@@ -51,3 +51,6 @@
 [submodule "depend/libnoise"]
 	path = depend/libnoise
 	url = https://github.com/qknight/libnoise
+[submodule "depend/SDL2"]
+	path = depend/SDL2
+	url = https://github.com/spurious/SDL-mirror.git

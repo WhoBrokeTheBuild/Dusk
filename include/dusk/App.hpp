@@ -34,6 +34,8 @@ struct RenderContext
     ShaderProgram * CurrentShader = nullptr;
 
     Camera * CurrentCamera = nullptr;
+
+    SDL_GLContext SDLGLContext;
 };
 
 class App
@@ -97,34 +99,16 @@ private:
 
     bool _running;
 
-    glm::ivec2 _windowSize = { 640, 480 };
+    glm::ivec2 _windowSize   = { 640, 480 };
     std::string _windowTitle = "Dusk";
+
     float _targetFps = 60.0f;
 
     ALCdevice * _alDevice;
     ALCcontext * _alContext;
 
-    GLFWwindow * _glfwWindow;
-
-    /// GLFW Accessor Methods
-
-    static void GLFW_ErrorCallback(int code, const char * message);
-    static void GLFW_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-    static void GLFW_MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-    static void GLFW_MouseMoveCallback(GLFWwindow* window, double x, double y);
-    static void GLFW_ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-    static void GLFW_CharCallback(GLFWwindow* window, unsigned int c);
-    static void GLFW_DropCallback(GLFWwindow* window, int count, const char ** filenames);
-    static void GLFW_WindowSizeCallback(GLFWwindow* window, int width, int height);
-    static void GLFW_FramebufferSizeCallback(GLFWwindow* window, int width, int height);
-
-    static std::function<void(int, int, int, int)> _KeyFunc;
-    static std::function<void(int, int, int)>      _MouseButtonFunc;
-    static std::function<void(double, double)>     _MouseMoveFunc;
-    static std::function<void(double, double)>     _ScrollFunc;
-    static std::function<void(unsigned int)>       _CharFunc;
-    static std::function<void(int, const char **)> _DropFunc;
-    static std::function<void(int, int)>           _WindowSizeFunc;
+    SDL_Window * _sdlWindow;
+    SDL_GLContext _sdlContext;
 
 }; // class App
 

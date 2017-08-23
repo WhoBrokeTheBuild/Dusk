@@ -71,7 +71,7 @@ INCLUDE_DIRECTORIES(BEFORE SYSTEM
     ${OPENGL_INCLUDE_DIRS}
     ${ZLIB_INCLUDE_DIRS}
     ${FLATBUFFERS_INCLUDE_DIRS}
-    ${GLFW_INCLUDE_DIRS}
+    ${SDL2_INCLUDE_DIRS}
     ${GLM_INCLUDE_DIRS}
     ${JSON_INCLUDE_DIRS}
     ${GSL_INCLUDE_DIRS}
@@ -80,42 +80,38 @@ INCLUDE_DIRECTORIES(BEFORE SYSTEM
     ${OGG_INCLUDE_DIRS}
     ${VORBIS_INCLUDE_DIRS}
     ${THEORA_INCLUDE_DIRS}
-    ${LIBNOISE_INCLUDE_DIRS}
 )
 
 SET(Dusk_LINK_LIBRARIES
     ${OPENGL_LIBRARIES}
     ${LUA_LIBRARIES}
     ${ZLIB_LIBRARIES}
-    ${GLFW_LIBRARIES}
+    ${SDL2_LIBRARIES}
     ${FLATBUFFERS_LIBRARIES}
     ${OPENAL_LIBRARIES}
     ${OGG_LIBRARIES}
     ${VORBIS_LIBRARIES}
     ${THEORA_LIBRARIES}
-    ${LIBNOISE_LIBRARIES}
 )
 SET(Dusk_LINK_LIBRARIES_DEBUG
     ${LUA_LIBRARIES_DEBUG}
     ${ZLIB_LIBRARIES_DEBUG}
-    ${GLFW_LIBRARIES_DEBUG}
+    ${SDL2_LIBRARIES_DEBUG}
     ${FLATBUFFERS_LIBRARIES_DEBUG}
     ${OPENAL_LIBRARIES_DEBUG}
     ${OGG_LIBRARIES_DEBUG}
     ${VORBIS_LIBRARIES_DEBUG}
     ${THEORA_LIBRARIES_DEBUG}
-    ${LIBNOISE_LIBRARIES_DEBUG}
 )
 SET(Dusk_LINK_LIBRARIES_RELEASE
     ${LUA_LIBRARIES_RELEASE}
     ${ZLIB_LIBRARIES_RELEASE}
-    ${GLFW_LIBRARIES_RELEASE}
+    ${SDL2_LIBRARIES_RELEASE}
     ${FLATBUFFERS_LIBRARIES_RELEASE}
     ${OPENAL_LIBRARIES_RELEASE}
     ${OGG_LIBRARIES_RELEASE}
     ${VORBIS_LIBRARIES_RELEASE}
     ${THEORA_LIBRARIES_RELEASE}
-    ${LIBNOISE_LIBRARIES_RELEASE}
 )
 
 ### Dusk library
@@ -172,7 +168,7 @@ SET(Dusk_INCLUDES
     # imgui
     include/imgui/imgui.h
     include/imgui/imgui_internal.h
-    include/imgui/imgui_impl_glfw_gl3.h
+    include/imgui/imgui_impl_sdl_gl3.h
 
     # glad
     include/glad/glad.h
@@ -208,7 +204,7 @@ SET(Dusk_SOURCES
     src/imgui/imgui.cpp
     src/imgui/imgui_draw.cpp
     src/imgui/imgui_demo.cpp
-    src/imgui/imgui_impl_glfw_gl3.cpp
+    src/imgui/imgui_impl_sdl_gl3.cpp
 
     # glad
     src/glad/glad.c

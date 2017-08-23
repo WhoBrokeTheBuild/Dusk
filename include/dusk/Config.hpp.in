@@ -14,8 +14,8 @@
 #define WIN32_LEAN_AND_MEAN
 #include <glad/glad.h>
 
-// GLFW
-#include <GLFW/glfw3.h>
+// SDL2
+#include <SDL.h>
 
 // OpenAL
 #include <AL/al.h>
@@ -42,7 +42,7 @@
 
 // ImGUI
 #include <imgui/imgui.h>
-#include <imgui/imgui_impl_glfw_gl3.h>
+#include <imgui/imgui_impl_sdl_gl3.h>
 
 // TinyObjLoader
 #include <tinyobjloader/tiny_obj_loader.h>
@@ -51,9 +51,6 @@
 #include <stb/stb_image.h>
 #include <stb/stb_rect_pack.h>
 #include <stb/stb_truetype.h>
-
-// LibNoise
-#include <noise/noise.h>
 
 #undef CreateWindow
 

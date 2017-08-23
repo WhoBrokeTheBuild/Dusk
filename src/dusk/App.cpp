@@ -12,14 +12,6 @@
 
 namespace dusk {
 
-std::function<void(int, int, int, int)> App::_KeyFunc;
-std::function<void(int, int, int)>      App::_MouseButtonFunc;
-std::function<void(double, double)>     App::_MouseMoveFunc;
-std::function<void(double, double)>     App::_ScrollFunc;
-std::function<void(unsigned int)>       App::_CharFunc;
-std::function<void(int, const char **)> App::_DropFunc;
-std::function<void(int, int)>           App::_WindowSizeFunc;
-
 void App::LuaSetup(sol::state& lua)
 {
     DuskBenchStart();
@@ -99,50 +91,50 @@ void App::LuaSetup(sol::state& lua)
 App::App(int argc, char** argv)
 {
     DuskLogInfo("Starting Application");
-
-    _KeyFunc = [this](int key, int scancode, int action, int mods) {
-
-        if (GLFW_PRESS == action)
-        {
-            EvtKeyPress.Call(key, mods);
-        }
-        else if (GLFW_RELEASE == action)
-        {
-            EvtKeyRelease.Call(key, mods);
-        }
-    };
-
-    _MouseButtonFunc = [this](int button, int action, int mods) {
-        if (GLFW_PRESS == action)
-        {
-            EvtMousePress.Call(button, mods);
-        }
-        else if (GLFW_RELEASE == action)
-        {
-            EvtMouseRelease.Call(button, mods);
-        }
-    };
-
-    _MouseMoveFunc = [this](double x, double y) {
-        static glm::vec2 last = { x, y };
-        glm::vec2 cur = { x, y };
-        EvtMouseMove.Call(cur, cur - last);
-        last = cur;
-    };
-
-    _ScrollFunc = [this](double xoffset, double yoffset) {
-        EvtMouseScroll.Call(glm::vec2(xoffset, yoffset));
-    };
-
-    _DropFunc = [this](int count, const char ** filenames) {
-        std::vector<std::string> filenameList;
-        for (int i = 0; i < count; ++i) filenameList.push_back(std::string(filenames[i]));
-        EvtFileDrop.Call(filenameList);
-    };
-
-    _WindowSizeFunc = [=](int width, int height) {
-        EvtWindowResize.Call(glm::ivec2(width, height));
-    };
+    //
+    // _KeyFunc = [this](int key, int scancode, int action, int mods) {
+    //
+    //     if (GLFW_PRESS == action)
+    //     {
+    //         EvtKeyPress.Call(key, mods);
+    //     }
+    //     else if (GLFW_RELEASE == action)
+    //     {
+    //         EvtKeyRelease.Call(key, mods);
+    //     }
+    // };
+    //
+    // _MouseButtonFunc = [this](int button, int action, int mods) {
+    //     if (GLFW_PRESS == action)
+    //     {
+    //         EvtMousePress.Call(button, mods);
+    //     }
+    //     else if (GLFW_RELEASE == action)
+    //     {
+    //         EvtMouseRelease.Call(button, mods);
+    //     }
+    // };
+    //
+    // _MouseMoveFunc = [this](double x, double y) {
+    //     static glm::vec2 last = { x, y };
+    //     glm::vec2 cur = { x, y };
+    //     EvtMouseMove.Call(cur, cur - last);
+    //     last = cur;
+    // };
+    //
+    // _ScrollFunc = [this](double xoffset, double yoffset) {
+    //     EvtMouseScroll.Call(glm::vec2(xoffset, yoffset));
+    // };
+    //
+    // _DropFunc = [this](int count, const char ** filenames) {
+    //     std::vector<std::string> filenameList;
+    //     for (int i = 0; i < count; ++i) filenameList.push_back(std::string(filenames[i]));
+    //     EvtFileDrop.Call(filenameList);
+    // };
+    //
+    // _WindowSizeFunc = [=](int width, int height) {
+    //     EvtWindowResize.Call(glm::ivec2(width, height));
+    // };
 
     CreateWindow();
 }
@@ -159,7 +151,7 @@ void App::Start()
     using namespace std::chrono;
     typedef duration<double, std::milli> double_ms;
 
-    glfwShowWindow(_glfwWindow);
+    SDL_ShowWindow(_sdlWindow);
 
     EvtStart.Call();
 
@@ -177,14 +169,26 @@ void App::Start()
     auto timeOffset = high_resolution_clock::now();
 
     updateCtx.TargetFPS = _targetFps;
+    renderCtx.SDLGLContext = _sdlContext;
+
+    SDL_Event evt;
 
     _running = true;
-    while (_running && !glfwWindowShouldClose(_glfwWindow))
+    while (_running)
     {
         auto elapsedTime = duration_cast<double_ms>(high_resolution_clock::now() - timeOffset);
         timeOffset = high_resolution_clock::now();
 
-        glfwPollEvents();
+		while (SDL_PollEvent(&evt))
+		{
+            ImGui_ImplSdlGL3_ProcessEvent(&evt);
+			if (evt.type == SDL_QUIT)
+            {
+                _running = false;
+            }
+		}
+
+        ImGui_ImplSdlGL3_NewFrame(_sdlWindow);
 
         updateCtx.DeltaTime = duration_cast<double_ms>(elapsedTime / frameDelay.count()).count();
         updateCtx.ElapsedTime = elapsedTime;
@@ -204,7 +208,7 @@ void App::Start()
 
             EvtRender.Call(renderCtx);
 
-            glfwSwapBuffers(_glfwWindow);
+            SDL_GL_SwapWindow(_sdlWindow);
         }
 
         fpsElap += elapsedTime;
@@ -223,7 +227,7 @@ void App::Start()
 
     EvtStop.Call();
 
-    glfwHideWindow(_glfwWindow);
+    SDL_HideWindow(_sdlWindow);
 }
 
 void App::Stop()
@@ -302,29 +306,44 @@ bool App::SaveConfig(const std::string& filename)
 void App::SetWindowSize(const glm::ivec2& size)
 {
     _windowSize = size;
-    glfwSetWindowSize(_glfwWindow, _windowSize.x, _windowSize.y);
+    SDL_SetWindowSize(_sdlWindow, _windowSize.x, _windowSize.y);
 }
 
 void App::SetWindowTitle(const std::string& title)
 {
     _windowTitle = title;
-    glfwSetWindowTitle(_glfwWindow, _windowTitle.c_str());
+    SDL_SetWindowTitle(_sdlWindow, _windowTitle.c_str());
 }
 
 std::vector<glm::ivec2> App::GetAvailableWindowSizes()
 {
     std::vector<glm::ivec2> sizes;
 
-    int count;
-    const GLFWvidmode* modes = glfwGetVideoModes(glfwGetPrimaryMonitor(), &count);
-    for (int i = 0; i < count; ++i)
+    SDL_DisplayMode tmp;
+
+    // Get current display mode of all displays.
+    for (int disp = 0; disp < SDL_GetNumVideoDisplays(); ++disp)
     {
-        glm::ivec2 size = { modes[i].width, modes[i].height };
-        if (std::find(sizes.begin(), sizes.end(), size) == sizes.end())
+        for (int mode = 0; mode < SDL_GetNumDisplayModes(disp); ++mode)
         {
-            sizes.push_back(size);
+            if (0 != SDL_GetDisplayMode(disp, mode, &tmp))
+            {
+                DuskLogError("Could not get display mode for video display #%d.%d: %s", disp, mode, SDL_GetError());
+                break;
+            }
+
+            glm::ivec2 size = { tmp.w, tmp.h };
+            if (std::find(sizes.begin(), sizes.end(), size) == sizes.end())
+            {
+                sizes.push_back(size);
+            }
         }
     }
+
+    std::sort(sizes.begin(), sizes.end(), [](glm::ivec2 a, glm::ivec2 b)
+    {
+        return a.x < b.x || a.y < b.y;
+    });
 
     return sizes;
 }
@@ -341,38 +360,48 @@ void App::CreateWindow()
     DuskLogInfo("OpenAL Vendor %s", alGetString(AL_VENDOR));
     DuskLogInfo("OpenAL Renderer %s", alGetString(AL_RENDERER));
 
-    if (!glfwInit())
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
-        DuskLogError("Failed to initialize GLFW");
+        DuskLogError("Failed to initialize SDL, %s", SDL_GetError());
         return;
     }
 
-    glfwSetErrorCallback(&App::GLFW_ErrorCallback);
+    int sdlGlFlags = SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG;
 
 #ifndef NDEBUG
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+    sdlGlFlags |= SDL_GL_CONTEXT_DEBUG_FLAG;
 #endif
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_SAMPLES, 16);
-    glfwWindowHint(GLFW_VISIBLE, false);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, sdlGlFlags);
+    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16);
+
+    int sdlWindowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN;
 
     const std::vector<glm::ivec2>& windowSizes = GetAvailableWindowSizes();
 
     _windowSize = windowSizes.back();
 
-    _glfwWindow = glfwCreateWindow(_windowSize.x, _windowSize.y, _windowTitle.c_str(), NULL, NULL);
-    if (!_glfwWindow)
+    _sdlWindow = SDL_CreateWindow(_windowTitle.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, _windowSize.x, _windowSize.y, sdlWindowFlags);
+    if (!_sdlWindow)
     {
-        DuskLogError("Failed to create GLFW window");
+        DuskLogError("Failed to create SDL window, %s", SDL_GetError());
         return;
     }
 
-    glfwMakeContextCurrent(_glfwWindow);
+    _sdlContext = SDL_GL_CreateContext(_sdlWindow);
+    if (!_sdlContext)
+    {
+        DuskLogError("Failed to create OpenGL context, %s", SDL_GetError());
+        return;
+    }
 
-    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
+    if (!gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress))
     {
         DuskLogError("Failed to initialize OpenGL context");
         return;
@@ -389,16 +418,10 @@ void App::CreateWindow()
 
     ShaderProgram::InitializeUniformBuffers();
 
-    ImGui_ImplGlfwGL3_Init(_glfwWindow, false);
+    ImGui_ImplSdlGL3_Init(_sdlWindow);
 
-    glfwSetKeyCallback(_glfwWindow, &App::GLFW_KeyCallback);
-    glfwSetMouseButtonCallback(_glfwWindow, &App::GLFW_MouseButtonCallback);
-    glfwSetCursorPosCallback(_glfwWindow, &App::GLFW_MouseMoveCallback);
-    glfwSetScrollCallback(_glfwWindow, &App::GLFW_ScrollCallback);
-    glfwSetCharCallback(_glfwWindow, &App::GLFW_CharCallback);
-    glfwSetDropCallback(_glfwWindow, &App::GLFW_DropCallback);
-    glfwSetFramebufferSizeCallback(_glfwWindow, &App::GLFW_FramebufferSizeCallback);
-    glfwSetWindowSizeCallback(_glfwWindow, &App::GLFW_WindowSizeCallback);
+    // V-Sync
+    SDL_GL_SetSwapInterval(1);
 
     glEnable(GL_MULTISAMPLE);
 
@@ -422,64 +445,16 @@ void App::CreateWindow()
 
 void App::DestroyWindow()
 {
-    ImGui_ImplGlfwGL3_Shutdown();
+    ImGui_ImplSdlGL3_Shutdown();
 
-    glfwDestroyWindow(_glfwWindow);
-    _glfwWindow = nullptr;
+    SDL_GL_DeleteContext(_sdlContext);
+    SDL_DestroyWindow(_sdlWindow);
+    _sdlWindow = nullptr;
 
-    glfwTerminate();
+    SDL_Quit();
 
     alcDestroyContext(_alContext);
     alcCloseDevice(_alDevice);
-}
-
-void App::GLFW_ErrorCallback(int code, const char * message)
-{
-    DuskLogError("GLFW: %d, %s", code, message);
-}
-
-void App::GLFW_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    ImGui_ImplGlfwGL3_KeyCallback(window, key, scancode, action, mods);
-    _KeyFunc(key, scancode, action, mods);
-}
-
-void App::GLFW_MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
-{
-    ImGui_ImplGlfwGL3_MouseButtonCallback(window, button, action, mods);
-    _MouseButtonFunc(button, action, mods);
-}
-
-void App::GLFW_ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
-{
-    ImGui_ImplGlfwGL3_ScrollCallback(window, xoffset, yoffset);
-    _ScrollFunc(xoffset, yoffset);
-}
-
-void App::GLFW_CharCallback(GLFWwindow* window, unsigned int c)
-{
-    ImGui_ImplGlfwGL3_CharCallback(window, c);
-}
-
-void App::GLFW_MouseMoveCallback(GLFWwindow* window, double x, double y)
-{
-    _MouseMoveFunc(x, y);
-}
-
-void App::GLFW_DropCallback(GLFWwindow* window, int count, const char ** filenames)
-{
-    _DropFunc(count, filenames);
-}
-
-void App::GLFW_WindowSizeCallback(GLFWwindow* window, int width, int height)
-{
-    _WindowSizeFunc(width, height);
-}
-
-void App::GLFW_FramebufferSizeCallback(GLFWwindow* window, int width, int height)
-{
-    DuskLogVerbose("Framebuffer Resized %d x %d", width, height);
-    glViewport(0, 0, width, height);
 }
 
 } // namespace dusk

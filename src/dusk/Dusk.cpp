@@ -1,7 +1,7 @@
 #include "dusk/Dusk.hpp"
 
-#include <dusk/Log.hpp>
-#include <dusk/Benchmark.hpp>
+#include <dusk/core/Log.hpp>
+#include <dusk/core/Benchmark.hpp>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tinyobjloader/tiny_obj_loader.h>

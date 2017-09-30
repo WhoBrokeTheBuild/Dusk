@@ -22,7 +22,12 @@ STRING(SUBSTRING "${DUSK_REVISION}" 0 12 DUSK_REVISION)
 # Options
 OPTION(VERBOSE_LOGGING "Build Dusk with Verbose Logging enabled" OFF)
 IF(VERBOSE_LOGGING)
-    ADD_DEFINITIONS(-DDUSK_VERBOSE_LOGGING)
+    ADD_DEFINITIONS(-DDUSK_ENABLE_VERBOSE_LOGGING)
+ENDIF()
+
+OPTION(BINARY_SHADERS "Build Dusk with Binary Shader support" ON)
+IF(BINARY_SHADERS)
+    ADD_DEFINITIONS(-DDUSK_ENABLE_BINARY_SHADERS)
 ENDIF()
 
 ### Compiler-specific flags
@@ -138,32 +143,32 @@ SET(Dusk_CONFIG    ${CMAKE_BINARY_DIR}/include/dusk/Config.hpp)
 FILE(GLOB_RECURSE Dusk_ASSETS RELATIVE ${CMAKE_SOURCE_DIR} "assets/*")
 
 SET(Dusk_INCLUDES
-    #include/dusk/Actor.hpp
-    include/dusk/App.hpp
-    #include/dusk/Asset.hpp
-    include/dusk/Benchmark.hpp
-    include/dusk/Camera.hpp
-    #include/dusk/Component.hpp
     include/dusk/Dusk.hpp
-    #include/dusk/Event.hpp
-    #include/dusk/EventCallbacks.hpp
-    #include/dusk/EventDispatcher.hpp
-    #include/dusk/Font.hpp
-    include/dusk/Log.hpp
-    include/dusk/Material.hpp
-    include/dusk/Mesh.hpp
-    include/dusk/Model.hpp
-    #include/dusk/Platform.hpp
-    #include/dusk/Scene.hpp
-    include/dusk/ScriptHost.hpp
-    include/dusk/Shader.hpp
-    include/dusk/Shader.inc.hpp
-    #include/dusk/Sound.hpp
-    include/dusk/Texture.hpp
-    #include/dusk/Timer.hpp
-    #include/dusk/UI.hpp
-    include/dusk/Util.hpp
-    #include/dusk/Video.hpp
+    include/dusk/core/App.hpp
+    include/dusk/core/Benchmark.hpp
+    include/dusk/core/Event.hpp
+    include/dusk/core/Log.hpp
+    include/dusk/core/Platform.hpp
+    include/dusk/core/ScriptHost.hpp
+    #include/dusk/core/Timer.hpp
+    include/dusk/core/Util.hpp
+    #include/dusk/asset/Font.hpp
+    include/dusk/asset/Material.hpp
+    include/dusk/asset/Mesh.hpp
+    include/dusk/asset/Shader.hpp
+    include/dusk/asset/Shader.inc.hpp
+    include/dusk/asset/ModelShader.hpp
+    #include/dusk/asset/Sound.hpp
+    include/dusk/asset/Texture.hpp
+    #include/dusk/asset/Video.hpp
+    include/dusk/asset/loaders/MeshLoaderFbx.hpp
+    include/dusk/asset/loaders/MeshLoaderObj.hpp
+    include/dusk/scene/Actor.hpp
+    include/dusk/scene/Camera.hpp
+    include/dusk/scene/Component.hpp
+    include/dusk/scene/Model.hpp
+    include/dusk/scene/Scene.hpp
+    #include/dusk/scene/UI.hpp
 
     # imgui
     include/imgui/imgui.h
@@ -179,26 +184,26 @@ SET(Dusk_INCLUDES
 )
 
 SET(Dusk_SOURCES
-    #src/dusk/Actor.cpp
-    src/dusk/App.cpp
-    src/dusk/Camera.cpp
-    #src/dusk/Component.cpp
     src/dusk/Dusk.cpp
-    #src/dusk/Event.cpp
-    #src/dusk/EventCallbacks.cpp
-    #src/dusk/EventDispatcher.cpp
-    #src/dusk/Font.cpp
-    src/dusk/Material.cpp
-    src/dusk/Mesh.cpp
-    src/dusk/Model.cpp
-    #src/dusk/Scene.cpp
-    src/dusk/ScriptHost.cpp
-    src/dusk/Shader.cpp
-    #src/dusk/Sound.cpp
-    src/dusk/Texture.cpp
-    #src/dusk/UI.cpp
-    src/dusk/Util.cpp
-    #src/dusk/Video.cpp
+    src/dusk/core/App.cpp
+    src/dusk/core/ScriptHost.cpp
+    src/dusk/core/Util.cpp
+    #src/dusk/asset/Font.cpp
+    src/dusk/asset/Material.cpp
+    src/dusk/asset/Mesh.cpp
+    src/dusk/asset/Shader.cpp
+    src/dusk/asset/ModelShader.cpp
+    #src/dusk/asset/Sound.cpp
+    src/dusk/asset/Texture.cpp
+    #src/dusk/asset/Video.cpp
+    src/dusk/asset/loaders/MeshLoaderFbx.cpp
+    src/dusk/asset/loaders/MeshLoaderObj.cpp
+    src/dusk/scene/Actor.cpp
+    src/dusk/scene/Camera.cpp
+    src/dusk/scene/Component.cpp
+    src/dusk/scene/Model.cpp
+    src/dusk/scene/Scene.cpp
+    #src/dusk/scene/UI.cpp
 
     # imgui
     src/imgui/imgui.cpp

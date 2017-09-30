@@ -3,21 +3,16 @@
 
 #include <dusk/Config.hpp>
 
-#include <dusk/App.hpp>
-#include <dusk/Camera.hpp>
-#include <dusk/Shader.hpp>
-#include <dusk/Texture.hpp>
-#include <dusk/Model.hpp>
-#include <dusk/Mesh.hpp>
-#include <dusk/Util.hpp>
-#include <dusk/ScriptHost.hpp>
-//#include <dusk/Platform.hpp>
-//#include <dusk/Timer.hpp>
-//#include <dusk/UI.hpp>
-//#include <dusk/Sound.hpp>
-//#include <dusk/Actor.hpp>
-//#include <dusk/Scene.hpp>
-//#include <dusk/Log.hpp>
+#include <dusk/core/App.hpp>
+#include <dusk/core/Util.hpp>
+#include <dusk/core/ScriptHost.hpp>
+#include <dusk/asset/Shader.hpp>
+#include <dusk/asset/ModelShader.hpp>
+#include <dusk/asset/Texture.hpp>
+#include <dusk/asset/Mesh.hpp>
+#include <dusk/scene/Camera.hpp>
+#include <dusk/scene/Model.hpp>
+#include <dusk/scene/Scene.hpp>
 
 namespace dusk {
 

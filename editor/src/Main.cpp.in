@@ -1,0 +1,9 @@
+#include <Main.hpp>
+#include <cstdio>
+
+int main(int argc, char** argv) {
+    printf("Starting Editor\n");
+    _DuskMain(argc, argv);
+    printf("Stopping Editor\n");
+    return 0;
+}

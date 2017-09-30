@@ -178,7 +178,6 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
     {
         GLint length = 0;
         glGetProgramiv(_glId, GL_PROGRAM_BINARY_LENGTH, &length);
-        DuskLogVerbose("%d", length);
 
         if (length > 0)
         {

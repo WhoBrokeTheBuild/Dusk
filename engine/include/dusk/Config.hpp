@@ -1,14 +1,14 @@
 #ifndef DUSK_CONFIG_HPP
 #define DUSK_CONFIG_HPP
 
-#define DUSK_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
-#define DUSK_VERSION_MINOR @PROJECT_VERSION_MINOR@
-#define DUSK_VERSION_PATCH @PROJECT_VERSION_PATCH@
-#define DUSK_REVISION "@DUSK_REVISION@"
+#define DUSK_VERSION_MAJOR 0
+#define DUSK_VERSION_MINOR 0
+#define DUSK_VERSION_PATCH 2
+#define DUSK_REVISION "12e4e69bb509"
 #define DUSK_VERSION_NUM ((DUSK_VERSION_MAJOR << 16) | \
                           (DUSK_VERSION_MINOR << 8) | \
                           DUSK_VERSION_PATCH)
-#define DUSK_VERSION "@PROJECT_VERSION@-@DUSK_REVISION@"
+#define DUSK_VERSION "0.0.2-12e4e69bb509"
 
 // glad
 #define WIN32_LEAN_AND_MEAN
@@ -40,10 +40,6 @@
 // nlohmann json
 #include <json.hpp>
 
-// ImGUI
-#include <imgui/imgui.h>
-#include <imgui/imgui_impl_sdl_gl3.h>
-
 // TinyObjLoader
 #include <tinyobjloader/tiny_obj_loader.h>
 
@@ -61,7 +57,7 @@
     TypeName(const TypeName&) = delete;   \
     TypeName& operator=(const TypeName&) = delete
 
-#define DUSK_SYSTEM_NAME	"@CMAKE_SYSTEM_NAME@"
-#define DUSK_SYSTEM_VERSION "@CMAKE_SYSTEM_VERSION@"
+#define DUSK_SYSTEM_NAME	"Linux"
+#define DUSK_SYSTEM_VERSION "4.4.0-96-generic"
 
 #endif // DUSK_CONFIG_HPP

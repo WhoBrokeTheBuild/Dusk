@@ -33,7 +33,7 @@ namespace dusk {
         va_list valist;
         static char buffer[MAX_LOG_LINE_LEN];
 
-        ImVec4 imColor;
+        //ImVec4 imColor;
         short fgColor, bgColor;
 
         va_start(valist, format);
@@ -45,27 +45,27 @@ namespace dusk {
         switch (level)
         {
         case LOG_INFO:
-            imColor = ImColor(255, 255, 255);
+            //imColor = ImColor(255, 255, 255);
             fgColor = 97; // White
             break;
         case LOG_WARN:
-            imColor = ImColor(255, 102, 0);
+            //imColor = ImColor(255, 102, 0);
             fgColor = 33; // Yellow
             break;
         case LOG_ERROR:
-            imColor = ImColor(204, 0, 0);
+            //imColor = ImColor(204, 0, 0);
             fgColor = 31; // Red
             break;
         case LOG_PERF:
-            imColor = ImColor(139, 0, 139);
+            //imColor = ImColor(139, 0, 139);
             fgColor = 35; // Magenta
             break;
         case LOG_VERBOSE:
-            imColor = ImColor(128, 128, 128);
+            //imColor = ImColor(128, 128, 128);
             fgColor = 37; // Grey
             break;
         case LOG_LOAD:
-            imColor = ImColor(0, 255, 0);
+            //imColor = ImColor(0, 255, 0);
             fgColor = 32; // Green
             break;
         }

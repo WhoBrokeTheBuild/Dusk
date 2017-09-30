@@ -97,51 +97,6 @@ App::App(int argc, char** argv)
     Mesh::AddLoader(std::unique_ptr<IMeshLoader>(new MeshLoaderObj()));
     Mesh::AddLoader(std::unique_ptr<IMeshLoader>(new MeshLoaderFbx()));
 
-    //
-    // _KeyFunc = [this](int key, int scancode, int action, int mods) {
-    //
-    //     if (GLFW_PRESS == action)
-    //     {
-    //         EvtKeyPress.Call(key, mods);
-    //     }
-    //     else if (GLFW_RELEASE == action)
-    //     {
-    //         EvtKeyRelease.Call(key, mods);
-    //     }
-    // };
-    //
-    // _MouseButtonFunc = [this](int button, int action, int mods) {
-    //     if (GLFW_PRESS == action)
-    //     {
-    //         EvtMousePress.Call(button, mods);
-    //     }
-    //     else if (GLFW_RELEASE == action)
-    //     {
-    //         EvtMouseRelease.Call(button, mods);
-    //     }
-    // };
-    //
-    // _MouseMoveFunc = [this](double x, double y) {
-    //     static glm::vec2 last = { x, y };
-    //     glm::vec2 cur = { x, y };
-    //     EvtMouseMove.Call(cur, cur - last);
-    //     last = cur;
-    // };
-    //
-    // _ScrollFunc = [this](double xoffset, double yoffset) {
-    //     EvtMouseScroll.Call(glm::vec2(xoffset, yoffset));
-    // };
-    //
-    // _DropFunc = [this](int count, const char ** filenames) {
-    //     std::vector<std::string> filenameList;
-    //     for (int i = 0; i < count; ++i) filenameList.push_back(std::string(filenames[i]));
-    //     EvtFileDrop.Call(filenameList);
-    // };
-    //
-    // _WindowSizeFunc = [=](int width, int height) {
-    //     EvtWindowResize.Call(glm::ivec2(width, height));
-    // };
-
     CreateWindow();
 }
 
@@ -187,7 +142,7 @@ void App::Start()
 
 		while (SDL_PollEvent(&evt))
 		{
-            ImGui_ImplSdlGL3_ProcessEvent(&evt);
+            //ImGui_ImplSdlGL3_ProcessEvent(&evt);
 
             switch (evt.type)
             {
@@ -223,7 +178,7 @@ void App::Start()
             }
 		}
 
-        ImGui_ImplSdlGL3_NewFrame(_sdlWindow);
+        //ImGui_ImplSdlGL3_NewFrame(_sdlWindow);
 
         updateCtx.DeltaTime = duration_cast<double_ms>(elapsedTime / frameDelay.count()).count();
         updateCtx.ElapsedTime = elapsedTime;
@@ -406,7 +361,7 @@ void App::CreateWindow()
     const std::vector<glm::ivec2>& windowSizes = GetAvailableWindowSizes();
     _windowSize = windowSizes.back();
 
-    int sdlGlFlags = SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG;
+    int sdlGlFlags = 0; //SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG;
 
 #ifndef NDEBUG
     sdlGlFlags |= SDL_GL_CONTEXT_DEBUG_FLAG;
@@ -414,8 +369,8 @@ void App::CreateWindow()
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, sdlGlFlags);
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, DUSK_MIN_OPENGL_VERSION_MAJOR);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, DUSK_MIN_OPENGL_VERSION_MINOR);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
@@ -470,7 +425,7 @@ void App::CreateWindow()
     Shader::InitializeVersionString();
     Shader::InitializeUniformBuffers();
 
-    ImGui_ImplSdlGL3_Init(_sdlWindow);
+    //ImGui_ImplSdlGL3_Init(_sdlWindow);
 
     // V-Sync
     SDL_GL_SetSwapInterval(1);
@@ -497,7 +452,7 @@ void App::CreateWindow()
 
 void App::DestroyWindow()
 {
-    ImGui_ImplSdlGL3_Shutdown();
+    //ImGui_ImplSdlGL3_Shutdown();
 
     SDL_GL_DeleteContext(_sdlContext);
     SDL_DestroyWindow(_sdlWindow);

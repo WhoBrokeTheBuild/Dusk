@@ -1,6 +1,8 @@
 #ifndef DUSK_MAIN_HPP
 #define DUSK_MAIN_HPP
 
-extern int _DuskMain(int argc, char ** argv);
+#include <dusk/core/App.hpp>
+
+extern void _DuskSetup(dusk::App * app);
 
 #endif // DUSK_MAIN_HPP

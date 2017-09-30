@@ -23,15 +23,15 @@ Shader::~Shader()
     if (_glId > 0) glDeleteProgram(_glId);
 }
 
-//std::unique_ptr<ShaderProgram> ShaderProgram::Create()
-//{
-//    return std::make_unique<ShaderProgram>();
-//}
-//
-//std::unique_ptr<ShaderProgram> ShaderProgram::Create(const std::vector<std::string>& filenames)
-//{
-//    return std::make_unique<ShaderProgram>(filenames);
-//}
+std::unique_ptr<Shader> Shader::Create()
+{
+    return std::make_unique<Shader>();
+}
+
+std::unique_ptr<Shader> Shader::Create(const std::vector<std::string>& filenames)
+{
+    return std::make_unique<Shader>(filenames);
+}
 
 void Shader::InitializeVersionString()
 {

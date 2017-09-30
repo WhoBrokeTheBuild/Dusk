@@ -1,9 +1,12 @@
 #include <Main.hpp>
+#include <Editor.hpp>
 #include <cstdio>
 
 int main(int argc, char** argv) {
-    printf("Starting Editor\n");
-    _DuskMain(argc, argv);
-    printf("Stopping Editor\n");
+    Editor app(argc, argv);
+
+    _DuskSetup(&app);
+
+    app.Start();
     return 0;
 }

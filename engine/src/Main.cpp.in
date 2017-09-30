@@ -1,5 +1,8 @@
 #include <dusk/Main.hpp>
 
 int main(int argc, char** argv) {
-    return _DuskMain(argc, argv);
+    dusk::App app(argc, argv);
+    _DuskSetup(&app);
+    app.Start();
+    return 0;
 }

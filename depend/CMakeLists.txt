@@ -37,6 +37,7 @@ ADD_DEPENDENCIES(depend gsl)
 MESSAGE("Adding dependency: lua")
 
 SET(LUA_OPTIONS
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
 )
 
 IF(MSVC)
@@ -93,6 +94,7 @@ ADD_DEPENDENCIES(depend lua)
 MESSAGE("Adding dependency: zlib")
 
 SET(ZLIB_OPTIONS
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
 )
 
 SET(ZLIB_INCLUDE_DIRS
@@ -142,6 +144,7 @@ ADD_DEPENDENCIES(depend zlib)
 MESSAGE("Adding dependency: SDL2")
 
 SET(SDL2_OPTIONS
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
 )
 
 IF(NOT MSVC)
@@ -195,6 +198,7 @@ ADD_DEPENDENCIES(depend sdl2)
 MESSAGE("Adding dependency: openal")
 
 SET(OPENAL_OPTIONS
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DALSOFT_UTILS=OFF
     -DALSOFT_EXAMPLES=OFF
     -DALSOFT_TESTS=OFF
@@ -250,7 +254,6 @@ MESSAGE("Adding dependency: ogg")
 
 SET(OGG_INCLUDE_DIRS
     "${CMAKE_SOURCE_DIR}/depend/libogg/include"
-
 )
 
 IF (MSVC)
@@ -310,7 +313,6 @@ MESSAGE("Adding dependency: vorbis")
 
 SET(VORBIS_INCLUDE_DIRS
     "${CMAKE_SOURCE_DIR}/depend/libvorbis/include"
-
 )
 
 IF (MSVC)
@@ -383,7 +385,6 @@ MESSAGE("Adding dependency: theora")
 
 SET(THEORA_INCLUDE_DIRS
     "${CMAKE_SOURCE_DIR}/depend/libtheora/include"
-
 )
 
 IF (MSVC)
@@ -462,7 +463,6 @@ SET(FLATBUFFERS_OPTIONS
 
 SET(FLATBUFFERS_INCLUDE_DIRS
     "${CMAKE_SOURCE_DIR}/depend/flatbuffers/include"
-
 )
 
 FILE(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/depend/flatbuffers)

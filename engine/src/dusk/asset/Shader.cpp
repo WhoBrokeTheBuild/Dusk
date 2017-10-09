@@ -35,9 +35,10 @@ std::unique_ptr<Shader> Shader::Create(const std::vector<std::string>& filenames
 
 void Shader::InitializeVersionString()
 {
-    const char * version = reinterpret_cast<const char *>(glGetString(GL_SHADING_LANGUAGE_VERSION));
-    _GLSLVersionString = "#version " + std::string(version) + " core";
+    _GLSLVersionString = std::string(reinterpret_cast<const char *>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
     _GLSLVersionString.erase(_GLSLVersionString.find('.'), 1);
+    _GLSLVersionString.erase(_GLSLVersionString.find(' '));
+    _GLSLVersionString = "#version " + _GLSLVersionString + " core";
 
     DuskLogVerbose("Using GLSL version string '%s'", _GLSLVersionString.c_str());
 }
@@ -110,7 +111,9 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
         return false;
     }
 
-#if defined(DUSK_ENABLE_BINARY_SHADERS) && defined(OPENGL_4_1)
+#if defined(DUSK_ENABLE_BINARY_SHADERS) && defined(GL_VERSION_4_1)
+
+    DuskLogVerbose("Attempting Binary Shader Stuff");
 
     glProgramParameteri(_glId, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
 
@@ -121,7 +124,7 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
     std::ifstream binFile(binFilename, std::ios::binary);
     if (binFile.is_open())
     {
-        DuskLogLoad("Loading cached binary shader from %s.", binFilename.c_str());
+        DuskLogLoad("Loading cached binary shader from '%s'.", binFilename.c_str());
 
         binFile.read((char *)&binaryFormat, sizeof(GLenum));
 
@@ -143,7 +146,7 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
         }
     }
 
-#endif // defined(DUSK_ENABLE_BINARY_SHADERS) && defined(OPENGL_4_1)
+#endif // defined(DUSK_ENABLE_BINARY_SHADERS) && defined(GL_VERSION_4_1)
 
     if (!_loaded)
     {
@@ -179,7 +182,7 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
         }
     }
 
-#if defined(DUSK_ENABLE_BINARY_SHADERS) && defined(OPENGL_4_1)
+#if defined(DUSK_ENABLE_BINARY_SHADERS) && defined(GL_VERSION_4_1)
 
     if (_loaded && !loadFromBinary)
     {
@@ -207,7 +210,7 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
         }
     }
 
-#endif // defined(DUSK_ENABLE_BINARY_SHADERS) && defined(OPENGL_4_1)
+#endif // defined(DUSK_ENABLE_BINARY_SHADERS) && defined(GL_VERSION_4_1)
 
     for (GLuint shader : shaders)
     {
@@ -397,9 +400,7 @@ void Shader::PrintShaderLog(GLuint id)
 
 void Shader::PrintProgramLog()
 {
-    // TODO: Convert to std::array
-
-    std::string programLog;
+    std::vector<char> programLog;
     GLint logSize, retSize;
 
     if (!glIsProgram(_glId))
@@ -411,9 +412,9 @@ void Shader::PrintProgramLog()
     glGetProgramiv(_glId, GL_INFO_LOG_LENGTH, &logSize);
 
     programLog.resize(logSize);
-    glGetProgramInfoLog(_glId, logSize, &retSize, &programLog[0]);
+    glGetProgramInfoLog(_glId, logSize, &retSize, programLog.data());
 
-    DuskLogInfo("Log for shader program %d:\n%s", _glId, programLog.c_str());
+    DuskLogInfo("Log for shader program %d:\n%s", _glId, programLog.data());
 }
 
 void Shader::CacheUniforms()

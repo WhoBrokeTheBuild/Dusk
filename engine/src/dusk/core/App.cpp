@@ -362,7 +362,6 @@ void App::CreateWindow()
 #endif
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, sdlGlFlags);
-    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, DUSK_MIN_OPENGL_VERSION_MAJOR);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, DUSK_MIN_OPENGL_VERSION_MINOR);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -370,7 +369,7 @@ void App::CreateWindow()
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 
-        int sdlWindowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN;
+    int sdlWindowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN;
 
     for (int multisamples = 16; multisamples > 0; multisamples /= 2)
     {

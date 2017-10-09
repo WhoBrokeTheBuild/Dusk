@@ -14,82 +14,6 @@
 
 namespace dusk {
 
-void App::LuaSetup(sol::state& lua)
-{
-    DuskBenchStart();
-
-    /*
-    lua.new_usertype<App>("App",
-        "new", sol::no_constructor,
-        "Start", &App::Start,
-        "Stop", &App::Stop,
-        "LoadConfig", &App::LoadConfig,
-        "SaveConfig", &App::SaveConfig,
-        "GetWindowSize", &App::GetWindowSize,
-        "SetWindowSize", &App::SetWindowSize,
-        "GetWindowTitle", &App::GetWindowTitle,
-        "SetWindowTitle", &App::SetWindowTitle,
-        "GetAvailableWindowSizes", &App::GetAvailableWindowSizes,
-
-        "EvtStart", &App::EvtStart,
-        "EvtStop", &App::EvtStop,
-        "EvtUpdate", &App::EvtUpdate,
-        "EvtRender", &App::EvtRender,
-        "EvtKeyPress", &App::EvtKeyPress,
-        "EvtKeyRelease", &App::EvtKeyRelease,
-        "EvtMousePress", &App::EvtMousePress,
-        "EvtMouseRelease", &App::EvtMouseRelease,
-        "EvtMouseMove", &App::EvtMouseMove,
-        "EvtMouseScroll", &App::EvtMouseScroll,
-        "EvtWindowResize", &App::EvtWindowResize,
-        "EvtFileDrop", &App::EvtFileDrop
-    );
-
-    lua.new_usertype<UpdateContext>("UpdateContext",
-        "new", sol::no_constructor,
-        "TargetFPS", &UpdateContext::TargetFPS,
-        "CurrentFPS", &UpdateContext::CurrentFPS,
-        "DeltaTime", &UpdateContext::DeltaTime,
-        "ElapsedTime", &UpdateContext::ElapsedTime,
-        "TotalTime", &UpdateContext::TotalTime
-    );
-    lua.new_usertype<RenderContext>("RenderContext",
-        "new", sol::no_constructor,
-        "CurrentPass", &RenderContext::CurrentPass,
-        "CurrentShader", &RenderContext::CurrentShader,
-        "CurrentCamera", &RenderContext::CurrentCamera
-    );
-
-    lua.new_simple_usertype<glm::vec2>("glm::vec2",
-        "x", &glm::vec2::x,
-        "y", &glm::vec2::y
-    );
-    lua.new_simple_usertype<glm::ivec2>("glm::ivec2",
-        "x", &glm::ivec2::x,
-        "y", &glm::ivec2::y
-    );
-
-    Event<>::LuaSetup(lua, "Event<>");
-    Event<const UpdateContext&>::LuaSetup(lua, "Event<const UpdateContext&>");
-    Event<RenderContext&>::LuaSetup(lua, "Event<RenderContext&>");
-    Event<Key, Flags>::LuaSetup(lua, "Event<Key, Flags>");
-    Event<Button, Flags>::LuaSetup(lua, "Event<Button, Flags>");
-    Event<glm::vec2, glm::vec2>::LuaSetup(lua, "Event<glm::vec2, glm::vec2>");
-    Event<glm::vec2>::LuaSetup(lua, "Event<glm::vec2>");
-    Event<glm::ivec2>::LuaSetup(lua, "Event<glm::ivec2>");
-    Event<std::vector<std::string>>::LuaSetup(lua, "Event<std::vector<std::string>>");
-
-    Mesh::LuaSetup(lua);
-    Model::LuaSetup(lua);
-    Texture::LuaSetup(lua);
-    Shader::LuaSetup(lua);
-    Shader::LuaSetup(lua);
-
-    */
-
-    DuskBenchEnd("App::LuaSetup");
-}
-
 App::App(int argc, char** argv)
 {
     DuskLogInfo("Starting Application");
@@ -116,9 +40,6 @@ void App::Start()
 
     EvtStart.Call();
 
-    UpdateContext updateCtx;
-    RenderContext renderCtx;
-
     unsigned long frames = 0;
 
     double_ms frameDelay = 1000ms / _targetFps;
@@ -129,8 +50,8 @@ void App::Start()
 
     auto timeOffset = high_resolution_clock::now();
 
-    updateCtx.TargetFPS = _targetFps;
-    renderCtx.SDLGLContext = _sdlContext;
+    _updateContext.TargetFPS = _targetFps;
+    _renderContext.SDLGLContext = _sdlContext;
 
     SDL_Event evt;
 
@@ -142,48 +63,14 @@ void App::Start()
 
 		while (SDL_PollEvent(&evt))
 		{
-            //ImGui_ImplSdlGL3_ProcessEvent(&evt);
-
-            switch (evt.type)
-            {
-            case SDL_QUIT:
-                _running = false;
-                break;
-            case SDL_KEYDOWN:
-                EvtKeyPress.Call(evt.key.keysym.sym, evt.key.keysym.mod);
-                break;
-            case SDL_KEYUP:
-                EvtKeyRelease.Call(evt.key.keysym.sym, evt.key.keysym.mod);
-                break;
-            case SDL_MOUSEMOTION:
-                EvtMouseMove.Call({ evt.motion.x, evt.motion.y }, { evt.motion.xrel, evt.motion.yrel }, evt.motion.state);
-                break;
-            case SDL_MOUSEBUTTONDOWN:
-                EvtMousePress.Call(evt.button.button, { evt.button.x, evt.button.y }, evt.button.state);
-                break;
-            case SDL_MOUSEBUTTONUP:
-                EvtMouseRelease.Call(evt.button.button, { evt.button.x, evt.button.y }, evt.button.state);
-                break;
-            case SDL_MOUSEWHEEL:
-                EvtMouseScroll.Call({ evt.wheel.x, evt.wheel.y });
-                break;
-            case SDL_WINDOWEVENT:
-                if (evt.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
-                {
-                    _windowSize = { evt.window.data1, evt.window.data2 };
-                    EvtWindowResize.Call(_windowSize);
-                    glViewport(0, 0, _windowSize.x, _windowSize.y);
-                }
-                break;
-            }
+            ProcessSdlEvent(&evt);
 		}
 
-        //ImGui_ImplSdlGL3_NewFrame(_sdlWindow);
+        _updateContext.DeltaTime = duration_cast<double_ms>(elapsedTime / frameDelay.count()).count();
+        _updateContext.ElapsedTime = elapsedTime;
+        _updateContext.TotalTime += elapsedTime;
 
-        updateCtx.DeltaTime = duration_cast<double_ms>(elapsedTime / frameDelay.count()).count();
-        updateCtx.ElapsedTime = elapsedTime;
-        updateCtx.TotalTime += elapsedTime;
-        EvtUpdate.Call(updateCtx);
+        Update();
 
         frameElap += elapsedTime;
         if (frameDelay <= frameElap)
@@ -193,10 +80,10 @@ void App::Start()
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            renderCtx.CurrentPass = 0;
-            renderCtx.CurrentShader = nullptr;
+            _renderContext.CurrentPass = 0;
+            _renderContext.CurrentShader = nullptr;
 
-            EvtRender.Call(renderCtx);
+            Render();
 
             SDL_GL_SwapWindow(_sdlWindow);
         }
@@ -204,11 +91,11 @@ void App::Start()
         fpsElap += elapsedTime;
         if (fpsDelay <= fpsElap)
         {
-            updateCtx.CurrentFPS = (frames / fpsElap.count()) * 1000.0;
+            _updateContext.CurrentFPS = (frames / fpsElap.count()) * 1000.0;
 
             static char buffer[128];
-            sprintf(buffer, "Dusk - %0.2f", updateCtx.CurrentFPS);
-            SetWindowTitle(buffer);
+            sprintf(buffer, "%s - %0.2f", _windowTitle.c_str(), _updateContext.CurrentFPS);
+            SDL_SetWindowTitle(_sdlWindow, buffer);
 
             frames = 0;
             fpsElap = 0ms;
@@ -236,12 +123,14 @@ void App::Deserialize(nlohmann::json& data)
     if (data.find("Size") != data.end())
     {
         _windowSize.x = data["Size"][0];
-        _windowSize.x = data["Size"][0];
+        _windowSize.y = data["Size"][1];
+        SetWindowSize(_windowSize);
     }
 
 	if (data.find("Title") != data.end())
 	{
 		_windowTitle = data["Title"].get<std::string>();
+        SetWindowTitle(_windowTitle);
 	}
 }
 
@@ -249,21 +138,40 @@ bool App::LoadConfig(const std::string& filename)
 {
     DuskBenchStart();
 
-    std::ifstream file(filename);
+    if (filename.empty())
+    {
+        if (_configFilename.empty())
+        {
+            DuskLogError("No config filename specified.");
+            return false;
+        }
+    }
+    else
+    {
+        _configFilename = filename;
+    }
+
+    Reset();
+
+    std::ifstream file(_configFilename);
     nlohmann::json data;
 
-    DuskLogLoad("Loading config file '%s'", filename.c_str());
+    DuskLogLoad("Loading config file '%s'", _configFilename.c_str());
 
     if (!file.is_open())
     {
-        DuskLogError("Failed to open config file '%s'", filename.c_str());
+        DuskLogError("Failed to open config file '%s', %s", _configFilename.c_str(), strerror(errno));
+        file.close();
+
+        EvtLoadConfig.Call(_configFilename);
         return false;
     }
 
 	data << file;
     Deserialize(data);
-
     file.close();
+
+    EvtLoadConfig.Call(_configFilename);
 
     DuskBenchEnd("App::LoadConfig()");
     return true;
@@ -273,14 +181,27 @@ bool App::SaveConfig(const std::string& filename)
 {
     DuskBenchStart();
 
-    std::ofstream file(filename);
+    if (filename.empty())
+    {
+        if (_configFilename.empty())
+        {
+            DuskLogError("No config filename specified.");
+            return false;
+        }
+    }
+    else
+    {
+        _configFilename = filename;
+    }
+
+    std::ofstream file(_configFilename);
     nlohmann::json data;
 
-    DuskLogLoad("Saving config file '%s'", filename.c_str());
+    DuskLogLoad("Saving config file '%s'", _configFilename.c_str());
 
     if (!file.is_open())
     {
-        DuskLogError("Failed to open config file '%s'", filename.c_str());
+        DuskLogError("Failed to open config file '%s', %s", _configFilename.c_str(), strerror(errno));
         return false;
     }
 
@@ -296,6 +217,7 @@ bool App::SaveConfig(const std::string& filename)
 void App::SetWindowSize(const glm::ivec2& size)
 {
     _windowSize = size;
+    glViewport(0, 0, _windowSize.x, _windowSize.y);
     SDL_SetWindowSize(_sdlWindow, _windowSize.x, _windowSize.y);
 }
 
@@ -338,6 +260,78 @@ std::vector<glm::ivec2> App::GetAvailableWindowSizes()
     return sizes;
 }
 
+void App::Update()
+{
+    EvtUpdate.Call(_updateContext);
+}
+
+void App::Render()
+{
+    EvtRender.Call(_renderContext);
+}
+
+void App::ProcessSdlEvent(SDL_Event * evt)
+{
+    switch (evt->type)
+    {
+    case SDL_QUIT:
+        _running = false;
+        break;
+    case SDL_KEYDOWN:
+        EvtKeyPress.Call(evt->key.keysym.sym, evt->key.keysym.mod);
+        break;
+    case SDL_KEYUP:
+        EvtKeyRelease.Call(evt->key.keysym.sym, evt->key.keysym.mod);
+        break;
+    case SDL_MOUSEMOTION:
+        EvtMouseMove.Call({ evt->motion.x, evt->motion.y }, { evt->motion.xrel, evt->motion.yrel }, evt->motion.state);
+        break;
+    case SDL_MOUSEBUTTONDOWN:
+        EvtMousePress.Call(evt->button.button, { evt->button.x, evt->button.y }, evt->button.state);
+        break;
+    case SDL_MOUSEBUTTONUP:
+        EvtMouseRelease.Call(evt->button.button, { evt->button.x, evt->button.y }, evt->button.state);
+        break;
+    case SDL_MOUSEWHEEL:
+        EvtMouseScroll.Call({ evt->wheel.x, evt->wheel.y });
+        break;
+    case SDL_WINDOWEVENT:
+        if (evt->window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+        {
+            _windowSize = { evt->window.data1, evt->window.data2 };
+            EvtWindowResize.Call(_windowSize);
+            glViewport(0, 0, _windowSize.x, _windowSize.y);
+        }
+        break;
+    }
+}
+
+void App::Reset()
+{
+    _scenes.clear();
+    _shaders.clear();
+
+    EvtStart.RemoveAllListeners();
+    EvtStop.RemoveAllListeners();
+
+    EvtUpdate.RemoveAllListeners();
+    EvtRender.RemoveAllListeners();
+
+    EvtKeyPress.RemoveAllListeners();
+    EvtKeyRelease.RemoveAllListeners();
+
+    EvtMousePress.RemoveAllListeners();
+    EvtMouseRelease.RemoveAllListeners();
+    EvtMouseMove.RemoveAllListeners();
+    EvtMouseScroll.RemoveAllListeners();
+
+    EvtWindowResize.RemoveAllListeners();
+
+    EvtFileDrop.RemoveAllListeners();
+
+    //EvtLoadConfig.RemoveAllListeners();
+}
+
 void App::CreateWindow()
 {
     DuskBenchStart();
@@ -361,7 +355,7 @@ void App::CreateWindow()
     const std::vector<glm::ivec2>& windowSizes = GetAvailableWindowSizes();
     _windowSize = windowSizes.back();
 
-    int sdlGlFlags = 0; //SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG;
+    int sdlGlFlags = SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG;
 
 #ifndef NDEBUG
     sdlGlFlags |= SDL_GL_CONTEXT_DEBUG_FLAG;
@@ -425,8 +419,6 @@ void App::CreateWindow()
     Shader::InitializeVersionString();
     Shader::InitializeUniformBuffers();
 
-    //ImGui_ImplSdlGL3_Init(_sdlWindow);
-
     // V-Sync
     SDL_GL_SetSwapInterval(1);
 
@@ -452,8 +444,6 @@ void App::CreateWindow()
 
 void App::DestroyWindow()
 {
-    //ImGui_ImplSdlGL3_Shutdown();
-
     SDL_GL_DeleteContext(_sdlContext);
     SDL_DestroyWindow(_sdlWindow);
     _sdlWindow = nullptr;

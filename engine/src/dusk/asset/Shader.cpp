@@ -44,6 +44,11 @@ void Shader::InitializeVersionString()
 
 void Shader::InitializeUniformBuffers()
 {
+    while (!_AvailableUniformBufferBindings.empty())
+    {
+        _AvailableUniformBufferBindings.pop();
+    }
+
     int maxBindings;
     glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &maxBindings);
     DuskLogVerbose("Max UBO Bindings %d", maxBindings);
@@ -87,6 +92,8 @@ void Shader::SetUniformBufferData(const std::string& name, GLvoid * data)
 
 bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
 {
+    _filenames = filenames;
+
     GLint linked = GL_FALSE;
     std::vector<GLuint> shaders;
 
@@ -103,7 +110,7 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
         return false;
     }
 
-#ifdef DUSK_ENABLE_BINARY_SHADERS
+#if defined(DUSK_ENABLE_BINARY_SHADERS) && defined(OPENGL_4_1)
 
     glProgramParameteri(_glId, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
 
@@ -136,7 +143,7 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
         }
     }
 
-#endif // DUSK_ENABLE_BINARY_SHADERS
+#endif // defined(DUSK_ENABLE_BINARY_SHADERS) && defined(OPENGL_4_1)
 
     if (!_loaded)
     {
@@ -172,7 +179,7 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
         }
     }
 
-#ifdef DUSK_ENABLE_BINARY_SHADERS
+#if defined(DUSK_ENABLE_BINARY_SHADERS) && defined(OPENGL_4_1)
 
     if (_loaded && !loadFromBinary)
     {
@@ -200,7 +207,7 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
         }
     }
 
-#endif // DUSK_ENABLE_BINARY_SHADERS
+#endif // defined(DUSK_ENABLE_BINARY_SHADERS) && defined(OPENGL_4_1)
 
     for (GLuint shader : shaders)
     {
@@ -289,13 +296,13 @@ GLuint Shader::LoadShader(const std::string& filename)
         type = GL_TESS_EVALUATION_SHADER;
     }
 #endif // GL_VERSION_4_0
-#ifdef GL_VERSION_4_5
+#ifdef GL_VERSION_4_3
     // Requires OpenGL 4.3+
     else if (filename.find(".cs.glsl") != std::string::npos)
     {
         type = GL_COMPUTE_SHADER;
     }
-#endif // GL_VERSION_4_5
+#endif // GL_VERSION_4_3
     else
     {
         DuskLogError("Unable to infer shader type for '%s'", filename.c_str());

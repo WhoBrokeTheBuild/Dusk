@@ -77,16 +77,19 @@ std::string GetShaderTypeString(GLuint type)
     case GL_GEOMETRY_SHADER:
         return "Geometry";
 
+#ifdef GL_VERSION_4_0
     // Requires OpenGL 4.0+
     case GL_TESS_CONTROL_SHADER:
         return "Tessellation Control";
 
     case GL_TESS_EVALUATION_SHADER:
         return "Tessellation Evaluation";
-
+#endif // GL_VERSION_4_0
+#ifdef GL_VERSION_4_3
     // Requires OpenGL 4.3+
     case GL_COMPUTE_SHADER:
         return "Compute";
+#endif // GL_VERSION_4_3
 
     default:
         break;

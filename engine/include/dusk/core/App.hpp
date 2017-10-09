@@ -24,8 +24,6 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(App);
 
-    static void LuaSetup(sol::state& lua);
-
     explicit App(int argc, char** argv);
     virtual ~App();
 
@@ -37,8 +35,11 @@ public:
     void Start();
     void Stop();
 
-    bool LoadConfig(const std::string& filename);
-    bool SaveConfig(const std::string& filename);
+    bool LoadConfig(const std::string& filename = "");
+    bool SaveConfig(const std::string& filename = "");
+
+    RenderContext& GetRenderContext() { return _renderContext; }
+    const UpdateContext& GetUpdateContext() { return _updateContext; }
 
     glm::ivec2 GetWindowSize() const { return _windowSize; }
     void SetWindowSize(const glm::ivec2& size);
@@ -72,7 +73,25 @@ public:
 
     Event<std::vector<std::string>> EvtFileDrop;
 
+    Event<std::string> EvtLoadConfig;
+
     // Assets
+
+protected:
+
+    virtual void Reset();
+    virtual void Update();
+    virtual void Render();
+    virtual void ProcessSdlEvent(SDL_Event * evt);
+
+    ALCdevice * GetAlDevice() { return _alDevice; }
+    ALCcontext * GetAlContext() { return _alContext; }
+
+    SDL_Window * GetSdlWindow() { return _sdlWindow; }
+    SDL_GLContext GetSdlContext() { return _sdlContext; }
+
+    std::vector<std::unique_ptr<Scene>>& GetScenes() { return _scenes; }
+    std::vector<std::unique_ptr<Shader>>& GetShaders() { return _shaders; }
 
 private:
 
@@ -80,6 +99,8 @@ private:
     void DestroyWindow();
 
     bool _running;
+
+    std::string _configFilename;
 
     glm::ivec2 _windowSize   = { 640, 480 };
     std::string _windowTitle = "Dusk";
@@ -91,6 +112,9 @@ private:
 
     SDL_Window * _sdlWindow;
     SDL_GLContext _sdlContext;
+
+    RenderContext _renderContext;
+    UpdateContext _updateContext;
 
     std::vector<std::unique_ptr<Scene>> _scenes;
 

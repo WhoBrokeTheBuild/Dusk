@@ -15,6 +15,13 @@ class Shader
 {
 public:
 
+    struct UniformRecord
+    {
+        GLint  Location;
+        GLint  Size;
+        GLenum Type;
+    };
+
     /// Boilerplate
 
     DISALLOW_COPY_AND_ASSIGN(Shader);
@@ -69,6 +76,16 @@ public:
      */
     void Bind();
 
+    std::unordered_map<std::string, UniformRecord> GetAllUniforms() const
+    {
+        return _uniforms;
+    }
+
+    std::unordered_map<std::string, GLuint> GetAllAttributes() const
+    {
+        return _attributes;
+    }
+
     /** Check if the shader has an attribute.
      * @param name The name of the attribute to check.
      * @return True if the attribute exists within the shader.
@@ -93,7 +110,9 @@ public:
      */
     GLint GetUniformLocation(const std::string& name) const;
 
-    #include "Shader.inc.hpp"
+    std::vector<std::string> GetFilenames() const { return _filenames; }
+
+#include "Shader.inc.hpp"
 
 protected:
 
@@ -106,13 +125,6 @@ protected:
 private:
 
     /// Types
-
-    struct UniformRecord
-    {
-        GLint  Location;
-        GLint  Size;
-        GLenum Type;
-    };
 
     struct UniformBufferRecord
     {

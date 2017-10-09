@@ -1,8 +1,15 @@
 #include <dusk/Main.hpp>
 
+const std::string PROJECT_FILENAME = "@CMAKE_SOURCE_DIR@/@PROJECT_NAME@.duskproj";
+
 int main(int argc, char** argv) {
     dusk::App app(argc, argv);
-    _DuskSetup(&app);
+
+    app.EvtLoadConfig.AddStatic([&](std::string) {
+        _DuskSetup(&app);
+    });
+    app.LoadConfig(PROJECT_FILENAME);
+
     app.Start();
     return 0;
 }

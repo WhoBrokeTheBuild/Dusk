@@ -159,6 +159,7 @@ flatbuffers_common_*.h
 ### Custom ###
 build
 config.h
+Config.hpp
 *.bin
 vgcore.*
 imgui.ini

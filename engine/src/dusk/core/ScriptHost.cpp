@@ -14,7 +14,7 @@ ScriptHost::ScriptHost()
 
     _lua["this_script_host"] = this;
 
-    App::LuaSetup(_lua);
+    //App::LuaSetup(_lua);
 }
 
 ScriptHost::~ScriptHost()

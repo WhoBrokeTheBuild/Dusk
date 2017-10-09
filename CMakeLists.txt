@@ -27,8 +27,6 @@ STRING(SUBSTRING "${DUSK_REVISION}" 0 12 DUSK_REVISION)
 # Dependencies to be built with the project
 ADD_SUBDIRECTORY(depend)
 
-MESSAGE(STATUS "${DEPEND_INCLUDE_DIRS}")
-
 # Engine library
 ADD_SUBDIRECTORY(engine)
 

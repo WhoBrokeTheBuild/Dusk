@@ -1,0 +1,74 @@
+
+INCLUDE($ENV{DUSK_INSTALL_DIR}/cmake/Config.cmake)
+INCLUDE($ENV{DUSK_INSTALL_DIR}/cmake/Compiler.cmake)
+
+INCLUDE_DIRECTORIES(
+    include/
+    ${_DUSK_ENGINE_INCLUDE_DIRS}
+    ${_DUSK_EDITOR_INCLUDE_DIRS}
+)
+
+SET(_EXECUTABLE ${PROJECT_NAME})
+SET(_EDITOR     ${PROJECT_NAME}-Editor)
+SET(_LIBRARY    ${PROJECT_NAME}-Library)
+
+FILE(GLOB_RECURSE _INCLUDES RELATIVE ${CMAKE_SOURCE_DIR} include/*.hpp)
+FILE(GLOB_RECURSE _SOURCES  RELATIVE ${CMAKE_SOURCE_DIR} src/*.cpp)
+
+ADD_LIBRARY(${_LIBRARY} SHARED
+    ${_INCLUDES}
+    ${_SOURCES}
+)
+
+CONFIGURE_FILE(
+    ${_DUSK_ENGINE_MAIN}
+    EngineMain.gen.cpp
+)
+
+ADD_EXECUTABLE(${_EXECUTABLE}
+    EngineMain.gen.cpp
+)
+
+TARGET_LINK_LIBRARIES(${PROJECT_NAME}
+    ${_LIBRARY}
+    ${_DUSK_ENGINE_LIBRARIES}
+)
+
+CONFIGURE_FILE(
+    ${_DUSK_EDITOR_MAIN}
+    EditorMain.gen.cpp
+)
+
+ADD_EXECUTABLE(${_EDITOR}
+    EditorMain.gen.cpp
+)
+
+TARGET_LINK_LIBRARIES(${_EDITOR}
+    ${_LIBRARY}
+    ${_DUSK_ENGINE_LIBRARIES}
+    ${_DUSK_EDITOR_LIBRARIES}
+)
+
+###
+### Automation
+###
+
+FILE(GLOB_RECURSE _ASSETS RELATIVE ${CMAKE_SOURCE_DIR} "assets/*")
+FILE(GLOB_RECURSE _DUSK_ASSETS RELATIVE ${_DUSK_DIR} "assets/*")
+
+# Copy assets to build directory
+ADD_CUSTOM_TARGET(copy-assets ALL)
+ADD_DEPENDENCIES(${_LIBRARY} copy-assets)
+ADD_CUSTOM_COMMAND(
+    OUTPUT
+    TARGET copy-assets PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E
+        copy_directory ${CMAKE_SOURCE_DIR}/assets ${CMAKE_BINARY_DIR}/assets
+    COMMAND ${CMAKE_COMMAND} -E
+        copy_directory ${_DUSK_DIR}/assets ${CMAKE_BINARY_DIR}/assets
+)
+
+SET_TARGET_PROPERTIES(
+    copy-assets
+    PROPERTIES FOLDER "automation"
+)

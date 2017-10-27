@@ -41,12 +41,11 @@ bool MeshLoaderObj::Load(Mesh * mesh, const std::string& filename)
     bool hasNorms = !attrib.normals.empty();
     bool hasTxcds = !attrib.texcoords.empty();
 
-    unsigned int offset = 0;
     for (tinyobj::shape_t & shape : shapes)
     {
         Mesh::Data data;
 
-        DuskLogVerbose("Processing shape %s, offset %u", shape.name.c_str(), offset);
+        DuskLogVerbose("Processing shape %s", shape.name.c_str());
 
         tinyobj::mesh_t & objMesh = shape.mesh;
         std::shared_ptr<Material> material;

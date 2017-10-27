@@ -26,8 +26,8 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Shader);
 
-    std::unique_ptr<Shader> Create();
-    std::unique_ptr<Shader> Create(const std::vector<std::string>& filenames);
+    static std::unique_ptr<Shader> Create();
+    static std::unique_ptr<Shader> Create(const std::vector<std::string>& filenames);
 
     /** Create an empty shader, for use with LoadFromFile().
      */

@@ -61,7 +61,6 @@ SET(_DUSK_INCLUDES
     include/dusk/asset/loaders/MeshLoaderObj.hpp
     include/dusk/scene/Actor.hpp
     include/dusk/scene/Camera.hpp
-    include/dusk/scene/Component.hpp
     include/dusk/scene/Model.hpp
     include/dusk/scene/Scene.hpp
     #include/dusk/scene/UI.hpp
@@ -90,7 +89,6 @@ SET(_DUSK_SOURCES
     src/dusk/asset/loaders/MeshLoaderObj.cpp
     src/dusk/scene/Actor.cpp
     src/dusk/scene/Camera.cpp
-    src/dusk/scene/Component.cpp
     src/dusk/scene/Model.cpp
     src/dusk/scene/Scene.cpp
     #src/dusk/scene/UI.cpp

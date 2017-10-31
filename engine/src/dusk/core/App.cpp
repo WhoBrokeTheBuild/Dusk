@@ -459,10 +459,21 @@ Shader * App::AddShader(std::unique_ptr<Shader>&& sp)
     return _shaders.back().get();
 }
 
-Scene * App::AddScene(std::unique_ptr<Scene>&& scene)
+Scene * App::AddScene(std::string name, std::unique_ptr<Scene>&& scene)
 {
-    _scenes.push_back(std::move(scene));
-    return _scenes.back().get();
+    _scenes.emplace(name, std::move(scene));
+    // TODO: Fix vvv
+    return scene.get();
+}
+
+bool App::SetActiveScene(std::string name)
+{
+    if (_scenes.find(name) == _scenes.end())
+    {
+        return false;
+    }
+
+
 }
 
 } // namespace dusk

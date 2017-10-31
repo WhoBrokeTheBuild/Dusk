@@ -5,13 +5,8 @@
 
 namespace dusk {
 
-std::unique_ptr<Camera> Camera::Create(float fov /*= 45.0f*/, glm::vec3 up /*= glm::vec3(0, 1, 0)*/, glm::vec2 clip /*= glm::vec2(0.1f, 1000.0f)*/)
-{
-    return std::make_unique<Camera>(fov, up, clip);
-}
-
-Camera::Camera(float fov /*= 45.0f*/, glm::vec3 up /*= glm::vec3(0, 1, 0)*/, glm::vec2 clip /*= glm::vec2(0.1f, 1000.0f)*/)
-    : _baseTransform(1)
+Camera::Camera(std::string name, Actor * parent /*= nullptr*/, float fov /*= 45.0f*/, glm::vec3 up /*= glm::vec3(0, 1, 0)*/, glm::vec2 clip /*= glm::vec2(0.1f, 1000.0f)*/)
+    : Actor(name, parent)
     , _viewInvalid(true)
     , _projectionInvalid(true)
     , _view(1)
@@ -74,17 +69,12 @@ void Camera::Deserialize(nlohmann::json& data)
 	}
 }
 
-void Camera::SetBaseTransform(const glm::mat4& baseTransform)
-{
-    _baseTransform = baseTransform;
-    _viewInvalid = true;
-}
-
 glm::mat4 Camera::GetView()
 {
     if (_viewInvalid)
     {
-        _view = glm::lookAt(_position, _position + _forward, _up) * _baseTransform;
+        _view = glm::lookAt(_position, _position + _forward, _up)
+              * (GetParent() ? GetParent()->GetTransform() : glm::mat4());
         _viewInvalid = false;
     }
     return _view;

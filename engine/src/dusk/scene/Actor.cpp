@@ -6,14 +6,9 @@
 
 namespace dusk {
 
-std::unique_ptr<Actor> Actor::Create()
-{
-    return std::make_unique<Actor>();
-}
-
-Actor::Actor()
-    : _scene(nullptr)
-    , _baseTransform(1)
+Actor::Actor(std::string name, Actor * parent /*= nullptr*/)
+    : _name(name)
+    , _parent(parent)
     , _transform(1)
     , _position(0)
     , _rotation(0)
@@ -21,14 +16,21 @@ Actor::Actor()
 {
 }
 
-void Actor::SetScene(Scene * scene)
+void Actor::AddChild(Actor * child)
 {
-    _scene = scene;
+    _children.push_back(child);
 }
 
-void Actor::SetBaseTransform(const glm::mat4& baseTransform)
+bool Actor::RemoveChild(Actor * child)
 {
-    _baseTransform = baseTransform;
+    const auto& it = std::find(_children.begin(), _children.end(), child);
+    if (it == _children.end())
+    {
+        // Not our child
+        return false;
+    }
+    _children.erase(it);
+    return true;
 }
 
 void Actor::SetPosition(const glm::vec3& pos)
@@ -48,7 +50,7 @@ void Actor::SetScale(const glm::vec3& scale)
 
 glm::mat4 Actor::GetTransform()
 {
-    _transform = _baseTransform;
+    _transform = (_parent ? _parent->GetTransform() : glm::mat4());
     _transform = glm::translate(_transform, _position);
     _transform = glm::rotate(_transform, _rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
     _transform = glm::rotate(_transform, _rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -56,16 +58,6 @@ glm::mat4 Actor::GetTransform()
     _transform = glm::scale(_transform, _scale);
 
     return _transform;
-}
-
-void Actor::Update(const UpdateContext& ctx)
-{
-    EvtUpdate.Call(ctx);
-}
-
-void Actor::Render(RenderContext& ctx)
-{
-    EvtRender.Call(ctx);
 }
 
 } // namespace dusk

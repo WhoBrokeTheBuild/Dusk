@@ -2,30 +2,27 @@
 #define DUSK_CAMERA_HPP
 
 #include <dusk/Config.hpp>
+#include <dusk/scene/Actor.hpp>
 
 #include <memory>
 
 namespace dusk {
 
-class Camera
+class Camera : public Actor
 {
 public:
 
     /// Class Boilerplate
 
-    static std::unique_ptr<Camera> Create(float fov = 45.0f, glm::vec3 up = glm::vec3(0, 1, 0), glm::vec2 clip = glm::vec2(0.1f, 1000.0f));
-
     DISALLOW_COPY_AND_ASSIGN(Camera);
 
-    Camera(float fov = 45.0f, glm::vec3 up = glm::vec3(0, 1, 0), glm::vec2 clip = glm::vec2(0.1f, 1000.0f));
+    Camera(std::string name, Actor * parent = nullptr, float fov = 45.0f, glm::vec3 up = glm::vec3(0, 1, 0), glm::vec2 clip = glm::vec2(0.1f, 1000.0f));
     virtual ~Camera() = default;
 
     void Serialize(nlohmann::json& data);
     void Deserialize(nlohmann::json& data);
 
     /// Methods
-
-    void SetBaseTransform(const glm::mat4& baseTransform);
 
     glm::mat4 GetView();
     glm::mat4 GetProjection();
@@ -52,8 +49,6 @@ public:
     glm::vec3 GetUp() const { return _up; }
 
 private:
-
-    glm::mat4 _baseTransform;
 
     bool _viewInvalid;
     bool _projectionInvalid;

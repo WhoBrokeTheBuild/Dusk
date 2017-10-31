@@ -8,6 +8,8 @@
 #include <dusk/scene/Scene.hpp>
 
 #include <string>
+#include <unordered_map>
+#include <vector>
 #include <memory>
 
 namespace dusk {
@@ -51,7 +53,14 @@ public:
 
     Shader * AddShader(std::unique_ptr<Shader>&& sp);
 
-    Scene * AddScene(std::unique_ptr<Scene>&& scene);
+    inline Scene * AddScene(std::string name, Scene * scene)
+    {
+        return AddScene(name, std::unique_ptr<Scene>(scene));
+    }
+
+    Scene * AddScene(std::string name, std::unique_ptr<Scene>&& scene);
+
+    bool SetActiveScene(std::string name);
 
     /// Events
 
@@ -116,7 +125,9 @@ private:
     RenderContext _renderContext;
     UpdateContext _updateContext;
 
-    std::vector<std::unique_ptr<Scene>> _scenes;
+    Scene * _activeScene;
+
+    std::unordered_map<std::string, std::unique_ptr<Scene>> _scenes;
 
     std::vector<std::unique_ptr<Shader>> _shaders;
 

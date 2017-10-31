@@ -3,13 +3,9 @@
 
 #include <dusk/Config.hpp>
 
-#include <dusk/core/Context.hpp>
-#include <dusk/scene/Component.hpp>
 #include <memory>
 
 namespace dusk {
-
-class Scene;
 
 class Actor
 {
@@ -17,15 +13,14 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Actor);
 
-    static std::unique_ptr<Actor> Create();
-
-    Actor();
+    Actor(std::string name, Actor * parent = nullptr);
     virtual ~Actor() = default;
 
-    void SetScene(Scene * scene);
-    Scene * GetScene() const { return _scene; };
+    std::string GetName() { return _name; }
 
-    void SetBaseTransform(const glm::mat4& baseTransform);
+    inline Actor * GetParent() { return _parent; }
+    void AddChild(Actor * child);
+    bool RemoveChild(Actor * child);
 
     void SetPosition(const glm::vec3& pos);
     inline glm::vec3 GetPosition() const { return _position; }
@@ -38,31 +33,17 @@ public:
 
     glm::mat4 GetTransform();
 
-    template <class T>
-    T * AddComponent(std::unique_ptr<Component> comp)
-    {
-        comp->SetActor(this);
-        _components.push_back(std::move(comp));
-        return static_cast<T *>(_components.back().get());
-    }
-
-    void Update(const UpdateContext& ctx);
-    void Render(RenderContext& ctx);
-
-    Event<const UpdateContext&> EvtUpdate;
-    Event<RenderContext&> EvtRender;
-
 private:
 
-    Scene * _scene;
+    std::string _name;
 
-    glm::mat4 _baseTransform;
+    Actor * _parent;
+    std::vector<Actor *> _children;
+
     glm::mat4 _transform;
     glm::vec3 _position;
     glm::vec3 _rotation;
     glm::vec3 _scale;
-
-    std::vector<std::unique_ptr<Component>> _components;
 
 }; // class Actor
 

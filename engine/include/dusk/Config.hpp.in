@@ -22,8 +22,8 @@
 #include <AL/alc.h>
 
 // Ogg/Vorbis
-#include <vorbis/codec.h>
-#include <vorbis/vorbisfile.h>
+//#include <vorbis/codec.h>
+//#include <vorbis/vorbisfile.h>
 
 // glm
 #include <glm/glm.hpp>

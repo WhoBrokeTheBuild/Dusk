@@ -508,7 +508,7 @@ ENDIF()
 ADD_DEPENDENCIES(depend flatbuffers)
 
 SET_TARGET_PROPERTIES(
-    depend glm json lua zlib sdl2 openal vorbis flatbuffers
+    depend glm json lua zlib sdl2 openal flatbuffers
     PROPERTIES FOLDER "depend"
 )
 

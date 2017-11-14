@@ -182,7 +182,12 @@ IF (MSVC)
     )
     ADD_CUSTOM_TARGET(sdl2 DEPENDS ${SDL2_LIBRARIES_DEBUG} ${SDL2_LIBRARIES_RELEASE})
 ELSE()
-    SET(SDL2_LIBRARIES "${CMAKE_BINARY_DIR}/depend/SDL2/libSDL2-2.0.${SHARED_EXT}")
+    STRING(TOLOWER "${CMAKE_BUILD_TYPE}" build_type)
+    IF (build_type STREQUAL "debug")
+        SET(SDL2_LIBRARIES "${CMAKE_BINARY_DIR}/depend/SDL2/libSDL2-2.0d.${SHARED_EXT}")
+    ELSE()
+        SET(SDL2_LIBRARIES "${CMAKE_BINARY_DIR}/depend/SDL2/libSDL2-2.0.${SHARED_EXT}")
+    ENDIF()
     SET(SDL2_LIBRARIES "${SDL2_LIBRARIES}")
 
     ADD_CUSTOM_COMMAND(
@@ -248,6 +253,7 @@ ELSE()
 ENDIF()
 ADD_DEPENDENCIES(depend openal)
 
+#[[
 
 ### Ogg
 MESSAGE("Adding dependency: ogg")
@@ -377,8 +383,6 @@ ELSE()
     ADD_CUSTOM_TARGET(vorbis DEPENDS ogg ${VORBIS_LIBRARIES})
 ENDIF()
 ADD_DEPENDENCIES(depend vorbis)
-
-#[[
 
 ### Theora
 MESSAGE("Adding dependency: theora")

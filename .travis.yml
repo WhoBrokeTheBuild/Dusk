@@ -20,7 +20,7 @@ matrix:
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test', 'kalakris-cmake' ]
-          packages: [ 'g++-6', 'libstdc++-6-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
+          packages: [ 'g++-7', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
       env: CMAKE_BUILD_TYPE=DEBUG
 
     - os: linux
@@ -28,7 +28,7 @@ matrix:
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test', 'kalakris-cmake' ]
-          packages: [ 'g++-6', 'libstdc++-6-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
+          packages: [ 'g++-7', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
       env: CMAKE_BUILD_TYPE=RELEASE
 
     - os: linux
@@ -36,7 +36,7 @@ matrix:
       addons:
         apt:
           sources: [ 'llvm-toolchain-trusty-4.0', 'ubuntu-toolchain-r-test', 'kalakris-cmake' ]
-          packages: [ 'clang-4.0', 'libstdc++-6-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
+          packages: [ 'clang-4.0', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
       env: CMAKE_BUILD_TYPE=DEBUG
 
     - os: linux
@@ -44,13 +44,13 @@ matrix:
       addons:
         apt:
           sources: [ 'llvm-toolchain-trusty-4.0', 'ubuntu-toolchain-r-test', 'kalakris-cmake' ]
-          packages: [ 'clang-4.0', 'libstdc++-6-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
+          packages: [ 'clang-4.0', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
       env: CMAKE_BUILD_TYPE=RELEASE
 
 before_install:
   - env
   - export SRC_DIR="`pwd`"
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-6" CC="gcc-6"; fi
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-7" CC="gcc-7"; fi
   - if [ "$CXX" = "clang++" ]; then export CXX="clang++-4.0" CC="clang-4.0"; fi
 
 script:

@@ -7,8 +7,8 @@ namespace dusk {
 
 ScriptHost::ScriptHost()
 {
-    _lua = luaL_newstate();
-    luaL_openlibs(_lua);
+    //_lua = luaL_newstate();
+    //luaL_openlibs(_lua);
 
     //_lua.open_libraries(sol::lib::base, sol::lib::math);
     //_lua.new_usertype<ScriptHost>("ScriptHost",
@@ -22,8 +22,8 @@ ScriptHost::ScriptHost()
 
 ScriptHost::~ScriptHost()
 {
-    lua_close(_lua);
-    
+    //lua_close(_lua);
+
     //if (_lua["cleanup"].valid())
     //{
     //    _lua["cleanup"]();

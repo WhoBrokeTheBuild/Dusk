@@ -38,7 +38,7 @@ public:
     virtual void Render(RenderContext& ctx);
 
     template <class T = Actor>
-    void AddChild(std::unique_ptr<T> actor, const std::string& id) 
+    T * AddChild(std::unique_ptr<T> actor, const std::string& id)
     {
         if (_childrenById.find(id) != _childrenById.end()) {
             RemoveChild(id);
@@ -47,9 +47,11 @@ public:
             _childrenByType[typeid(T)] = {};
         }
         _children.push_back(actor.get());
-        _typesByChild[actor.get()] = typeid(T);
+        _typesByChild.emplace(actor.get(), typeid(T));
         _childrenByType[typeid(T)].push_back(actor.get());
         _childrenById[id] = std::move(actor);
+
+        return dynamic_cast<T*>(_childrenById[id].get());
     }
 
 
@@ -68,7 +70,7 @@ public:
     void RemoveChildTag(const std::string& id, const std::string& tag);
 
     Actor * GetChild(const std::string& id);
-    
+
     Actor * GetFirstChild();
     std::vector<Actor *> GetChildren();
 

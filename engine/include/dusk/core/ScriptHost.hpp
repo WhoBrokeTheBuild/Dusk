@@ -21,10 +21,10 @@ public:
     void RunFile(const std::string& filename)
     {
         //_lua.script_file(filename);
-        luaL_loadfile(_lua, filename.c_str());
-        if (lua_pcall(_lua, 0, 0, 0)) {
-            // Failed
-        }
+        //luaL_loadfile(_lua, filename.c_str());
+        //if (lua_pcall(_lua, 0, 0, 0)) {
+        //    // Failed
+        //}
     }
 
     void RunCode(const std::string& code)
@@ -32,18 +32,18 @@ public:
         //_lua.script(code);
     }
 
-    lua_State * GetLuaState()
-    {
-        //return _lua.lua_state();
-        return _lua;
-    }
+    //lua_State * GetLuaState()
+    //{
+    //    //return _lua.lua_state();
+    //    return _lua;
+    //}
 
     Event<> EvtCleanup;
 
 private:
 
     //sol::state _lua;
-    lua_State * _lua;
+    //lua_State * _lua;
 
 }; // class ScriptHost
 

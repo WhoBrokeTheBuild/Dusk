@@ -8,18 +8,6 @@ namespace dusk {
 
 std::vector<std::unique_ptr<IMeshLoader>> Mesh::_Loaders;
 
-void Mesh::LuaSetup(sol::state& lua)
-{
-    /*
-    lua.new_usertype<Mesh>("Mesh",
-        "new", sol::constructors<Mesh(), Mesh(const std::string& filename)>(),
-        "LoadFromFile", &Mesh::LoadFromFile,
-        "IsLoaded", &Mesh::IsLoaded,
-        "Render", &Mesh::Render
-    );
-    */
-}
-
 void Mesh::AddLoader(std::unique_ptr<IMeshLoader> loader)
 {
     _Loaders.push_back(std::move(loader));

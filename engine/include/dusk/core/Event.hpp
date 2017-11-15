@@ -17,20 +17,6 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Event);
 
-    static void LuaSetup(sol::state& lua, const std::string& name)
-    {
-        lua.new_usertype<Event<Params ...>>(name,
-            "new", sol::no_constructor,
-            "AddListener", [](Event<Params ...> * event,
-                              std::function<void(Params ...)> func,
-                              sol::this_state state) -> unsigned int {
-                return event->AddLua(state, func);
-            },
-            "RemoveListener", &Event<Params ...>::RemoveListener,
-            "RemoveAllListeners", &Event<Params ...>::RemoveAllListeners
-        );
-    }
-
     Event() = default;
     virtual ~Event()
     {
@@ -99,23 +85,6 @@ public:
 
 private:
 
-    unsigned int AddLua(lua_State * state, std::function<void(Params ...)> func)
-    {
-        sol::state_view lua(state);
-
-        unsigned int id = GetNextId();
-        _callbacks.push_back(std::make_unique<LuaCallback>(id, state, func));
-
-        // Use Lua to avoid cross-include issue
-        // Gross
-        Event<>* evtCleanup = lua["this_script_host"]["EvtCleanup"];
-        evtCleanup->AddStatic([=]() {
-            RemoveListener(id);
-        });
-
-        return id;
-    }
-
     struct Callback
     {
         bool alive;
@@ -158,23 +127,6 @@ private:
         void Call(Params ... args) override
         {
             callback(object, args...);
-        }
-    };
-
-    struct LuaCallback : public Callback
-    {
-        lua_State * state;
-        std::function<void(Params ...)> callback;
-
-        LuaCallback(unsigned int id, lua_State * state, std::function<void(Params ...)> func)
-            : Callback(id)
-            , state(state)
-            , callback(func)
-        { }
-
-        void Call(Params ... args) override
-        {
-            callback(args...);
         }
     };
 

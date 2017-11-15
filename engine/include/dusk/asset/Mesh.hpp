@@ -44,8 +44,6 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Mesh);
 
-    static void LuaSetup(sol::state& lua);
-
     static void AddLoader(std::unique_ptr<IMeshLoader> loader);
 
     static std::shared_ptr<Mesh> Create();

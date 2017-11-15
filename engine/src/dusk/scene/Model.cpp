@@ -7,8 +7,8 @@
 
 namespace dusk {
 
-Model::Model(std::string name, Actor * parent /*= nullptr*/)
-    : Actor(name, parent)
+Model::Model(Actor * parent /*= nullptr*/)
+    : Actor(parent)
 {
 }
 

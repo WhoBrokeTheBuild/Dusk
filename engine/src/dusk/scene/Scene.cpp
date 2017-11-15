@@ -7,7 +7,7 @@
 namespace dusk {
 
 Scene::Scene()
-    : ITaggedCollection<Actor>()
+    : Actor()
 {
 }
 

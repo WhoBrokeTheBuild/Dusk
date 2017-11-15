@@ -3,7 +3,7 @@
 
 #include <dusk/Config.hpp>
 
-#include <dusk/scene/ITaggedCollection.hpp>
+#include <dusk/scene/Actor.hpp>
 #include <dusk/core/Context.hpp>
 #include <dusk/scene/Actor.hpp>
 #include <dusk/scene/Camera.hpp>
@@ -14,7 +14,7 @@
 
 namespace dusk {
 
-class Scene : public ITaggedCollection<Actor>
+class Scene : public Actor
 {
 public:
 

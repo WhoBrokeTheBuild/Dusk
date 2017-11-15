@@ -3,23 +3,23 @@
 
 #include <dusk/Config.hpp>
 
-#include <dusk/scene/ITaggedCollection.hpp>
 #include <dusk/core/Context.hpp>
 
 #include <memory>
+#include <unordered_map>
+#include <vector>
+#include <typeindex>
 
 namespace dusk {
 
-class Actor : public ITaggedCollection<Actor>
+class Actor
 {
 public:
 
     DISALLOW_COPY_AND_ASSIGN(Actor);
 
-    Actor(std::string name, Actor * parent = nullptr);
+    Actor(Actor * parent = nullptr);
     virtual ~Actor() = default;
-
-    std::string GetName() { return _name; }
 
     inline Actor * GetParent() { return _parent; }
 
@@ -37,9 +37,67 @@ public:
     virtual void Update(const UpdateContext& ctx);
     virtual void Render(RenderContext& ctx);
 
-private:
+    template <class T = Actor>
+    void AddChild(std::unique_ptr<T> actor, const std::string& id) 
+    {
+        if (_childrenById.find(id) != _childrenById.end()) {
+            RemoveChild(id);
+        }
+        if (_childrenByType.find(typeid(T)) == _childrenByType.end()) {
+            _childrenByType[typeid(T)] = {};
+        }
+        _children.push_back(actor.get());
+        _typesByChild[actor.get()] = typeid(T);
+        _childrenByType[typeid(T)].push_back(actor.get());
+        _childrenById[id] = std::move(actor);
+    }
 
-    std::string _name;
+
+    void RemoveChild(Actor * actor);
+
+    void RemoveChild(const std::string& id);
+
+    void ChangeChildId(const std::string& oldId, const std::string& newId);
+
+    void AddChildTag(Actor * actor, const std::string& tag);
+
+    void AddChildTag(const std::string& id, const std::string& tag);
+
+    void RemoveChildTag(Actor * actor, const std::string& tag);
+
+    void RemoveChildTag(const std::string& id, const std::string& tag);
+
+    Actor * GetChild(const std::string& id);
+    
+    Actor * GetFirstChild();
+    std::vector<Actor *> GetChildren();
+
+    Actor * GetFirstChildWithTag(const std::string& tag);
+    std::vector<Actor *> GetChildrenWithTag(const std::string& tag);
+
+    template <class T>
+    Actor * GetFirstChildWithType()
+    {
+        if (_childrenByType.find(typeid(T)) == _childrenByType.end()) {
+            _childrenByType[typeid(T)] = {};
+        }
+        if (_childrenByType[typeid(T)].empty()) {
+            return nullptr;
+        }
+        return _childrenByType[typeid(T)].front();
+    }
+
+    template <class T>
+    std::vector<Actor *> GetChildrenWithType()
+    {
+        if (_childrenByType.find(typeid(T)) == _childrenByType.end()) {
+            _childrenByType[typeid(T)] = {};
+        }
+        return _childrenByType[typeid(T)];
+
+    }
+
+private:
 
     Actor * _parent;
 
@@ -47,6 +105,18 @@ private:
     glm::vec3 _position;
     glm::vec3 _rotation;
     glm::vec3 _scale;
+
+    std::vector<Actor *> _children;
+
+    std::unordered_map<std::string, std::unique_ptr<Actor>> _childrenById;
+
+    std::unordered_map<Actor *, std::vector<std::string>> _tagsByChild;
+
+    std::unordered_map<std::string, std::vector<Actor *>> _childrenByTag;
+
+    std::unordered_map<Actor *, std::type_index> _typesByChild;
+
+    std::unordered_map<std::type_index, std::vector<Actor *>> _childrenByType;
 
 }; // class Actor
 

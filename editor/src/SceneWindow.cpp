@@ -22,15 +22,15 @@ void RenderActorTree(dusk::Actor * parent)
 
     for (const auto& actor : actors)
     {
-        const auto& name = actor->GetName();
+        //const auto& name = actor->GetName();
 
-        ImGui::Text("  Name: %s", name.c_str());
+        //ImGui::Text("  Name: %s", name.c_str());
 
-        ImGui::SetNextTreeNodeOpen(true, ImGuiSetCond_FirstUseEver);
-        if (ImGui::CollapsingHeader("Children##%s", name.c_str()))
-        {
-            RenderActorTree(actor);
-        }
+        //ImGui::SetNextTreeNodeOpen(true, ImGuiSetCond_FirstUseEver);
+        //if (ImGui::CollapsingHeader("Children##%s", name.c_str()))
+        //{
+        //    RenderActorTree(actor);
+        //}
     }
 }
 
@@ -44,15 +44,15 @@ void SceneWindow::DoRender()
         ImGui::BeginChild("Scroll", ImVec2(0, -ImGui::GetItemsLineHeightWithSpacing()), false, 0);
         for (const auto& actor : actors)
         {
-            const auto& name = actor->GetName();
+            //const auto& name = actor->GetName();
 
-            ImGui::Text("Name: %s", name.c_str());
+            //ImGui::Text("Name: %s", name.c_str());
 
-            ImGui::SetNextTreeNodeOpen(true, ImGuiSetCond_FirstUseEver);
-            if (ImGui::CollapsingHeader("Children##%s", name.c_str()))
-            {
-                RenderActorTree(actor);
-            }
+            //ImGui::SetNextTreeNodeOpen(true, ImGuiSetCond_FirstUseEver);
+            //if (ImGui::CollapsingHeader("Children##%s", name.c_str()))
+            //{
+            //    RenderActorTree(actor);
+            //}
         }
         ImGui::EndChild();
 

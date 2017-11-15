@@ -25,7 +25,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Model);
 
-    Model(std::string name, Actor * parent = nullptr);
+    Model(Actor * parent = nullptr);
     virtual ~Model() = default;
 
     void AddMesh(std::shared_ptr<Mesh> mesh);

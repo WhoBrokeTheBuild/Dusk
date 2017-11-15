@@ -61,6 +61,7 @@ public:
     Scene * AddScene(std::string name, std::unique_ptr<Scene>&& scene);
 
     bool SetActiveScene(std::string name);
+    Scene * GetActiveScene();
 
     /// Events
 
@@ -99,7 +100,7 @@ protected:
     SDL_Window * GetSdlWindow() { return _sdlWindow; }
     SDL_GLContext GetSdlContext() { return _sdlContext; }
 
-    std::vector<std::unique_ptr<Scene>>& GetScenes() { return _scenes; }
+    std::unordered_map<std::string, std::unique_ptr<Scene>>& GetScenes() { return _scenes; }
     std::vector<std::unique_ptr<Shader>>& GetShaders() { return _shaders; }
 
 private:

@@ -19,7 +19,7 @@ struct TransformData
     alignas(64) glm::mat4 MVP   = glm::mat4(1);
 };
 
-class Model : Actor
+class Model : public Actor
 {
 public:
 
@@ -32,8 +32,8 @@ public:
 
     Box GetBounds() const { return _bounds; }
 
-    virtual void Update(const UpdateContext& ctx);
-    virtual void Render(RenderContext& ctx);
+    virtual void Update(const UpdateContext& ctx) override;
+    virtual void Render(RenderContext& ctx) override;
 
 private:
 

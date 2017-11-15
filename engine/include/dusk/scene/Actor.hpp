@@ -3,11 +3,14 @@
 
 #include <dusk/Config.hpp>
 
+#include <dusk/scene/ITaggedCollection.hpp>
+#include <dusk/core/Context.hpp>
+
 #include <memory>
 
 namespace dusk {
 
-class Actor
+class Actor : public ITaggedCollection<Actor>
 {
 public:
 
@@ -19,8 +22,6 @@ public:
     std::string GetName() { return _name; }
 
     inline Actor * GetParent() { return _parent; }
-    void AddChild(Actor * child);
-    bool RemoveChild(Actor * child);
 
     void SetPosition(const glm::vec3& pos);
     inline glm::vec3 GetPosition() const { return _position; }
@@ -33,12 +34,14 @@ public:
 
     glm::mat4 GetTransform();
 
+    virtual void Update(const UpdateContext& ctx);
+    virtual void Render(RenderContext& ctx);
+
 private:
 
     std::string _name;
 
     Actor * _parent;
-    std::vector<Actor *> _children;
 
     glm::mat4 _transform;
     glm::vec3 _position;

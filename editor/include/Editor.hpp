@@ -3,10 +3,12 @@
 
 #include "Config.hpp"
 #include <vector>
+#include <unordered_map>
 
 #include "EditorWindow.hpp"
 #include "ShadersWindow.hpp"
 #include "SettingsWindow.hpp"
+#include "SceneWindow.hpp"
 
 class Editor : public dusk::App
 {
@@ -19,7 +21,7 @@ public:
         ImGui_ImplSdlGL3_Shutdown();
     }
 
-    std::vector<std::unique_ptr<dusk::Scene>>& GetScenes() { return dusk::App::GetScenes(); }
+    std::unordered_map<std::string, std::unique_ptr<dusk::Scene>>& GetScenes() { return dusk::App::GetScenes(); }
     std::vector<std::unique_ptr<dusk::Shader>>& GetShaders() { return dusk::App::GetShaders(); }
 
 protected:

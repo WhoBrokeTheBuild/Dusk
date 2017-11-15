@@ -27,12 +27,16 @@ void Model::AddMesh(std::shared_ptr<Mesh> mesh)
 
 void Model::Update(const UpdateContext& ctx)
 {
+    Actor::Update(ctx);
+
     _shaderData.Model = GetTransform();
 }
 
 void Model::Render(RenderContext& ctx)
 {
     if (!ctx.CurrentShader || !ctx.CurrentCamera) return;
+
+    Actor::Render(ctx);
 
     _shaderData.View = ctx.CurrentCamera->GetView();
     _shaderData.Proj = ctx.CurrentCamera->GetProjection();

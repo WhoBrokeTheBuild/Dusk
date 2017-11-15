@@ -25,6 +25,7 @@ SET(_EDITOR_INCLUDES
     include/EditorWindow.hpp
     include/ShadersWindow.hpp
     include/SettingsWindow.hpp
+    include/SceneWindow.hpp
 
     # imgui
     include/imgui/imgui.h
@@ -36,6 +37,7 @@ SET(_EDITOR_SOURCES
     src/Editor.cpp
     src/ShadersWindow.cpp
     src/SettingsWindow.cpp
+    src/SceneWindow.cpp
 
     # imgui
     src/imgui/imgui.cpp

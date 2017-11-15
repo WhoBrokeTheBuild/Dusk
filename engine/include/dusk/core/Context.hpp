@@ -2,13 +2,14 @@
 #define DUSK_CONTEXT_HPP
 
 #include <dusk/Config.hpp>
-#include <dusk/asset/Shader.hpp>
-#include <dusk/scene/Camera.hpp>
 
 #include <chrono>
 
 namespace dusk
 {
+
+class Shader;
+class Camera;
 
 struct UpdateContext
 {

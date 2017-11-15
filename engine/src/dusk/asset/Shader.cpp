@@ -36,8 +36,14 @@ std::unique_ptr<Shader> Shader::Create(const std::vector<std::string>& filenames
 void Shader::InitializeVersionString()
 {
     _GLSLVersionString = std::string(reinterpret_cast<const char *>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
+    DuskLogInfo("%s", _GLSLVersionString.c_str());
+
+    auto it = _GLSLVersionString.find(' ');
+    if (it != std::string::npos) {
+        _GLSLVersionString.erase(_GLSLVersionString.find(' '));
+    }
+
     _GLSLVersionString.erase(_GLSLVersionString.find('.'), 1);
-    _GLSLVersionString.erase(_GLSLVersionString.find(' '));
     _GLSLVersionString = "#version " + _GLSLVersionString + " core";
 
     DuskLogVerbose("Using GLSL version string '%s'", _GLSLVersionString.c_str());

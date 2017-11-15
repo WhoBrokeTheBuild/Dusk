@@ -7,6 +7,7 @@ Editor::Editor(int argc, char ** argv)
 
     _windows.emplace("Settings", std::make_unique<SettingsWindow>(this, false));
     _windows.emplace("Shaders", std::make_unique<ShadersWindow>(this, false));
+    _windows.emplace("Scene", std::make_unique<SceneWindow>(this, false));
 
     ImGui_ImplSdlGL3_Init(GetSdlWindow());
 }
@@ -69,6 +70,11 @@ void Editor::Render()
             if (ImGui::MenuItem("Shaders", "", _windows["Shaders"]->IsShown()))
             {
                 _windows["Shaders"]->Toggle();
+            }
+
+            if (ImGui::MenuItem("Scene", "", _windows["Scene"]->IsShown()))
+            {
+                _windows["Scene"]->Toggle();
             }
 
             ImGui::EndMenu();

@@ -263,11 +263,17 @@ std::vector<glm::ivec2> App::GetAvailableWindowSizes()
 void App::Update()
 {
     EvtUpdate.Call(_updateContext);
+    if (_activeScene) {
+        _activeScene->Update(_updateContext);
+    }
 }
 
 void App::Render()
 {
     EvtRender.Call(_renderContext);
+    if (_activeScene) {
+        _activeScene->Render(_renderContext);
+    }
 }
 
 void App::ProcessSdlEvent(SDL_Event * evt)
@@ -462,8 +468,7 @@ Shader * App::AddShader(std::unique_ptr<Shader>&& sp)
 Scene * App::AddScene(std::string name, std::unique_ptr<Scene>&& scene)
 {
     _scenes.emplace(name, std::move(scene));
-    // TODO: Fix vvv
-    return scene.get();
+    return _scenes[name].get();
 }
 
 bool App::SetActiveScene(std::string name)
@@ -473,7 +478,13 @@ bool App::SetActiveScene(std::string name)
         return false;
     }
 
+    _activeScene = _scenes[name].get();
+    return true;
+}
 
+Scene * App::GetActiveScene()
+{
+    return _activeScene;
 }
 
 } // namespace dusk

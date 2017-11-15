@@ -16,23 +16,6 @@ Actor::Actor(std::string name, Actor * parent /*= nullptr*/)
 {
 }
 
-void Actor::AddChild(Actor * child)
-{
-    _children.push_back(child);
-}
-
-bool Actor::RemoveChild(Actor * child)
-{
-    const auto& it = std::find(_children.begin(), _children.end(), child);
-    if (it == _children.end())
-    {
-        // Not our child
-        return false;
-    }
-    _children.erase(it);
-    return true;
-}
-
 void Actor::SetPosition(const glm::vec3& pos)
 {
     _position = pos;
@@ -58,6 +41,22 @@ glm::mat4 Actor::GetTransform()
     _transform = glm::scale(_transform, _scale);
 
     return _transform;
+}
+
+void Actor::Update(const UpdateContext& ctx)
+{
+    const std::vector<Actor *>& children = GetChildren();
+    for (auto& c : children) {
+        c->Update(ctx);
+    }
+}
+
+void Actor::Render(RenderContext& ctx)
+{
+    const std::vector<Actor *>& children = GetChildren();
+    for (auto& c : children) {
+        c->Render(ctx);
+    }
 }
 
 } // namespace dusk

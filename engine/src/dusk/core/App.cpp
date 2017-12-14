@@ -22,6 +22,34 @@ App::App(int argc, char** argv)
     Mesh::AddLoader(std::unique_ptr<IMeshLoader>(new MeshLoaderFbx()));
 
     CreateWindow();
+
+    BaseClass::Initializers.emplace("Actor", []() -> BaseClass* { return new Actor(); });
+    BaseClass::Serializers.emplace("Actor", [](BaseClass * base, nlohmann::json& data) {
+        Actor * inst = dynamic_cast<Actor*>(base);
+        inst->Serialize(data);
+    });
+    BaseClass::Deserializers.emplace("Actor", [](BaseClass * base, nlohmann::json& data) {
+        Actor * inst = dynamic_cast<Actor*>(base);
+        inst->Deserialize(data);
+    });
+
+    BaseClass::Initializers.emplace("Model", []() -> BaseClass* { return new Model(); });
+    BaseClass::Serializers.emplace("Model", [](BaseClass * base, nlohmann::json& data) {
+        Model * inst = dynamic_cast<Model*>(base);
+        inst->Serialize(data);
+    });
+    BaseClass::Deserializers.emplace("Model", [](BaseClass * base, nlohmann::json& data) {
+        Model * inst = dynamic_cast<Model*>(base);
+        inst->Deserialize(data);
+    });
+
+    BaseClass::Initializers.emplace("Camera", []() -> BaseClass* { return new Camera(); });
+    BaseClass::Serializers.emplace("Camera", [](BaseClass * base, nlohmann::json& data) {
+
+    });
+    BaseClass::Deserializers.emplace("Camera", [](BaseClass * base, nlohmann::json& data) {
+
+    });
 }
 
 App::~App()
@@ -116,6 +144,7 @@ void App::Serialize(nlohmann::json& data)
 {
     data["Size"] = { _windowSize.x, _windowSize.y };
     data["Title"] = _windowTitle;
+    data["StartScene"] = _startScene;
 }
 
 void App::Deserialize(nlohmann::json& data)
@@ -132,6 +161,23 @@ void App::Deserialize(nlohmann::json& data)
 		_windowTitle = data["Title"].get<std::string>();
         SetWindowTitle(_windowTitle);
 	}
+
+    if (data.find("Scenes") != data.end())
+    {
+        for (const std::string& scene : data["Scenes"])
+        {
+            DuskLogLoad("Loading scene '%s'", scene.c_str());
+            std::unique_ptr<Scene> ptr(new Scene());
+            ptr->Load(scene);
+            AddScene(scene, std::move(ptr));
+        }
+    }
+
+    if (data.find("StartScene") != data.end())
+    {
+        _startScene = data["StartScene"].get<std::string>();
+        SetActiveScene(_startScene);
+    }
 }
 
 bool App::LoadConfig(const std::string& filename)

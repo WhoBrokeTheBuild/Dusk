@@ -51,6 +51,7 @@ void Mesh::Deserialize(nlohmann::json& data)
 
 bool Mesh::LoadFromFile(const std::string& filename)
 {
+    _filename = filename;
     const std::string& ext = GetExtension(filename);
     for (auto& loader : _Loaders)
     {

@@ -25,10 +25,14 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Model);
 
-    Model(Actor * parent = nullptr);
+    Model();
     virtual ~Model() = default;
 
+    virtual void Serialize(nlohmann::json& data) override;
+    virtual void Deserialize(nlohmann::json& data) override;
+
     void AddMesh(std::shared_ptr<Mesh> mesh);
+    std::vector<Mesh*> GetMeshes();
 
     Box GetBounds() const { return _bounds; }
 

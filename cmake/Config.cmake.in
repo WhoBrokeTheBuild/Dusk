@@ -1,11 +1,24 @@
 
 SET(_DUSK_DIR @CMAKE_SOURCE_DIR@)
 
+FIND_PROGRAM(_DUSK_PREPROCESSOR
+    DuskPP
+    NO_DEFAULT_PATH
+    PATHS
+        @CMAKE_SOURCE_DIR@/preprocessor
+        @CMAKE_BINARY_DIR@/preprocessor
+    PATH_SUFFIXES
+        Debug
+        Release
+)
+
 FIND_LIBRARY(_DUSK_ENGINE_LIBRARY
     Dusk
     NO_DEFAULT_PATH
     PATHS @CMAKE_SOURCE_DIR@/engine
           @CMAKE_BINARY_DIR@/engine
+    PATH_SUFFIXES Debug
+                  Release
 )
 
 SET(_DUSK_ENGINE_INCLUDE_DIRS @_ENGINE_INCLUDE_DIRS@
@@ -17,8 +30,12 @@ SET(_DUSK_ENGINE_MAIN         ${_DUSK_DIR}/engine/src/Main.cpp.in)
 FIND_LIBRARY(_DUSK_EDITOR_LIBRARY
     Dusk-Editor
     NO_DEFAULT_PATH
-    PATHS @CMAKE_SOURCE_DIR@/editor
-          @CMAKE_BINARY_DIR@/editor
+    PATHS
+        @CMAKE_SOURCE_DIR@/editor
+        @CMAKE_BINARY_DIR@/editor
+    PATH_SUFFIXES
+        Debug
+        Release
 )
 
 SET(_DUSK_EDITOR_INCLUDE_DIRS @_EDITOR_INCLUDE_DIRS@

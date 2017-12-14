@@ -33,6 +33,9 @@ ADD_SUBDIRECTORY(engine)
 # Editor library
 ADD_SUBDIRECTORY(editor)
 
+# Preprocessor
+ADD_SUBDIRECTORY(preprocessor)
+
 # Example projects
 #ADD_SUBDIRECTORY(examples)
 

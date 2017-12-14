@@ -23,6 +23,7 @@ SET(_EDITOR_INCLUDES
     include/Config.hpp
     include/Editor.hpp
     include/EditorWindow.hpp
+    include/DemoWindow.hpp
     include/ShadersWindow.hpp
     include/SettingsWindow.hpp
     include/SceneWindow.hpp

@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "EditorWindow.hpp"
+#include "DemoWindow.hpp"
 #include "ShadersWindow.hpp"
 #include "SettingsWindow.hpp"
 #include "SceneWindow.hpp"
@@ -19,6 +20,18 @@ public:
     virtual ~Editor()
     {
         ImGui_ImplSdlGL3_Shutdown();
+    }
+
+    template <class T>
+    void AddActorTypeFields(std::function<void(dusk::Actor *)> callback)
+    {
+        _actorFieldCallbacks.emplace(typeid(T), callback);
+    }
+
+    template <class T>
+    void AddShaderTypeFields(std::function<void(dusk::Shader *)> callback)
+    {
+        _shaderFieldCallbacks.emplace(typeid(T), callback);
     }
 
     std::unordered_map<std::string, std::unique_ptr<dusk::Scene>>& GetScenes() { return dusk::App::GetScenes(); }
@@ -42,6 +55,9 @@ protected:
     }
 
 private:
+
+    std::unordered_map<std::type_index, std::function<void(dusk::Actor *)>> _actorFieldCallbacks;
+    std::unordered_map<std::type_index, std::function<void(dusk::Shader *)>> _shaderFieldCallbacks;
 
     std::unordered_map<std::string, std::unique_ptr<EditorWindow>> _windows;
 };

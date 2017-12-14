@@ -7,9 +7,33 @@
 
 namespace dusk {
 
-Model::Model(Actor * parent /*= nullptr*/)
-    : Actor(parent)
+Model::Model()
+    : Actor()
 {
+}
+
+void Model::Serialize(nlohmann::json& data)
+{
+    Actor::Serialize(data);
+
+    const std::vector<Mesh*>& meshes = GetMeshes();
+    std::vector<std::string> meshFilenames;
+    for (const auto& mesh : meshes) {
+        meshFilenames.push_back(mesh->GetFilename());
+    }
+    data["Meshes"] = meshFilenames;
+}
+
+void Model::Deserialize(nlohmann::json& data)
+{
+    Actor::Deserialize(data);
+
+    if (data.find("Meshes") != data.end()) {
+        std::vector<std::string> meshFilenames = data["Meshes"];
+        for (auto& filename : meshFilenames) {
+            AddMesh(std::make_shared<Mesh>(filename));
+        }
+    }
 }
 
 void Model::AddMesh(std::shared_ptr<Mesh> mesh)
@@ -23,6 +47,15 @@ void Model::AddMesh(std::shared_ptr<Mesh> mesh)
     {
         _bounds += mesh->GetBounds();
     }
+}
+
+std::vector<Mesh*> Model::GetMeshes()
+{
+    std::vector<Mesh*> meshes;
+    for (auto& ptr : _meshes) {
+        meshes.push_back(ptr.get());
+    }
+    return meshes;
 }
 
 void Model::Update(const UpdateContext& ctx)

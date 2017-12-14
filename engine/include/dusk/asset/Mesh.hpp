@@ -89,6 +89,8 @@ public:
 
     bool LoadFromFile(const std::string& filename);
 
+    std::string GetFilename() { return _filename; }
+
     void AddData(const Data& data);
 
     bool FinishLoad();
@@ -114,6 +116,7 @@ private:
     Box ComputeBounds(const std::vector<glm::vec3>& verts);
 
     bool _loaded = false;
+    std::string _filename;
 
     std::vector<Data> _data;
 

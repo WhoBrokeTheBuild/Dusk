@@ -6,13 +6,72 @@
 
 namespace dusk {
 
-Actor::Actor(Actor * parent /*= nullptr*/)
-    : _parent(parent)
+Actor::Actor()
+    : _parent(nullptr)
+    , _id()
     , _transform(1)
     , _position(0)
     , _rotation(0)
     , _scale(1)
 {
+}
+
+void Actor::Serialize(nlohmann::json& data)
+{
+    // Children
+
+    glm::vec3 position = GetPosition();
+    data["Position"] = { position.x, position.y, position.z };
+
+    glm::vec3 rotation = GetRotation();
+    data["Rotation"] = { rotation.x, rotation.y, rotation.z };
+
+    glm::vec3 scale = GetScale();
+    data["Scale"] = { scale.x, scale.y, scale.z };
+}
+
+void Actor::Deserialize(nlohmann::json& data)
+{
+    DuskLogInfo("Deserializinng Actor");
+
+    if (data.find("Children") != data.end()) {
+        for (auto& actor : data["Children"]) {
+            std::string id = actor["ID"].get<std::string>();
+            std::string type = actor["Type"].get<std::string>();
+            DuskLogInfo("Creating Actor of Type '%s'", type.c_str());
+
+            std::unique_ptr<BaseClass> base = BaseClass::Initializers[type]();
+            BaseClass::Deserializers[type](base, actor);
+
+            Actor * tmp = dynamic_cast<Actor*>(base);
+            AddChild<Actor>(std::unique_ptr<Actor>(tmp), id);
+        }
+    }
+
+    if (data.find("Position") != data.end()) {
+        glm::vec3 position = { data["Position"][0], data["Position"][1], data["Position"][2] };
+        SetPosition(position);
+    }
+
+    if (data.find("Rotation") != data.end()) {
+        glm::vec3 rotation = { data["Rotation"][0], data["Rotation"][1], data["Rotation"][2] };
+        SetRotation(rotation);
+    }
+
+    if (data.find("Scale") != data.end()) {
+        glm::vec3 scale = { data["Scale"][0], data["Scale"][1], data["Scale"][2] };
+        SetScale(scale);
+    }
+}
+
+void Actor::SetId(const std::string& id)
+{
+    _id = id;
+}
+
+void Actor::SetParent(Actor * parent)
+{
+    _parent = parent;
 }
 
 void Actor::SetPosition(const glm::vec3& pos)
@@ -126,6 +185,22 @@ Actor * Actor::GetChild(const std::string& id)
         return nullptr;
     }
     return _childrenById[id].get();
+}
+
+std::type_index Actor::GetChildType(const std::string& id) const
+{
+    if (_childrenById.find(id) == _childrenById.end()) {
+        return typeid(nullptr);
+    }
+    return _typesByChild.at(_childrenById.at(id).get());
+}
+
+std::type_index Actor::GetChildType(Actor * actor) const
+{
+    if (_typesByChild.find(actor) == _typesByChild.end()) {
+        return typeid(nullptr);
+    }
+    return _typesByChild.at(actor);
 }
 
 Actor * Actor::GetFirstChild()

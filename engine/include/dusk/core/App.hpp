@@ -85,7 +85,7 @@ public:
 
     Event<std::string> EvtLoadConfig;
 
-    // Assets
+    // Dynamic Types
 
 protected:
 
@@ -112,21 +112,22 @@ private:
 
     std::string _configFilename;
 
-    glm::ivec2 _windowSize   = { 640, 480 };
+    glm::ivec2 _windowSize = { 640, 480 };
     std::string _windowTitle = "Dusk";
+    std::string _startScene = "";
 
     float _targetFps = 60.0f;
 
-    ALCdevice * _alDevice;
-    ALCcontext * _alContext;
+    ALCdevice * _alDevice = nullptr;
+    ALCcontext * _alContext = nullptr;
 
-    SDL_Window * _sdlWindow;
+    SDL_Window * _sdlWindow = nullptr;
     SDL_GLContext _sdlContext;
 
     RenderContext _renderContext;
     UpdateContext _updateContext;
 
-    Scene * _activeScene;
+    Scene * _activeScene = nullptr;
 
     std::unordered_map<std::string, std::unique_ptr<Scene>> _scenes;
 

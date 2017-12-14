@@ -3,7 +3,9 @@
 
 #include <dusk/Config.hpp>
 
+#include <dusk/core/BaseClass.hpp>
 #include <dusk/core/Context.hpp>
+#include <dusk/core/Log.hpp>
 
 #include <memory>
 #include <unordered_map>
@@ -12,15 +14,22 @@
 
 namespace dusk {
 
-class Actor
+class Actor : public BaseClass
 {
 public:
 
     DISALLOW_COPY_AND_ASSIGN(Actor);
 
-    Actor(Actor * parent = nullptr);
+    Actor();
     virtual ~Actor() = default;
 
+    virtual void Serialize(nlohmann::json& data);
+    virtual void Deserialize(nlohmann::json& data);
+
+    void SetId(const std::string& id);
+    inline std::string GetId() { return _id; }
+
+    void SetParent(Actor * pareent);
     inline Actor * GetParent() { return _parent; }
 
     void SetPosition(const glm::vec3& pos);
@@ -49,6 +58,7 @@ public:
         _children.push_back(actor.get());
         _typesByChild.emplace(actor.get(), typeid(T));
         _childrenByType[typeid(T)].push_back(actor.get());
+        actor->SetId(id);
         _childrenById[id] = std::move(actor);
 
         return dynamic_cast<T*>(_childrenById[id].get());
@@ -70,6 +80,10 @@ public:
     void RemoveChildTag(const std::string& id, const std::string& tag);
 
     Actor * GetChild(const std::string& id);
+
+    std::type_index GetChildType(const std::string& id) const;
+
+    std::type_index GetChildType(Actor * actor) const;
 
     Actor * GetFirstChild();
     std::vector<Actor *> GetChildren();
@@ -102,6 +116,8 @@ public:
 private:
 
     Actor * _parent;
+
+    std::string _id;
 
     glm::mat4 _transform;
     glm::vec3 _position;

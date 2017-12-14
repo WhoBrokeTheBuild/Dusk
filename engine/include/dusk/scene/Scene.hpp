@@ -23,8 +23,11 @@ public:
     Scene();
     virtual ~Scene() = default;
 
-    void Update(const UpdateContext& ctx);
-    void Render(RenderContext& ctx);
+    bool Load(const std::string& filename);
+    bool Save(const std::string& filename);
+
+    void Update(const UpdateContext& ctx) override;
+    void Render(RenderContext& ctx) override;
 
 private:
 

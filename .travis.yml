@@ -56,8 +56,13 @@ before_install:
 script:
   - $CXX --version
   - cmake --version
-  - mkdir "$TRAVIS_BUILD_DIR/build-ninja"
+  - mkdir -p "$TRAVIS_BUILD_DIR/build-ninja"
   - cd "$TRAVIS_BUILD_DIR/build-ninja"
   - pwd
   - cmake -Dstdlib=libstdc++ -GNinja "$SRC_DIR"
+  - ninja -v
+  - mkdir -p "$TRAVIS_BUILD_DIR/build-ninja/examples/Textured"
+  - cd "$TRAVIS_BUILD_DIR/build-ninja/examples/Textured"
+  - pwd
+  - cmake -Dstdlib=libstdc++ -GNinja "$SRC_DIR/examples/Textured"
   - ninja -v

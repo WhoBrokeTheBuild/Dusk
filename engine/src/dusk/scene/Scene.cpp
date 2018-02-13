@@ -1,7 +1,6 @@
 #include "dusk/scene/Scene.hpp"
 
 #include <fstream>
-#include <dusk/core/App.hpp>
 #include <dusk/core/Log.hpp>
 #include <dusk/core/Benchmark.hpp>
 

@@ -5,12 +5,7 @@
 
 #include <dusk/scene/Actor.hpp>
 #include <dusk/core/Context.hpp>
-#include <dusk/scene/Actor.hpp>
-#include <dusk/scene/Camera.hpp>
 #include <string>
-#include <vector>
-#include <unordered_map>
-#include <memory>
 
 namespace dusk {
 

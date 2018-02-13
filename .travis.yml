@@ -50,7 +50,7 @@ matrix:
 before_install:
   - env
   - export DUSK_INSTALL_DIR="`pwd`"
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-7" CC="gcc-7"; fi
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-7" CC="gcc-7" NINJA_ARG="-j1"; fi
   - if [ "$CXX" = "clang++" ]; then export CXX="clang++-4.0" CC="clang-4.0"; fi
 
 script:
@@ -60,9 +60,9 @@ script:
   - cd "$TRAVIS_BUILD_DIR/build-ninja"
   - pwd
   - cmake -Dstdlib=libstdc++ -GNinja "$DUSK_INSTALL_DIR"
-  - ninja -v
+  - ninja -v $NINJA_ARG
   - mkdir -p "$TRAVIS_BUILD_DIR/build-ninja/examples/Textured"
   - cd "$TRAVIS_BUILD_DIR/build-ninja/examples/Textured"
   - pwd
   - cmake -Dstdlib=libstdc++ -GNinja "$DUSK_INSTALL_DIR/examples/Textured"
-  - ninja -v
+  - ninja -v $NINJA_ARG

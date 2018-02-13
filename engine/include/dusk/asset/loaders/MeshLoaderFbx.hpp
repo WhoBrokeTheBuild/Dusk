@@ -11,7 +11,7 @@ class MeshLoaderFbx : public IMeshLoader
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(MeshLoaderFbx);
+    DISALLOW_COPY_AND_ASSIGN(MeshLoaderFbx)
 
     MeshLoaderFbx() = default;
     virtual ~MeshLoaderFbx() = default;

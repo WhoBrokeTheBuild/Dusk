@@ -12,7 +12,7 @@ class UI
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(UI);
+    DISALLOW_COPY_AND_ASSIGN(UI)
 
     UI() = delete;
 

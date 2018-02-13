@@ -16,12 +16,12 @@ Editor::Editor(int argc, char ** argv)
 void Editor::Reset()
 {
     dusk::App::Reset();
-    EvtLoadConfig.AddStatic([this](std::string) {
+    TrackCallback(OnLoadConfig.AddStatic([this](std::string) {
         for (auto& win : _windows)
         {
             win.second->Reset();
         }
-    });
+    }));
 }
 
 void Editor::Render()

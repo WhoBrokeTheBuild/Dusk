@@ -56,7 +56,7 @@ public:
         std::string BumpMap = "";
     };
 
-    DISALLOW_COPY_AND_ASSIGN(Material);
+    DISALLOW_COPY_AND_ASSIGN(Material)
 
     Material(const Data& data);
 

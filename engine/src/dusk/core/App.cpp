@@ -23,7 +23,7 @@ App::App(int argc, char** argv)
 
     CreateWindow();
 
-    BaseClass::Initializers.emplace("Actor", []() -> BaseClass* { return new Actor(); });
+    BaseClass::Initializers.emplace("Actor", []() -> std::unique_ptr<BaseClass> { return std::unique_ptr<Actor>(new Actor()); });
     BaseClass::Serializers.emplace("Actor", [](BaseClass * base, nlohmann::json& data) {
         Actor * inst = dynamic_cast<Actor*>(base);
         inst->Serialize(data);
@@ -33,7 +33,7 @@ App::App(int argc, char** argv)
         inst->Deserialize(data);
     });
 
-    BaseClass::Initializers.emplace("Model", []() -> BaseClass* { return new Model(); });
+    BaseClass::Initializers.emplace("Model", []() -> std::unique_ptr<BaseClass> { return std::unique_ptr<Model>(new Model()); });
     BaseClass::Serializers.emplace("Model", [](BaseClass * base, nlohmann::json& data) {
         Model * inst = dynamic_cast<Model*>(base);
         inst->Serialize(data);
@@ -43,7 +43,7 @@ App::App(int argc, char** argv)
         inst->Deserialize(data);
     });
 
-    BaseClass::Initializers.emplace("Camera", []() -> BaseClass* { return new Camera(); });
+    BaseClass::Initializers.emplace("Camera", []() -> std::unique_ptr<BaseClass> { return std::unique_ptr<Camera>(new Camera()); });
     BaseClass::Serializers.emplace("Camera", [](BaseClass * base, nlohmann::json& data) {
 
     });
@@ -66,7 +66,7 @@ void App::Start()
 
     SDL_ShowWindow(_sdlWindow);
 
-    EvtStart.Call();
+    OnStart.Call();
 
     unsigned long frames = 0;
 
@@ -130,7 +130,7 @@ void App::Start()
         }
     }
 
-    EvtStop.Call();
+    OnStop.Call();
 
     SDL_HideWindow(_sdlWindow);
 }
@@ -209,7 +209,7 @@ bool App::LoadConfig(const std::string& filename)
         DuskLogError("Failed to open config file '%s', %s", _configFilename.c_str(), strerror(errno));
         file.close();
 
-        EvtLoadConfig.Call(_configFilename);
+        OnLoadConfig.Call(_configFilename);
         return false;
     }
 
@@ -217,7 +217,7 @@ bool App::LoadConfig(const std::string& filename)
     Deserialize(data);
     file.close();
 
-    EvtLoadConfig.Call(_configFilename);
+    OnLoadConfig.Call(_configFilename);
 
     DuskBenchEnd("App::LoadConfig()");
     return true;
@@ -308,7 +308,7 @@ std::vector<glm::ivec2> App::GetAvailableWindowSizes()
 
 void App::Update()
 {
-    EvtUpdate.Call(_updateContext);
+    OnUpdate.Call(_updateContext);
     if (_activeScene) {
         _activeScene->Update(_updateContext);
     }
@@ -316,7 +316,7 @@ void App::Update()
 
 void App::Render()
 {
-    EvtRender.Call(_renderContext);
+    OnRender.Call(_renderContext);
     if (_activeScene) {
         _activeScene->Render(_renderContext);
     }
@@ -330,28 +330,28 @@ void App::ProcessSdlEvent(SDL_Event * evt)
         _running = false;
         break;
     case SDL_KEYDOWN:
-        EvtKeyPress.Call(evt->key.keysym.sym, evt->key.keysym.mod);
+        OnKeyPress.Call(evt->key.keysym.sym, evt->key.keysym.mod);
         break;
     case SDL_KEYUP:
-        EvtKeyRelease.Call(evt->key.keysym.sym, evt->key.keysym.mod);
+        OnKeyRelease.Call(evt->key.keysym.sym, evt->key.keysym.mod);
         break;
     case SDL_MOUSEMOTION:
-        EvtMouseMove.Call({ evt->motion.x, evt->motion.y }, { evt->motion.xrel, evt->motion.yrel }, evt->motion.state);
+        OnMouseMove.Call({ evt->motion.x, evt->motion.y }, { evt->motion.xrel, evt->motion.yrel }, evt->motion.state);
         break;
     case SDL_MOUSEBUTTONDOWN:
-        EvtMousePress.Call(evt->button.button, { evt->button.x, evt->button.y }, evt->button.state);
+        OnMousePress.Call(evt->button.button, { evt->button.x, evt->button.y }, evt->button.state);
         break;
     case SDL_MOUSEBUTTONUP:
-        EvtMouseRelease.Call(evt->button.button, { evt->button.x, evt->button.y }, evt->button.state);
+        OnMouseRelease.Call(evt->button.button, { evt->button.x, evt->button.y }, evt->button.state);
         break;
     case SDL_MOUSEWHEEL:
-        EvtMouseScroll.Call({ evt->wheel.x, evt->wheel.y });
+        OnMouseScroll.Call({ evt->wheel.x, evt->wheel.y });
         break;
     case SDL_WINDOWEVENT:
         if (evt->window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
         {
             _windowSize = { evt->window.data1, evt->window.data2 };
-            EvtWindowResize.Call(_windowSize);
+            OnWindowResize.Call(_windowSize);
             glViewport(0, 0, _windowSize.x, _windowSize.y);
         }
         break;
@@ -363,25 +363,25 @@ void App::Reset()
     _scenes.clear();
     _shaders.clear();
 
-    EvtStart.RemoveAllListeners();
-    EvtStop.RemoveAllListeners();
+    //OnStart.RemoveAllListeners();
+    //OnStop.RemoveAllListeners();
 
-    EvtUpdate.RemoveAllListeners();
-    EvtRender.RemoveAllListeners();
+    //OnUpdate.RemoveAllListeners();
+    //OnRender.RemoveAllListeners();
 
-    EvtKeyPress.RemoveAllListeners();
-    EvtKeyRelease.RemoveAllListeners();
+    //OnKeyPress.RemoveAllListeners();
+    //OnKeyRelease.RemoveAllListeners();
 
-    EvtMousePress.RemoveAllListeners();
-    EvtMouseRelease.RemoveAllListeners();
-    EvtMouseMove.RemoveAllListeners();
-    EvtMouseScroll.RemoveAllListeners();
+    //OnMousePress.RemoveAllListeners();
+    //OnMouseRelease.RemoveAllListeners();
+    //OnMouseMove.RemoveAllListeners();
+    //OnMouseScroll.RemoveAllListeners();
 
-    EvtWindowResize.RemoveAllListeners();
+    //OnWindowResize.RemoveAllListeners();
 
-    EvtFileDrop.RemoveAllListeners();
+    //OnFileDrop.RemoveAllListeners();
 
-    //EvtLoadConfig.RemoveAllListeners();
+    //OnLoadConfig.RemoveAllListeners();
 }
 
 void App::CreateWindow()

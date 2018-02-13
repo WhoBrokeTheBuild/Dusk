@@ -4,6 +4,7 @@
 #include <dusk/Config.hpp>
 
 #include <dusk/core/Context.hpp>
+#include <dusk/core/Util.hpp>
 #include <dusk/asset/Shader.hpp>
 #include <dusk/asset/Material.hpp>
 #include <memory>
@@ -42,7 +43,7 @@ public:
 
     /// Class Boilerplate
 
-    DISALLOW_COPY_AND_ASSIGN(Mesh);
+    DISALLOW_COPY_AND_ASSIGN(Mesh)
 
     static void AddLoader(std::unique_ptr<IMeshLoader> loader);
 

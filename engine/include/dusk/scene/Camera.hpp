@@ -14,7 +14,7 @@ public:
 
     /// Class Boilerplate
 
-    DISALLOW_COPY_AND_ASSIGN(Camera);
+    DISALLOW_COPY_AND_ASSIGN(Camera)
 
     Camera(float fov = 45.0f, glm::vec3 up = glm::vec3(0, 1, 0), glm::vec2 clip = glm::vec2(0.1f, 1000.0f));
     virtual ~Camera() = default;

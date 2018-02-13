@@ -18,7 +18,7 @@ class Actor : public BaseClass
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(Actor);
+    DISALLOW_COPY_AND_ASSIGN(Actor)
 
     Actor();
     virtual ~Actor() = default;

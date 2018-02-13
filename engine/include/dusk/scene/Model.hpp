@@ -23,7 +23,7 @@ class Model : public Actor
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(Model);
+    DISALLOW_COPY_AND_ASSIGN(Model)
 
     Model();
     virtual ~Model() = default;

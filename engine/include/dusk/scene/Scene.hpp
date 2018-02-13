@@ -18,16 +18,16 @@ class Scene : public Actor
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(Scene);
+    DISALLOW_COPY_AND_ASSIGN(Scene)
 
     Scene();
     virtual ~Scene() = default;
 
-    bool Load(const std::string& filename);
-    bool Save(const std::string& filename);
+    virtual bool Load(const std::string& filename);
+    virtual bool Save(const std::string& filename);
 
-    void Update(const UpdateContext& ctx) override;
-    void Render(RenderContext& ctx) override;
+    virtual void Update(const UpdateContext& ctx) override;
+    virtual void Render(RenderContext& ctx) override;
 
 private:
 

@@ -9,41 +9,30 @@
 
 namespace dusk {
 
-class ScriptHost
+class ScriptHost : public ICallbackHost
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(ScriptHost);
+    DISALLOW_COPY_AND_ASSIGN(ScriptHost)
 
     ScriptHost();
     virtual ~ScriptHost();
 
-    void RunFile(const std::string& filename)
-    {
-        //_lua.script_file(filename);
-        //luaL_loadfile(_lua, filename.c_str());
-        //if (lua_pcall(_lua, 0, 0, 0)) {
-        //    // Failed
-        //}
+    void RunFile(const std::string& filename) {
+        _lua.script_file(filename);
     }
 
-    void RunCode(const std::string& code)
-    {
-        //_lua.script(code);
+    void RunCode(const std::string& code) {
+        _lua.script(code);
     }
 
-    //lua_State * GetLuaState()
-    //{
-    //    //return _lua.lua_state();
-    //    return _lua;
-    //}
-
-    Event<> EvtCleanup;
+    lua_State * GetLuaState() {
+        return _lua.lua_state();
+    }
 
 private:
 
-    //sol::state _lua;
-    //lua_State * _lua;
+    sol::state _lua;
 
 }; // class ScriptHost
 

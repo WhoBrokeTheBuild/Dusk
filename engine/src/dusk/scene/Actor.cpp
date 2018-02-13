@@ -40,11 +40,11 @@ void Actor::Deserialize(nlohmann::json& data)
             std::string type = actor["Type"].get<std::string>();
             DuskLogInfo("Creating Actor of Type '%s'", type.c_str());
 
-            std::unique_ptr<BaseClass> base = BaseClass::Initializers[type]();
-            BaseClass::Deserializers[type](base, actor);
+            std::unique_ptr<BaseClass> base = std::unique_ptr<BaseClass>(BaseClass::Initializers[type]());
+            BaseClass::Deserializers[type](base.get(), actor);
 
-            Actor * tmp = dynamic_cast<Actor*>(base);
-            AddChild<Actor>(std::unique_ptr<Actor>(tmp), id);
+            std::unique_ptr<Actor> tmp(dynamic_cast<Actor*>(base.release()));
+            AddChild<Actor>(std::move(tmp), id);
         }
     }
 

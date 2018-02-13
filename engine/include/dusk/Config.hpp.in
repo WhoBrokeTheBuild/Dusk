@@ -38,7 +38,7 @@
 //#include <lua.h>
 //#include <lauxlib.h>
 //#include <lualib.h>
-//#include <sol/sol.hpp>
+#include <sol/sol.hpp>
 
 // nlohmann json
 #include <json.hpp>

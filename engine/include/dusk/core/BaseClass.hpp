@@ -14,7 +14,7 @@ public:
     virtual ~BaseClass() = default;
 
     static std::unordered_map<std::string, std::type_index> Types;
-    static std::unordered_map<std::string, std::function<BaseClass*()>> Initializers;
+    static std::unordered_map<std::string, std::function<std::unique_ptr<BaseClass>()>> Initializers;
     static std::unordered_map<std::string, std::function<void(BaseClass*, nlohmann::json&)>> Serializers;
     static std::unordered_map<std::string, std::function<void(BaseClass*, nlohmann::json&)>> Deserializers;
 

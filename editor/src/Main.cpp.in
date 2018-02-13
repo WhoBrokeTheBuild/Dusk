@@ -7,7 +7,7 @@ const std::string PROJECT_FILENAME = "@CMAKE_SOURCE_DIR@/@PROJECT_NAME@.duskproj
 int main(int argc, char** argv) {
     Editor app(argc, argv);
 
-    app.EvtLoadConfig.AddStatic([&](std::string) {
+    auto cb = app.OnLoadConfig.AddStatic([&](std::string) {
         _DuskSetup(&app);
     });
     app.LoadConfig(PROJECT_FILENAME);

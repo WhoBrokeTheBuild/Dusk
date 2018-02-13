@@ -24,7 +24,7 @@ public:
 
     /// Boilerplate
 
-    DISALLOW_COPY_AND_ASSIGN(Shader);
+    DISALLOW_COPY_AND_ASSIGN(Shader)
 
     static std::unique_ptr<Shader> Create();
     static std::unique_ptr<Shader> Create(const std::vector<std::string>& filenames);

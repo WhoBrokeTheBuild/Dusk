@@ -5,7 +5,8 @@ const std::string PROJECT_FILENAME = "@CMAKE_SOURCE_DIR@/@PROJECT_NAME@.duskproj
 int main(int argc, char** argv) {
     dusk::App app(argc, argv);
 
-    app.EvtLoadConfig.AddStatic([&](std::string) {
+    auto cb = app.OnLoadConfig.AddStatic([&](std::string) {
+        printf("???\n");
         _DuskSetup(&app);
     });
     app.LoadConfig(PROJECT_FILENAME);

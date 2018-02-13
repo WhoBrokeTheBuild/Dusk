@@ -3,140 +3,168 @@
 
 #include <dusk/Config.hpp>
 
-#include <dusk/core/Log.hpp>
+#include <functional>
 #include <memory>
 #include <vector>
-#include <functional>
+#include <unordered_map>
 
 namespace dusk {
+
+struct CallbackBase
+{
+public:
+
+    virtual ~CallbackBase() { }
+
+}; // struct CallbackBase
 
 template <class ... Params>
 class Event
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(Event);
-
-    Event() = default;
-    virtual ~Event()
-    {
-        for (auto& func : _cleanupFuncs)
-        {
-            func();
+    ~Event() {
+        for (auto cb : _callbacks) {
+            cb.first->Detach();
         }
-    };
-
-    unsigned int GetNextId()
-    {
-        return ++_nextId;
     }
 
-    unsigned int AddStatic(std::function<void(Params ...)> func)
-    {
-        unsigned int id = GetNextId();
-        _callbacks.push_back(std::make_unique<StaticCallback>(id, func));
-        return id;
+    void Call(Params ... args) {
+        for (auto cb : _callbacks) {
+            cb.first->Call(args...);
+        }
+    }
+
+    void RemoveCallbackBase(CallbackBase * callback) {
+        Callback * evtCb = dynamic_cast<Callback*>(callback);
+        if (evtCb) {
+            auto it = _callbacks.find(evtCb);
+            if (it != _callbacks.end()) {
+                _callbacks.erase(it);
+                evtCb->Detach();
+            }
+        }
+    }
+
+    void AddCallbackBase(CallbackBase * callback) {
+        Callback * evtCb = dynamic_cast<Callback*>(callback);
+        if (evtCb) {
+            evtCb->Attach(this);
+            _callbacks.emplace(evtCb, true);
+        }
+    }
+
+    std::unique_ptr<CallbackBase> AddStatic(std::function<void(Params ...)> func) {
+        auto ptr = std::unique_ptr<CallbackBase>(new StaticCallback(func));
+        AddCallbackBase(ptr.get());
+        return ptr;
     }
 
     template <class Object>
-    unsigned int AddMember(Object * object, std::function<void(Object *, Params ...)> func)
-    {
-        unsigned int id = GetNextId();
-        _callbacks.push_back(std::make_unique<MemberCallback<Object>>(id, object, func));
-        return id;
+    std::unique_ptr<CallbackBase> AddMethod(Object * object, std::function<void(Object *, Params ...)> func) {
+        auto ptr = std::unique_ptr<CallbackBase>(new MethodCallback<Object>(object, func));
+        AddCallbackBase(ptr.get());
+        return ptr;
     }
 
-    void Call(Params ... args)
-    {
-        for (auto& callback : _callbacks)
-        {
-            if (callback->alive)
-                callback->Call(args...);
-        }
-
-        for (unsigned int i = 0; i < _callbacks.size(); ++i)
-        {
-            if (!_callbacks[i]->alive)
-            {
-                _callbacks.erase(_callbacks.begin() + i);
-                --i;
-            }
-        }
-    }
-
-    void RemoveAllListeners()
-    {
-        for (auto& callback : _callbacks)
-        {
-            callback->alive = false;
-        }
-    }
-
-    void RemoveListener(unsigned int id)
-    {
-        for (auto& callback : _callbacks)
-        {
-            if (callback->id == id)
-            {
-                callback->alive = false;
-            }
-        }
-    }
 
 private:
 
-    struct Callback
+    struct Callback : public CallbackBase
     {
-        bool alive;
-        unsigned int id;
+    public:
 
-        Callback(unsigned int id)
-            : alive(true)
-            , id(id)
+        Callback()
+            : CallbackBase()
+            , _event(nullptr)
         { }
 
+        virtual ~Callback() {
+            if (_event) {
+                _event->RemoveCallbackBase(this);
+            }
+        }
+
+        void Attach(Event<Params ...> * event) {
+            _event = event;
+        }
+
+        void Detach() {
+            _event = nullptr;
+        }
+
         virtual void Call(Params ... args) = 0;
-    };
+
+    private:
+
+        Event<Params ...> * _event;
+
+    }; // struct CallbackBase
 
     struct StaticCallback : public Callback
     {
-        std::function<void(Params ...)> callback;
+    public:
 
-        StaticCallback(unsigned int id, std::function<void(Params ...)> func)
-            : Callback(id)
-            , callback(func)
+        StaticCallback(std::function<void(Params ...)> func)
+            : Callback()
+            , _callback(func)
         { }
 
-        void Call(Params ... args) override
-        {
-            callback(args...);
+        void Call(Params ... args) override {
+            _callback(args...);
         }
-    };
+
+    private:
+
+        std::function<void(Params ...)> _callback;
+
+    }; // struct StaticCallback
 
     template <class Object>
-    struct MemberCallback : public Callback
+    struct MethodCallback : public Callback
     {
-        Object * object;
-        std::function<void(Object *, Params ...)> callback;
+    public:
 
-        MemberCallback(unsigned int id, Object * object, std::function<void(Object *, Params ...)> func)
-            : object(object)
-            , callback(func)
+        MethodCallback(Object * object, std::function<void(Object *, Params ...)> func)
+            : Callback()
+            , _object(object)
+            , _callback(func)
         { }
 
-        void Call(Params ... args) override
-        {
-            callback(object, args...);
+        void Call(Params ... args) override {
+            _callback(_object, args...);
         }
-    };
 
-    // Reserve 0 as invalid id
-    unsigned int _nextId = 0;
+    private:
 
-    std::vector<std::unique_ptr<Callback>> _callbacks;
-    std::vector<std::function<void()>> _cleanupFuncs;
+        Object * _object;
+        std::function<void(Object *, Params ...)> _callback;
+
+    }; // struct MethodCallback
+
+    std::unordered_map<Callback*, bool> _callbacks;
 
 }; // class Event
+
+class ICallbackHost
+{
+public:
+
+    virtual ~ICallbackHost() { }
+
+    void TrackCallback(std::unique_ptr<CallbackBase>&& ptr) {
+        _callbacks.push_back(std::move(ptr));
+    }
+
+    void ClearCallbacks() {
+        _callbacks.clear();
+    }
+
+protected:
+
+    std::vector<std::unique_ptr<CallbackBase>> _callbacks;
+
+}; // class ICallbackBaseHost
 
 } // namespace dusk
 

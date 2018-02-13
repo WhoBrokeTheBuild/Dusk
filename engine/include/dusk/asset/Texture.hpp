@@ -15,7 +15,7 @@ public:
 
     /// Class Boilerplate
 
-    DISALLOW_COPY_AND_ASSIGN(Texture);
+    DISALLOW_COPY_AND_ASSIGN(Texture)
 
     Texture() = default;
     Texture(const std::string& filename)

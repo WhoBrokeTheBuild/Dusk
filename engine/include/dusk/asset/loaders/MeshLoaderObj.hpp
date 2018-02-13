@@ -11,7 +11,7 @@ class MeshLoaderObj : public IMeshLoader
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(MeshLoaderObj);
+    DISALLOW_COPY_AND_ASSIGN(MeshLoaderObj)
 
     MeshLoaderObj() = default;
     virtual ~MeshLoaderObj() = default;

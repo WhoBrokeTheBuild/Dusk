@@ -20,7 +20,7 @@ IF(CMAKE_COMPILER_IS_GNUCXX OR ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
     ENDIF()
 
     ADD_DEFINITIONS(-D_XOPEN_SOURCE=700)
-    ADD_COMPILE_OPTIONS(-Wall -Wextra -pedantic -Wno-unused-parameter
+    ADD_COMPILE_OPTIONS(-Wall -Wextra -Wno-unused-parameter
         -Wno-unused-variable -Wno-missing-braces -Wno-unused-function
         -Wno-variadic-macros)
 

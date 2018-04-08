@@ -20,7 +20,7 @@ ADD_DEPENDENCIES(depend glm)
 ### nlohmann_json
 MESSAGE("Adding dependency: json")
 
-SET(JSON_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/depend/json/src")
+SET(JSON_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/depend/json/include")
 
 ADD_CUSTOM_TARGET(json)
 ADD_DEPENDENCIES(depend json)
@@ -94,7 +94,6 @@ ADD_DEPENDENCIES(depend lua)
 MESSAGE("Adding dependency: zlib")
 
 SET(ZLIB_OPTIONS
-    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
 )
 
 SET(ZLIB_INCLUDE_DIRS
@@ -471,7 +470,7 @@ SET(FLATBUFFERS_INCLUDE_DIRS
 FILE(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/depend/flatbuffers)
 EXECUTE_PROCESS(
     COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}"
-        ${CMAKE_SOURCE_DIR}/depend/flatbuffers ${ZLIB_OPTIONS}
+    	${CMAKE_SOURCE_DIR}/depend/flatbuffers ${FLATBUFFERS_OPTIONS}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/depend/flatbuffers
 )
 

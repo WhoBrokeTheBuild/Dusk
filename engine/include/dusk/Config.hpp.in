@@ -41,7 +41,7 @@
 #include <sol/sol.hpp>
 
 // nlohmann json
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 
 // TinyObjLoader
 #include <tinyobjloader/tiny_obj_loader.h>

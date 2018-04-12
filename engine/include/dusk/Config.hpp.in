@@ -31,15 +31,6 @@
 #include <glm/gtx/vector_angle.hpp>
 #include <glm/gtx/norm.hpp>
 
-// GSL
-//#include <gsl/gsl>
-
-// SOL
-//#include <lua.h>
-//#include <lauxlib.h>
-//#include <lualib.h>
-#include <sol/sol.hpp>
-
 // nlohmann json
 #include <nlohmann/json.hpp>
 

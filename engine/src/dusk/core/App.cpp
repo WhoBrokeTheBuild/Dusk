@@ -214,7 +214,7 @@ bool App::LoadConfig(const std::string& filename)
         return false;
     }
 
-	data << file;
+	file >> data;
     Deserialize(data);
     file.close();
 

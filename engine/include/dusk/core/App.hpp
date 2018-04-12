@@ -88,62 +88,6 @@ public:
 
     // Dynamic Types
 
-    static void LuaSetup(sol::state& lua) {
-        lua.new_usertype<App>("App",
-            "OnStart", [](App * app, std::function<void()> func, sol::this_state s) {
-                ScriptHost * host = sol::state_view(s)["this_script_host"];
-                host->TrackCallback(app->OnStart.AddStatic(func));
-            },
-            "OnStop", [](App * app, std::function<void()> func, sol::this_state s) {
-                ScriptHost * host = sol::state_view(s)["this_script_host"];
-                host->TrackCallback(app->OnStop.AddStatic(func));
-            },
-            "OnUpdate", [](App * app, std::function<void(const UpdateContext&)> func, sol::this_state s) {
-                ScriptHost * host = sol::state_view(s)["this_script_host"];
-                host->TrackCallback(app->OnUpdate.AddStatic(func));
-            },
-            "OnRender", [](App * app, std::function<void(RenderContext&)> func, sol::this_state s) {
-                ScriptHost * host = sol::state_view(s)["this_script_host"];
-                host->TrackCallback(app->OnRender.AddStatic(func));
-            },
-            "OnKeyPress", [](App * app, std::function<void(Key, Flags)> func, sol::this_state s) {
-                ScriptHost * host = sol::state_view(s)["this_script_host"];
-                host->TrackCallback(app->OnKeyPress.AddStatic(func));
-            },
-            "OnKeyRelease", [](App * app, std::function<void(Key, Flags)> func, sol::this_state s) {
-                ScriptHost * host = sol::state_view(s)["this_script_host"];
-                host->TrackCallback(app->OnKeyRelease.AddStatic(func));
-            },
-            "OnMousePress", [](App * app, std::function<void(Button, glm::vec2, Flags)> func, sol::this_state s) {
-                ScriptHost * host = sol::state_view(s)["this_script_host"];
-                host->TrackCallback(app->OnMousePress.AddStatic(func));
-            },
-            "OnMouseRelease", [](App * app, std::function<void(Button, glm::vec2, Flags)> func, sol::this_state s) {
-                ScriptHost * host = sol::state_view(s)["this_script_host"];
-                host->TrackCallback(app->OnMouseRelease.AddStatic(func));
-            },
-            "OnMouseMove", [](App * app, std::function<void(glm::vec2, glm::vec2, Flags)> func, sol::this_state s) {
-                ScriptHost * host = sol::state_view(s)["this_script_host"];
-                host->TrackCallback(app->OnMouseMove.AddStatic(func));
-            },
-            "OnMouseScroll", [](App * app, std::function<void(glm::vec2)> func, sol::this_state s) {
-                ScriptHost * host = sol::state_view(s)["this_script_host"];
-                host->TrackCallback(app->OnMouseScroll.AddStatic(func));
-            },
-            "OnWindowResize", [](App * app, std::function<void(glm::ivec2)> func, sol::this_state s) {
-                ScriptHost * host = sol::state_view(s)["this_script_host"];
-                host->TrackCallback(app->OnWindowResize.AddStatic(func));
-            },
-            "OnFileDrop", [](App * app, std::function<void(std::vector<std::string>)> func, sol::this_state s) {
-                ScriptHost * host = sol::state_view(s)["this_script_host"];
-                host->TrackCallback(app->OnFileDrop.AddStatic(func));
-            },
-            "OnLoadConfig", [](App * app, std::function<void(std::string)> func, sol::this_state s) {
-                ScriptHost * host = sol::state_view(s)["this_script_host"];
-                host->TrackCallback(app->OnLoadConfig.AddStatic(func));
-            }
-        );
-    }
 
 protected:
 

@@ -19,20 +19,13 @@ public:
     virtual ~ScriptHost();
 
     void RunFile(const std::string& filename) {
-        _lua.script_file(filename);
     }
 
     void RunCode(const std::string& code) {
-        _lua.script(code);
-    }
-
-    lua_State * GetLuaState() {
-        return _lua.lua_state();
     }
 
 private:
 
-    sol::state _lua;
 
 }; // class ScriptHost
 

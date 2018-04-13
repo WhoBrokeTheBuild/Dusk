@@ -26,6 +26,9 @@ public:
     ScriptHost();
     virtual ~ScriptHost();
 
+    int Script_AddRef() { return 1; }
+    int Script_Release() { return 1; }
+
     //void Serialize(nlohmann::json& data);
     //void Deserialize(nlohmann::json& data);
 

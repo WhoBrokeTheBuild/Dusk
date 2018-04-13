@@ -1,6 +1,6 @@
 
 ###
-### Compiler-specific flags
+### Compiler-specIFic flags
 ###
 
 # GCC or Clang
@@ -31,6 +31,24 @@ ELSEIF(MSVC)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
     SET(CMAKE_EXE_LINKER_FLAGS
         "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
+
+    IF(MSVC70 OR MSVC71)
+      set(MSVC_PREFIX "vc70")
+    ELSEIF(MSVC80)
+      set(MSVC_PREFIX "vc80")
+    ELSEIF(MSVC90)
+      set(MSVC_PREFIX "vc90")
+    ELSEIF(MSVC10)
+      set(MSVC_PREFIX "vc100")
+    ELSEIF(MSVC11)
+      set(MSVC_PREFIX "vc110")
+    ELSEIF(MSVC12)
+      set(MSVC_PREFIX "vc120")
+    ELSEIF(MSVC14)
+      set(MSVC_PREFIX "vc140")
+    else()
+      set(MSVC_PREFIX "vc150")
+  ENDIF()
 
 ENDIF()
 

@@ -6,13 +6,6 @@
 
 namespace dusk {
 
-std::vector<std::unique_ptr<IMeshLoader>> Mesh::_Loaders;
-
-void Mesh::AddLoader(std::unique_ptr<IMeshLoader> loader)
-{
-    _Loaders.push_back(std::move(loader));
-}
-
 std::shared_ptr<Mesh> Mesh::Create()
 {
     return std::make_shared<Mesh>();
@@ -53,14 +46,7 @@ bool Mesh::LoadFromFile(const std::string& filename)
 {
     _filename = filename;
     const std::string& ext = GetExtension(filename);
-    for (auto& loader : _Loaders)
-    {
-        const std::vector<std::string>& extList = loader->GetExtensions();
-        if (std::find(extList.cbegin(), extList.cend(), ext) != extList.cend())
-        {
-            return loader->Load(this, filename);
-        }
-    }
+    // TODO: assimp
     DuskLogWarn("Unsupported model format '.%s'", ext.c_str());
     return false;
 }

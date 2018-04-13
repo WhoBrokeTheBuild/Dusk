@@ -10,10 +10,6 @@
 	path = depend/json
 	url = https://github.com/nlohmann/json.git
 	branch = master
-[submodule "depend/zlib"]
-	path = depend/zlib
-	url = https://github.com/madler/zlib
-	branch = tags/v1.2.11
 [submodule "depend/flatbuffers"]
 	path = depend/flatbuffers
 	url = https://github.com/WhoBrokeTheBuild/flatbuffers.git
@@ -22,13 +18,12 @@
 	path = depend/openal
 	url = https://github.com/kcat/openal-soft
 	branch = master
-[submodule "depend/ogg"]
-	path = depend/libogg
-	url = https://github.com/xiph/ogg
-	branch = tags/v1.3.2
 [submodule "depend/SDL2"]
 	path = depend/SDL2
 	url = https://github.com/spurious/SDL-mirror.git
 [submodule "depend/AngelScript"]
 	path = depend/AngelScript
 	url = https://github.com/urho3d/AngelScript.git
+[submodule "depend/assimp"]
+	path = depend/assimp
+	url = https://github.com/assimp/assimp

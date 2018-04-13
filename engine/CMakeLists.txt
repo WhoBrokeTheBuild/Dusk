@@ -58,8 +58,6 @@ SET(_DUSK_INCLUDES
     #include/dusk/asset/Sound.hpp
     include/dusk/asset/Texture.hpp
     #include/dusk/asset/Video.hpp
-    include/dusk/asset/loaders/MeshLoaderFbx.hpp
-    include/dusk/asset/loaders/MeshLoaderObj.hpp
     include/dusk/scene/Actor.hpp
     include/dusk/scene/Camera.hpp
     include/dusk/scene/Model.hpp
@@ -87,8 +85,6 @@ SET(_DUSK_SOURCES
     #src/dusk/asset/Sound.cpp
     src/dusk/asset/Texture.cpp
     #src/dusk/asset/Video.cpp
-    src/dusk/asset/loaders/MeshLoaderFbx.cpp
-    src/dusk/asset/loaders/MeshLoaderObj.cpp
     src/dusk/scene/Actor.cpp
     src/dusk/scene/Camera.cpp
     src/dusk/scene/Model.cpp
@@ -110,12 +106,21 @@ INCLUDE_DIRECTORIES(
     ${_DEPEND_INCLUDE_DIRS}
 )
 
-ADD_LIBRARY(${_DUSK_ENGINE} SHARED
-    ${_DUSK_CONFIG}
-    ${_DUSK_INCLUDES}
-    ${_DUSK_SOURCES}
-    ${_DEPEND_SOURCES}
-)
+IF(WIN32)
+    ADD_LIBRARY(${_DUSK_ENGINE}
+        ${_DUSK_CONFIG}
+        ${_DUSK_INCLUDES}
+        ${_DUSK_SOURCES}
+        ${_DEPEND_SOURCES}
+    )
+ELSE()
+    ADD_LIBRARY(${_DUSK_ENGINE} SHARED
+        ${_DUSK_CONFIG}
+        ${_DUSK_INCLUDES}
+        ${_DUSK_SOURCES}
+        ${_DEPEND_SOURCES}
+    )
+ENDIF()
 
 ADD_DEPENDENCIES(${_DUSK_ENGINE} depend)
 

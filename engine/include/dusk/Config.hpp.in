@@ -33,12 +33,6 @@
 // nlohmann json
 #include <nlohmann/json.hpp>
 
-// TinyObjLoader
-#include <tinyobjloader/tiny_obj_loader.h>
-
-// zlib
-#include <zlib.h>
-
 // STB
 #include <stb/stb_image.h>
 #include <stb/stb_rect_pack.h>

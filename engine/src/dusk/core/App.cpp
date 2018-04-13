@@ -11,17 +11,11 @@
 #include <memory>
 #include <thread>
 
-#include <dusk/asset/loaders/MeshLoaderObj.hpp>
-#include <dusk/asset/loaders/MeshLoaderFbx.hpp>
-
 namespace dusk {
 
 App::App(int argc, char** argv)
 {
     DuskLogInfo("Starting Application");
-
-    Mesh::AddLoader(std::unique_ptr<IMeshLoader>(new MeshLoaderObj()));
-    Mesh::AddLoader(std::unique_ptr<IMeshLoader>(new MeshLoaderFbx()));
 
     CreateWindow();
 
@@ -300,10 +294,9 @@ std::vector<glm::ivec2> App::GetAvailableWindowSizes()
         }
     }
 
-    std::sort(sizes.begin(), sizes.end(), [](glm::ivec2 a, glm::ivec2 b)
-    {
-        return a.x < b.x || a.y < b.y;
-    });
+    //std::sort(sizes.begin(), sizes.end(), [](glm::ivec2 a, glm::ivec2 b) {
+    //    return a.x < b.x || a.y < b.y;
+    //});
 
     return sizes;
 }
@@ -389,8 +382,6 @@ void App::Reset()
 void App::CreateWindow()
 {
     DuskBenchStart();
-
-    DuskLogInfo("zlib Version %s", zlibVersion());
 
     _alDevice = alcOpenDevice(NULL);
     _alContext = alcCreateContext(_alDevice, NULL);

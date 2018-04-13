@@ -14,18 +14,6 @@ namespace dusk {
 
 class Mesh;
 
-class IMeshLoader
-{
-public:
-
-    virtual ~IMeshLoader() = default;
-
-    virtual std::vector<std::string> GetExtensions() const = 0;
-
-    virtual bool Load(Mesh * mesh, const std::string& filename) = 0;
-
-};
-
 class Mesh
 {
 public:
@@ -44,8 +32,6 @@ public:
     /// Class Boilerplate
 
     DISALLOW_COPY_AND_ASSIGN(Mesh)
-
-    static void AddLoader(std::unique_ptr<IMeshLoader> loader);
 
     static std::shared_ptr<Mesh> Create();
     static std::shared_ptr<Mesh> Create(const std::string& filename);
@@ -103,8 +89,6 @@ public:
     void Render(RenderContext& ctx);
 
 private:
-
-    static std::vector<std::unique_ptr<IMeshLoader>> _Loaders;
 
     struct RenderGroup
     {

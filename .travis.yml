@@ -15,21 +15,21 @@ git:
 
 matrix:
   include:
-    - os: linux
-      compiler: gcc
-      addons:
-        apt:
-          sources: [ 'ubuntu-toolchain-r-test', 'kalakris-cmake' ]
-          packages: [ 'g++-7', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
-      env: CMAKE_BUILD_TYPE=DEBUG
-
-    - os: linux
-      compiler: gcc
-      addons:
-        apt:
-          sources: [ 'ubuntu-toolchain-r-test', 'kalakris-cmake' ]
-          packages: [ 'g++-7', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
-      env: CMAKE_BUILD_TYPE=RELEASE
+#    - os: linux
+#      compiler: gcc
+#      addons:
+#        apt:
+#          sources: [ 'ubuntu-toolchain-r-test', 'kalakris-cmake' ]
+#          packages: [ 'g++-7', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
+#      env: CMAKE_BUILD_TYPE=DEBUG
+#
+#    - os: linux
+#      compiler: gcc
+#      addons:
+#        apt:
+#          sources: [ 'ubuntu-toolchain-r-test', 'kalakris-cmake' ]
+#          packages: [ 'g++-7', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
+#      env: CMAKE_BUILD_TYPE=RELEASE
 
     - os: linux
       compiler: clang
@@ -50,7 +50,7 @@ matrix:
 before_install:
   - env
   - export DUSK_INSTALL_DIR="`pwd`"
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-7" CC="gcc-7" NINJA_ARG="-j1"; fi
+#  - if [ "$CXX" = "g++" ]; then export CXX="g++-7" CC="gcc-7" NINJA_ARG="-j1"; fi
   - if [ "$CXX" = "clang++" ]; then export CXX="clang++-4.0" CC="clang-4.0"; fi
 
 script:
@@ -61,9 +61,9 @@ script:
   - cd "$TRAVIS_BUILD_DIR/build-ninja"
   - pwd
   - cmake -Dstdlib=libstdc++ -GNinja "$DUSK_INSTALL_DIR"
-  - ninja -v $NINJA_ARG
+  - ninja -v
   - mkdir -p "$TRAVIS_BUILD_DIR/build-ninja/examples/Textured"
   - cd "$TRAVIS_BUILD_DIR/build-ninja/examples/Textured"
   - pwd
   - cmake -Dstdlib=libstdc++ -GNinja "$DUSK_INSTALL_DIR/examples/Textured"
-  - ninja -v $NINJA_ARG
+  - ninja -v

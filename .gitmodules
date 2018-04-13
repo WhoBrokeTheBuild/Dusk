@@ -6,24 +6,31 @@
 	path = depend/glm
 	url = https://github.com/g-truc/glm.git
 	branch = 0.9.8
+	shallow = true
 [submodule "depend/json"]
 	path = depend/json
 	url = https://github.com/nlohmann/json.git
 	branch = master
+	shallow = true
 [submodule "depend/flatbuffers"]
 	path = depend/flatbuffers
 	url = https://github.com/WhoBrokeTheBuild/flatbuffers.git
 	branch = master
+	shallow = true
 [submodule "depend/openal"]
 	path = depend/openal
 	url = https://github.com/kcat/openal-soft
 	branch = master
+	shallow = true
 [submodule "depend/SDL2"]
 	path = depend/SDL2
 	url = https://github.com/spurious/SDL-mirror.git
+	shallow = true
 [submodule "depend/AngelScript"]
 	path = depend/AngelScript
 	url = https://github.com/urho3d/AngelScript.git
+	shallow = true
 [submodule "depend/assimp"]
 	path = depend/assimp
 	url = https://github.com/assimp/assimp
+	shallow = true

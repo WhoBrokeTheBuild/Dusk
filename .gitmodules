@@ -12,11 +12,6 @@
 	url = https://github.com/nlohmann/json.git
 	branch = master
 	shallow = true
-[submodule "depend/flatbuffers"]
-	path = depend/flatbuffers
-	url = https://github.com/WhoBrokeTheBuild/flatbuffers.git
-	branch = master
-	shallow = true
 [submodule "depend/openal"]
 	path = depend/openal
 	url = https://github.com/kcat/openal-soft
@@ -33,4 +28,8 @@
 [submodule "depend/assimp"]
 	path = depend/assimp
 	url = https://github.com/assimp/assimp
+	shallow = true
+[submodule "depend/flatbuffers"]
+	path = depend/flatbuffers
+	url = https://github.com/google/flatbuffers.git
 	shallow = true

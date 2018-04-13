@@ -268,6 +268,7 @@ IF(MSVC)
 ENDIF()
 
 SET(ASSIMP_INCLUDE_DIRS
+	${CMAKE_CURRENT_BINARY_DIR}/assimp/include/
 	${CMAKE_CURRENT_SOURCE_DIR}/assimp/include/
 )
 

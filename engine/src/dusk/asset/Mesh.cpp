@@ -75,35 +75,42 @@ bool Mesh::LoadFromFile(const std::string& filename)
         return { c.r, c.g, c.b, 1.0f };
     };
 
-    for (unsigned int i = 0; i < scene->mNumMeshes; ++i)
+    for (unsigned int m = 0; m < scene->mNumMeshes; ++m)
     {
-        aiMesh * aiMesh = scene->mMeshes[i];
+        aiMesh * aiMesh = scene->mMeshes[m];
         Data data;
 
-        data.Vertices.reserve(aiMesh->mNumVertices);
+        data.Vertices.reserve(aiMesh->mNumFaces * 3);
 
         if (aiMesh->HasNormals())
         {
-            data.Normals.reserve(aiMesh->mNumVertices);
+            data.Normals.reserve(aiMesh->mNumFaces * 3);
         }
 
         if (aiMesh->HasTextureCoords(0))
         {
-            data.TexCoords.reserve(aiMesh->mNumVertices);
+            data.TexCoords.reserve(aiMesh->mNumFaces * 3);
         }
 
-        for (unsigned int v = 0; v < aiMesh->mNumVertices; ++v)
+        for (unsigned int f = 0; f < aiMesh->mNumFaces; ++f)
         {
-            data.Vertices.push_back(toVec3(aiMesh->mVertices[v]));
+            aiFace& aiFace = aiMesh->mFaces[f];
+            assert(aiFace.mNumIndices == 3);
 
-            if (aiMesh->HasNormals())
-            {
-                data.Normals.push_back(toVec3(aiMesh->mNormals[v]));
-            }
+            for (int i = 0; i < 3; ++i) {
+                unsigned int index = aiFace.mIndices[i];
 
-            if (aiMesh->HasTextureCoords(0))
-            {
-                data.TexCoords.push_back(toVec2(aiMesh->mTextureCoords[0][v]));
+                data.Vertices.push_back(toVec3(aiMesh->mVertices[index]));
+
+                if (aiMesh->HasNormals())
+                {
+                    data.Normals.push_back(toVec3(aiMesh->mNormals[index]));
+                }
+
+                if (aiMesh->HasTextureCoords(0))
+                {
+                    data.TexCoords.push_back(toVec2(aiMesh->mTextureCoords[0][index]));
+                }
             }
         }
 
@@ -134,11 +141,11 @@ bool Mesh::LoadFromFile(const std::string& filename)
             }
 
             std::string normalTex;
-            //if (aiMat->GetTextureCount(aiTextureType_NORMALS) > 0)
-            //{
-            //    aiMat->GetTexture(aiTextureType_NORMALS, 0, &path);
-            //    normalTex = dirname + path.C_Str();
-            //}
+            if (aiMat->GetTextureCount(aiTextureType_NORMALS) > 0)
+            {
+                aiMat->GetTexture(aiTextureType_NORMALS, 0, &path);
+                normalTex = dirname + path.C_Str();
+            }
 
 			aiColor4D aiAmbient;
 			aiGetMaterialColor(aiMat, AI_MATKEY_COLOR_AMBIENT, &aiAmbient);

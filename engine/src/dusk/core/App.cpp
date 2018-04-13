@@ -6,6 +6,7 @@
 #include <dusk/asset/Texture.hpp>
 #include <dusk/scene/Model.hpp>
 #include <dusk/scene/Camera.hpp>
+#include <dusk/core/ScriptPack.hpp>
 #include <fstream>
 #include <memory>
 #include <thread>
@@ -96,8 +97,8 @@ void App::Start()
 		}
 
         _updateContext.DeltaTime = duration_cast<double_ms>(elapsedTime / frameDelay.count()).count();
-        _updateContext.ElapsedTime = elapsedTime;
-        _updateContext.TotalTime += elapsedTime;
+        _updateContext.ElapsedTime = elapsedTime.count();
+        _updateContext.TotalTime += elapsedTime.count();
 
         Update();
 
@@ -532,6 +533,110 @@ bool App::SetActiveScene(std::string name)
 Scene * App::GetActiveScene()
 {
     return _activeScene;
+}
+
+void App::Script_Init(asIScriptEngine * as)
+{
+    as->RegisterObjectType("App", 0, asOBJ_REF | asOBJ_NOHANDLE);
+
+    as->RegisterObjectMethod("App", "void Start()", asMETHOD(App, Start), asCALL_THISCALL);
+    as->RegisterObjectMethod("App", "void Stop()", asMETHOD(App, Stop), asCALL_THISCALL);
+
+    as->RegisterObjectMethod("App", "bool LoadConfig(string)", asMETHOD(App, LoadConfig), asCALL_THISCALL);
+    as->RegisterObjectMethod("App", "bool SaveConfig(string)", asMETHOD(App, SaveConfig), asCALL_THISCALL);
+
+    //as->RegisterObjectMethod("App", "ivec2 GetWindowSize()", asMETHOD(App, GetWindowSize), asCALL_THISCALL);
+    //as->RegisterObjectMethod("App", "void SetWindowSize(ivec2)", asMETHOD(App, SetWindowSize), asCALL_THISCALL);
+
+    as->RegisterObjectMethod("App", "string GetWindowTitle()", asMETHOD(App, GetWindowTitle), asCALL_THISCALL);
+    as->RegisterObjectMethod("App", "void SetWindowTitle(string)", asMETHOD(App, SetWindowTitle), asCALL_THISCALL);
+
+    // GetAvailableWindowSizes()
+    // AddShader
+    // AddScene
+    // SetActiveScene
+    // GetActiveScene
+
+    as->RegisterObjectMethod("App", "void OnStart(ScriptHost&, string)", asMETHOD(App, Script_OnStart), asCALL_THISCALL);
+    as->RegisterObjectMethod("App", "void OnStop(ScriptHost&, string)", asMETHOD(App, Script_OnStop), asCALL_THISCALL);
+
+    as->RegisterObjectMethod("App", "void OnUpdate(ScriptHost&, string)", asMETHOD(App, Script_OnUpdate), asCALL_THISCALL);
+    as->RegisterObjectMethod("App", "void OnRender(ScriptHost&, string)", asMETHOD(App, Script_OnRender), asCALL_THISCALL);
+
+    as->RegisterObjectMethod("App", "void OnKeyPress(ScriptHost&, string)", asMETHOD(App, Script_OnKeyPress), asCALL_THISCALL);
+    as->RegisterObjectMethod("App", "void OnKeyRelease(ScriptHost&, string)", asMETHOD(App, Script_OnKeyRelease), asCALL_THISCALL);
+
+    as->RegisterObjectMethod("App", "void OnMousePress(ScriptHost&, string)", asMETHOD(App, Script_OnMousePress), asCALL_THISCALL);
+    as->RegisterObjectMethod("App", "void OnMouseRelease(ScriptHost&, string)", asMETHOD(App, Script_OnMouseRelease), asCALL_THISCALL);
+    as->RegisterObjectMethod("App", "void OnMouseMove(ScriptHost&, string)", asMETHOD(App, Script_OnMouseMove), asCALL_THISCALL);
+    as->RegisterObjectMethod("App", "void OnMouseScroll(ScriptHost&, string)", asMETHOD(App, Script_OnMouseScroll), asCALL_THISCALL);
+
+    as->RegisterObjectMethod("App", "void OnWindowResize(ScriptHost&, string)", asMETHOD(App, Script_OnWindowResize), asCALL_THISCALL);
+}
+
+void App::Script_OnStart(ScriptHost * host, std::string func)
+{
+    TrackCallback(OnStart.AddScript(host, func, ScriptPack_None));
+}
+
+void App::Script_OnStop(ScriptHost * host, std::string func)
+{
+    TrackCallback(OnStop.AddScript(host, func, ScriptPack_None));
+}
+
+void App::Script_OnUpdate(ScriptHost * host, std::string func)
+{
+    TrackCallback(OnUpdate.AddScript(host, func, ScriptPack_UpdateContext));
+}
+
+void App::Script_OnRender(ScriptHost * host, std::string func)
+{
+    TrackCallback(OnRender.AddScript(host, func, ScriptPack_RenderContext));
+}
+
+void App::Script_OnKeyPress(ScriptHost * host, std::string func)
+{
+    TrackCallback(OnKeyPress.AddScript(host, func, ScriptPack_Key_Flags));
+}
+
+void App::Script_OnKeyRelease(ScriptHost * host, std::string func)
+{
+    TrackCallback(OnKeyRelease.AddScript(host, func, ScriptPack_Key_Flags));
+}
+
+void App::Script_OnMousePress(ScriptHost * host, std::string func)
+{
+    TrackCallback(OnMousePress.AddScript(host, func, ScriptPack_Button_vec2_Flags));
+}
+
+void App::Script_OnMouseRelease(ScriptHost * host, std::string func)
+{
+    TrackCallback(OnMouseRelease.AddScript(host, func, ScriptPack_Button_vec2_Flags));
+}
+
+void App::Script_OnMouseMove(ScriptHost * host, std::string func)
+{
+    TrackCallback(OnMouseMove.AddScript(host, func, ScriptPack_vec2_vec2_Flags));
+}
+
+void App::Script_OnMouseScroll(ScriptHost * host, std::string func)
+{
+    TrackCallback(OnMouseScroll.AddScript(host, func, ScriptPack_vec2));
+}
+
+void App::Script_OnWindowResize(ScriptHost * host, std::string func)
+{
+    TrackCallback(OnWindowResize.AddScript(host, func, ScriptPack_ivec2));
+}
+
+void App::Script_OnFileDrop(ScriptHost * host, std::string func)
+{
+    // TODO
+}
+
+void App::Script_OnLoadConfig(ScriptHost * host, std::string func)
+{
+    TrackCallback(OnLoadConfig.AddScript(host, func, ScriptPack_string));
 }
 
 } // namespace dusk

@@ -11,7 +11,7 @@
 #include "SettingsWindow.hpp"
 #include "SceneWindow.hpp"
 
-class Editor : public dusk::App, public dusk::ICallbackHost
+class Editor : public dusk::App
 {
 public:
 

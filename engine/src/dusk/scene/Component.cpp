@@ -54,7 +54,7 @@ void ModelComponent::SetActor(Actor * actor)
     //renderBindId = GetActor()->EvtRender.AddMember(this, &ModelComponent::OnRender);
 }
 
-void ModelComponent::OnUpdate(const UpdateContext& ctx)
+void ModelComponent::OnUpdate(UpdateContext& ctx)
 {
     _model->SetBaseTransform(GetActor()->GetTransform());
     _model->Update(ctx);

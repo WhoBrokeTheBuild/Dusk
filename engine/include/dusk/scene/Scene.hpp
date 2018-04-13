@@ -21,7 +21,7 @@ public:
     virtual bool Load(const std::string& filename);
     virtual bool Save(const std::string& filename);
 
-    virtual void Update(const UpdateContext& ctx) override;
+    virtual void Update(UpdateContext& ctx) override;
     virtual void Render(RenderContext& ctx) override;
 
 private:

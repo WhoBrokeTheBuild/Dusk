@@ -41,7 +41,7 @@ bool Scene::Save(const std::string& filename)
     return true;
 }
 
-void Scene::Update(const UpdateContext& ctx)
+void Scene::Update(UpdateContext& ctx)
 {
     const std::vector<Actor *>& children = GetChildren();
     for (auto& c : children) {

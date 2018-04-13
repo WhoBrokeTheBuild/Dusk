@@ -29,3 +29,6 @@
 [submodule "depend/SDL2"]
 	path = depend/SDL2
 	url = https://github.com/spurious/SDL-mirror.git
+[submodule "depend/AngelScript"]
+	path = depend/AngelScript
+	url = https://github.com/urho3d/AngelScript.git

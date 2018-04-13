@@ -36,7 +36,7 @@ public:
 
     Box GetBounds() const { return _bounds; }
 
-    virtual void Update(const UpdateContext& ctx) override;
+    virtual void Update(UpdateContext& ctx) override;
     virtual void Render(RenderContext& ctx) override;
 
 private:

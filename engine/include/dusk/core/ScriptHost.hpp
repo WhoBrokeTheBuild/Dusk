@@ -3,13 +3,21 @@
 
 #include <dusk/Config.hpp>
 
-#include <dusk/core/Event.hpp>
-#include <unordered_map>
-#include <memory>
+#include <string>
+#include <vector>
 
 namespace dusk {
 
-class ScriptHost : public ICallbackHost
+class IScriptRef
+{
+public:
+
+    int Script_AddRef() { return 1; }
+    int Script_Release() { return 1; }
+
+}; // class IScriptRef
+
+class ScriptHost : public IScriptRef
 {
 public:
 
@@ -18,14 +26,24 @@ public:
     ScriptHost();
     virtual ~ScriptHost();
 
-    void RunFile(const std::string& filename) {
-    }
+    //void Serialize(nlohmann::json& data);
+    //void Deserialize(nlohmann::json& data);
 
-    void RunCode(const std::string& code) {
-    }
+    bool LoadFile(const std::string& filename);
+
+    void Run();
+
+    asIScriptEngine * GetEngine() const { return _as; }
+
+    asIScriptContext * GetContextFromPool();
+    void GiveContextToPool(asIScriptContext * asCtx);
 
 private:
 
+    std::vector<asIScriptContext*> _asContexts;
+
+    asIScriptEngine * _as;
+    asIScriptFunction * _asMain;
 
 }; // class ScriptHost
 

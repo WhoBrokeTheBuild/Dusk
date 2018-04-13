@@ -19,7 +19,7 @@ typedef int Key;
 typedef int Button;
 typedef unsigned int Flags;
 
-class App
+class App : public ICallbackHost
 {
 public:
 
@@ -42,7 +42,7 @@ public:
     bool SaveConfig(const std::string& filename = "");
 
     RenderContext& GetRenderContext() { return _renderContext; }
-    const UpdateContext& GetUpdateContext() { return _updateContext; }
+    UpdateContext& GetUpdateContext() { return _updateContext; }
 
     glm::ivec2 GetWindowSize() const { return _windowSize; }
     void SetWindowSize(const glm::ivec2& size);
@@ -69,7 +69,7 @@ public:
     Event<> OnStart;
     Event<> OnStop;
 
-    Event<const UpdateContext&> OnUpdate;
+    Event<UpdateContext&> OnUpdate;
     Event<RenderContext&> OnRender;
 
     Event<Key, Flags> OnKeyPress;
@@ -86,14 +86,13 @@ public:
 
     Event<std::string> OnLoadConfig;
 
-    // Dynamic Types
-
-
 protected:
 
     virtual void Reset();
+
     virtual void Update();
     virtual void Render();
+
     virtual void ProcessSdlEvent(SDL_Event * evt);
 
     ALCdevice * GetAlDevice() { return _alDevice; }
@@ -134,6 +133,30 @@ private:
     std::unordered_map<std::string, std::unique_ptr<Scene>> _scenes;
 
     std::vector<std::unique_ptr<Shader>> _shaders;
+
+public:
+
+    static void Script_Init(asIScriptEngine * as);
+
+    void Script_OnStart(ScriptHost * host, std::string func);
+    void Script_OnStop(ScriptHost * host, std::string func);
+
+    void Script_OnUpdate(ScriptHost * host, std::string func);
+    void Script_OnRender(ScriptHost * host, std::string func);
+
+    void Script_OnKeyPress(ScriptHost * host, std::string func);
+    void Script_OnKeyRelease(ScriptHost * host, std::string func);
+
+    void Script_OnMousePress(ScriptHost * host, std::string func);
+    void Script_OnMouseRelease(ScriptHost * host, std::string func);
+    void Script_OnMouseMove(ScriptHost * host, std::string func);
+    void Script_OnMouseScroll(ScriptHost * host, std::string func);
+
+    void Script_OnWindowResize(ScriptHost * host, std::string func);
+
+    void Script_OnFileDrop(ScriptHost * host, std::string func);
+
+    void Script_OnLoadConfig(ScriptHost * host, std::string func);
 
 }; // class App
 

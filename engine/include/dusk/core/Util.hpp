@@ -39,6 +39,21 @@ public:
 
 };
 
+inline std::vector<std::string> GetAssetPaths()
+{
+    static std::vector<std::string> paths;
+
+    if (paths.empty()) {
+        std::stringstream ss(ASSET_PATH);
+        std::string path;
+        while (std::getline(ss, path, ':')) {
+            paths.push_back(path);
+        }
+    }
+
+    return paths;
+}
+
 size_t GetGLTypeSize(GLenum type);
 
 /** Get a string representation of the shader type.

@@ -101,7 +101,7 @@ glm::mat4 Actor::GetTransform()
     return _transform;
 }
 
-void Actor::Update(const UpdateContext& ctx)
+void Actor::Update(UpdateContext& ctx)
 {
     const std::vector<Actor *>& children = GetChildren();
     for (auto& c : children) {

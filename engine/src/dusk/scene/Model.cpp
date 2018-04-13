@@ -58,7 +58,7 @@ std::vector<Mesh*> Model::GetMeshes()
     return meshes;
 }
 
-void Model::Update(const UpdateContext& ctx)
+void Model::Update(UpdateContext& ctx)
 {
     Actor::Update(ctx);
 

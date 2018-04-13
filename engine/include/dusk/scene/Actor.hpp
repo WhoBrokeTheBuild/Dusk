@@ -43,7 +43,7 @@ public:
 
     glm::mat4 GetTransform();
 
-    virtual void Update(const UpdateContext& ctx);
+    virtual void Update(UpdateContext& ctx);
     virtual void Render(RenderContext& ctx);
 
     template <class T = Actor>

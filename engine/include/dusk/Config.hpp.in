@@ -21,9 +21,8 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 
-// Ogg/Vorbis
-//#include <vorbis/codec.h>
-//#include <vorbis/vorbisfile.h>
+// AngelScript
+#include <angelscript.h>
 
 // glm
 #include <glm/glm.hpp>
@@ -44,6 +43,10 @@
 #include <stb/stb_image.h>
 #include <stb/stb_rect_pack.h>
 #include <stb/stb_truetype.h>
+
+#ifndef ASSET_PATH
+#define ASSET_PATH "."
+#endif // ASSET_PATH
 
 #undef CreateWindow
 

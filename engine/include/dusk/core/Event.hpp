@@ -2,6 +2,7 @@
 #define DUSK_EVENT_HPP
 
 #include <dusk/Config.hpp>
+#include <dusk/core/ScriptHost.hpp>
 
 #include <functional>
 #include <memory>
@@ -10,18 +11,20 @@
 
 namespace dusk {
 
-struct CallbackBase
+struct ICallback
 {
 public:
 
-    virtual ~CallbackBase() { }
+    virtual ~ICallback() = default;
 
-}; // struct CallbackBase
+}; // struct Callback
 
 template <class ... Params>
-class Event
+class Event : public IScriptRef
 {
 public:
+
+    typedef std::function<void(asIScriptContext*, Params ...)> ScriptPackFunc;
 
     ~Event() {
         for (auto cb : _callbacks) {
@@ -30,12 +33,14 @@ public:
     }
 
     void Call(Params ... args) {
+        _inCall = true;
         for (auto cb : _callbacks) {
             cb.first->Call(args...);
         }
+        _inCall = false;
     }
 
-    void RemoveCallbackBase(CallbackBase * callback) {
+    void RemoveICallback(ICallback * callback) {
         Callback * evtCb = dynamic_cast<Callback*>(callback);
         if (evtCb) {
             auto it = _callbacks.find(evtCb);
@@ -46,7 +51,7 @@ public:
         }
     }
 
-    void AddCallbackBase(CallbackBase * callback) {
+    void AddICallback(ICallback * callback) {
         Callback * evtCb = dynamic_cast<Callback*>(callback);
         if (evtCb) {
             evtCb->Attach(this);
@@ -54,34 +59,46 @@ public:
         }
     }
 
-    std::unique_ptr<CallbackBase> AddStatic(std::function<void(Params ...)> func) {
-        auto ptr = std::unique_ptr<CallbackBase>(new StaticCallback(func));
-        AddCallbackBase(ptr.get());
+    std::unique_ptr<ICallback> AddPassthrough(Event<Params ...> * event) {
+        auto ptr = std::unique_ptr<ICallback>(new PassthroughCallback(event));
+        AddICallback(ptr.get());
+        return ptr;
+    }
+
+    std::unique_ptr<ICallback> AddStatic(std::function<void(Params ...)> func) {
+        auto ptr = std::unique_ptr<ICallback>(new StaticCallback(func));
+        AddICallback(ptr.get());
         return ptr;
     }
 
     template <class Object>
-    std::unique_ptr<CallbackBase> AddMethod(Object * object, std::function<void(Object *, Params ...)> func) {
-        auto ptr = std::unique_ptr<CallbackBase>(new MethodCallback<Object>(object, func));
-        AddCallbackBase(ptr.get());
+    std::unique_ptr<ICallback> AddMember(Object * object, std::function<void(Object *, Params ...)> func) {
+        auto ptr = std::unique_ptr<ICallback>(new MemberCallback<Object>(object, func));
+        AddICallback(ptr.get());
+        return ptr;
+    }
+
+    std::unique_ptr<ICallback> AddScript(ScriptHost * host, std::string func, ScriptPackFunc packer) {
+        auto ptr = std::unique_ptr<ICallback>(new ScriptCallback(host, func, packer));
+        AddICallback(ptr.get());
         return ptr;
     }
 
 
 private:
 
-    struct Callback : public CallbackBase
+    struct Callback : public ICallback
     {
     public:
 
         Callback()
-            : CallbackBase()
+            : ICallback()
             , _event(nullptr)
         { }
 
         virtual ~Callback() {
             if (_event) {
-                _event->RemoveCallbackBase(this);
+                _event->RemoveICallback(this);
             }
         }
 
@@ -99,7 +116,26 @@ private:
 
         Event<Params ...> * _event;
 
-    }; // struct CallbackBase
+    }; // struct ICallback
+
+    struct PassthroughCallback : public Callback
+    {
+    public:
+
+        PassthroughCallback(Event<Params ...> * event)
+            : Callback()
+            , _nextEvent(event)
+        { }
+
+        void Call(Params ... args) override {
+            _nextEvent->Call(args...);
+        }
+
+    private:
+
+        Event<Params ...> * _nextEvent;
+
+    }; // struct PassthroughCallback
 
     struct StaticCallback : public Callback
     {
@@ -121,11 +157,11 @@ private:
     }; // struct StaticCallback
 
     template <class Object>
-    struct MethodCallback : public Callback
+    struct MemberCallback : public Callback
     {
     public:
 
-        MethodCallback(Object * object, std::function<void(Object *, Params ...)> func)
+        MemberCallback(Object * object, std::function<void(Object *, Params ...)> func)
             : Callback()
             , _object(object)
             , _callback(func)
@@ -140,8 +176,39 @@ private:
         Object * _object;
         std::function<void(Object *, Params ...)> _callback;
 
-    }; // struct MethodCallback
+    }; // struct MemberCallback
 
+    struct ScriptCallback : public Callback
+    {
+    public:
+
+        ScriptCallback(ScriptHost * host, std::string func, ScriptPackFunc packer)
+            : Callback()
+            , _host(host)
+            , _packer(packer)
+        {
+            _asFunc = _host->GetEngine()->GetModule(0)->GetFunctionByName(func.c_str());
+        }
+
+        void Call(Params ... args) override {
+            asIScriptContext * asCtx = _host->GetContextFromPool();
+
+            asCtx->Prepare(_asFunc);
+            _packer(asCtx, args...);
+            asCtx->Execute();
+
+            _host->GiveContextToPool(asCtx);
+        }
+
+    private:
+
+        ScriptHost * _host;
+        asIScriptFunction * _asFunc;
+        ScriptPackFunc _packer;
+
+    }; // struct ScriptCallback
+
+    bool _inCall = false;
     std::unordered_map<Callback*, bool> _callbacks;
 
 }; // class Event
@@ -152,7 +219,7 @@ public:
 
     virtual ~ICallbackHost() { }
 
-    void TrackCallback(std::unique_ptr<CallbackBase>&& ptr) {
+    void TrackCallback(std::unique_ptr<ICallback>&& ptr) {
         _callbacks.push_back(std::move(ptr));
     }
 
@@ -162,9 +229,9 @@ public:
 
 protected:
 
-    std::vector<std::unique_ptr<CallbackBase>> _callbacks;
+    std::vector<std::unique_ptr<ICallback>> _callbacks;
 
-}; // class ICallbackBaseHost
+}; // class IICallbackHost
 
 } // namespace dusk
 

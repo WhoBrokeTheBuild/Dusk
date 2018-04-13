@@ -1,6 +1,9 @@
 #include "dusk/asset/Mesh.hpp"
 
 #include <fstream>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 #include <dusk/core/Log.hpp>
 #include <dusk/core/Benchmark.hpp>
 
@@ -45,9 +48,118 @@ void Mesh::Deserialize(nlohmann::json& data)
 bool Mesh::LoadFromFile(const std::string& filename)
 {
     _filename = filename;
-    const std::string& ext = GetExtension(filename);
-    // TODO: assimp
-    DuskLogWarn("Unsupported model format '.%s'", ext.c_str());
+
+    const unsigned int flags = aiProcess_Triangulate |
+                               aiProcess_FlipUVs;
+
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(filename, flags);
+
+	if (!scene)
+    {
+        DuskLogError("Failed to load model, '%s'", filename.c_str());
+        return false;
+    }
+
+	std::string dirname = GetDirname(filename) + "/";
+
+    auto toVec2 = [](const aiVector3D& v) -> glm::vec2 {
+        return { v.x, v.y };
+    };
+
+    auto toVec3 = [](const aiVector3D& v) -> glm::vec3 {
+        return { v.x, v.y, v.z };
+    };
+
+    auto toVec4 = [](const aiColor4D& c) -> glm::vec4 {
+        return { c.r, c.g, c.b, 1.0f };
+    };
+
+    for (unsigned int i = 0; i < scene->mNumMeshes; ++i)
+    {
+        aiMesh * aiMesh = scene->mMeshes[i];
+        Data data;
+
+        data.Vertices.reserve(aiMesh->mNumVertices);
+
+        if (aiMesh->HasNormals())
+        {
+            data.Normals.reserve(aiMesh->mNumVertices);
+        }
+
+        if (aiMesh->HasTextureCoords(0))
+        {
+            data.TexCoords.reserve(aiMesh->mNumVertices);
+        }
+
+        for (unsigned int v = 0; v < aiMesh->mNumVertices; ++v)
+        {
+            data.Vertices.push_back(toVec3(aiMesh->mVertices[v]));
+
+            if (aiMesh->HasNormals())
+            {
+                data.Normals.push_back(toVec3(aiMesh->mNormals[v]));
+            }
+
+            if (aiMesh->HasTextureCoords(0))
+            {
+                data.TexCoords.push_back(toVec2(aiMesh->mTextureCoords[0][v]));
+            }
+        }
+
+        if (scene->HasMaterials())
+        {
+            aiMaterial * aiMat = scene->mMaterials[aiMesh->mMaterialIndex];
+            aiString path;
+
+            std::string ambientTex;
+            if (aiMat->GetTextureCount(aiTextureType_AMBIENT) > 0)
+            {
+                aiMat->GetTexture(aiTextureType_AMBIENT, 0, &path);
+                ambientTex = dirname + path.C_Str();
+            }
+
+            std::string diffuseTex;
+            if (aiMat->GetTextureCount(aiTextureType_DIFFUSE) > 0)
+            {
+                aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &path);
+                diffuseTex = dirname + path.C_Str();
+            }
+
+            std::string specularTex;
+            if (aiMat->GetTextureCount(aiTextureType_SPECULAR) > 0)
+            {
+                aiMat->GetTexture(aiTextureType_SPECULAR, 0, &path);
+                specularTex = dirname + path.C_Str();
+            }
+
+            std::string normalTex;
+            //if (aiMat->GetTextureCount(aiTextureType_NORMALS) > 0)
+            //{
+            //    aiMat->GetTexture(aiTextureType_NORMALS, 0, &path);
+            //    normalTex = dirname + path.C_Str();
+            //}
+
+			aiColor4D aiAmbient;
+			aiGetMaterialColor(aiMat, AI_MATKEY_COLOR_AMBIENT, &aiAmbient);
+
+			aiColor4D aiDiffuse;
+			aiGetMaterialColor(aiMat, AI_MATKEY_COLOR_DIFFUSE, &aiDiffuse);
+
+			aiColor4D aiSpecular;
+			aiGetMaterialColor(aiMat, AI_MATKEY_COLOR_SPECULAR, &aiSpecular);
+
+            data.Material.reset(new Material({
+                toVec4(aiAmbient), toVec4(aiDiffuse), toVec4(aiSpecular),
+                ambientTex, diffuseTex, specularTex, normalTex
+            }));
+        }
+
+        AddData(data);
+    }
+
+    FinishLoad();
+
     return false;
 }
 

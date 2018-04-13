@@ -56,11 +56,11 @@ before_install:
 script:
   - $CXX --version
   - cmake --version
+  - ninja -v
   - mkdir -p "$TRAVIS_BUILD_DIR/build-ninja"
   - cd "$TRAVIS_BUILD_DIR/build-ninja"
   - pwd
   - cmake -Dstdlib=libstdc++ -GNinja "$DUSK_INSTALL_DIR"
-  - ninja -v $NINJA_ARG
   - mkdir -p "$TRAVIS_BUILD_DIR/build-ninja/examples/Textured"
   - cd "$TRAVIS_BUILD_DIR/build-ninja/examples/Textured"
   - pwd

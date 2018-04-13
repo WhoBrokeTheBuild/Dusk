@@ -97,12 +97,13 @@ SET(OPENAL_OPTIONS
     -DALSOFT_EXAMPLES=OFF
     -DALSOFT_TESTS=OFF
     -DALSOFT_INSTALL=OFF
+    -DALSOFT_NO_CONFIG_UTIL=ON
 )
 
 IF(MSVC)
     SET(OPENAL_OPTIONS
         ${OPENAL_OPTIONS}
-        -DLIBTYPE="STATIC"
+        -DLIBTYPE=STATIC
     )
 ENDIF()
 
@@ -258,11 +259,16 @@ SET(ASSIMP_OPTIONS
     -DASSIMP_BUILD_TESTS=OFF
 )
 
+IF(MSVC)
+    SET(ASSIMP_OPTIONS
+        ${ASSIMP_OPTIONS}
+        -DBUILD_SHARED_LIBS=OFF
+        -DASSIMP_BUILD_ZLIB=ON
+    )
+ENDIF()
+
 SET(ASSIMP_INCLUDE_DIRS
-    ${CMAKE_CURRENT_SOURCE_DIR}/assimp/code/
 	${CMAKE_CURRENT_SOURCE_DIR}/assimp/include/
-	${CMAKE_CURRENT_BINARY_DIR}/assimp/include/
-    PARENT_SCOPE
 )
 
 FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/assimp)
@@ -273,19 +279,13 @@ EXECUTE_PROCESS(
 )
 
 IF (MSVC)
-    SET(ASSIMP_OPTIONS
-        ${ASSIMP_OPTIONS}
-        -DBUILD_SHARED_LIBS=OFF
-        -DASSIMP_BUILD_ZLIB=ON
-    )
-
 	SET(ASSIMP_LIBRARIES_DEBUG "${CMAKE_CURRENT_BINARY_DIR}/assimp/code/Debug/assimp-${MSVC_PREFIX}-mt.lib"
                                "${CMAKE_CURRENT_BINARY_DIR}/assimp/contrib/irrXML/Debug/IrrXML.lib"
-                               "${CMAKE_CURRENT_BINARY_DIR}/assimp/contrib/zlib/Debug/zlibd.lib")
+                               "${CMAKE_CURRENT_BINARY_DIR}/assimp/contrib/zlib/Debug/zlibstaticd.lib")
     SET(ASSIMP_LIBRARIES_DEBUG "${ASSIMP_LIBRARIES_DEBUG}" PARENT_SCOPE)
     SET(ASSIMP_LIBRARIES_RELEASE "${CMAKE_CURRENT_BINARY_DIR}/assimp/code/Release/assimp-${MSVC_PREFIX}-mt.lib"
                                  "${CMAKE_CURRENT_BINARY_DIR}/assimp/contrib/irrXML/Release/IrrXML.lib"
-                                 "${CMAKE_CURRENT_BINARY_DIR}/assimp/contrib/zlib/Release/zlib.lib")
+                                 "${CMAKE_CURRENT_BINARY_DIR}/assimp/contrib/zlib/Release/zlibstatic.lib")
     SET(ASSIMP_LIBRARIES_RELEASE "${ASSIMP_LIBRARIES_RELEASE}" PARENT_SCOPE)
 
 	ADD_CUSTOM_COMMAND(

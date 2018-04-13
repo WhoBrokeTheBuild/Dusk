@@ -10,9 +10,6 @@ bool Texture::LoadFromFile(const std::string& filename)
     DuskBenchStart();
     DuskLogLoad("Loading texture from '%s'", filename.c_str());
 
-    // OpenGL is weird
-    stbi_set_flip_vertically_on_load(true);
-
     int width, height, comp;
     unsigned char * texture = stbi_load(filename.c_str(), &width, &height, &comp, STBI_rgb_alpha);
 

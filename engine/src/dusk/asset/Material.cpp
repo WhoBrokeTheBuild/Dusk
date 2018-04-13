@@ -11,12 +11,10 @@ Material::Material(const Data& data)
     : _ambient(data.Ambient)
     , _diffuse(data.Diffuse)
     , _specular(data.Specular)
-    , _shininess(data.Shininess)
-    , _dissolve(data.Dissolve)
     , _ambientMap(nullptr)
     , _diffuseMap(nullptr)
     , _specularMap(nullptr)
-    , _bumpMap(nullptr)
+    , _normalMap(nullptr)
 {
     if (!data.AmbientMap.empty())
     {
@@ -30,23 +28,20 @@ Material::Material(const Data& data)
     {
         _specularMap.reset(new Texture(data.SpecularMap));
     }
-    if (!data.BumpMap.empty())
+    if (!data.NormalMap.empty())
     {
-        _bumpMap.reset(new Texture(data.BumpMap));
+        _normalMap.reset(new Texture(data.NormalMap));
     }
 
     _shaderData.Ambient  = _ambient;
     _shaderData.Diffuse  = _diffuse;
     _shaderData.Specular = _specular;
 
-    _shaderData.Shininess = _shininess;
-    _shaderData.Dissolve  = _dissolve;
-
     _shaderData.MapFlags = 0;
     _shaderData.MapFlags |= (_ambientMap && _ambientMap->IsLoaded()   ? AMBIENT_MAP_FLAG : 0);
     _shaderData.MapFlags |= (_diffuseMap && _diffuseMap->IsLoaded()   ? DIFFUSE_MAP_FLAG : 0);
     _shaderData.MapFlags |= (_specularMap && _specularMap->IsLoaded() ? SPECULAR_MAP_FLAG : 0);
-    _shaderData.MapFlags |= (_bumpMap && _bumpMap->IsLoaded()         ? BUMP_MAP_FLAG : 0);
+    _shaderData.MapFlags |= (_normalMap && _normalMap->IsLoaded()     ? NORMAL_MAP_FLAG : 0);
 }
 
 void Material::Bind(Shader * sp)
@@ -74,11 +69,11 @@ void Material::Bind(Shader * sp)
         _specularMap->Bind();
     }
 
-    if (_bumpMap && _bumpMap->IsLoaded())
+    if (_normalMap && _normalMap->IsLoaded())
     {
-        sp->SetUniform("_BumpMap", TextureID::BUMP);
-        glActiveTexture(GL_TEXTURE0 + TextureID::BUMP);
-        _bumpMap->Bind();
+        sp->SetUniform("_NormalMap", TextureID::NORMAL);
+        glActiveTexture(GL_TEXTURE0 + TextureID::NORMAL);
+        _normalMap->Bind();
     }
 
     glActiveTexture(0);

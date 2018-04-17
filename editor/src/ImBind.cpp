@@ -1,5 +1,7 @@
 #include "ImBind.hpp"
 
+#include <SDL_syswm.h>
+
 SDL_Window * ImBind::_Window = nullptr;
 
 // SDL data

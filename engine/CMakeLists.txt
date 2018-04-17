@@ -63,13 +63,6 @@ SET(_DUSK_INCLUDES
     include/dusk/scene/Model.hpp
     include/dusk/scene/Scene.hpp
     #include/dusk/scene/UI.hpp
-
-    # glad
-    include/glad/glad.h
-    include/KHR/khrplatform.h
-
-    # stb
-    include/stb/stb_image.h
 )
 
 SET(_DUSK_SOURCES
@@ -90,9 +83,6 @@ SET(_DUSK_SOURCES
     src/dusk/scene/Model.cpp
     src/dusk/scene/Scene.cpp
     #src/dusk/scene/UI.cpp
-
-    # glad
-    src/glad/glad.c
 )
 
 ###

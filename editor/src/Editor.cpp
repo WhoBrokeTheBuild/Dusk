@@ -5,12 +5,14 @@ Editor::Editor(int argc, char ** argv)
 {
     DuskLogInfo("Running from the Editor");
 
+    ImGui::CreateContext();
+
     _windows.emplace("Settings", std::make_unique<SettingsWindow>(this, false));
     _windows.emplace("Shaders", std::make_unique<ShadersWindow>(this, false));
     _windows.emplace("Scene", std::make_unique<SceneWindow>(this, false));
     _windows.emplace("ImGui Demo", std::make_unique<DemoWindow>(this, false));
 
-    ImGui_ImplSdlGL3_Init(GetSdlWindow());
+    ImBind::Init(GetSdlWindow());
 }
 
 void Editor::Reset()
@@ -26,7 +28,7 @@ void Editor::Reset()
 
 void Editor::Render()
 {
-    ImGui_ImplSdlGL3_NewFrame(GetSdlWindow());
+    ImBind::NewFrame();
 
     glm::ivec2 winSize = GetWindowSize();
     if (ImGui::BeginMainMenuBar())
@@ -99,4 +101,5 @@ void Editor::Render()
 
     dusk::App::Render();
     ImGui::Render();
+    ImBind::RenderDrawData(ImGui::GetDrawData());
 }

@@ -16,7 +16,6 @@
 #define IMGUI_DISABLE_STB_TRUETYPE_IMPLEMENTATION
 #endif
 
-#include <imgui/imgui.h>
-#include <imgui/imgui_impl_sdl_gl3.h>
+#include <imgui.h>
 
 #endif // DUSK_EDITOR_CONFIG_HPP

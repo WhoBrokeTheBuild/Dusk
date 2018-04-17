@@ -10,6 +10,7 @@
 #include "ShadersWindow.hpp"
 #include "SettingsWindow.hpp"
 #include "SceneWindow.hpp"
+#include "ImBind.hpp"
 
 class Editor : public dusk::App
 {
@@ -19,7 +20,8 @@ public:
 
     virtual ~Editor()
     {
-        ImGui_ImplSdlGL3_Shutdown();
+        ImBind::Term();
+        ImGui::DestroyContext();
     }
 
     template <class T>
@@ -50,7 +52,7 @@ protected:
 
     virtual void ProcessSdlEvent(SDL_Event * evt) override
     {
-        ImGui_ImplSdlGL3_ProcessEvent(evt);
+        ImBind::ProcessEvent(evt);
         dusk::App::ProcessSdlEvent(evt);
     }
 

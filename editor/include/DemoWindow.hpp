@@ -20,7 +20,7 @@ protected:
 
     virtual void DoRender() override
     {
-        ImGui::ShowTestWindow(&_shown);
+        ImGui::ShowTestWindow();
     }
 
 private:

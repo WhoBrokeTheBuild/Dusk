@@ -7,12 +7,20 @@
 #include <dusk/core/Util.hpp>
 #include <dusk/asset/Shader.hpp>
 #include <dusk/asset/Material.hpp>
+#include <dusk/scene/IComponent.hpp>
+
 #include <memory>
 #include <sstream>
 
 namespace dusk {
 
-class Mesh;
+struct TransformData
+{
+    alignas(64) glm::mat4 Model = glm::mat4(1);
+    alignas(64) glm::mat4 View  = glm::mat4(1);
+    alignas(64) glm::mat4 Proj  = glm::mat4(1);
+    alignas(64) glm::mat4 MVP   = glm::mat4(1);
+};
 
 class Mesh
 {
@@ -32,11 +40,6 @@ public:
     /// Class Boilerplate
 
     DISALLOW_COPY_AND_ASSIGN(Mesh)
-
-    static std::shared_ptr<Mesh> Create();
-    static std::shared_ptr<Mesh> Create(const std::string& filename);
-    static std::shared_ptr<Mesh> Create(const Data& data);
-    static std::shared_ptr<Mesh> Create(const std::vector<Data>& datum);
 
     Mesh() = default;
 
@@ -112,6 +115,24 @@ private:
 
     std::vector<RenderGroup> _renderGroups;
 };
+
+class MeshComponent : public IComponent
+{
+public:
+
+    MeshComponent(Actor * actor, std::unique_ptr<Mesh>&& mesh);
+
+    ~MeshComponent() = default;
+
+    void Render(RenderContext& ctx);
+
+private:
+
+    TransformData _shaderData;
+
+    std::unique_ptr<Mesh> _mesh;
+
+}; // class MeshComponent
 
 } // namespace dusk
 

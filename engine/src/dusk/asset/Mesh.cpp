@@ -1,33 +1,16 @@
 #include "dusk/asset/Mesh.hpp"
 
+#include <dusk/core/Log.hpp>
+#include <dusk/core/Benchmark.hpp>
+#include <dusk/scene/Actor.hpp>
+#include <dusk/scene/Camera.hpp>
+
 #include <fstream>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include <dusk/core/Log.hpp>
-#include <dusk/core/Benchmark.hpp>
 
 namespace dusk {
-
-std::shared_ptr<Mesh> Mesh::Create()
-{
-    return std::make_shared<Mesh>();
-}
-
-std::shared_ptr<Mesh> Mesh::Create(const std::string& filename)
-{
-    return std::make_shared<Mesh>(filename);
-}
-
-std::shared_ptr<Mesh> Mesh::Create(const Data& data)
-{
-    return std::make_shared<Mesh>(data);
-}
-
-std::shared_ptr<Mesh> Mesh::Create(const std::vector<Data>& datum)
-{
-    return std::make_shared<Mesh>(datum);
-}
 
 Mesh::~Mesh()
 {
@@ -303,6 +286,28 @@ Box Mesh::ComputeBounds(const std::vector<glm::vec3>& verts)
     }
 
     return bounds;
+}
+
+MeshComponent::MeshComponent(Actor * actor, std::unique_ptr<Mesh>&& mesh)
+    : IComponent(actor)
+    , _mesh(std::move(mesh))
+{
+    DuskLogInfo("MeshComponent::ctor()");
+    TrackCallback(GetActor()->OnRender.AddMember<MeshComponent>(this, &MeshComponent::Render));
+}
+
+void MeshComponent::Render(RenderContext& ctx)
+{
+    if (!ctx.CurrentShader || !ctx.CurrentCamera) return;
+
+    _shaderData.Model = GetActor()->GetTransform();
+    _shaderData.View = ctx.CurrentCamera->GetView();
+    _shaderData.Proj = ctx.CurrentCamera->GetProjection();
+    _shaderData.MVP = _shaderData.Proj * _shaderData.View * _shaderData.Model;
+
+    Shader::SetUniformBufferData("DuskTransformData", &_shaderData);
+
+    _mesh->Render(ctx);
 }
 
 } // namespace dusk

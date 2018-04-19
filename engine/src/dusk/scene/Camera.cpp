@@ -5,8 +5,8 @@
 
 namespace dusk {
 
-Camera::Camera(float fov /*= 45.0f*/, glm::vec3 up /*= glm::vec3(0, 1, 0)*/, glm::vec2 clip /*= glm::vec2(0.1f, 1000.0f)*/)
-    : Actor()
+Camera::Camera(Scene * scene, float fov /*= 45.0f*/, glm::vec3 up /*= glm::vec3(0, 1, 0)*/, glm::vec2 clip /*= glm::vec2(0.1f, 1000.0f)*/)
+    : Actor(scene)
     , _viewInvalid(true)
     , _projectionInvalid(true)
     , _view(1)
@@ -73,8 +73,7 @@ glm::mat4 Camera::GetView()
 {
     if (_viewInvalid)
     {
-        _view = glm::lookAt(_position, _position + _forward, _up)
-              * (GetParent() ? GetParent()->GetTransform() : glm::mat4());
+        _view = glm::lookAt(_position, _position + _forward, _up);
         _viewInvalid = false;
     }
     return _view;

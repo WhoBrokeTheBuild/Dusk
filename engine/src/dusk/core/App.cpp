@@ -4,7 +4,6 @@
 #include <dusk/core/Benchmark.hpp>
 #include <dusk/asset/Mesh.hpp>
 #include <dusk/asset/Texture.hpp>
-#include <dusk/scene/Model.hpp>
 #include <dusk/scene/Camera.hpp>
 #include <dusk/core/ScriptPack.hpp>
 #include <fstream>
@@ -13,39 +12,15 @@
 
 namespace dusk {
 
+App * App::_Inst = nullptr;
+
 App::App(int argc, char** argv)
 {
+    _Inst = this;
+
     DuskLogInfo("Starting Application");
 
     CreateWindow();
-
-    BaseClass::Initializers.emplace("Actor", []() -> std::unique_ptr<BaseClass> { return std::unique_ptr<Actor>(new Actor()); });
-    BaseClass::Serializers.emplace("Actor", [](BaseClass * base, nlohmann::json& data) {
-        Actor * inst = dynamic_cast<Actor*>(base);
-        inst->Serialize(data);
-    });
-    BaseClass::Deserializers.emplace("Actor", [](BaseClass * base, nlohmann::json& data) {
-        Actor * inst = dynamic_cast<Actor*>(base);
-        inst->Deserialize(data);
-    });
-
-    BaseClass::Initializers.emplace("Model", []() -> std::unique_ptr<BaseClass> { return std::unique_ptr<Model>(new Model()); });
-    BaseClass::Serializers.emplace("Model", [](BaseClass * base, nlohmann::json& data) {
-        Model * inst = dynamic_cast<Model*>(base);
-        inst->Serialize(data);
-    });
-    BaseClass::Deserializers.emplace("Model", [](BaseClass * base, nlohmann::json& data) {
-        Model * inst = dynamic_cast<Model*>(base);
-        inst->Deserialize(data);
-    });
-
-    BaseClass::Initializers.emplace("Camera", []() -> std::unique_ptr<BaseClass> { return std::unique_ptr<Camera>(new Camera()); });
-    BaseClass::Serializers.emplace("Camera", [](BaseClass * base, nlohmann::json& data) {
-
-    });
-    BaseClass::Deserializers.emplace("Camera", [](BaseClass * base, nlohmann::json& data) {
-
-    });
 }
 
 App::~App()
@@ -105,7 +80,6 @@ void App::Start()
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             _renderContext.CurrentPass = 0;
-            _renderContext.CurrentShader = nullptr;
 
             Render();
 
@@ -163,9 +137,8 @@ void App::Deserialize(nlohmann::json& data)
         for (const std::string& scene : data["Scenes"])
         {
             DuskLogLoad("Loading scene '%s'", scene.c_str());
-            std::unique_ptr<Scene> ptr(new Scene());
-            ptr->Load(scene);
-            AddScene(scene, std::move(ptr));
+            Scene * tmp = AddScene(scene, std::make_unique<Scene>());
+            tmp->Load(scene);
         }
     }
 
@@ -304,17 +277,11 @@ std::vector<glm::ivec2> App::GetAvailableWindowSizes()
 void App::Update()
 {
     OnUpdate.Call(_updateContext);
-    if (_activeScene) {
-        _activeScene->Update(_updateContext);
-    }
 }
 
 void App::Render()
 {
     OnRender.Call(_renderContext);
-    if (_activeScene) {
-        _activeScene->Render(_renderContext);
-    }
 }
 
 void App::ProcessSdlEvent(SDL_Event * evt)
@@ -420,7 +387,7 @@ void App::CreateWindow()
     {
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, multisamples);
 
-        _sdlWindow = SDL_CreateWindow(_windowTitle.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, _windowSize.x, _windowSize.y, sdlWindowFlags);
+        _sdlWindow = SDL_CreateWindow(_windowTitle.c_str(), 0, 0, _windowSize.x, _windowSize.y, sdlWindowFlags);
         if (_sdlWindow) break;
     }
 
@@ -500,8 +467,9 @@ void App::DestroyWindow()
 
 Shader * App::AddShader(std::unique_ptr<Shader>&& sp)
 {
+    Shader * tmp = sp.get();
     _shaders.push_back(std::move(sp));
-    return _shaders.back().get();
+    return tmp;
 }
 
 Scene * App::AddScene(std::string name, std::unique_ptr<Scene>&& scene)
@@ -517,7 +485,12 @@ bool App::SetActiveScene(std::string name)
         return false;
     }
 
+    if (_activeScene) {
+        _activeScene->Stop();
+    }
+
     _activeScene = _scenes[name].get();
+    _activeScene->Start();
     return true;
 }
 

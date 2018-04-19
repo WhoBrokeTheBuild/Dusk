@@ -3,24 +3,25 @@
 
 #include <dusk/Config.hpp>
 
-#include <dusk/core/BaseClass.hpp>
+#include <dusk/core/Event.hpp>
 #include <dusk/core/Context.hpp>
 #include <dusk/core/Log.hpp>
+#include <dusk/scene/IComponent.hpp>
 
 #include <memory>
-#include <unordered_map>
 #include <vector>
-#include <typeindex>
 
 namespace dusk {
 
-class Actor : public BaseClass
+class Scene;
+
+class Actor : public ICallbackHost, public IScriptRef
 {
 public:
 
     DISALLOW_COPY_AND_ASSIGN(Actor)
 
-    Actor();
+    Actor(Scene * scene);
     virtual ~Actor() = default;
 
     virtual void Serialize(nlohmann::json& data);
@@ -28,9 +29,6 @@ public:
 
     void SetId(const std::string& id);
     inline std::string GetId() { return _id; }
-
-    void SetParent(Actor * pareent);
-    inline Actor * GetParent() { return _parent; }
 
     void SetPosition(const glm::vec3& pos);
     inline glm::vec3 GetPosition() const { return _position; }
@@ -43,79 +41,21 @@ public:
 
     glm::mat4 GetTransform();
 
-    virtual void Update(UpdateContext& ctx);
-    virtual void Render(RenderContext& ctx);
+    void AddComponent(std::unique_ptr<IComponent>&& ptr);
 
-    template <class T = Actor>
-    T * AddChild(std::unique_ptr<T> actor, const std::string& id)
-    {
-        if (_childrenById.find(id) != _childrenById.end()) {
-            RemoveChild(id);
-        }
-        if (_childrenByType.find(typeid(T)) == _childrenByType.end()) {
-            _childrenByType[typeid(T)] = {};
-        }
-        _children.push_back(actor.get());
-        _typesByChild.emplace(actor.get(), typeid(T));
-        _childrenByType[typeid(T)].push_back(actor.get());
-        actor->SetId(id);
-        _childrenById[id] = std::move(actor);
+    void AddTag(std::string tag, bool propagate = true);
 
-        return dynamic_cast<T*>(_childrenById[id].get());
-    }
+    bool RemoveTag(std::string tag, bool propagate = true);
 
+    std::vector<std::string> GetTags() const { return _tags; }
 
-    void RemoveChild(Actor * actor);
+    Event<UpdateContext&> OnUpdate;
 
-    void RemoveChild(const std::string& id);
-
-    void ChangeChildId(const std::string& oldId, const std::string& newId);
-
-    void AddChildTag(Actor * actor, const std::string& tag);
-
-    void AddChildTag(const std::string& id, const std::string& tag);
-
-    void RemoveChildTag(Actor * actor, const std::string& tag);
-
-    void RemoveChildTag(const std::string& id, const std::string& tag);
-
-    Actor * GetChild(const std::string& id);
-
-    std::type_index GetChildType(const std::string& id) const;
-
-    std::type_index GetChildType(Actor * actor) const;
-
-    Actor * GetFirstChild();
-    std::vector<Actor *> GetChildren();
-
-    Actor * GetFirstChildWithTag(const std::string& tag);
-    std::vector<Actor *> GetChildrenWithTag(const std::string& tag);
-
-    template <class T>
-    Actor * GetFirstChildWithType()
-    {
-        if (_childrenByType.find(typeid(T)) == _childrenByType.end()) {
-            _childrenByType[typeid(T)] = {};
-        }
-        if (_childrenByType[typeid(T)].empty()) {
-            return nullptr;
-        }
-        return _childrenByType[typeid(T)].front();
-    }
-
-    template <class T>
-    std::vector<Actor *> GetChildrenWithType()
-    {
-        if (_childrenByType.find(typeid(T)) == _childrenByType.end()) {
-            _childrenByType[typeid(T)] = {};
-        }
-        return _childrenByType[typeid(T)];
-
-    }
+    Event<RenderContext&> OnRender;
 
 private:
 
-    Actor * _parent;
+    Scene * _scene;
 
     std::string _id;
 
@@ -124,17 +64,9 @@ private:
     glm::vec3 _rotation;
     glm::vec3 _scale;
 
-    std::vector<Actor *> _children;
+    std::vector<std::string> _tags;
 
-    std::unordered_map<std::string, std::unique_ptr<Actor>> _childrenById;
-
-    std::unordered_map<Actor *, std::vector<std::string>> _tagsByChild;
-
-    std::unordered_map<std::string, std::vector<Actor *>> _childrenByTag;
-
-    std::unordered_map<Actor *, std::type_index> _typesByChild;
-
-    std::unordered_map<std::type_index, std::vector<Actor *>> _childrenByType;
+    std::vector<std::unique_ptr<IComponent>> _components;
 
 }; // class Actor
 

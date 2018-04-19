@@ -2,8 +2,6 @@
 #define DUSK_EDITOR_HPP
 
 #include "Config.hpp"
-#include <vector>
-#include <unordered_map>
 
 #include "EditorWindow.hpp"
 #include "DemoWindow.hpp"
@@ -11,6 +9,10 @@
 #include "SettingsWindow.hpp"
 #include "SceneWindow.hpp"
 #include "ImBind.hpp"
+
+#include <vector>
+#include <typeindex>
+#include <unordered_map>
 
 class Editor : public dusk::App
 {

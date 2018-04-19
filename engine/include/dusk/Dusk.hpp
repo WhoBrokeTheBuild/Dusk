@@ -4,14 +4,12 @@
 #include <dusk/Config.hpp>
 
 #include <dusk/core/App.hpp>
-#include <dusk/core/BaseClass.hpp>
 #include <dusk/core/Util.hpp>
 #include <dusk/core/ScriptHost.hpp>
 #include <dusk/asset/Shader.hpp>
 #include <dusk/asset/Texture.hpp>
 #include <dusk/asset/Mesh.hpp>
 #include <dusk/scene/Camera.hpp>
-#include <dusk/scene/Model.hpp>
 #include <dusk/scene/Scene.hpp>
 
 namespace dusk {

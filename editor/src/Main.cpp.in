@@ -2,7 +2,7 @@
 #include <Editor.hpp>
 #include <cstdio>
 
-const std::string PROJECT_FILENAME = "@CMAKE_SOURCE_DIR@/@PROJECT_NAME@.duskproj";
+const std::string PROJECT_FILENAME = "@_PROJECT_FILENAME@";
 
 int main(int argc, char** argv) {
     Editor app(argc, argv);

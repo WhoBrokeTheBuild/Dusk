@@ -8,7 +8,7 @@ IF(VERBOSE_LOGGING)
     ADD_DEFINITIONS(-DDUSK_ENABLE_VERBOSE_LOGGING)
 ENDIF()
 
-OPTION(BINARY_SHADERS "Build Dusk with Binary Shader support" ON)
+OPTION(BINARY_SHADERS "Build Dusk with Binary Shader support" OFF)
 IF(BINARY_SHADERS)
     ADD_DEFINITIONS(-DDUSK_ENABLE_BINARY_SHADERS)
 ENDIF()
@@ -42,7 +42,6 @@ SET(_DUSK_INCLUDES
     include/dusk/Main.hpp
     include/dusk/Dusk.hpp
     include/dusk/core/App.hpp
-    include/dusk/core/BaseClass.hpp
     include/dusk/core/Benchmark.hpp
     include/dusk/core/Event.hpp
     include/dusk/core/Log.hpp
@@ -60,7 +59,7 @@ SET(_DUSK_INCLUDES
     #include/dusk/asset/Video.hpp
     include/dusk/scene/Actor.hpp
     include/dusk/scene/Camera.hpp
-    include/dusk/scene/Model.hpp
+    include/dusk/scene/IComponent.hpp
     include/dusk/scene/Scene.hpp
     #include/dusk/scene/UI.hpp
 )
@@ -68,7 +67,6 @@ SET(_DUSK_INCLUDES
 SET(_DUSK_SOURCES
     src/dusk/Dusk.cpp
     src/dusk/core/App.cpp
-    src/dusk/core/BaseClass.cpp
     src/dusk/core/ScriptHost.cpp
     src/dusk/core/Util.cpp
     #src/dusk/asset/Font.cpp
@@ -80,7 +78,7 @@ SET(_DUSK_SOURCES
     #src/dusk/asset/Video.cpp
     src/dusk/scene/Actor.cpp
     src/dusk/scene/Camera.cpp
-    src/dusk/scene/Model.cpp
+    src/dusk/scene/IComponent.cpp
     src/dusk/scene/Scene.cpp
     #src/dusk/scene/UI.cpp
 )

@@ -27,6 +27,8 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(App)
 
+    static App * Inst() { return _Inst; }
+
     explicit App(int argc, char** argv);
     virtual ~App();
 
@@ -53,11 +55,6 @@ public:
     std::vector<glm::ivec2> GetAvailableWindowSizes();
 
     Shader * AddShader(std::unique_ptr<Shader>&& sp);
-
-    inline Scene * AddScene(std::string name, Scene * scene)
-    {
-        return AddScene(name, std::unique_ptr<Scene>(scene));
-    }
 
     Scene * AddScene(std::string name, std::unique_ptr<Scene>&& scene);
 
@@ -105,6 +102,8 @@ protected:
     std::vector<std::unique_ptr<Shader>>& GetShaders() { return _shaders; }
 
 private:
+
+    static App * _Inst;
 
     void CreateWindow();
     void DestroyWindow();

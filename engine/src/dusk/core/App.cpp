@@ -397,6 +397,12 @@ void App::CreateWindow()
         return;
     }
 
+    Uint16 pixels[16 * 16] = { 0 };
+    SDL_Surface * surface = SDL_CreateRGBSurfaceFrom(pixels, 16, 16, 16, 16 * 2,
+                                                     0x0f00, 0x00f0, 0x000f, 0xf000);
+    SDL_SetWindowIcon(_sdlWindow, surface);
+    SDL_FreeSurface(surface);
+
     _sdlContext = SDL_GL_CreateContext(_sdlWindow);
     if (!_sdlContext)
     {

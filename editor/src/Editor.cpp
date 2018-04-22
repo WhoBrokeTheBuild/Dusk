@@ -9,10 +9,16 @@ Editor::Editor(int argc, char ** argv)
 
     _windows.emplace("Settings", std::make_unique<SettingsWindow>(this, false));
     _windows.emplace("Shaders", std::make_unique<ShadersWindow>(this, false));
-    _windows.emplace("Scene", std::make_unique<SceneWindow>(this, false));
+    _windows.emplace("Scene", std::make_unique<SceneWindow>(this, true));
     _windows.emplace("ImGui Demo", std::make_unique<DemoWindow>(this, false));
 
     ImBind::Init(GetSdlWindow());
+
+    TrackCallback(OnKeyPress.AddStatic([this](dusk::Key key, dusk::Flags flags){
+        if (key == SDLK_SPACE) {
+            TogglePlay();
+        }
+    }));
 }
 
 void Editor::Reset()
@@ -86,6 +92,16 @@ void Editor::Render()
             }
 
             ImGui::EndMenu();
+        }
+
+        ImGui::SameLine((float)winSize.x * 0.5f, 0.0f);
+        if (IsPlaying() && ImGui::MenuItem("Pause"))
+        {
+            Pause();
+        }
+        else if (!IsPlaying() && ImGui::MenuItem("Play"))
+        {
+            Play();
         }
 
         ImGui::SameLine((float)winSize.x - 150, 0.0f);

@@ -126,6 +126,8 @@ public:
 
     void Render(RenderContext& ctx);
 
+    Mesh * GetMesh() const { return _mesh.get(); }
+
 private:
 
     TransformData _shaderData;

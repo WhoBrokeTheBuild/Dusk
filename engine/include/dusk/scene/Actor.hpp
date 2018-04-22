@@ -43,14 +43,14 @@ public:
 
     void AddComponent(std::unique_ptr<IComponent>&& ptr);
 
-    void AddTag(std::string tag, bool propagate = true);
+    std::vector<IComponent *> GetComponents() const;
 
+    void AddTag(std::string tag, bool propagate = true);
     bool RemoveTag(std::string tag, bool propagate = true);
 
     std::vector<std::string> GetTags() const { return _tags; }
 
     Event<UpdateContext&> OnUpdate;
-
     Event<RenderContext&> OnRender;
 
 private:
@@ -67,6 +67,8 @@ private:
     std::vector<std::string> _tags;
 
     std::vector<std::unique_ptr<IComponent>> _components;
+
+    std::vector<IComponent *> _rawComponents;
 
 }; // class Actor
 

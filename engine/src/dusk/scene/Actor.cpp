@@ -83,7 +83,13 @@ glm::mat4 Actor::GetTransform()
 
 void Actor::AddComponent(std::unique_ptr<IComponent>&& ptr)
 {
+    _rawComponents.push_back(ptr.get());
     _components.push_back(std::move(ptr));
+}
+
+std::vector<IComponent *> Actor::GetComponents() const
+{
+    return _rawComponents;
 }
 
 void Actor::AddTag(std::string tag, bool propagate /*= true*/)

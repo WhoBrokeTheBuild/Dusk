@@ -3,6 +3,7 @@
 
 #include "Config.hpp"
 #include "EditorWindow.hpp"
+#include "ActorWindow.hpp"
 
 class Editor;
 
@@ -19,6 +20,7 @@ protected:
     virtual void DoRender() override;
 
 private:
+
 
 };
 

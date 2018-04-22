@@ -29,6 +29,12 @@ void SceneWindow::DoRender()
             const auto& id = actor->GetId();
 
             ImGui::Text("ID: %s", id.c_str());
+            ImGui::SameLine(ImGui::GetWindowWidth() - 40);
+
+            std::string editId = "Edit##" + id;
+            if (ImGui::Button(editId.c_str())) {
+                AddPopup(std::make_unique<ActorWindow>(actor, this));
+            }
 
             if (index != actors.size() - 1) {
                 ImGui::Separator();
@@ -37,7 +43,6 @@ void SceneWindow::DoRender()
         }
 
         ImGui::EndChild();
-
         ImGui::End();
     }
 }

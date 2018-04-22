@@ -19,23 +19,28 @@ SET(_EDITOR_INCLUDE_DIRS "${_EDITOR_INCLUDE_DIRS}" PARENT_SCOPE)
 SET(_DUSK_EDITOR "Dusk-Editor")
 
 SET(_EDITOR_INCLUDES
-    include/Main.hpp
+    include/ActorWindow.hpp
     include/Config.hpp
+    include/DemoWindow.hpp
     include/Editor.hpp
     include/EditorWindow.hpp
     include/ImBind.hpp
-    include/DemoWindow.hpp
-    include/ShadersWindow.hpp
-    include/SettingsWindow.hpp
+    include/Main.hpp
+    include/PopupWindow.hpp
     include/SceneWindow.hpp
+    include/SettingsWindow.hpp
+    include/ShadersWindow.hpp
 )
 
 SET(_EDITOR_SOURCES
+    src/ActorWindow.cpp
     src/Editor.cpp
+    src/EditorWindow.cpp
     src/ImBind.cpp
-    src/ShadersWindow.cpp
-    src/SettingsWindow.cpp
+    src/PopupWindow.cpp
     src/SceneWindow.cpp
+    src/SettingsWindow.cpp
+    src/ShadersWindow.cpp
 )
 
 INCLUDE_DIRECTORIES(

@@ -4,8 +4,9 @@
 #include "Config.hpp"
 
 class Editor;
+class PopupWindow;
 
-class EditorWindow
+class EditorWindow : public dusk::ICallbackHost
 {
 public:
 
@@ -16,10 +17,7 @@ public:
 
     virtual ~EditorWindow() = default;
 
-    void Render()
-    {
-        if (_shown) DoRender();
-    }
+    void Render();
 
     void Reset()
     {
@@ -43,15 +41,21 @@ public:
 
     bool& IsShown() { return _shown; }
 
-protected:
+    void AddPopup(std::unique_ptr<PopupWindow>&& popup);
+    void ClosePopup(PopupWindow * window);
 
     Editor * GetEditor() { return _editor; }
+
+protected:
 
     virtual void DoReset() { }
     virtual void DoApply() { }
     virtual void DoRender() = 0;
 
     bool _shown;
+
+    std::vector<std::unique_ptr<PopupWindow>> _popupWindows;
+    std::vector<PopupWindow *> _toRemove;
 
 private:
 

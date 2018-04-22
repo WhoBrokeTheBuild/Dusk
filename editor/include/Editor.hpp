@@ -41,13 +41,34 @@ public:
     std::unordered_map<std::string, std::unique_ptr<dusk::Scene>>& GetScenes() { return dusk::App::GetScenes(); }
     std::vector<std::unique_ptr<dusk::Shader>>& GetShaders() { return dusk::App::GetShaders(); }
 
+    void Play() {
+        _playing = true;
+        OnPlayPause.Call(_playing);
+    }
+
+    void Pause() {
+        _playing = false;
+        OnPlayPause.Call(_playing);
+    }
+
+    void TogglePlay() {
+        _playing = !_playing;
+        OnPlayPause.Call(_playing);
+    }
+
+    bool IsPlaying() { return _playing; }
+
+    dusk::Event<bool> OnPlayPause;
+
 protected:
 
     virtual void Reset() override;
 
     virtual void Update() override
     {
-        dusk::App::Update();
+        if (IsPlaying()) {
+            dusk::App::Update();
+        }
     }
 
     virtual void Render() override;
@@ -59,6 +80,8 @@ protected:
     }
 
 private:
+
+    bool _playing = true;
 
     std::unordered_map<std::type_index, std::function<void(dusk::Actor *)>> _actorFieldCallbacks;
     std::unordered_map<std::type_index, std::function<void(dusk::Shader *)>> _shaderFieldCallbacks;

@@ -1,3 +1,14 @@
+#
+# In order to run this script, you must first run
+#   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
+#
+# Move to your project folder, and run this script with the full path to the
+# Dusk installation.
+# ex.
+#   cd C:/Path/to/my/Project/
+#   . C:/Path/to/Dusk/NewProject.ps1
+#
+
 function Test-Administrator
 {
     $user = [Security.Principal.WindowsIdentity]::GetCurrent();
@@ -9,8 +20,6 @@ if (!(Test-Administrator))
     Write-Host "Run this script as an Administrator"
     Exit
 }
-
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
 
 if (!(Test-Path "HKLM:\Software\Dusk")) {
     New-ItemProperty -Path "HKLM:\Software\Dusk" -Name "Path" -Value "$PSScriptRoot"

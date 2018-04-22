@@ -41,6 +41,9 @@ ADD_SUBDIRECTORY(preprocessor)
 # Example projects
 #ADD_SUBDIRECTORY(examples)
 
+STRING(REPLACE "\\" "/" DUSK_PATH ${CMAKE_SOURCE_DIR})
+STRING(REPLACE " " "\\ " DUSK_PATH ${CMAKE_SOURCE_DIR})
+
 CONFIGURE_FILE(
     "${CMAKE_SOURCE_DIR}/cmake/Config.cmake.in"
     "${CMAKE_SOURCE_DIR}/cmake/Config.cmake"

@@ -9,7 +9,7 @@
 #
 
 param(
-   [string] $Directory
+   [string] $Directory = $pwd
 )
 
 function Test-Administrator
@@ -20,7 +20,7 @@ function Test-Administrator
 
 if (!(Test-Administrator))
 {
-    Write-Host "Run this script as an Administrator"
+    Start-Process powershell -Window Hidden -Verb RunAs -ArgumentList "-File `"$PSCommandPath`" `"$Directory`""
     Exit
 }
 

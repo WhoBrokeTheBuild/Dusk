@@ -163,3 +163,4 @@ config.h
 vgcore.*
 imgui.ini
 cmake/Config.cmake
+cmake/NewDuskProject.reg

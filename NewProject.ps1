@@ -5,9 +5,12 @@
 # Move to your project folder, and run this script with the full path to the
 # Dusk installation.
 # ex.
-#   cd C:/Path/to/my/Project/
-#   . C:/Path/to/Dusk/NewProject.ps1
+#   . C:/Path/to/Dusk/NewProject.ps1 C:/Path/to/my/Project/
 #
+
+param(
+   [string] $Directory
+)
 
 function Test-Administrator
 {
@@ -25,4 +28,4 @@ if (!(Test-Path "HKLM:\Software\Dusk")) {
     New-ItemProperty -Path "HKLM:\Software\Dusk" -Name "Path" -Value "$PSScriptRoot"
 }
 
-Copy-Item "$PSScriptRoot\cmake\Project.cmake" "CmakeLists.txt"
+Copy-Item "$PSScriptRoot\cmake\Project.cmake" "$Directory\CmakeLists.txt"

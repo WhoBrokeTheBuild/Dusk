@@ -46,3 +46,11 @@ CONFIGURE_FILE(
     "${CMAKE_SOURCE_DIR}/cmake/Config.cmake"
     @ONLY
 )
+
+IF(WIN32)
+    CONFIGURE_FILE(
+        "${CMAKE_SOURCE_DIR}/cmake/NewDuskProject.reg.in"
+        "${CMAKE_SOURCE_DIR}/cmake/NewDuskProject.reg"
+        @ONLY
+    )
+ENDIF()

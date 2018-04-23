@@ -21,13 +21,12 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Actor)
 
-    Actor(Scene * scene);
+    Actor(std::string id, Scene * scene);
     virtual ~Actor() = default;
 
     virtual void Serialize(nlohmann::json& data);
     virtual void Deserialize(nlohmann::json& data);
 
-    void SetId(const std::string& id);
     inline std::string GetId() { return _id; }
 
     void SetPosition(const glm::vec3& pos);
@@ -69,6 +68,12 @@ private:
     std::vector<std::unique_ptr<IComponent>> _components;
 
     std::vector<IComponent *> _rawComponents;
+
+    // If true, prevents the object from being saved
+    bool _procedural = false;
+
+    // If false, indicates the object's update can be skipped
+    bool _important = true;
 
 }; // class Actor
 

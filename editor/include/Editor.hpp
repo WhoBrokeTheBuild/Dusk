@@ -38,7 +38,7 @@ public:
         _shaderFieldCallbacks.emplace(typeid(T), callback);
     }
 
-    std::unordered_map<std::string, std::unique_ptr<dusk::Scene>>& GetScenes() { return dusk::App::GetScenes(); }
+    std::vector<std::unique_ptr<dusk::Scene>>& GetScenes() { return dusk::App::GetScenes(); }
     std::vector<std::unique_ptr<dusk::Shader>>& GetShaders() { return dusk::App::GetShaders(); }
 
     void Play() {

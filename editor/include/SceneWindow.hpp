@@ -21,7 +21,8 @@ protected:
 
 private:
 
-
+    std::array<char, 512> _newActorId;
+    
 };
 
 #endif // DUSK_SCENE_WINDOW_HPP

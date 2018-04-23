@@ -1,11 +1,16 @@
 #include "dusk/scene/Scene.hpp"
 
-#include <fstream>
 #include <dusk/core/App.hpp>
 #include <dusk/core/Log.hpp>
 #include <dusk/core/Benchmark.hpp>
 
+#include <fstream>
+
 namespace dusk {
+
+Scene::Scene(std::string id)
+    : _id(id)
+{ }
 
 void Scene::Serialize(nlohmann::json& data)
 {

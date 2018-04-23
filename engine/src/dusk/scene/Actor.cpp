@@ -6,9 +6,9 @@
 
 namespace dusk {
 
-Actor::Actor(Scene * scene)
+Actor::Actor(std::string id, Scene * scene)
     : _scene(scene)
-    , _id()
+    , _id(id)
     , _transform(1)
     , _position(0)
     , _rotation(0)
@@ -20,6 +20,8 @@ Actor::Actor(Scene * scene)
 
 void Actor::Serialize(nlohmann::json& data)
 {
+    if (_procedural) return;
+
     glm::vec3 position = GetPosition();
     data["Position"] = { position.x, position.y, position.z };
 
@@ -46,11 +48,6 @@ void Actor::Deserialize(nlohmann::json& data)
         glm::vec3 scale = { data["Scale"][0], data["Scale"][1], data["Scale"][2] };
         SetScale(scale);
     }
-}
-
-void Actor::SetId(const std::string& id)
-{
-    _id = id;
 }
 
 void Actor::SetPosition(const glm::vec3& pos)

@@ -47,15 +47,19 @@ void ActorWindow::DoRender()
 
         ImGui::Spacing();
 
-        ImGui::InputFloat3("Position", (float *)&_position);
-        ImGui::InputFloat3("Rotation", (float *)&_rotation);
-        ImGui::InputFloat3("Scale", (float *)&_scale);
+        bool apply = false;
+
+        apply |= ImGui::InputFloat3("Position", (float *)&_position, -1, ImGuiInputTextFlags_EnterReturnsTrue);
+        apply |= ImGui::InputFloat3("Rotation", (float *)&_rotation, -1, ImGuiInputTextFlags_EnterReturnsTrue);
+        apply |= ImGui::InputFloat3("Scale", (float *)&_scale, -1, ImGuiInputTextFlags_EnterReturnsTrue);
+
+        if (apply) Apply();
 
         ImGui::Spacing();
         ImGui::Separator();
         ImGui::Spacing();
-
         // TODO: Improve
+
         ImGui::Text("Components");
         ImGui::SameLine(ImGui::GetWindowWidth() - 50.0f);
 

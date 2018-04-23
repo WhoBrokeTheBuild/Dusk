@@ -4,6 +4,7 @@
 #include "Config.hpp"
 #include "PopupWindow.hpp"
 
+
 class ActorWindow : public PopupWindow
 {
 public:
@@ -23,6 +24,8 @@ private:
     glm::vec3 _position;
     glm::vec3 _rotation;
     glm::vec3 _scale;
+
+    std::array<char, 512> _tags;
 
 }; // class ActorWindow
 

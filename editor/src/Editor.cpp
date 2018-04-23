@@ -15,7 +15,7 @@ Editor::Editor(int argc, char ** argv)
     ImBind::Init(GetSdlWindow());
 
     TrackCallback(OnKeyPress.AddStatic([this](dusk::Key key, dusk::Flags flags){
-        if (key == SDLK_SPACE) {
+        if (key == SDLK_SPACE && (flags & KMOD_CTRL) > 0) {
             TogglePlay();
         }
     }));
@@ -35,6 +35,10 @@ void Editor::Reset()
 void Editor::Render()
 {
     ImBind::NewFrame();
+
+    if (!GetActiveScene()) {
+        SetActiveScene(AddScene(std::make_unique<dusk::Scene>("default")));
+    }
 
     glm::ivec2 winSize = GetWindowSize();
     if (ImGui::BeginMainMenuBar())

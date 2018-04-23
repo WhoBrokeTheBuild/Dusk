@@ -16,11 +16,13 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Scene)
 
-    Scene() = default;
+    Scene(std::string id);
     virtual ~Scene() = default;
 
     virtual void Serialize(nlohmann::json& data);
     virtual void Deserialize(nlohmann::json& data);
+
+    inline std::string GetId() { return _id; }
 
     virtual void Start();
     virtual void Stop();
@@ -46,6 +48,8 @@ public:
     Event<RenderContext&> OnRender;
 
 private:
+
+    std::string _id;
 
     std::vector<std::unique_ptr<Actor>> _actors;
 

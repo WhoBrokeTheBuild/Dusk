@@ -134,18 +134,18 @@ void App::Deserialize(nlohmann::json& data)
 
     if (data.find("Scenes") != data.end())
     {
-        for (const std::string& scene : data["Scenes"])
+        for (const std::string& name : data["Scenes"])
         {
-            DuskLogLoad("Loading scene '%s'", scene.c_str());
-            Scene * tmp = AddScene(scene, std::make_unique<Scene>());
-            tmp->Load(scene);
+            DuskLogLoad("Loading scene '%s'", name.c_str());
+            Scene * scene = AddScene(std::make_unique<Scene>(name));
+            scene->Load(name);
         }
     }
 
     if (data.find("StartScene") != data.end())
     {
         _startScene = data["StartScene"].get<std::string>();
-        SetActiveScene(_startScene);
+        SetActiveScene(GetScene(_startScene));
     }
 }
 
@@ -387,7 +387,7 @@ void App::CreateWindow()
     {
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, multisamples);
 
-        _sdlWindow = SDL_CreateWindow(_windowTitle.c_str(), 0, 0, _windowSize.x, _windowSize.y, sdlWindowFlags);
+        _sdlWindow = SDL_CreateWindow(_windowTitle.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, _windowSize.x, _windowSize.y, sdlWindowFlags);
         if (_sdlWindow) break;
     }
 
@@ -397,7 +397,7 @@ void App::CreateWindow()
         return;
     }
 
-    Uint16 pixels[16 * 16] = { 0 };
+    Uint16 pixels[16 * 16] = { 0xFFFF };
     SDL_Surface * surface = SDL_CreateRGBSurfaceFrom(pixels, 16, 16, 16, 16 * 2,
                                                      0x0f00, 0x00f0, 0x000f, 0xf000);
     SDL_SetWindowIcon(_sdlWindow, surface);
@@ -478,16 +478,31 @@ Shader * App::AddShader(std::unique_ptr<Shader>&& sp)
     return tmp;
 }
 
-Scene * App::AddScene(std::string name, std::unique_ptr<Scene>&& scene)
+Scene * App::AddScene(std::unique_ptr<Scene>&& scene)
 {
-    _scenes.emplace(name, std::move(scene));
-    return _scenes[name].get();
+    Scene * tmp = scene.get();
+    _scenes.push_back(std::move(scene));
+    return tmp;
 }
 
-bool App::SetActiveScene(std::string name)
+Scene * App::GetScene(std::string id)
 {
-    if (_scenes.find(name) == _scenes.end())
-    {
+    auto it = std::find_if(_scenes.begin(), _scenes.end(),
+        [id](std::unique_ptr<Scene>& scene){
+            return (scene->GetId() == id);
+        }
+    );
+
+    if (it == _scenes.end()) {
+        return nullptr;
+    }
+
+    return (*it).get();
+}
+
+bool App::SetActiveScene(Scene * scene)
+{
+    if (!scene) {
         return false;
     }
 
@@ -495,7 +510,7 @@ bool App::SetActiveScene(std::string name)
         _activeScene->Stop();
     }
 
-    _activeScene = _scenes[name].get();
+    _activeScene = scene;
     _activeScene->Start();
     return true;
 }

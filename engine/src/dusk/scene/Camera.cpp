@@ -5,8 +5,8 @@
 
 namespace dusk {
 
-Camera::Camera(Scene * scene, float fov /*= 45.0f*/, glm::vec3 up /*= glm::vec3(0, 1, 0)*/, glm::vec2 clip /*= glm::vec2(0.1f, 1000.0f)*/)
-    : Actor(scene)
+Camera::Camera(std::string id, Scene * scene, float fov /*= 45.0f*/, glm::vec3 up /*= glm::vec3(0, 1, 0)*/, glm::vec2 clip /*= glm::vec2(0.1f, 1000.0f)*/)
+    : Actor(id, scene)
     , _viewInvalid(true)
     , _projectionInvalid(true)
     , _view(1)

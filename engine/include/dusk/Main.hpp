@@ -3,6 +3,7 @@
 
 #include <dusk/Dusk.hpp>
 
-extern void _DuskSetup(dusk::App * app);
+typedef void (*DuskSetupFn)(dusk::App *);
+extern "C" void _DuskSetup(dusk::App * app);
 
 #endif // DUSK_MAIN_HPP

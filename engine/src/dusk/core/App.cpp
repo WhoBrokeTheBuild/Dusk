@@ -30,6 +30,37 @@ App::~App()
     DestroyWindow();
 }
 
+void App::Reset()
+{
+    if (_activeScene) {
+        _activeScene->Stop();
+        _activeScene = nullptr;
+    }
+
+    _scenes.clear();
+    _shaders.clear();
+
+    OnStart.RemoveAllCallbacks();
+    OnStop.RemoveAllCallbacks();
+
+    OnUpdate.RemoveAllCallbacks();
+    OnRender.RemoveAllCallbacks();
+
+    OnKeyPress.RemoveAllCallbacks();
+    OnKeyRelease.RemoveAllCallbacks();
+
+    OnMousePress.RemoveAllCallbacks();
+    OnMouseRelease.RemoveAllCallbacks();
+    OnMouseMove.RemoveAllCallbacks();
+    OnMouseScroll.RemoveAllCallbacks();
+
+    OnWindowResize.RemoveAllCallbacks();
+
+    OnFileDrop.RemoveAllCallbacks();
+
+    OnReset.Call();
+}
+
 void App::Start()
 {
     using namespace std::chrono;
@@ -178,7 +209,6 @@ bool App::LoadConfig(const std::string& filename)
         DuskLogError("Failed to open config file '%s', %s", _configFilename.c_str(), strerror(errno));
         file.close();
 
-        OnLoadConfig.Call(_configFilename);
         return false;
     }
 
@@ -186,7 +216,7 @@ bool App::LoadConfig(const std::string& filename)
     Deserialize(data);
     file.close();
 
-    OnLoadConfig.Call(_configFilename);
+    OnConfigLoad.Call(filename);
 
     DuskBenchEnd("App::LoadConfig()");
     return true;
@@ -229,6 +259,11 @@ bool App::SaveConfig(const std::string& filename)
     return true;
 }
 
+void App::SetConfigFilename(const std::string& filename)
+{
+    _configFilename = filename;
+}
+
 void App::SetWindowSize(const glm::ivec2& size)
 {
     _windowSize = size;
@@ -266,10 +301,6 @@ std::vector<glm::ivec2> App::GetAvailableWindowSizes()
             }
         }
     }
-
-    //std::sort(sizes.begin(), sizes.end(), [](glm::ivec2 a, glm::ivec2 b) {
-    //    return a.x < b.x || a.y < b.y;
-    //});
 
     return sizes;
 }
@@ -320,32 +351,6 @@ void App::ProcessSdlEvent(SDL_Event * evt)
     }
 }
 
-void App::Reset()
-{
-    _scenes.clear();
-    _shaders.clear();
-
-    //OnStart.RemoveAllListeners();
-    //OnStop.RemoveAllListeners();
-
-    //OnUpdate.RemoveAllListeners();
-    //OnRender.RemoveAllListeners();
-
-    //OnKeyPress.RemoveAllListeners();
-    //OnKeyRelease.RemoveAllListeners();
-
-    //OnMousePress.RemoveAllListeners();
-    //OnMouseRelease.RemoveAllListeners();
-    //OnMouseMove.RemoveAllListeners();
-    //OnMouseScroll.RemoveAllListeners();
-
-    //OnWindowResize.RemoveAllListeners();
-
-    //OnFileDrop.RemoveAllListeners();
-
-    //OnLoadConfig.RemoveAllListeners();
-}
-
 void App::CreateWindow()
 {
     DuskBenchStart();
@@ -365,7 +370,7 @@ void App::CreateWindow()
     }
 
     const std::vector<glm::ivec2>& windowSizes = GetAvailableWindowSizes();
-    _windowSize = windowSizes.back();
+    _windowSize = windowSizes.front();
 
     int sdlGlFlags = SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG;
 
@@ -381,7 +386,7 @@ void App::CreateWindow()
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 
-    int sdlWindowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN;
+    int sdlWindowFlags = GetSdlWindowFlags();
 
     for (int multisamples = 16; multisamples > 0; multisamples /= 2)
     {
@@ -619,9 +624,9 @@ void App::Script_OnFileDrop(ScriptHost * host, std::string func)
     // TODO
 }
 
-void App::Script_OnLoadConfig(ScriptHost * host, std::string func)
-{
-    TrackCallback(OnLoadConfig.AddScript(host, func, ScriptPack_string));
-}
+//void App::Script_OnLoadConfig(ScriptHost * host, std::string func)
+//{
+//    TrackCallback(OnLoadConfig.AddScript(host, func, ScriptPack_string));
+//}
 
 } // namespace dusk

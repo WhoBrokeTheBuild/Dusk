@@ -25,7 +25,6 @@ SET(_EDITOR_INCLUDES
     include/Editor.hpp
     include/EditorWindow.hpp
     include/ImBind.hpp
-    include/Main.hpp
     include/PopupWindow.hpp
     include/SceneWindow.hpp
     include/SettingsWindow.hpp

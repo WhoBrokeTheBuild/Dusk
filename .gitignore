@@ -159,7 +159,7 @@ flatbuffers_common_*.h
 ### Custom ###
 build
 config.h
-*.bin
+#*.bin
 vgcore.*
 imgui.ini
 cmake/Config.cmake

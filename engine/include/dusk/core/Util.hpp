@@ -70,6 +70,7 @@ std::string GetDirname(std::string path);
 std::string GetBasename(std::string path);
 std::string GetExtension(std::string path);
 
+std::string RunCommand(const std::string& cmd);
 
 template <typename F>
 struct privDefer {

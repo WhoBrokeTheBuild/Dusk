@@ -52,6 +52,11 @@ CONFIGURE_FILE(
 
 IF(WIN32)
     CONFIGURE_FILE(
+        "${CMAKE_SOURCE_DIR}/cmake/DuskPath.reg.in"
+        "${CMAKE_SOURCE_DIR}/cmake/DuskPath.reg"
+        @ONLY
+    )
+    CONFIGURE_FILE(
         "${CMAKE_SOURCE_DIR}/cmake/NewDuskProject.reg.in"
         "${CMAKE_SOURCE_DIR}/cmake/NewDuskProject.reg"
         @ONLY

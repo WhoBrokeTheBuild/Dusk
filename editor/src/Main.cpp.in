@@ -1,16 +1,58 @@
-#include <Main.hpp>
+#include <dusk/Main.hpp>
 #include <Editor.hpp>
 #include <cstdio>
 
+#ifdef __linux__
+#include <dlfcn.h>
+#endif // __linux__
+
 const std::string PROJECT_FILENAME = "@_PROJECT_FILENAME@";
+
+const std::string PROJECT_LIBRARY = "$<TARGET_FILE:@_LIBRARY@>";
+
+#ifdef __linux__
+
+void * libraryHandle = nullptr;
+
+void loadLibrary() {
+    dusk::App * app = dusk::App::Inst();
+
+    if (libraryHandle) {
+        dlclose(libraryHandle);
+    }
+
+    DuskLogLoad("Loading library '%s'", PROJECT_LIBRARY.c_str());
+    libraryHandle = dlopen(PROJECT_LIBRARY.c_str(), RTLD_LOCAL | RTLD_LAZY);
+
+    if (!libraryHandle) return;
+
+    DuskSetupFn setup;
+    *(void **) (&setup) = dlsym(libraryHandle, "_DuskSetup");
+
+    if (!setup) return;
+
+    DuskLogInfo("%p", app);
+    (*setup)(app);
+}
+
+#endif // __linux__
 
 int main(int argc, char** argv) {
     Editor app(argc, argv);
 
-    auto cb = app.OnLoadConfig.AddStatic([&](std::string) {
-        _DuskSetup(&app);
-    });
-    app.LoadConfig(PROJECT_FILENAME);
+#ifdef __linux__
+    app.TrackCallback(app.OnReset.AddStatic([]() {
+        loadLibrary();
+    }));
+#endif // __linux__
+
+    app.SetConfigFilename(PROJECT_FILENAME);
+
+    FILE * fp = fopen(PROJECT_FILENAME.c_str(), "rt");
+    if (fp) {
+        fclose(fp);
+        app.LoadConfig(PROJECT_FILENAME);
+    }
 
     app.Start();
     return 0;

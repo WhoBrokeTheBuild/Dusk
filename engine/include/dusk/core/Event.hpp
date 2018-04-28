@@ -26,10 +26,8 @@ public:
 
     typedef std::function<void(asIScriptContext*, Params ...)> ScriptPackFunc;
 
-    ~Event() {
-        for (auto cb : _callbacks) {
-            cb.first->Detach();
-        }
+    virtual ~Event() {
+        RemoveAllCallbacks();
     }
 
     void Call(Params ... args) {
@@ -48,6 +46,12 @@ public:
                 _callbacks.erase(it);
                 evtCb->Detach();
             }
+        }
+    }
+
+    void RemoveAllCallbacks() {
+        for (auto cb : _callbacks) {
+            cb.first->Detach();
         }
     }
 

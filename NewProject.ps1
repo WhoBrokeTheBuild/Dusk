@@ -12,20 +12,4 @@ param(
    [string] $Directory = $pwd
 )
 
-function Test-Administrator
-{
-    $user = [Security.Principal.WindowsIdentity]::GetCurrent();
-    (New-Object Security.Principal.WindowsPrincipal $user).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
-}
-
-if (!(Test-Administrator))
-{
-    Start-Process powershell -Window Hidden -Verb RunAs -ArgumentList "-File `"$PSCommandPath`" `"$Directory`""
-    Exit
-}
-
-if (!(Test-Path "HKLM:\Software\Dusk")) {
-    New-ItemProperty -Path "HKLM:\Software\Dusk" -Name "Path" -Value "$PSScriptRoot"
-}
-
-Copy-Item "$PSScriptRoot\cmake\Project.cmake" "$Directory\CmakeLists.txt"
+Get-ChildItem "$PSScriptRoot\template" | Copy -Destination "$Directory" -Recurse

@@ -6,4 +6,4 @@ if [ ! -f "$HOME/.duskconfig" ]; then
     echo $BASE_DIR > "$HOME/.duskconfig"
 fi
 
-cp $BASE_DIR/cmake/Project.cmake ./CMakeLists.txt
+cp -r $BASE_DIR/template/* ./

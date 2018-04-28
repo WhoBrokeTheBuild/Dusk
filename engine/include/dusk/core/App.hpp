@@ -37,11 +37,14 @@ public:
 
     /// Methods
 
+    virtual void Reset();
+
     void Start();
     void Stop();
 
     bool LoadConfig(const std::string& filename = "");
     bool SaveConfig(const std::string& filename = "");
+    void SetConfigFilename(const std::string& filename);
 
     RenderContext& GetRenderContext() { return _renderContext; }
     UpdateContext& GetUpdateContext() { return _updateContext; }
@@ -82,11 +85,10 @@ public:
 
     Event<std::vector<std::string>> OnFileDrop;
 
-    Event<std::string> OnLoadConfig;
+    Event<> OnReset;
+    Event<std::string> OnConfigLoad;
 
 protected:
-
-    virtual void Reset();
 
     virtual void Update();
     virtual void Render();
@@ -102,6 +104,8 @@ protected:
     std::vector<std::unique_ptr<Scene>>& GetScenes() { return _scenes; }
     std::vector<std::unique_ptr<Shader>>& GetShaders() { return _shaders; }
 
+    virtual int GetSdlWindowFlags() const { return SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN; }
+
 private:
 
     static App * _Inst;
@@ -113,7 +117,7 @@ private:
 
     std::string _configFilename;
 
-    glm::ivec2 _windowSize = { 640, 480 };
+    glm::ivec2 _windowSize = { 1024, 768 };
     std::string _windowTitle = "Dusk";
     std::string _startScene = "";
 
@@ -156,7 +160,7 @@ public:
 
     void Script_OnFileDrop(ScriptHost * host, std::string func);
 
-    void Script_OnLoadConfig(ScriptHost * host, std::string func);
+    //void Script_OnLoadConfig(ScriptHost * host, std::string func);
 
 }; // class App
 

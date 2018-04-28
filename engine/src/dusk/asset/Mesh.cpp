@@ -150,6 +150,8 @@ bool Mesh::LoadFromFile(const std::string& filename)
 
     FinishLoad();
 
+    DuskLogLoad("Finished loading Mesh from '%s'", filename.c_str());
+
     return false;
 }
 
@@ -194,7 +196,7 @@ bool Mesh::FinishLoad()
 
     _bounds = ComputeBounds(verts);
 
-    DuskLogLoad("Loading Mesh to OpenGL");
+    DuskLogVerbose("Uploading Mesh Data to OpenGL");
 
     glGenVertexArrays(1, &_glVAO);
     glBindVertexArray(_glVAO);
@@ -292,7 +294,6 @@ MeshComponent::MeshComponent(Actor * actor, std::unique_ptr<Mesh>&& mesh)
     : IComponent(actor)
     , _mesh(std::move(mesh))
 {
-    DuskLogInfo("MeshComponent::ctor()");
     TrackCallback(GetActor()->OnRender.AddMember<MeshComponent>(this, &MeshComponent::Render));
 }
 

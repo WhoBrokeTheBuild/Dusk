@@ -20,11 +20,7 @@ public:
 
     Editor(int argc, char ** argv);
 
-    virtual ~Editor()
-    {
-        ImBind::Term();
-        ImGui::DestroyContext();
-    }
+    virtual ~Editor();
 
     template <class T>
     void AddActorTypeFields(std::function<void(dusk::Actor *)> callback)
@@ -60,6 +56,10 @@ public:
 
     dusk::Event<bool> OnPlayPause;
 
+    virtual int GetSdlWindowFlags() const override {
+        return App::GetSdlWindowFlags() | SDL_WINDOW_RESIZABLE;
+    }
+
 protected:
 
     virtual void Reset() override;
@@ -79,9 +79,16 @@ protected:
         dusk::App::ProcessSdlEvent(evt);
     }
 
+    void InitFramebuffer();
+    void TermFramebuffer();
+
 private:
 
     bool _playing = true;
+
+    GLuint _glTexBuf = 0;
+    GLuint _glFrameBuf = 0;
+    GLuint _glDepthBuf = 0;
 
     std::unordered_map<std::type_index, std::function<void(dusk::Actor *)>> _actorFieldCallbacks;
     std::unordered_map<std::type_index, std::function<void(dusk::Shader *)>> _shaderFieldCallbacks;

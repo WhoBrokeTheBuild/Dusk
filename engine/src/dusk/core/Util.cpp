@@ -156,8 +156,11 @@ std::string GetExtension(std::string path)
 
 std::string RunCommand(const std::string& cmd)
 {
-    std::array<char, 128> buffer;
     std::string result;
+
+#ifdef __linux__
+
+    std::array<char, 128> buffer;
     std::shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
 
     if (!pipe)
@@ -172,6 +175,8 @@ std::string RunCommand(const std::string& cmd)
             result += buffer.data();
         }
     }
+    
+#endif // __linux__
 
     return result;
 }

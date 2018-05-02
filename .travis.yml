@@ -62,8 +62,8 @@ script:
   - pwd
   - cmake -Dstdlib=libstdc++ -GNinja "$DUSK_INSTALL_DIR"
   - ninja -v
-  - mkdir -p "$TRAVIS_BUILD_DIR/build-ninja/examples/Textured"
-  - cd "$TRAVIS_BUILD_DIR/build-ninja/examples/Textured"
+  - mkdir -p "$TRAVIS_BUILD_DIR/build-ninja/examples/HelloWorld"
+  - cd "$TRAVIS_BUILD_DIR/build-ninja/examples/HelloWorld"
   - pwd
-  - cmake -Dstdlib=libstdc++ -GNinja "$DUSK_INSTALL_DIR/examples/Textured"
+  - cmake -Dstdlib=libstdc++ -GNinja "$DUSK_INSTALL_DIR/examples/HelloWorld"
   - ninja -v

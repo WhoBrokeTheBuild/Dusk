@@ -8,10 +8,9 @@
 
 const std::string PROJECT_FILENAME = "@_PROJECT_FILENAME@";
 
-const std::string PROJECT_LIBRARY = "$<TARGET_FILE:@_LIBRARY@>";
-
 #ifdef __linux__
 
+const std::string PROJECT_LIBRARY = "./lib@PROJECT_NAME@-Library.so";
 void * libraryHandle = nullptr;
 
 void loadLibrary() {
@@ -24,12 +23,18 @@ void loadLibrary() {
     DuskLogLoad("Loading library '%s'", PROJECT_LIBRARY.c_str());
     libraryHandle = dlopen(PROJECT_LIBRARY.c_str(), RTLD_LOCAL | RTLD_LAZY);
 
-    if (!libraryHandle) return;
+    if (!libraryHandle) {
+        DuskLogError("Failed to load '%s', %s", PROJECT_LIBRARY.c_str(), dlerror());
+        return;
+    }
 
     DuskSetupFn setup;
     *(void **) (&setup) = dlsym(libraryHandle, "_DuskSetup");
 
-    if (!setup) return;
+    if (!setup) {
+        DuskLogError("Failed to find '_DuskSetup' in '%s', %s", PROJECT_LIBRARY.c_str(), dlerror());
+        return;
+    }
 
     DuskLogInfo("%p", app);
     (*setup)(app);

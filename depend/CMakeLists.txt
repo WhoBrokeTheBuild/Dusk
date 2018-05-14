@@ -367,11 +367,13 @@ MESSAGE("Adding dependency: imgui")
 
 SET(IMGUI_INCLUDE_DIRS
     "${CMAKE_CURRENT_SOURCE_DIR}/imgui/"
+    "${CMAKE_CURRENT_SOURCE_DIR}/imgui_tabs/"
 )
 SET(IMGUI_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_draw.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_demo.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/imgui_tabs/imgui_tabs.cpp"
 )
 
 SET(EXTRA_INCLUDE_DIRS "")

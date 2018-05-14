@@ -3,6 +3,7 @@
 const std::string PROJECT_FILENAME = "@_PROJECT_FILENAME@";
 
 int main(int argc, char** argv) {
+    dusk::SetAssetPath(DUSK_ASSET_PATH);
     dusk::App app(argc, argv);
 
     app.LoadConfig(PROJECT_FILENAME);

@@ -37,3 +37,6 @@
 	path = depend/imgui
 	url = https://github.com/ocornut/imgui.git
 	depth = 50
+[submodule "depend/imgui_tabs"]
+	path = depend/imgui_tabs
+	url = https://github.com/ebachard/imgui_tabs.git

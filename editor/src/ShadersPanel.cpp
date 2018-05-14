@@ -1,26 +1,25 @@
-#include "ShadersWindow.hpp"
+#include "ShadersPanel.hpp"
 #include "Editor.hpp"
 
-ShadersWindow::ShadersWindow(Editor * editor, bool shown)
-    : EditorWindow(editor, shown)
+ShadersPanel::ShadersPanel(Editor * editor)
+    : EditorPanel(editor)
 {
     Reset();
 }
 
-void ShadersWindow::DoReset()
+void ShadersPanel::DoReset()
 {
 }
 
-void ShadersWindow::DoApply()
+void ShadersPanel::DoApply()
 {
 }
 
-void ShadersWindow::DoRender()
+void ShadersPanel::DoRender()
 {
     static auto& shaders = GetEditor()->GetShaders();
 
-    ImGui::SetNextWindowSize(ImVec2(500, 300), ImGuiSetCond_FirstUseEver);
-    if (ImGui::Begin("Shaders", &_shown))
+    if (ImGui::AddTab("Shaders"))
     {
         ImGui::BeginChild("Scroll", ImVec2(0, -ImGui::GetItemsLineHeightWithSpacing()), false, 0);
         for (const auto& shader : shaders)
@@ -50,7 +49,5 @@ void ShadersWindow::DoRender()
             ImGui::Separator();
         }
         ImGui::EndChild();
-
-        ImGui::End();
     }
 }

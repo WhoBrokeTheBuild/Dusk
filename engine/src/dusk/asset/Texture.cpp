@@ -8,10 +8,21 @@ namespace dusk {
 bool Texture::LoadFromFile(const std::string& filename)
 {
     DuskBenchStart();
-    DuskLogLoad("Loading texture from '%s'", filename.c_str());
+
+    const auto& paths = GetAssetPaths();
 
     int width, height, comp;
-    unsigned char * texture = stbi_load(filename.c_str(), &width, &height, &comp, STBI_rgb_alpha);
+    unsigned char * texture = nullptr;
+
+    std::string fullPath;
+    for (auto& p : paths) {
+        fullPath = p + filename;
+
+        DuskLogVerbose("Checking %s", fullPath.c_str());
+        texture = stbi_load(fullPath.c_str(), &width, &height, &comp, STBI_rgb_alpha);
+
+        if (texture) break;
+    }
 
     if (!texture)
     {
@@ -21,6 +32,8 @@ bool Texture::LoadFromFile(const std::string& filename)
 
     std::vector<uint8_t> data(texture, texture + (width * height * GetGLTypeSize(GL_RGBA)));
     stbi_image_free(texture);
+
+    DuskLogLoad("Finished loading texture from '%s'", fullPath.c_str());
 
     bool success = FinishLoad(glm::uvec2(width, height), data, GL_RGBA);
     DuskBenchEnd("Texture::LoadFromFile");

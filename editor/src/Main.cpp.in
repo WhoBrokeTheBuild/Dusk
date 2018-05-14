@@ -14,6 +14,7 @@ const std::string PROJECT_LIBRARY = "./lib@PROJECT_NAME@-Library.so";
 void * libraryHandle = nullptr;
 
 void loadLibrary() {
+    dusk::SetAssetPath(DUSK_ASSET_PATH);
     dusk::App * app = dusk::App::Inst();
 
     if (libraryHandle) {

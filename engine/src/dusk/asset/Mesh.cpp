@@ -36,7 +36,18 @@ bool Mesh::LoadFromFile(const std::string& filename)
                                aiProcess_FlipUVs;
 
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(filename, flags);
+    std::string fullPath;
+    const auto& paths = GetAssetPaths();
+    const aiScene* scene = nullptr;
+
+    for (auto& p : paths) {
+        fullPath = p + filename;
+
+        DuskLogVerbose("Checking %s", fullPath.c_str());
+        scene = importer.ReadFile(fullPath, flags);
+
+        if (scene) break;
+    }
 
 	if (!scene)
     {
@@ -150,7 +161,7 @@ bool Mesh::LoadFromFile(const std::string& filename)
 
     FinishLoad();
 
-    DuskLogLoad("Finished loading Mesh from '%s'", filename.c_str());
+    DuskLogLoad("Finished loading Mesh from '%s'", fullPath.c_str());
 
     return false;
 }

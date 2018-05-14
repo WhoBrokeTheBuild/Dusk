@@ -101,6 +101,7 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
 {
     _filenames = filenames;
 
+    const auto& paths = GetAssetPaths();
     GLint linked = GL_FALSE;
     std::vector<GLuint> shaders;
 
@@ -125,9 +126,19 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
 
     bool loadFromBinary = false;
     GLenum binaryFormat = GL_INVALID_ENUM;
-    std::string binFilename = "assets/shaders/" + GetBinaryName(filenames);
+    std::string binFilename = "shaders/" + GetBinaryName(filenames);
 
-    std::ifstream binFile(binFilename, std::ios::binary);
+    std::ifstream binFile;
+
+    for (auto& p : paths) {
+        std::string fullPath = p + binFilename;
+
+        DuskLogVerbose("Checking %s", fullPath.c_str());
+        binFile.open(fullPath, std::ios::binary);
+
+        if (binFile.is_open()) break;
+    }
+
     if (binFile.is_open())
     {
         DuskLogLoad("Loading cached binary shader from '%s'.", binFilename.c_str());
@@ -201,14 +212,24 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
 
             glGetProgramBinary(_glId, data.size(), nullptr, &binaryFormat, data.data());
 
-            std::ofstream outBinFile(binFilename, std::ios::binary);
-            if (!outBinFile)
+            std::string outBinFilename;
+            std::ofstream outBinFile;
+            for (auto &p = paths) {
+                outBinFilename = p + binFilename;
+
+                DuskLogVerbose("Checking %s", outBinFilename.c_str());
+                outBinFile.open(outBinFilename, std::ios::binary);
+
+                if (outBinFile.is_open()) break;
+            }
+
+            if (!outBinFile.is_open())
             {
                 DuskLogWarn("Failed to create binary shader file '%s'.", binFilename.c_str());
             }
             else
             {
-                DuskLogVerbose("Saving cached binary shader file '%s'.", binFilename.c_str());
+                DuskLogVerbose("Saving cached binary shader file '%s'.", outBinFilename.c_str());
                 outBinFile.write((const char *)&binaryFormat, sizeof(GLenum));
                 outBinFile.write((const char *)data.data(), data.size());
                 outBinFile.close();
@@ -318,15 +339,32 @@ GLuint Shader::LoadShader(const std::string& filename)
         return false;
     }
 
-    std::ifstream file(filename);
+    const auto& paths = GetAssetPaths();
+
+    std::string fullPath;
+    std::ifstream file;
+    for (auto& p : paths) {
+        fullPath = p + filename;
+
+        DuskLogVerbose("Checking %s", fullPath.c_str());
+        file.open(fullPath);
+
+        if (file.is_open()) break;
+    }
+
+    if (!file.is_open()) {
+        DuskLogError("Failed to open shader '%s'", filename.c_str());
+        return 0;
+    }
+
     std::string code((std::istreambuf_iterator<char>(file)),
                      std::istreambuf_iterator<char>());
     file.close();
 
     code = _GLSLVersionString + "\n" + code;
 
-    DuskLogLoad("Loading %s shader from '%s'", GetShaderTypeString(type).c_str(), filename.c_str());
-    code = PreProcess(type, code, GetDirname(filename));
+    DuskLogLoad("Loading %s shader from '%s'", GetShaderTypeString(type).c_str(), fullPath.c_str());
+    code = PreProcess(type, code, GetDirname(fullPath));
 
     GLint compiled = GL_FALSE;
     GLuint id = glCreateShader(type);
@@ -345,7 +383,7 @@ GLuint Shader::LoadShader(const std::string& filename)
         glDeleteShader(id);
         id = 0;
 
-        return false;
+        return 0;
     }
 
     return id;
@@ -363,9 +401,29 @@ std::string Shader::PreProcess(GLuint type, const std::string& code, const std::
         {
             if (0 == line.compare(0, strlen("#include"), "#include"))
             {
-                std::string incFilename = (basedir.empty() ? "" : basedir + "/") + line.substr(strlen("#include") + 1);
+                auto paths = GetAssetPaths();
+                if (!basedir.empty()) {
+                    paths.push_back((basedir.back() == '/' ? basedir : basedir + '/'));
+                }
 
-                std::ifstream incFile(incFilename);
+                std::string filename = line.substr(strlen("#include") + 1);
+
+                std::string incFilename;
+                std::ifstream incFile;
+                for (auto& p : paths) {
+                    incFilename = p + filename;
+
+                    DuskLogVerbose("Checking %s", incFilename.c_str());
+                    incFile.open(incFilename);
+
+                    if (incFile.is_open()) break;
+                }
+
+                if (!incFile.is_open()) {
+                    DuskLogError("Failed to shader include '%s'", filename.c_str());
+                    continue;
+                }
+
                 std::string incCode((std::istreambuf_iterator<char>(incFile)),
                                      std::istreambuf_iterator<char>());
                 incFile.close();

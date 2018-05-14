@@ -1,35 +1,46 @@
-#include "ActorWindow.hpp"
+#include "ActorPanel.hpp"
 #include "Editor.hpp"
 
-ActorWindow::ActorWindow(dusk::Actor * actor, EditorWindow * parent)
-    : PopupWindow(parent)
-    , _actor(actor)
+ActorPanel::ActorPanel(Editor * editor)
+    : EditorPanel(editor)
 {
+}
+
+void ActorPanel::SetActor(dusk::Actor * actor) {
+    _actor = actor;
     Reset();
 }
 
-void ActorWindow::DoReset()
+void ActorPanel::DoReset()
 {
+    if (!_actor) return;
+
     _position = _actor->GetPosition();
     _rotation = _actor->GetRotation();
     _scale = _actor->GetScale();
 }
 
-void ActorWindow::DoApply()
+void ActorPanel::DoApply()
 {
+    if (!_actor) return;
+
     _actor->SetPosition(_position);
     _actor->SetRotation(_rotation);
     _actor->SetScale(_scale);
 }
 
-void ActorWindow::DoRender()
+void ActorPanel::DoRender()
 {
-    const auto& id = _actor->GetId();
-    std::string windowTitle = "Actor - " + id;
+    if (ImGui::AddTab("Actor")) {
+        if (!_actor) {
+            ImGui::Text("No Actor Selected");
+            return;
+        }
 
-    ImGui::SetNextWindowSize(ImVec2(500, 300), ImGuiSetCond_FirstUseEver);
-    if (ImGui::Begin(windowTitle.c_str(), &_shown)) {
-        if (GetParent()->GetEditor()->IsPlaying()) {
+        const auto& id = _actor->GetId();
+        std::string windowTitle = "Actor - " + id;
+
+        if (GetEditor()->IsPlaying()) {
             ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
             ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 
@@ -86,11 +97,9 @@ void ActorWindow::DoRender()
             ImGui::Unindent();
         }
 
-        if (GetParent()->GetEditor()->IsPlaying()) {
+        if (GetEditor()->IsPlaying()) {
             ImGui::PopStyleVar();
             ImGui::PopItemFlag();
         }
-
-        ImGui::End();
     }
 }

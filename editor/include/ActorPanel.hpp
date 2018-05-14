@@ -2,14 +2,15 @@
 #define DUSK_ACTOR_WINDOW_HPP
 
 #include "Config.hpp"
-#include "PopupWindow.hpp"
+#include "EditorPanel.hpp"
 
-
-class ActorWindow : public PopupWindow
+class ActorPanel : public EditorPanel
 {
 public:
 
-    ActorWindow(dusk::Actor * actor, EditorWindow * parent);
+    ActorPanel(Editor * editor);
+
+    void SetActor(dusk::Actor * actor);
 
 protected:
 
@@ -19,7 +20,7 @@ protected:
 
 private:
 
-    dusk::Actor * _actor;
+    dusk::Actor * _actor = nullptr;
 
     glm::vec3 _position;
     glm::vec3 _rotation;
@@ -27,6 +28,6 @@ private:
 
     std::array<char, 512> _tags;
 
-}; // class ActorWindow
+}; // class ActorPanel
 
 #endif // DUSK_ACTOR_WINDOW_HPP

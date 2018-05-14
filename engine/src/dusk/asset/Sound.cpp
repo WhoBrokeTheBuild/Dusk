@@ -8,7 +8,7 @@ namespace dusk
 
 Sound::Sound(const std::string& filename)
 {
-    FILE * file;
+    FILE * file = nullptr;
     OggVorbis_File vf;
     vorbis_info * vInfo;
     char buffer[32768];     // 32 KB buffer
@@ -19,9 +19,18 @@ Sound::Sound(const std::string& filename)
 
     alGenBuffers(1, &_alBuffer);
 
-    DuskLogInfo("Loading sound file '%s'", filename.c_str());
+    const auto& paths = GetAssetPaths();
 
-    file = fopen(filename.c_str(), "rb");
+    std::string fullPath;
+    for (auto& p : paths) {
+        fullPath = p + filename;
+
+        DuskLogVerbose("Checking %s", fullPath.c_str());
+        file = fopen(fullPath.c_str(), "rb");
+
+        if (file) break;
+    }
+
     if (!file)
     {
         DuskLogError("Failed to load sound file '%s'", filename.c_str());
@@ -56,6 +65,8 @@ Sound::Sound(const std::string& filename)
     alBufferData(_alBuffer, _alFormat, data.data(), static_cast<ALsizei>(data.size()), _alFreq);
 
     ov_clear(&vf);
+
+    DuskLogInfo("Finished loading sound file '%s'", fullPath.c_str());
 }
 
 Sound::~Sound()

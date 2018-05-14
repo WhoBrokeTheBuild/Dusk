@@ -7,6 +7,37 @@
 
 namespace dusk {
 
+std::string _assetPath;
+
+void SetAssetPath(const std::string& path)
+{
+    _assetPath = path;
+}
+
+std::string GetAssetPath()
+{
+    return _assetPath;
+}
+
+std::vector<std::string> GetAssetPaths()
+{
+    static std::vector<std::string> paths;
+
+    if (paths.empty()) {
+        std::stringstream ss(GetAssetPath());
+        std::string path;
+        while (std::getline(ss, path, ':')) {
+            if (path.empty()) continue;
+            if (path.back() != '/') path.push_back('/');
+
+            paths.push_back(path);
+        }
+    }
+
+    std::reverse(paths.begin(), paths.end());
+    return paths;
+}
+
 size_t GetGLTypeSize(GLenum type)
 {
     switch (type)
@@ -175,7 +206,7 @@ std::string RunCommand(const std::string& cmd)
             result += buffer.data();
         }
     }
-    
+
 #endif // __linux__
 
     return result;

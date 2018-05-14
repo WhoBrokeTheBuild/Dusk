@@ -1,30 +1,31 @@
-#include "SceneWindow.hpp"
+#include "ScenePanel.hpp"
 
 #include "Editor.hpp"
+#include "ActorPanel.hpp"
 
-SceneWindow::SceneWindow(Editor * editor, bool shown)
-    : EditorWindow(editor, shown)
+ScenePanel::ScenePanel(Editor * editor)
+    : EditorPanel(editor)
 {
     Reset();
 
     _newActorId[0] = '\0';
 }
 
-void SceneWindow::DoReset()
+void ScenePanel::DoReset()
 {
 }
 
-void SceneWindow::DoApply()
+void ScenePanel::DoApply()
 {
 }
 
-void SceneWindow::DoRender()
+void ScenePanel::DoRender()
 {
     dusk::Scene * scene = GetEditor()->GetActiveScene();
     if (!scene) return;
 
     ImGui::SetNextWindowSize(ImVec2(500, 300), ImGuiSetCond_FirstUseEver);
-    if (ImGui::Begin("Scene", &_shown)) {
+    if (ImGui::AddTab("Scene")) {
         ImGui::BeginChild("Scroll", ImVec2(0, -ImGui::GetItemsLineHeightWithSpacing()), false, 0);
 
         ImGui::Text("Actors");
@@ -56,7 +57,8 @@ void SceneWindow::DoRender()
 
             std::string editId = "Edit##" + id;
             if (ImGui::Button(editId.c_str())) {
-                AddPopup(std::make_unique<ActorWindow>(actor, this));
+                ActorPanel * actorPanel = (ActorPanel *)GetEditor()->GetPanel("Actor");
+                actorPanel->SetActor(actor);
             }
 
             if (index != actors.size() - 1) {
@@ -66,6 +68,5 @@ void SceneWindow::DoRender()
         }
 
         ImGui::EndChild();
-        ImGui::End();
     }
 }

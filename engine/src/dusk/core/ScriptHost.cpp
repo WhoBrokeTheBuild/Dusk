@@ -80,8 +80,20 @@ ScriptHost::~ScriptHost()
 
 bool ScriptHost::LoadFile(const std::string& filename)
 {
-    std::ifstream file(filename);
-    if (!file) {
+    const auto& paths = GetAssetPaths();
+
+    std::string fullPath;
+    std::ifstream file;
+    for (auto& p : paths) {
+        fullPath = p + filename;
+
+        DuskLogVerbose("Checking %s", fullPath.c_str());
+        file.open(fullPath);
+
+        if (file.is_open()) break;
+    }
+
+    if (!file.is_open()) {
         fprintf(stderr, "Could not open file '%s'\n", filename.c_str());
         return false;
     }
@@ -94,6 +106,8 @@ bool ScriptHost::LoadFile(const std::string& filename)
     mod->Build();
 
     _asMain = _as->GetModule(0)->GetFunctionByDecl("void main()");
+
+    DuskLogInfo("Finished loading script '%s'", fullPath.c_str());
 
     return true;
 }

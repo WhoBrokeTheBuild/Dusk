@@ -42,9 +42,9 @@
 #include <stb_rect_pack.h>
 #include <stb_truetype.h>
 
-#ifndef ASSET_PATH
-#define ASSET_PATH "."
-#endif // ASSET_PATH
+#ifndef DUSK_ASSET_PATH
+#define DUSK_ASSET_PATH "."
+#endif // DUSK_ASSET_PATH
 
 #undef CreateWindow
 

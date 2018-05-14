@@ -2,15 +2,15 @@
 #define DUSK_SHADER_WINDOW_HPP
 
 #include "Config.hpp"
-#include "EditorWindow.hpp"
+#include "EditorPanel.hpp"
 
 class Editor;
 
-class ShadersWindow : public EditorWindow
+class ShadersPanel : public EditorPanel
 {
 public:
 
-    ShadersWindow(Editor * editor, bool shown = false);
+    ShadersPanel(Editor * editor);
 
 protected:
 

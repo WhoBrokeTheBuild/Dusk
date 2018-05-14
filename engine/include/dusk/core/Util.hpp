@@ -39,20 +39,10 @@ public:
 
 };
 
-inline std::vector<std::string> GetAssetPaths()
-{
-    static std::vector<std::string> paths;
+void SetAssetPath(const std::string& path);
+std::string GetAssetPath();
 
-    if (paths.empty()) {
-        std::stringstream ss(ASSET_PATH);
-        std::string path;
-        while (std::getline(ss, path, ':')) {
-            paths.push_back(path);
-        }
-    }
-
-    return paths;
-}
+std::vector<std::string> GetAssetPaths();
 
 size_t GetGLTypeSize(GLenum type);
 
@@ -88,7 +78,6 @@ privDefer<F> defer_func(F f) {
 #define DEFER_2(x, y) DEFER_1(x, y)
 #define DEFER_3(x)    DEFER_2(x, __COUNTER__)
 #define defer(code)   auto DEFER_3(_defer_) = defer_func([&](){code;})
-
 
 } // namespace dusk
 

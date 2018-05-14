@@ -16,7 +16,12 @@
 #define IMGUI_DISABLE_STB_TRUETYPE_IMPLEMENTATION
 #endif
 
+#ifndef IMGUI_DEFINE_MATH_OPERATORS
+#define IMGUI_DEFINE_MATH_OPERATORS
+#endif
+
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <imgui_tabs.h>
 
 #endif // DUSK_EDITOR_CONFIG_HPP

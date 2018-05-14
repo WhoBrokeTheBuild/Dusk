@@ -18,14 +18,25 @@ Font::Font(const std::string& filename, unsigned int size)
 {
     long int fileSize;
 
-    DuskLogInfo("Loading font '%s'", filename.c_str());
+    const auto& paths = GetAssetPaths();
 
-    FILE * fp = fopen(filename.c_str(), "rb");
+    std::string fullPath;
+    FILE * fp = nullptr;
+    for (auto& p : paths) {
+        fullPath = p + filename;
+
+        DuskLogVerbose("Checking %s", fullPath.c_str());
+        fp = fopen(fullPath.c_str(), "rb");
+
+        if (fp) break;
+    }
+
     if (!fp)
     {
         DuskLogError("Failed to open font '%s'", filename.c_str());
         return;
     }
+
 
     fseek(fp, 0, SEEK_END);
     fileSize = ftell(fp);
@@ -37,6 +48,8 @@ Font::Font(const std::string& filename, unsigned int size)
     fclose(fp);
 
     stbtt_InitFont(&_stbFontInfo, _buffer.data(), 0);
+
+    DuskLogInfo("Finished loading font '%s'", fullPath.c_str());
 }
 
 Text::Text(const std::string& text, std::shared_ptr<Font> font, Shader * shader /*= nullptr*/)

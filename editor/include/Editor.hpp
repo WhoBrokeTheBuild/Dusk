@@ -3,13 +3,15 @@
 
 #include "Config.hpp"
 
-#include "EditorWindow.hpp"
-#include "DemoWindow.hpp"
-#include "ShadersWindow.hpp"
-#include "SettingsWindow.hpp"
-#include "SceneWindow.hpp"
+#include "ActorPanel.hpp"
+#include "ComponentPanel.hpp"
+#include "EditorPanel.hpp"
+#include "ShadersPanel.hpp"
+#include "SettingsPanel.hpp"
+#include "ScenePanel.hpp"
 #include "ImBind.hpp"
 
+#include <memory>
 #include <vector>
 #include <typeindex>
 #include <unordered_map>
@@ -21,18 +23,6 @@ public:
     Editor(int argc, char ** argv);
 
     virtual ~Editor();
-
-    template <class T>
-    void AddActorTypeFields(std::function<void(dusk::Actor *)> callback)
-    {
-        _actorFieldCallbacks.emplace(typeid(T), callback);
-    }
-
-    template <class T>
-    void AddShaderTypeFields(std::function<void(dusk::Shader *)> callback)
-    {
-        _shaderFieldCallbacks.emplace(typeid(T), callback);
-    }
 
     std::vector<std::unique_ptr<dusk::Scene>>& GetScenes() { return dusk::App::GetScenes(); }
     std::vector<std::unique_ptr<dusk::Shader>>& GetShaders() { return dusk::App::GetShaders(); }
@@ -60,6 +50,8 @@ public:
         return App::GetSdlWindowFlags() | SDL_WINDOW_RESIZABLE;
     }
 
+    EditorPanel * GetPanel(const std::string& id) { return _panels[id].get(); }
+
 protected:
 
     virtual void Reset() override;
@@ -85,15 +77,21 @@ protected:
 private:
 
     bool _playing = true;
+    bool _fullscreen = false;
 
     GLuint _glTexBuf = 0;
     GLuint _glFrameBuf = 0;
     GLuint _glDepthBuf = 0;
 
-    std::unordered_map<std::type_index, std::function<void(dusk::Actor *)>> _actorFieldCallbacks;
-    std::unordered_map<std::type_index, std::function<void(dusk::Shader *)>> _shaderFieldCallbacks;
+    std::vector<float> _frameTimes;
+    double _frameTimeUpdate = 0.0;
 
-    std::unordered_map<std::string, std::unique_ptr<EditorWindow>> _windows;
+    std::unordered_map<std::string, std::function<dusk::IComponent*(void)>> _componentTypes;
+
+    std::unordered_map<std::string, std::unique_ptr<EditorPanel>> _panels;
+    std::vector<EditorPanel *> _panelsLeft;
+    std::vector<EditorPanel *> _panelsBottom;
+    std::vector<EditorPanel *> _panelsRight;
 };
 
 #endif // DUSK_EDITOR_HPP

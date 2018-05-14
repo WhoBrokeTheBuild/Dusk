@@ -7,6 +7,7 @@ ADD_DEFINITIONS(
     -DIMGUI_DISABLE_INCLUDE_IMCONFIG_H
     -DIMGUI_DISABLE_STB_RECT_PACK_IMPLEMENTATION
     -DIMGUI_DISABLE_STB_TRUETYPE_IMPLEMENTATION
+    -DIMGUI_DEFINE_MATH_OPERATORS
 )
 
 SET(_EDITOR_INCLUDE_DIRS
@@ -19,27 +20,26 @@ SET(_EDITOR_INCLUDE_DIRS "${_EDITOR_INCLUDE_DIRS}" PARENT_SCOPE)
 SET(_DUSK_EDITOR "Dusk-Editor")
 
 SET(_EDITOR_INCLUDES
-    include/ActorWindow.hpp
+    include/ActorPanel.hpp
+    include/ComponentPanel.hpp
     include/Config.hpp
-    include/DemoWindow.hpp
     include/Editor.hpp
-    include/EditorWindow.hpp
+    include/EditorPanel.hpp
     include/ImBind.hpp
-    include/PopupWindow.hpp
-    include/SceneWindow.hpp
-    include/SettingsWindow.hpp
-    include/ShadersWindow.hpp
+    include/ScenePanel.hpp
+    include/SettingsPanel.hpp
+    include/ShadersPanel.hpp
 )
 
 SET(_EDITOR_SOURCES
-    src/ActorWindow.cpp
+    src/ActorPanel.cpp
+    src/ComponentPanel.cpp
     src/Editor.cpp
-    src/EditorWindow.cpp
+    src/EditorPanel.cpp
     src/ImBind.cpp
-    src/PopupWindow.cpp
-    src/SceneWindow.cpp
-    src/SettingsWindow.cpp
-    src/ShadersWindow.cpp
+    src/ScenePanel.cpp
+    src/SettingsPanel.cpp
+    src/ShadersPanel.cpp
 )
 
 INCLUDE_DIRECTORIES(

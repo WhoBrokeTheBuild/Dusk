@@ -56,6 +56,14 @@ void PrintCode(const std::string& code);
 
 void CleanSlashes(std::string& path);
 
+std::vector<std::string> StringSplit(const char& sep, const std::string& str);
+std::string StringJoin(const std::string& sep, const std::vector<std::string>& strs);
+
+inline std::string StringJoin(const char& sep, const std::vector<std::string>& strs)
+{
+    return StringJoin(std::string(1, sep), strs);
+}
+
 std::string GetDirname(std::string path);
 std::string GetBasename(std::string path);
 std::string GetExtension(std::string path);

@@ -51,9 +51,9 @@ ELSEIF(MSVC)
       set(MSVC_PREFIX "vc120")
     ELSEIF(MSVC14)
       set(MSVC_PREFIX "vc140")
-    else()
+    ELSE()
       set(MSVC_PREFIX "vc150")
-  ENDIF()
+    ENDIF()
 
 ENDIF()
 

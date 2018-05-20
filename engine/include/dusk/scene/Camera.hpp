@@ -45,8 +45,13 @@ public:
     void SetForward(const glm::vec3& forward);
     glm::vec3 GetForward() const { return _forward; }
 
+    void SetLookAt(const glm::vec3& lookAt) { SetForward(lookAt - GetPosition()); };
+
     void SetUp(const glm::vec3& up);
     glm::vec3 GetUp() const { return _up; }
+
+    void ChangePitch(const float& pitch);
+    void ChangeYaw(const float& yaw);
 
 private:
 
@@ -63,6 +68,10 @@ private:
     glm::vec3 _position;
     glm::vec3 _forward;
     glm::vec3 _up;
+
+    float _pitch = 0.0f;
+    float _yaw   = 0.0f;
+    float _roll   = 0.0f;
 
 }; // class Camera
 

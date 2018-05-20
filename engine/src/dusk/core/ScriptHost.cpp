@@ -12,7 +12,8 @@
 
 namespace dusk {
 
-void as_print(std::string& str) {
+void as_print(std::string& str)
+{
     printf("%s", str.c_str());
 }
 

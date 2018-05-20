@@ -4,8 +4,6 @@
 #include "Config.hpp"
 #include "EditorPanel.hpp"
 
-class Editor;
-
 class ComponentPanel : public EditorPanel
 {
 public:

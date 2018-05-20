@@ -18,6 +18,9 @@ Camera::Camera(std::string id, Scene * scene, float fov /*= 45.0f*/, glm::vec3 u
     , _forward(1)
     , _up(up)
 {
+    TrackCallback(App::Inst()->OnWindowResize.AddStatic([this](glm::ivec2 size) {
+        SetAspect(size);
+    }));
 }
 
 void Camera::Serialize(nlohmann::json& data)
@@ -73,6 +76,21 @@ glm::mat4 Camera::GetView()
 {
     if (_viewInvalid)
     {
+        glm::quat qpitch, qyaw, qroll, tmp;
+        glm::vec3 pitchAxis;
+
+        pitchAxis = glm::cross(_forward, _up);
+        qpitch = glm::angleAxis(_pitch, pitchAxis);
+        qyaw = glm::angleAxis(_yaw, _up);
+
+        tmp = glm::cross(qpitch, qyaw);
+        tmp = glm::normalize(tmp);
+
+        _forward = glm::rotate(tmp, _forward);
+
+        _pitch = 0;
+        _yaw = 0;
+
         _view = glm::lookAt(_position, _position + _forward, _up);
         _viewInvalid = false;
     }
@@ -110,19 +128,31 @@ void Camera::SetClip(const glm::vec2& clip)
 void Camera::SetPosition(const glm::vec3& pos)
 {
     _position = pos;
-    _projectionInvalid = true;
+    _viewInvalid = true;
 }
 
 void Camera::SetForward(const glm::vec3& forward)
 {
-    _forward = forward;
-    _projectionInvalid = true;
+    _forward = glm::normalize(forward);
+    _viewInvalid = true;
 }
 
 void Camera::SetUp(const glm::vec3& up)
 {
     _up = up;
-    _projectionInvalid = true;
+    _viewInvalid = true;
+}
+
+void Camera::ChangePitch(const float& pitch)
+{
+    _pitch += pitch;
+    _viewInvalid = true;
+}
+
+void Camera::ChangeYaw(const float& yaw)
+{
+    _yaw += yaw;
+    _viewInvalid = true;
 }
 
 } // namespace dusk

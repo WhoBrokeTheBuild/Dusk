@@ -3,12 +3,7 @@
 
 #include "Config.hpp"
 
-#include "ActorPanel.hpp"
-#include "ComponentPanel.hpp"
 #include "EditorPanel.hpp"
-#include "ShadersPanel.hpp"
-#include "SettingsPanel.hpp"
-#include "ScenePanel.hpp"
 #include "ImBind.hpp"
 
 #include <memory>
@@ -46,22 +41,13 @@ public:
 
     dusk::Event<bool> OnPlayPause;
 
-    virtual int GetSdlWindowFlags() const override {
-        return App::GetSdlWindowFlags() | SDL_WINDOW_RESIZABLE;
-    }
-
     EditorPanel * GetPanel(const std::string& id) { return _panels[id].get(); }
 
 protected:
 
     virtual void Reset() override;
 
-    virtual void Update() override
-    {
-        if (IsPlaying()) {
-            dusk::App::Update();
-        }
-    }
+    virtual void Update() override;
 
     virtual void Render() override;
 
@@ -85,6 +71,12 @@ private:
 
     std::vector<float> _frameTimes;
     double _frameTimeUpdate = 0.0;
+
+    dusk::Camera * _editorCamera = nullptr;
+    dusk::Camera * _playCamera = nullptr;
+    glm::vec3 _cameraDir = { 0, 0, 0 };
+    const float _cameraSpeed = 0.25f;
+    bool _cameraDrag = false;
 
     std::unordered_map<std::string, std::function<dusk::IComponent*(void)>> _componentTypes;
 

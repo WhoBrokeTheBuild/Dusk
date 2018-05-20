@@ -1,4 +1,10 @@
 #include "Editor.hpp"
+#include "ActorPanel.hpp"
+#include "AssetsPanel.hpp"
+#include "ComponentPanel.hpp"
+#include "ShadersPanel.hpp"
+#include "SettingsPanel.hpp"
+#include "ScenePanel.hpp"
 
 Editor::Editor(int argc, char ** argv)
     : dusk::App(argc, argv)
@@ -43,14 +49,13 @@ Editor::Editor(int argc, char ** argv)
     colors["PlotHistogramHovered"] = c3;
 
     for (int i = 0; i < ImGuiCol_COUNT; ++i) {
-        ImVec4& color = ImGui::GetStyle().Colors[i];
         std::string name = ImGui::GetStyleColorName(i);
-        DuskLogInfo("Color %s (%f, %f, %f, %f)", name.c_str(), color.x, color.y, color.z, color.w);
-
         if (colors.find(name) != colors.end()) {
             memcpy(&ImGui::GetStyle().Colors[i], &colors[name].Value, sizeof(ImVec4));
         }
     }
+
+    ImGui::GetStyle().FrameBorderSize = 1.0f;
 
     _panels.emplace("Settings", std::make_unique<SettingsPanel>(this));
     _panelsLeft.push_back(_panels["Settings"].get());
@@ -67,7 +72,30 @@ Editor::Editor(int argc, char ** argv)
     _panels.emplace("Component", std::make_unique<ComponentPanel>(this));
     _panelsRight.push_back(_panels["Component"].get());
 
+    _panels.emplace("Assets", std::make_unique<AssetsPanel>(this));
+    _panelsBottom.push_back(_panels["Assets"].get());
+
     ImBind::Init(GetSdlWindow());
+
+    TrackCallback(OnMousePress.AddStatic([this](dusk::Button button, glm::vec2 pos, dusk::Flags flags) {
+        if (button == SDL_BUTTON_LEFT) {
+            _cameraDrag = true;
+        }
+    }));
+
+    TrackCallback(OnMouseRelease.AddStatic([this](dusk::Button button, glm::vec2 pos, dusk::Flags flags) {
+        if (button == SDL_BUTTON_LEFT) {
+            _cameraDrag = false;
+        }
+    }));
+
+    TrackCallback(OnMouseMove.AddStatic([this](glm::vec2 pos, glm::vec2 delta, dusk::Flags flags) {
+        if (_cameraDrag && _editorCamera) {
+            delta *= 0.001f;
+            _editorCamera->ChangePitch(delta.y);
+            _editorCamera->ChangeYaw(delta.x);
+        }
+    }));
 
     TrackCallback(OnKeyPress.AddStatic([this](dusk::Key key, dusk::Flags flags) {
         if (key == SDLK_F5) {
@@ -77,21 +105,71 @@ Editor::Editor(int argc, char ** argv)
         if (key == SDLK_F11) {
             _fullscreen = !_fullscreen;
         }
+
+        if (key == SDLK_w) {
+            _cameraDir.z = -1.0f;
+        }
+        else if (key == SDLK_s) {
+            _cameraDir.z = 1.0f;
+        }
+
+        if (key == SDLK_a) {
+            _cameraDir.x = -1.0f;
+        }
+        else if (key == SDLK_d) {
+            _cameraDir.x = 1.0f;
+        }
+
+        if (key == SDLK_PAGEUP) {
+            _cameraDir.y = 1.0f;
+        }
+        else if (key == SDLK_PAGEDOWN) {
+            _cameraDir.y = -1.0f;
+        }
+    }));
+
+    TrackCallback(OnKeyRelease.AddStatic([this](dusk::Key key, dusk::Flags flags) {
+        if (key == SDLK_w) {
+            _cameraDir.z = (_cameraDir.z < 0.0f ? 0.0f : _cameraDir.z);
+        }
+        else if (key == SDLK_s) {
+            _cameraDir.z = (_cameraDir.z > 0.0f ? 0.0f : _cameraDir.z);
+        }
+
+        if (key == SDLK_a) {
+            _cameraDir.x = (_cameraDir.x < 0.0f ? 0.0f : _cameraDir.x);
+        }
+        else if (key == SDLK_d) {
+            _cameraDir.x = (_cameraDir.x > 0.0f ? 0.0f : _cameraDir.x);
+        }
+
+        if (key == SDLK_PAGEUP) {
+            _cameraDir.y = (_cameraDir.y > 0.0f ? 0.0f : _cameraDir.y);
+        }
+        else if (key == SDLK_PAGEDOWN) {
+            _cameraDir.y = (_cameraDir.y < 0.0f ? 0.0f : _cameraDir.y);
+        }
     }));
 
     TrackCallback(OnWindowResize.AddStatic([this](glm::ivec2 size) {
         InitFramebuffer();
     }));
 
+    TrackCallback(OnPlayPause.AddStatic([this](bool playing) {
+        if (playing) {
+            GetRenderContext().CurrentCamera = _playCamera;
+        }
+        else {
+            _playCamera = GetRenderContext().CurrentCamera;
+            GetRenderContext().CurrentCamera = _editorCamera;
+        }
+    }));
+
     InitFramebuffer();
 
     _frameTimes.resize(20);
 
-    DuskLogInfo("Asset Paths:");
-    const auto& r = dusk::GetAssetPaths();
-    for (auto& p : r) {
-        DuskLogInfo("%s", p.c_str());
-    }
+    SDL_SetWindowResizable(GetSdlWindow(), SDL_TRUE);
 }
 
 Editor::~Editor()
@@ -140,6 +218,23 @@ void Editor::Reset()
     dusk::App::Reset();
 }
 
+void Editor::Update()
+{
+    if (IsPlaying()) {
+        dusk::App::Update();
+    }
+    else {
+        if (_editorCamera) {
+            if (glm::length2(_cameraDir) > 0.0f) {
+                glm::vec3 pos = _editorCamera->GetPosition();
+                glm::vec3 delta = _cameraDir * (_cameraSpeed * GetUpdateContext().DeltaTime);
+                glm::vec4 tmp = glm::vec4(delta.x, delta.y, delta.z, 1.0f) * _editorCamera->GetView();
+                _editorCamera->SetPosition(pos + glm::vec3(tmp.x, tmp.y, tmp.z));
+            }
+        }
+    }
+}
+
 void Editor::Render()
 {
     auto& ctx = GetUpdateContext();
@@ -148,18 +243,21 @@ void Editor::Render()
     if (_frameTimeUpdate <= 0.0) {
         _frameTimeUpdate = 0.1;
 
-        for (size_t i = 1; i < _frameTimes.size(); ++i) {
-            _frameTimes[i - 1] = _frameTimes[i];
-        }
-
-        _frameTimes.pop_back();
-        _frameTimes.push_back(ctx.CurrentFPS);
+        std::rotate(_frameTimes.begin(), _frameTimes.begin() + 1, _frameTimes.end());
+        _frameTimes.back() = ctx.CurrentFPS;
     }
 
     ImBind::NewFrame();
 
     if (!GetActiveScene()) {
         SetActiveScene(AddScene(std::make_unique<dusk::Scene>("default")));
+    }
+
+    if (!_editorCamera) {
+        _editorCamera = GetActiveScene()->AddActor<dusk::Camera>(std::make_unique<dusk::Camera>("_editor_camera", GetActiveScene()));
+        _editorCamera->SetAspect(GetWindowSize());
+        _editorCamera->SetPosition({ 5, 5, 5 });
+        _editorCamera->SetLookAt({ 0, 0, 0 });
     }
 
     if (_fullscreen) {

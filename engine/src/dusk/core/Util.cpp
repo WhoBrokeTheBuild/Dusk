@@ -1,5 +1,6 @@
 #include "dusk/core/Util.hpp"
 
+#include <dusk/core/Log.hpp>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
@@ -8,10 +9,13 @@
 namespace dusk {
 
 std::string _assetPath;
+std::vector<std::string> _assetPaths;
 
 void SetAssetPath(const std::string& path)
 {
+    DuskLogInfo("Setting Asset Path: %s", path.c_str());
     _assetPath = path;
+    _assetPaths.clear();
 }
 
 std::string GetAssetPath()
@@ -21,21 +25,19 @@ std::string GetAssetPath()
 
 std::vector<std::string> GetAssetPaths()
 {
-    static std::vector<std::string> paths;
-
-    if (paths.empty()) {
+    if (_assetPaths.empty()) {
         std::stringstream ss(GetAssetPath());
         std::string path;
         while (std::getline(ss, path, ':')) {
             if (path.empty()) continue;
             if (path.back() != '/') path.push_back('/');
 
-            paths.push_back(path);
+            _assetPaths.push_back(path);
         }
     }
 
-    std::reverse(paths.begin(), paths.end());
-    return paths;
+    std::reverse(_assetPaths.begin(), _assetPaths.end());
+    return _assetPaths;
 }
 
 size_t GetGLTypeSize(GLenum type)
@@ -157,6 +159,46 @@ void CleanSlashes(std::string& path)
             path[i] = '/';
         }
     }
+}
+
+std::vector<std::string> StringSplit(const char& sep, const std::string& str)
+{
+    size_t it, left;
+    std::vector<std::string> parts;
+
+    if (str.empty()) return parts;
+
+    left = 0;
+    it = str.find(sep);
+    while (it != std::string::npos) {
+        if (left != it) {
+            parts.push_back(str.substr(left, it - left));
+        }
+        left = ++it;
+        it = str.find(sep, left);
+    }
+
+    if (it == std::string::npos && left < str.size()) {
+        parts.push_back(str.substr(left));
+    }
+
+    return parts;
+}
+
+std::string StringJoin(const std::string& sep, const std::vector<std::string>& strs)
+{
+    std::string str;
+
+    for (const std::string& s : strs) {
+        str += s;
+        str += sep;
+    }
+
+    if (!str.empty()) {
+        str.pop_back();
+    }
+
+    return str;
 }
 
 std::string GetDirname(std::string path)

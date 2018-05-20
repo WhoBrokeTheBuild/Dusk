@@ -44,6 +44,7 @@ SET(_DUSK_INCLUDES
     include/dusk/core/App.hpp
     include/dusk/core/Benchmark.hpp
     include/dusk/core/Event.hpp
+    include/dusk/core/Filesystem.hpp
     include/dusk/core/Log.hpp
     include/dusk/core/Platform.hpp
     include/dusk/core/ScriptHost.hpp
@@ -67,6 +68,7 @@ SET(_DUSK_INCLUDES
 SET(_DUSK_SOURCES
     src/dusk/Dusk.cpp
     src/dusk/core/App.cpp
+    src/dusk/core/Filesystem.cpp
     src/dusk/core/ScriptHost.cpp
     src/dusk/core/Util.cpp
     #src/dusk/asset/Font.cpp

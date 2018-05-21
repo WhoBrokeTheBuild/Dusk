@@ -76,25 +76,61 @@ void ActorPanel::DoRender()
 
         std::string addCompId = "Add##" + id;
         if (ImGui::Button(addCompId.c_str())) {
-            //
+            ImGui::OpenPopup(addCompId.c_str());
+        }
+
+        if (ImGui::BeginPopup(addCompId.c_str())) {
+            if (ImGui::Button("Mesh")) {
+                _actor->AddComponent(std::make_unique<dusk::MeshComponent>(_actor, nullptr));
+            }
+            else if (ImGui::Button("Script")) {
+
+            }
+            ImGui::EndPopup();
         }
 
         ImGui::Spacing();
 
+        int i = 0;
         const auto& components = _actor->GetComponents();
         for (const auto& c : components) {
             ImGui::Indent();
 
             if (dusk::MeshComponent * mc = dynamic_cast<dusk::MeshComponent *>(c)) {
-                dusk::Mesh * mesh = mc->GetMesh();
-
                 ImGui::Text("Type: MeshComponent");
 
-                std::string filename = "File: " + mesh->GetFilename();
-                ImGui::Text("%s", filename.c_str());
+                std::string filename;
+                dusk::Mesh * mesh = mc->GetMesh();
+                if (mesh) {
+                    filename = mesh->GetFilename();
+                }
+
+                ImGui::Text("File: %s", filename.c_str());
+                ImGui::SameLine();
+
+                bool waiting = GetEditor()->IsWaitingForAsset();
+                if (waiting && !GetEditor()->IsPlaying()) {
+                    ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+                    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+                }
+
+                std::stringstream label;
+                label << "Change##" << i;
+                if (ImGui::Button(label.str().c_str())) {
+                    GetEditor()->RequestAsset(AssetType::Model);
+                    TrackCallback(GetEditor()->OnAssetChosen.AddStatic([=](std::string asset){
+                        mc->SetMesh(std::make_unique<dusk::Mesh>(asset));
+                    }));
+                }
+
+                if (waiting && !GetEditor()->IsPlaying()) {
+                    ImGui::PopStyleVar();
+                    ImGui::PopItemFlag();
+                }
             }
 
             ImGui::Unindent();
+            ++i;
         }
 
         if (GetEditor()->IsPlaying()) {

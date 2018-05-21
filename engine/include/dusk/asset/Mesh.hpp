@@ -128,6 +128,8 @@ public:
 
     Mesh * GetMesh() const { return _mesh.get(); }
 
+    void SetMesh(std::unique_ptr<Mesh>&& mesh);
+
 private:
 
     TransformData _shaderData;

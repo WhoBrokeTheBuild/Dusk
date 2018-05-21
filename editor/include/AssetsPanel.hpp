@@ -3,6 +3,7 @@
 
 #include "Config.hpp"
 #include "EditorPanel.hpp"
+#include "AssetTypes.hpp"
 
 class Editor;
 
@@ -20,10 +21,15 @@ protected:
 
 private:
 
+    AssetType GetAssetType(std::string ext);
+
     void Refresh();
 
     struct Entry
     {
+        std::string Filename;
+        std::string Ext;
+        AssetType Type;
         bool Directory;
     };
 

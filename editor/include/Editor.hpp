@@ -5,6 +5,7 @@
 
 #include "EditorPanel.hpp"
 #include "ImBind.hpp"
+#include "AssetTypes.hpp"
 
 #include <memory>
 #include <vector>
@@ -39,7 +40,24 @@ public:
 
     bool IsPlaying() { return _playing; }
 
+    void RequestAsset(AssetType type) {
+        _waitingForAsset = true;
+        _assetRequestType = type;
+
+        OnAssetChosen.RemoveAllCallbacks();
+
+        TrackCallback(OnAssetChosen.AddStatic([this](std::string) {
+            _waitingForAsset = false;
+        }));
+    }
+
+    bool IsWaitingForAsset() const { return _waitingForAsset; }
+
+    AssetType AssetRequestType() const { return _assetRequestType; }
+
     dusk::Event<bool> OnPlayPause;
+
+    dusk::Event<std::string> OnAssetChosen;
 
     EditorPanel * GetPanel(const std::string& id) { return _panels[id].get(); }
 
@@ -64,6 +82,9 @@ private:
 
     bool _playing = true;
     bool _fullscreen = false;
+
+    bool _waitingForAsset = false;
+    AssetType _assetRequestType = AssetType::Unknown;
 
     GLuint _glTexBuf = 0;
     GLuint _glFrameBuf = 0;

@@ -421,7 +421,7 @@ void Editor::Render()
         ImGui::PopStyleVar();
     }
 
-    ImGui::ShowDemoWindow();
+    //ImGui::ShowDemoWindow();
 
     ImGui::Render();
     ImBind::RenderDrawData(ImGui::GetDrawData());

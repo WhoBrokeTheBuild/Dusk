@@ -2,6 +2,7 @@
 #include "Editor.hpp"
 
 #include <dusk/core/Benchmark.hpp>
+#include <cctype>
 
 AssetsPanel::AssetsPanel(Editor * editor)
     : EditorPanel(editor)
@@ -31,6 +32,8 @@ void AssetsPanel::DoRender()
             Refresh();
         }
 
+        ImGui::BeginChild("Scroll", ImVec2(0, -ImGui::GetItemsLineHeightWithSpacing()), false, 0);
+
         bool upDisabled = (_path[0] == '\0');
         if (upDisabled) {
             ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
@@ -55,6 +58,7 @@ void AssetsPanel::DoRender()
             ImGui::PopItemFlag();
         }
 
+        int i = 0;
         for (auto& e : _entries) {
             if (e.second.Directory) {
                 if (ImGui::Button(e.first.c_str())) {
@@ -70,10 +74,59 @@ void AssetsPanel::DoRender()
                 }
             }
             else {
-                ImGui::Text(e.first.c_str());
+                ImGui::Text("%s", e.first.c_str());
+                ImGui::SameLine(200);
+                ImGui::Text("%s", AssetTypeNames[(int)e.second.Type].c_str());
+
+                if (GetEditor()->IsWaitingForAsset() && GetEditor()->AssetRequestType() == e.second.Type) {
+                    ImGui::SameLine(300);
+                    std::stringstream label;
+                    label << "Select##" << i;
+                    if (ImGui::Button(label.str().c_str())) {
+                        GetEditor()->OnAssetChosen.Call(e.second.Filename);
+                    }
+                }
             }
+            ++i;
         }
+
+        ImGui::EndChild(); // Scroll
     }
+}
+
+AssetType AssetsPanel::GetAssetType(std::string ext)
+{
+    for (size_t i = 0; i < ext.size(); ++i) {
+        ext[i] = ::tolower((unsigned char)ext[i]);
+    }
+
+    if (ext == "glsl") {
+        return AssetType::Shader;
+    }
+    else if (ext == "obj" || ext == "fbx" || ext == "dmf" || ext == "dmfz") {
+        // TODO: Expand
+        return AssetType::Model;
+    }
+    else if (ext == "mtl") {
+        return AssetType::Material;
+    }
+    else if (ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "tga") {
+        return AssetType::Texture;
+    }
+    else if (ext == "ttf" || ext == "otf") {
+        return AssetType::Font;
+    }
+    else if (ext == "as") {
+        return AssetType::Script;
+    }
+    else if (ext == "ogg" || ext == "mp3" || ext == "wav") {
+        return AssetType::Audio;
+    }
+    else if (ext == "ogv" || ext == "mpv") {
+        return AssetType::Video;
+    }
+
+    return AssetType::Unknown;
 }
 
 void AssetsPanel::Refresh()
@@ -95,7 +148,12 @@ void AssetsPanel::Refresh()
                 continue;
             }
 
+            dusk::Path fullPath = dusk::Path(_path.data()) + dusk::Path(filename);
+
             Entry e;
+            e.Filename = fullPath.GetStr();
+            e.Ext = ent.GetPath().GetExt();
+            e.Type = GetAssetType(e.Ext);
             e.Directory = ent.IsDirectory();
             _entries.emplace(filename, e);
         }

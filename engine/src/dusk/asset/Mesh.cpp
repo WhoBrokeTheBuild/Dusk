@@ -311,6 +311,7 @@ MeshComponent::MeshComponent(Actor * actor, std::unique_ptr<Mesh>&& mesh)
 void MeshComponent::Render(RenderContext& ctx)
 {
     if (!ctx.CurrentShader || !ctx.CurrentCamera) return;
+    if (!_mesh) return;
 
     _shaderData.Model = GetActor()->GetTransform();
     _shaderData.View = ctx.CurrentCamera->GetView();
@@ -320,6 +321,11 @@ void MeshComponent::Render(RenderContext& ctx)
     Shader::SetUniformBufferData("DuskTransformData", &_shaderData);
 
     _mesh->Render(ctx);
+}
+
+void MeshComponent::SetMesh(std::unique_ptr<Mesh>&& mesh)
+{
+    _mesh = std::move(mesh);
 }
 
 } // namespace dusk

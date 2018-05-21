@@ -21,6 +21,13 @@ namespace dusk {
 
 const char Path::Sep = '\\';
 
+void HandleDeleter(HandleWrap * wrp)
+{
+    HANDLE hnd = wrp->handle;
+    if (hnd) FindClose(hnd);
+    delete wrp;
+}
+
 #elif defined(__linux__)
 
 const char Path::Sep = '/';
@@ -98,11 +105,11 @@ void Path::Clean()
 
 #if defined(WIN32)
     // Clean mixed '/' '\'
-    // it = _path.find('/');
-    // while (it != std::string::npos) {
-    //     _path[it] = Path::Sep;
-    //     it = _path.find('/', it + 1);
-    // }
+    it = _path.find('/');
+    while (it != std::string::npos) {
+        _path[it] = Path::Sep;
+        it = _path.find('/', it + 1);
+    }
 #elif defined(__linux__)
     absolute = (_path.front() == Path::Sep);
 #endif
@@ -133,7 +140,15 @@ void Path::Clean()
 DirectoryEntry::DirectoryEntry(const Path& path)
     : _path(path)
 {
-    UpdateInfo();
+#if defined(WIN32)
+
+#elif defined(__linux__)
+    struct stat st;
+    if (stat(_path.GetCStr(), &st) == 0) {
+        _directory = (S_ISDIR(st.st_mode) != 0);
+        _size = st.st_size;
+    }
+#endif
 }
 
 Path DirectoryEntry::GetPath() const
@@ -156,29 +171,42 @@ size_t DirectoryEntry::GetSize() const
     return _size;
 }
 
-void DirectoryEntry::UpdateInfo()
-{
-#if defined(WIN32)
-
-#elif defined(__linux__)
-    struct stat st;
-    if (stat(_path.GetCStr(), &st) == 0) {
-        _directory = (S_ISDIR(st.st_mode) != 0);
-        _size = st.st_size;
-    }
-#endif
-}
-
 DirectoryIterator::DirectoryIterator(Path path)
 {
     _basePath = path;
 
 #if defined(WIN32)
-    WIN32_FIND_DATA ffd;
-    HANDLE hFind = FindFirstFile(path.GetCStr(), &ffd);
 
+    path = path + dusk::Path("*");
+
+    LARGE_INTEGER size;
+    WIN32_FIND_DATA ffd;
+    _hnd.reset(new HandleWrap(), HandleDeleter);
+    _hnd->handle = FindFirstFile(path.GetCStr(), &ffd);
+
+    if (_hnd->handle == INVALID_HANDLE_VALUE) {
+        return;
+    }
+    
+    DuskLogInfo("%s", ffd.cFileName);
+    
+    if (strcmp(ffd.cFileName, ".") == 0) {
+        ++(*this);
+    }
+    else if (strcmp(ffd.cFileName, "..") == 0) {
+        ++(*this);
+    }
+    else {
+        size.LowPart = ffd.nFileSizeLow;
+        size.HighPart = ffd.nFileSizeHigh;
+        _entry = DirectoryEntry(_basePath + Path(ffd.cFileName));
+        _entry._size = size.QuadPart;
+        _entry._directory = (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY > 0);
+        _entry._directory = (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ? true : false);
+    }
 
 #elif defined(__linux__)
+
     struct dirent * ent;
 
     _dir.reset(opendir(path.GetCStr()), DirDeleter);
@@ -210,7 +238,7 @@ DirectoryIterator::DirectoryIterator(const DirectoryIterator& rhs)
     _entry = rhs._entry;
 
 #if defined(WIN32)
-
+    _hnd = rhs._hnd;
 #elif defined(__linux__)
     _dir = rhs._dir;
     _index = rhs._index;
@@ -223,7 +251,7 @@ DirectoryIterator& DirectoryIterator::operator=(const DirectoryIterator& rhs)
     _entry = rhs._entry;
 
 #if defined(WIN32)
-
+    _hnd = rhs._hnd;
 #elif defined(__linux__)
     _dir = rhs._dir;
     _index = rhs._index;
@@ -236,7 +264,32 @@ DirectoryIterator& DirectoryIterator::operator++()
 {
 #if defined(WIN32)
 
+    LARGE_INTEGER size;
+    WIN32_FIND_DATA ffd;
+    
+    if (FindNextFile(_hnd->handle, &ffd) == 0) {
+        _hnd = nullptr;
+        return *this;
+    }
+
+    DuskLogInfo("%s", ffd.cFileName);
+    
+    if (strcmp(ffd.cFileName, ".") == 0) {
+        ++(*this);
+    }
+    else if (strcmp(ffd.cFileName, "..") == 0) {
+        ++(*this);
+    }
+    else {
+        size.LowPart = ffd.nFileSizeLow;
+        size.HighPart = ffd.nFileSizeHigh;
+        _entry = DirectoryEntry(_basePath + Path(ffd.cFileName));
+        _entry._size = size.QuadPart;
+        _entry._directory = (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ? true : false);
+    }
+
 #elif defined(__linux__)
+
     struct dirent * ent = nullptr;
 
     seekdir(_dir.get(), _index);
@@ -278,8 +331,12 @@ const DirectoryEntry* DirectoryIterator::operator->() const
 
 bool operator==(const DirectoryIterator& lhs, const DirectoryIterator& rhs)
 {
+#if defined(WIN32)
+    return (lhs._hnd.get() == rhs._hnd.get());
+#elif defined(__linux__)
     return (lhs._dir.get() == rhs._dir.get() &&
             lhs._index == rhs._index);
+#endif
 }
 
 bool operator!=(const DirectoryIterator& lhs, const DirectoryIterator& rhs)

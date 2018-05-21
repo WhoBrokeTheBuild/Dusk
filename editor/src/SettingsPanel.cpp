@@ -11,6 +11,8 @@ void SettingsPanel::DoReset()
 {
     const std::string& title = GetEditor()->GetWindowTitle();
     std::copy(title.c_str(), title.c_str() + title.size() + 1, _windowTitle.begin());
+
+    _startScene[0] = '\0';
 }
 
 void SettingsPanel::DoApply()

@@ -5,6 +5,10 @@
 
 #if defined(WIN32)
 
+struct HandleWrap {
+    HANDLE handle;
+};
+
 #elif defined(__linux__)
 
 #include <dirent.h>
@@ -48,8 +52,12 @@ private:
 
 };
 
+class DirectoryIterator;
+
 class DirectoryEntry
 {
+    friend class DirectoryIterator;
+
 public:
 
     DirectoryEntry() = default;
@@ -65,8 +73,6 @@ public:
     size_t GetSize() const;
 
 private:
-
-    void UpdateInfo();
 
     Path _path;
     bool _directory = false;
@@ -99,6 +105,8 @@ private:
     DirectoryEntry _entry;
 
 #if defined(WIN32)
+
+    std::shared_ptr<HandleWrap> _hnd;
 
 #elif defined(__linux__)
 

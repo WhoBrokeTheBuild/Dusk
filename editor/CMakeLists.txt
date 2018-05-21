@@ -3,11 +3,13 @@
 ### Project Configuration
 ###
 
-SET_SOURCE_FILES_PROPERTIES(
-    ${_EDITOR_DEPEND_SOURCES}
-    PROPERTIES
-    COMPILE_FLAGS -Wno-ignored-qualifiers
-)
+IF(NOT WIN32)
+    SET_SOURCE_FILES_PROPERTIES(
+        ${_EDITOR_DEPEND_SOURCES}
+        PROPERTIES
+        COMPILE_FLAGS -Wno-ignored-qualifiers
+    )
+ENDIF()
 
 ADD_DEFINITIONS(
     -DIMGUI_DISABLE_INCLUDE_IMCONFIG_H

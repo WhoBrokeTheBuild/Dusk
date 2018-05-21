@@ -46,11 +46,16 @@ int main(int argc, char** argv) {
     dusk::SetAssetPath(DUSK_ASSET_PATH);
     Editor app(argc, argv);
 
-#ifdef __linux__
+#if defined(WIN32)
+    app.TrackCallback(app.OnReset.AddStatic([]() {
+        dusk::App * app = dusk::App::Inst();
+        _DuskSetup(app);
+    }));
+#elif defined(__linux__)
     app.TrackCallback(app.OnReset.AddStatic([]() {
         loadLibrary();
     }));
-#endif // __linux__
+#endif
 
     app.SetConfigFilename(PROJECT_FILENAME);
 

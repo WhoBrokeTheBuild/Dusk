@@ -28,7 +28,7 @@ std::vector<std::string> GetAssetPaths()
     if (_assetPaths.empty()) {
         std::stringstream ss(GetAssetPath());
         std::string path;
-        while (std::getline(ss, path, ':')) {
+        while (std::getline(ss, path, '@')) {
             if (path.empty()) continue;
             if (path.back() != '/') path.push_back('/');
 

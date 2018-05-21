@@ -155,6 +155,7 @@ void App::Deserialize(nlohmann::json& data)
         _windowSize.x = data["Size"][0];
         _windowSize.y = data["Size"][1];
         SetWindowSize(_windowSize);
+        SDL_SetWindowPosition(_sdlWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     }
 
 	if (data.find("Title") != data.end())

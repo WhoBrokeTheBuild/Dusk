@@ -77,8 +77,17 @@ Editor::Editor(int argc, char ** argv)
 
     ImBind::Init(GetSdlWindow());
 
+    TrackCallback(OnWindowFocus.AddStatic([this](bool focused) {
+        if (focused) {
+            GetUpdateContext().TargetFPS = 60.0f;
+        }
+        else {
+            GetUpdateContext().TargetFPS = 8.0f;
+        }
+    }));
+
     TrackCallback(OnMousePress.AddStatic([this](dusk::Button button, glm::vec2 pos, dusk::Flags flags) {
-        if (button == SDL_BUTTON_LEFT) {
+        if (button == SDL_BUTTON_LEFT && !_playing) {
             _cameraDrag = true;
         }
     }));
@@ -99,7 +108,12 @@ Editor::Editor(int argc, char ** argv)
 
     TrackCallback(OnKeyPress.AddStatic([this](dusk::Key key, dusk::Flags flags) {
         if (key == SDLK_F5) {
-            TogglePlay();
+            if (flags & KMOD_CTRL) {
+                Compile();
+            }
+            else {
+                TogglePlay();
+            }
         }
 
         if (key == SDLK_F11) {
@@ -158,10 +172,15 @@ Editor::Editor(int argc, char ** argv)
     TrackCallback(OnPlayPause.AddStatic([this](bool playing) {
         if (playing) {
             GetRenderContext().CurrentCamera = _playCamera;
+            GetRenderContext().CurrentShader = _playShader;
         }
         else {
+            _cameraDrag = false;
+
             _playCamera = GetRenderContext().CurrentCamera;
+            _playShader = GetRenderContext().CurrentShader;
             GetRenderContext().CurrentCamera = _editorCamera;
+            GetRenderContext().CurrentShader = _editorShader;
         }
     }));
 
@@ -216,6 +235,13 @@ void Editor::TermFramebuffer()
 void Editor::Reset()
 {
     dusk::App::Reset();
+
+    _editorShader = nullptr;
+    _editorCamera = nullptr;
+    _playCamera = nullptr;
+    _playShader = nullptr;
+
+    _playing = true;
 }
 
 void Editor::Update()
@@ -253,8 +279,15 @@ void Editor::Render()
         SetActiveScene(AddScene(std::make_unique<dusk::Scene>("default")));
     }
 
+    if (!_editorShader) {
+        _editorShader = AddShader(std::make_unique<dusk::Shader>("_editor_shader", std::vector<std::string>({
+            "shaders/default/textured.fs.glsl",
+            "shaders/default/textured.vs.glsl"
+        })));
+    }
+
     if (!_editorCamera) {
-        _editorCamera = GetActiveScene()->AddActor<dusk::Camera>(std::make_unique<dusk::Camera>("_editor_camera", GetActiveScene()));
+        _editorCamera = GetActiveScene()->AddCamera(std::make_unique<dusk::Camera>("_editor_camera", GetActiveScene()));
         _editorCamera->SetAspect(GetWindowSize());
         _editorCamera->SetPosition({ 5, 5, 5 });
         _editorCamera->SetLookAt({ 0, 0, 0 });
@@ -311,12 +344,35 @@ void Editor::Render()
                 ImGui::EndMenu();
             }
 
+            if (ImGui::BeginMenu("Scene"))
+            {
+                if (ImGui::MenuItem("Open"))
+                {
+                    GetActiveScene()->Load();
+                }
+
+                if (ImGui::MenuItem("Save"))
+                {
+                    GetActiveScene()->Save();
+                }
+
+                ImGui::EndMenu();
+            }
+
             if (ImGui::BeginMenu("Program"))
             {
-                if (ImGui::MenuItem("Compile", ""))
+                if (IsPlaying() && ImGui::MenuItem("Pause", "F5"))
                 {
-                    std::string output = dusk::RunCommand("cmake --build .");
-                    Reset();
+                    Pause();
+                }
+                else if (!IsPlaying() && ImGui::MenuItem("Play", "F5"))
+                {
+                    Play();
+                }
+
+                if (ImGui::MenuItem("Compile", "Ctrl+F5"))
+                {
+                    Compile();
                 }
 
                 ImGui::EndMenu();
@@ -425,4 +481,10 @@ void Editor::Render()
 
     ImGui::Render();
     ImBind::RenderDrawData(ImGui::GetDrawData());
+}
+
+void Editor::Compile()
+{
+    std::string output = dusk::RunCommand("cmake --build .");
+    Reset();
 }

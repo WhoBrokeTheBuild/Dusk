@@ -106,7 +106,6 @@ void ActorPanel::DoRender()
                 }
 
                 ImGui::Text("File: %s", filename.c_str());
-                ImGui::SameLine();
 
                 bool waiting = GetEditor()->IsWaitingForAsset();
                 if (waiting && !GetEditor()->IsPlaying()) {
@@ -119,7 +118,8 @@ void ActorPanel::DoRender()
                 if (ImGui::Button(label.str().c_str())) {
                     GetEditor()->RequestAsset(AssetType::Model);
                     TrackCallback(GetEditor()->OnAssetChosen.AddStatic([=](std::string asset){
-                        mc->SetMesh(std::make_unique<dusk::Mesh>(asset));
+                        dusk::Mesh * mesh = dusk::AssetLoader::Load<dusk::Mesh>(asset);
+                        mc->SetMesh(mesh);
                     }));
                 }
 

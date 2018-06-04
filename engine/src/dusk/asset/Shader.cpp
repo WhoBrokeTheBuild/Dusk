@@ -13,7 +13,8 @@ std::string Shader::_GLSLVersionString;
 std::queue<GLuint> Shader::_AvailableUniformBufferBindings;
 std::unordered_map<std::string, Shader::UniformBufferRecord> Shader::_UniformBuffers;
 
-Shader::Shader(const std::vector<std::string>& filenames)
+Shader::Shader(const std::string& id, const std::vector<std::string>& filenames)
+    : _id(id)
 {
     LoadFromFiles(filenames);
 }
@@ -21,16 +22,6 @@ Shader::Shader(const std::vector<std::string>& filenames)
 Shader::~Shader()
 {
     if (_glId > 0) glDeleteProgram(_glId);
-}
-
-std::unique_ptr<Shader> Shader::Create()
-{
-    return std::make_unique<Shader>();
-}
-
-std::unique_ptr<Shader> Shader::Create(const std::vector<std::string>& filenames)
-{
-    return std::make_unique<Shader>(filenames);
 }
 
 void Shader::InitializeVersionString()

@@ -7,6 +7,7 @@
 #include <dusk/core/Filesystem.hpp>
 #include <dusk/core/ScriptHost.hpp>
 #include <dusk/core/Util.hpp>
+#include <dusk/asset/AssetLoader.hpp>
 #include <dusk/asset/Shader.hpp>
 #include <dusk/asset/Texture.hpp>
 #include <dusk/asset/Mesh.hpp>

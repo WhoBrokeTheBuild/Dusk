@@ -50,6 +50,8 @@ SET(_DUSK_INCLUDES
     include/dusk/core/ScriptHost.hpp
     #include/dusk/core/Timer.hpp
     include/dusk/core/Util.hpp
+    include/dusk/asset/Asset.hpp
+    include/dusk/asset/AssetLoader.hpp
     #include/dusk/asset/Font.hpp
     include/dusk/asset/Material.hpp
     include/dusk/asset/Mesh.hpp
@@ -71,6 +73,7 @@ SET(_DUSK_SOURCES
     src/dusk/core/Filesystem.cpp
     src/dusk/core/ScriptHost.cpp
     src/dusk/core/Util.cpp
+    src/dusk/asset/AssetLoader.cpp
     #src/dusk/asset/Font.cpp
     src/dusk/asset/Material.cpp
     src/dusk/asset/Mesh.cpp

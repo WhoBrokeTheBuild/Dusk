@@ -5,6 +5,7 @@
 
 #include <dusk/core/Context.hpp>
 #include <dusk/core/Util.hpp>
+#include <dusk/asset/Asset.hpp>
 #include <dusk/asset/Shader.hpp>
 #include <dusk/asset/Material.hpp>
 #include <dusk/scene/IComponent.hpp>
@@ -22,7 +23,7 @@ struct TransformData
     alignas(64) glm::mat4 MVP   = glm::mat4(1);
 };
 
-class Mesh
+class Mesh : public Asset
 {
 public:
 
@@ -43,49 +44,9 @@ public:
 
     Mesh() = default;
 
-    Mesh(Mesh&& rhs)
-    {
-        std::swap(_loaded, rhs._loaded);
-        std::swap(_glVAO, rhs._glVAO);
-        memcpy(_glVBOs, rhs._glVBOs, sizeof(_glVBOs));
-        memset(rhs._glVBOs, 0, sizeof(rhs._glVBOs));
-        _renderGroups = std::move(rhs._renderGroups);
-    }
-
-    Mesh(const std::string& filename)
-    {
-        LoadFromFile(filename);
-    }
-
-    Mesh(const Data& data)
-    {
-        AddData(data);
-        FinishLoad();
-    }
-
-    Mesh(const std::vector<Data>& datum)
-    {
-        for (const auto& data : datum)
-        {
-            AddData(data);
-        }
-        FinishLoad();
-    }
+    Mesh(const std::string& filename);
 
     virtual ~Mesh();
-
-    void Serialize(nlohmann::json& data);
-    void Deserialize(nlohmann::json& data);
-
-    bool LoadFromFile(const std::string& filename);
-
-    std::string GetFilename() { return _filename; }
-
-    void AddData(const Data& data);
-
-    bool FinishLoad();
-
-    bool IsLoaded() const { return _loaded; }
 
     Box GetBounds() const { return _bounds; }
 
@@ -101,10 +62,10 @@ private:
         size_t count;
     };
 
-    Box ComputeBounds(const std::vector<glm::vec3>& verts);
+    virtual void Load() override;
+    virtual void Free() override;
 
-    bool _loaded = false;
-    std::string _filename;
+    Box ComputeBounds(const std::vector<glm::vec3>& verts);
 
     std::vector<Data> _data;
 
@@ -120,21 +81,23 @@ class MeshComponent : public IComponent
 {
 public:
 
-    MeshComponent(Actor * actor, std::unique_ptr<Mesh>&& mesh);
+    MeshComponent(Actor * actor, Mesh * mesh = nullptr);
+    virtual ~MeshComponent();
 
-    ~MeshComponent() = default;
+    virtual void Serialize(nlohmann::json& data);
+    virtual void Deserialize(nlohmann::json& data);
 
     void Render(RenderContext& ctx);
 
-    Mesh * GetMesh() const { return _mesh.get(); }
+    Mesh * GetMesh() const { return _mesh; }
 
-    void SetMesh(std::unique_ptr<Mesh>&& mesh);
+    void SetMesh(Mesh * mesh);
 
 private:
 
     TransformData _shaderData;
 
-    std::unique_ptr<Mesh> _mesh;
+    Mesh * _mesh;
 
 }; // class MeshComponent
 

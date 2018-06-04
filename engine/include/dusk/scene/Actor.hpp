@@ -21,13 +21,14 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Actor)
 
-    Actor(std::string id, Scene * scene);
+    Actor(std::string id, Scene * scene, bool proc = false);
     virtual ~Actor() = default;
 
     virtual void Serialize(nlohmann::json& data);
     virtual void Deserialize(nlohmann::json& data);
 
     inline std::string GetId() { return _id; }
+    inline Scene * GetScene() const { return _scene; }
 
     void SetPosition(const glm::vec3& pos);
     inline glm::vec3 GetPosition() const { return _position; }
@@ -52,6 +53,10 @@ public:
     Event<UpdateContext&> OnUpdate;
     Event<RenderContext&> OnRender;
 
+    inline bool IsTemplate() const { return _template; }
+    inline bool IsProcedural() const { return _procedural; }
+    inline bool IsImportant() const { return _important; }
+
 private:
 
     Scene * _scene;
@@ -68,6 +73,9 @@ private:
     std::vector<std::unique_ptr<IComponent>> _components;
 
     std::vector<IComponent *> _rawComponents;
+
+    // If true, indicates this is an Actor Template
+    bool _template = false;
 
     // If true, prevents the object from being saved
     bool _procedural = false;

@@ -1,26 +1,32 @@
 #include "dusk/scene/Actor.hpp"
 
+#include <dusk/asset/Mesh.hpp>
 #include <dusk/core/Log.hpp>
 #include <dusk/core/Benchmark.hpp>
 #include <dusk/scene/Scene.hpp>
 
 namespace dusk {
 
-Actor::Actor(std::string id, Scene * scene)
+Actor::Actor(std::string id, Scene * scene, bool tmpl /* = false */)
     : _scene(scene)
     , _id(id)
     , _transform(1)
     , _position(0)
     , _rotation(0)
     , _scale(1)
+    , _template(tmpl)
 {
-    TrackCallback(scene->OnUpdate.AddPassthrough(&OnUpdate));
-    TrackCallback(scene->OnRender.AddPassthrough(&OnRender));
+    if (!IsTemplate()) {
+        TrackCallback(GetScene()->OnUpdate.AddPassthrough(&OnUpdate));
+        TrackCallback(GetScene()->OnRender.AddPassthrough(&OnRender));
+    }
 }
 
 void Actor::Serialize(nlohmann::json& data)
 {
     if (_procedural) return;
+
+    data["Id"] = GetId();
 
     glm::vec3 position = GetPosition();
     data["Position"] = { position.x, position.y, position.z };
@@ -30,6 +36,12 @@ void Actor::Serialize(nlohmann::json& data)
 
     glm::vec3 scale = GetScale();
     data["Scale"] = { scale.x, scale.y, scale.z };
+
+    data["Components"] = nlohmann::json::array();
+    for (auto& comp : _components) {
+        data["Components"].push_back(nlohmann::json::object());
+        comp->Serialize(data["Components"].back());
+    }
 }
 
 void Actor::Deserialize(nlohmann::json& data)
@@ -47,6 +59,18 @@ void Actor::Deserialize(nlohmann::json& data)
     if (data.find("Scale") != data.end()) {
         glm::vec3 scale = { data["Scale"][0], data["Scale"][1], data["Scale"][2] };
         SetScale(scale);
+    }
+
+    if (data.find("Components") != data.end()) {
+        for (auto& comp : data["Components"]) {
+            if (comp.find("Type") == comp.end()) continue;
+
+            IComponent * tmp = IComponent::CreateInstanceOfType(comp["Type"], this);
+            if (tmp) {
+                tmp->Deserialize(comp);
+                AddComponent(std::unique_ptr<IComponent>(tmp));
+            }
+        }
     }
 }
 
@@ -80,8 +104,9 @@ glm::mat4 Actor::GetTransform()
 
 void Actor::AddComponent(std::unique_ptr<IComponent>&& ptr)
 {
-    _rawComponents.push_back(ptr.get());
+    IComponent * raw = ptr.get();
     _components.push_back(std::move(ptr));
+    _rawComponents.push_back(raw);
 }
 
 std::vector<IComponent *> Actor::GetComponents() const

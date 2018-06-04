@@ -66,10 +66,10 @@ private:
     glm::vec4 _diffuse;
     glm::vec4 _specular;
 
-    std::shared_ptr<Texture> _ambientMap;
-    std::shared_ptr<Texture> _diffuseMap;
-    std::shared_ptr<Texture> _specularMap;
-    std::shared_ptr<Texture> _normalMap;
+    Texture * _ambientMap;
+    Texture * _diffuseMap;
+    Texture * _specularMap;
+    Texture * _normalMap;
 
 };
 

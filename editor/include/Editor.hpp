@@ -78,6 +78,8 @@ protected:
     void InitFramebuffer();
     void TermFramebuffer();
 
+    void Compile();
+
 private:
 
     bool _playing = true;
@@ -93,8 +95,12 @@ private:
     std::vector<float> _frameTimes;
     double _frameTimeUpdate = 0.0;
 
+    dusk::Shader * _editorShader = nullptr;
+    dusk::Shader * _playShader = nullptr;
+
     dusk::Camera * _editorCamera = nullptr;
     dusk::Camera * _playCamera = nullptr;
+
     glm::vec3 _cameraDir = { 0, 0, 0 };
     const float _cameraSpeed = 0.25f;
     bool _cameraDrag = false;

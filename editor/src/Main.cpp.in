@@ -52,6 +52,9 @@ int main(int argc, char** argv) {
         _DuskSetup(app);
     }));
 #elif defined(__linux__)
+    app.TrackCallback(app.OnStart.AddStatic([]() {
+        loadLibrary();
+    }));
     app.TrackCallback(app.OnReset.AddStatic([]() {
         loadLibrary();
     }));

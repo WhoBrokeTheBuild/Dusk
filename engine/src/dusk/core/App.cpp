@@ -2,6 +2,7 @@
 
 #include <dusk/core/Log.hpp>
 #include <dusk/core/Benchmark.hpp>
+#include <dusk/asset/AssetLoader.hpp>
 #include <dusk/asset/Mesh.hpp>
 #include <dusk/asset/Texture.hpp>
 #include <dusk/scene/Camera.hpp>
@@ -21,6 +22,12 @@ App::App(int argc, char** argv)
     DuskLogInfo("Starting Application");
 
     CreateWindow();
+
+    EmptyTexture = AssetLoader::Load<Texture>("models/default/empty.png");
+
+    IComponent::RegisterType("Mesh", [](Actor * actor) -> IComponent * {
+        return static_cast<IComponent*>(new MeshComponent(actor));
+    });
 }
 
 App::~App()
@@ -72,7 +79,6 @@ void App::Start()
 
     unsigned long frames = 0;
 
-    double_ms frameDelay = 1000ms / _targetFps;
     double_ms fpsDelay = 250ms; // Update FPS 4 times per second
 
     double_ms frameElap = 0ms;
@@ -80,7 +86,6 @@ void App::Start()
 
     auto timeOffset = high_resolution_clock::now();
 
-    _updateContext.TargetFPS = _targetFps;
     _renderContext.SDLGLContext = _sdlContext;
 
     SDL_Event evt;
@@ -88,6 +93,8 @@ void App::Start()
     _running = true;
     while (_running)
     {
+        double_ms frameDelay = 1000ms / _updateContext.TargetFPS;
+
         auto elapsedTime = duration_cast<double_ms>(high_resolution_clock::now() - timeOffset);
         timeOffset = high_resolution_clock::now();
 
@@ -166,11 +173,25 @@ void App::Deserialize(nlohmann::json& data)
 
     if (data.find("Scenes") != data.end())
     {
-        for (const std::string& name : data["Scenes"])
+        for (auto& scene : data["Scenes"])
         {
-            DuskLogLoad("Loading scene '%s'", name.c_str());
-            Scene * scene = AddScene(std::make_unique<Scene>(name));
-            scene->Load(name);
+            // TODO: Harden
+            std::string id = scene["Id"];
+            std::string file = scene["File"];
+
+            AddScene(std::make_unique<Scene>(id, file));
+        }
+    }
+
+    if (data.find("Shaders") != data.end())
+    {
+        for (auto& shader : data["Shaders"])
+        {
+            // TODO: Harden
+            std::string id = shader["Id"];
+            std::vector<std::string> files = shader["Files"];
+
+            AddShader(std::make_unique<Shader>(id, files));
         }
     }
 
@@ -265,6 +286,11 @@ void App::SetConfigFilename(const std::string& filename)
     _configFilename = filename;
 }
 
+std::string App::GetProjectDir() const
+{
+    return GetDirname(_configFilename);
+}
+
 void App::SetWindowSize(const glm::ivec2& size)
 {
     _windowSize = size;
@@ -347,6 +373,14 @@ void App::ProcessSdlEvent(SDL_Event * evt)
             _windowSize = { evt->window.data1, evt->window.data2 };
             OnWindowResize.Call(_windowSize);
             glViewport(0, 0, _windowSize.x, _windowSize.y);
+        }
+        else if (evt->window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
+        {
+            OnWindowFocus.Call(true);
+        }
+        else if (evt->window.event == SDL_WINDOWEVENT_FOCUS_LOST)
+        {
+            OnWindowFocus.Call(false);
         }
         break;
     }
@@ -482,6 +516,19 @@ Shader * App::AddShader(std::unique_ptr<Shader>&& sp)
     Shader * tmp = sp.get();
     _shaders.push_back(std::move(sp));
     return tmp;
+}
+
+Shader * App::GetShader(const std::string& id)
+{
+    auto it = std::find_if(_shaders.begin(), _shaders.end(), [&](std::unique_ptr<Shader>& ptr) {
+        return (ptr->GetId() == id);
+    });
+
+    if (it != _shaders.end()) {
+        return (*it).get();
+    }
+
+    return nullptr;
 }
 
 Scene * App::AddScene(std::unique_ptr<Scene>&& scene)

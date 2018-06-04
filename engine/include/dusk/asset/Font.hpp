@@ -13,8 +13,6 @@ class Font
 {
 public:
 
-    static std::shared_ptr<Font> Create(const std::string& filename, unsigned int size);
-
     Font(const std::string& filename, unsigned int size);
     virtual ~Font() = default;
 

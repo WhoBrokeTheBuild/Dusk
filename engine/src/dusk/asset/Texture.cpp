@@ -5,7 +5,16 @@
 
 namespace dusk {
 
-bool Texture::LoadFromFile(const std::string& filename)
+Texture::Texture(const std::string& filename)
+    : Asset(filename)
+{ }
+
+Texture::~Texture()
+{
+    Free();
+}
+
+void Texture::Load()
 {
     DuskBenchStart();
 
@@ -16,7 +25,7 @@ bool Texture::LoadFromFile(const std::string& filename)
 
     std::string fullPath;
     for (auto& p : paths) {
-        fullPath = p + filename;
+        fullPath = p + GetFilename();
 
         DuskLogVerbose("Checking %s", fullPath.c_str());
         texture = stbi_load(fullPath.c_str(), &width, &height, &comp, STBI_rgb_alpha);
@@ -26,8 +35,8 @@ bool Texture::LoadFromFile(const std::string& filename)
 
     if (!texture)
     {
-        DuskLogError("Failed to load texture '%s'", filename.c_str());
-        return false;
+        DuskLogError("Failed to load texture '%s'", GetFilename().c_str());
+        SetFilename("");
     }
 
     std::vector<uint8_t> data(texture, texture + (width * height * GetGLTypeSize(GL_RGBA)));
@@ -35,43 +44,24 @@ bool Texture::LoadFromFile(const std::string& filename)
 
     DuskLogLoad("Finished loading texture from '%s'", fullPath.c_str());
 
-    bool success = FinishLoad(glm::uvec2(width, height), data, GL_RGBA);
-    DuskBenchEnd("Texture::LoadFromFile");
-    return success;
-}
-
-bool Texture::LoadFromData(const glm::uvec2& size, const std::vector<uint8_t>& pixels, GLenum type /*= GL_RGBA*/)
-{
-    DuskBenchStart();
-    DuskLogLoad("Loading texture from data");
-
-    bool success = FinishLoad(size, pixels, type);
-    DuskBenchEnd("Texture::LoadFromFile");
-    return success;
-}
-
-bool Texture::FinishLoad(const glm::uvec2& size, const std::vector<uint8_t>& data, GLenum type)
-{
     if (_glID > 0)
     {
         glDeleteTextures(1, &_glID);
         _glID = 0;
     }
 
-    _loaded = false;
-
-    if (data.size() < (size.x * size.y * GetGLTypeSize(type)))
-    {
-        DuskLogError("Image size mismatch, buffer to small");
-        return false;
-    }
+    //if (data.size() < (width * height * GetGLTypeSize(GL_RGBA)))
+    //{
+    //    DuskLogError("Image size mismatch, buffer to small");
+    //    SetFilename("");
+    //}
 
     glGenTextures(1, &_glID);
 
     if (0 == _glID)
     {
         DuskLogError("Failed to create GL Texture");
-        return false;
+        SetFilename("");
     }
 
     glBindTexture(GL_TEXTURE_2D, _glID);
@@ -88,17 +78,29 @@ bool Texture::FinishLoad(const glm::uvec2& size, const std::vector<uint8_t>& dat
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, type, GL_UNSIGNED_BYTE, data.data());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.data());
     glGenerateMipmap(GL_TEXTURE_2D);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    _loaded = true;
-    return true;
+    SetLoaded(true);
+    DuskBenchEnd("Texture::Load");
+}
+
+void Texture::Free()
+{
+    if (_glID > 0) {
+        glDeleteTextures(1, &_glID);
+        _glID = 0;
+    }
 }
 
 void Texture::Bind()
 {
+    if (!IsLoaded()) {
+        Load();
+    }
+
     glBindTexture(GL_TEXTURE_2D, _glID);
 }
 

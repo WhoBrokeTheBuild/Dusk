@@ -22,7 +22,7 @@ IF(CMAKE_COMPILER_IS_GNUCXX OR ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
     ADD_DEFINITIONS(-D_XOPEN_SOURCE=700)
     ADD_COMPILE_OPTIONS(-Wall -Wextra -Wno-unused-parameter
         -Wno-unused-variable -Wno-missing-braces -Wno-unused-function
-        -Wno-variadic-macros)
+        -Wno-variadic-macros -Wno-ignored-qualifiers -Wno-int-to-void-pointer-cast)
 
 # VisualStudio
 ELSEIF(MSVC)

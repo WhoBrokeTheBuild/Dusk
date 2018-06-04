@@ -34,13 +34,13 @@ void ShadersPanel::DoRender()
                 ImGui::Text("  %s", filename.c_str());
             }
 
-            ImGui::Text("Uniforms:");
+            ImGui::Text("Uniform Locations:");
             for (const auto& uniform : uniforms)
             {
                 ImGui::Text("  %s: %d", uniform.first.c_str(), uniform.second.Location);
             }
 
-            ImGui::Text("Attributes:");
+            ImGui::Text("Attribute Locations:");
             for (const auto& attribute : attributes)
             {
                 ImGui::Text("  %s: %u", attribute.first.c_str(), attribute.second);

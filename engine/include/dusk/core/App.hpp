@@ -6,6 +6,7 @@
 #include <dusk/core/Event.hpp>
 #include <dusk/core/ScriptHost.hpp>
 #include <dusk/asset/Shader.hpp>
+#include <dusk/asset/Texture.hpp>
 #include <dusk/scene/Scene.hpp>
 
 #include <string>
@@ -44,7 +45,10 @@ public:
 
     bool LoadConfig(const std::string& filename = "");
     bool SaveConfig(const std::string& filename = "");
+
     void SetConfigFilename(const std::string& filename);
+
+    std::string GetProjectDir() const;
 
     RenderContext& GetRenderContext() { return _renderContext; }
     UpdateContext& GetUpdateContext() { return _updateContext; }
@@ -58,6 +62,8 @@ public:
     std::vector<glm::ivec2> GetAvailableWindowSizes();
 
     Shader * AddShader(std::unique_ptr<Shader>&& sp);
+
+    Shader * GetShader(const std::string& id);
 
     Scene * AddScene(std::unique_ptr<Scene>&& scene);
     Scene * GetScene(std::string id);
@@ -82,11 +88,14 @@ public:
     Event<glm::vec2> OnMouseScroll;
 
     Event<glm::ivec2> OnWindowResize;
+    Event<bool> OnWindowFocus;
 
     Event<std::vector<std::string>> OnFileDrop;
 
     Event<> OnReset;
     Event<std::string> OnConfigLoad;
+
+    Texture * EmptyTexture;
 
 protected:
 
@@ -120,8 +129,6 @@ private:
     glm::ivec2 _windowSize = { 1024, 768 };
     std::string _windowTitle = "Dusk";
     std::string _startScene = "";
-
-    float _targetFps = 60.0f;
 
     ALCdevice * _alDevice = nullptr;
     ALCcontext * _alContext = nullptr;

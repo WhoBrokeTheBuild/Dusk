@@ -1,5 +1,6 @@
 #include "dusk/asset/Mesh.hpp"
 
+#include <dusk/asset/AssetLoader.hpp>
 #include <dusk/core/Log.hpp>
 #include <dusk/core/Benchmark.hpp>
 #include <dusk/scene/Actor.hpp>
@@ -12,25 +13,21 @@
 
 namespace dusk {
 
+Mesh::Mesh(const std::string& filename)
+    : Asset(filename)
+{
+}
+
 Mesh::~Mesh()
 {
-    glDeleteBuffers(sizeof(_glVBOs) / sizeof(GLuint), _glVBOs);
-    glDeleteVertexArrays(1, &_glVAO);
+    Free();
 }
 
-void Mesh::Serialize(nlohmann::json& data)
+void Mesh::Load()
 {
+    DuskBenchStart();
 
-}
-
-void Mesh::Deserialize(nlohmann::json& data)
-{
-
-}
-
-bool Mesh::LoadFromFile(const std::string& filename)
-{
-    _filename = filename;
+    if (GetFilename().empty()) return;
 
     const unsigned int flags = aiProcess_Triangulate |
                                aiProcess_FlipUVs;
@@ -41,7 +38,7 @@ bool Mesh::LoadFromFile(const std::string& filename)
     const aiScene* scene = nullptr;
 
     for (auto& p : paths) {
-        fullPath = p + filename;
+        fullPath = p + GetFilename();
 
         DuskLogVerbose("Checking %s", fullPath.c_str());
         scene = importer.ReadFile(fullPath, flags);
@@ -51,11 +48,11 @@ bool Mesh::LoadFromFile(const std::string& filename)
 
 	if (!scene)
     {
-        DuskLogError("Failed to load model, '%s'", filename.c_str());
-        return false;
+        DuskLogError("Failed to load model, '%s'", GetFilename().c_str());
+        SetFilename("");
     }
 
-	std::string dirname = GetDirname(filename) + "/";
+	std::string dirname = GetDirname(GetFilename()) + "/";
 
     auto toVec2 = [](const aiVector3D& v) -> glm::vec2 {
         return { v.x, v.y };
@@ -156,25 +153,8 @@ bool Mesh::LoadFromFile(const std::string& filename)
             }));
         }
 
-        AddData(data);
+        _data.push_back(data);
     }
-
-    FinishLoad();
-
-    DuskLogLoad("Finished loading Mesh from '%s'", fullPath.c_str());
-
-    return false;
-}
-
-void Mesh::AddData(const Data& data)
-{
-    _data.push_back(data);
-}
-
-bool Mesh::FinishLoad()
-{
-    DuskBenchStart();
-    _loaded = false;
 
     std::vector<glm::vec3> verts;
     std::vector<glm::vec3> norms;
@@ -202,7 +182,7 @@ bool Mesh::FinishLoad()
     if (verts.empty())
     {
         DuskLogWarn("Cannot create an empty mesh");
-        return false;
+        SetFilename("");
     }
 
     _bounds = ComputeBounds(verts);
@@ -243,14 +223,28 @@ bool Mesh::FinishLoad()
 
     // TODO: Colors?
 
-    DuskBenchEnd("Mesh::FinishLoad");
-    _loaded = true;
-    return true;
+    DuskBenchEnd("Mesh::Load");
+    SetLoaded(true);
+}
+
+void Mesh::Free()
+{
+    _data.clear();
+    _renderGroups.clear();
+
+    glDeleteBuffers(sizeof(_glVBOs) / sizeof(GLuint), _glVBOs);
+    glDeleteVertexArrays(1, &_glVAO);
+
+    SetLoaded(false);
 }
 
 void Mesh::Render(RenderContext& ctx)
 {
     if (!ctx.CurrentShader) return;
+
+    if (!IsLoaded()) {
+        Load();
+    }
 
     ctx.CurrentShader->Bind();
 
@@ -301,11 +295,35 @@ Box Mesh::ComputeBounds(const std::vector<glm::vec3>& verts)
     return bounds;
 }
 
-MeshComponent::MeshComponent(Actor * actor, std::unique_ptr<Mesh>&& mesh)
+MeshComponent::MeshComponent(Actor * actor, Mesh * mesh /*= nullptr*/)
     : IComponent(actor)
-    , _mesh(std::move(mesh))
+    , _mesh(mesh)
 {
+    if (GetMesh()) {
+        AssetLoader::Lock(static_cast<Asset*>(GetMesh()));
+    }
+
     TrackCallback(GetActor()->OnRender.AddMember<MeshComponent>(this, &MeshComponent::Render));
+}
+
+MeshComponent::~MeshComponent()
+{
+    AssetLoader::Release(static_cast<Asset*>(GetMesh()));
+}
+
+void MeshComponent::Serialize(nlohmann::json& data)
+{
+    data["Type"] = "Mesh";
+    if (GetMesh()) {
+        data["File"] = GetMesh()->GetFilename();
+    }
+}
+
+void MeshComponent::Deserialize(nlohmann::json& data)
+{
+    if (data.find("File") != data.end()) {
+        SetMesh(AssetLoader::Load<Mesh>(data["File"]));
+    }
 }
 
 void MeshComponent::Render(RenderContext& ctx)
@@ -323,9 +341,13 @@ void MeshComponent::Render(RenderContext& ctx)
     _mesh->Render(ctx);
 }
 
-void MeshComponent::SetMesh(std::unique_ptr<Mesh>&& mesh)
+void MeshComponent::SetMesh(Mesh * mesh)
 {
-    _mesh = std::move(mesh);
+    if (GetMesh()) {
+        AssetLoader::Release(static_cast<Asset*>(GetMesh()));
+    }
+    _mesh = mesh;
+    AssetLoader::Lock(static_cast<Asset*>(GetMesh()));
 }
 
 } // namespace dusk

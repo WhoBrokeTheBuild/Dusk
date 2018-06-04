@@ -2,13 +2,14 @@
 #define DUSK_CAMERA_HPP
 
 #include <dusk/Config.hpp>
-#include <dusk/scene/Actor.hpp>
+#include <dusk/core/Event.hpp>
+#include <dusk/scene/Scene.hpp>
 
 #include <memory>
 
 namespace dusk {
 
-class Camera : public Actor
+class Camera : public ICallbackHost
 {
 public:
 
@@ -23,6 +24,8 @@ public:
     void Deserialize(nlohmann::json& data);
 
     /// Methods
+
+    std::string GetId() const { return _id; }
 
     glm::mat4 GetView();
     glm::mat4 GetProjection();
@@ -54,6 +57,10 @@ public:
     void ChangeYaw(const float& yaw);
 
 private:
+
+    std::string _id;
+
+    Scene * _scene;
 
     bool _viewInvalid;
     bool _projectionInvalid;

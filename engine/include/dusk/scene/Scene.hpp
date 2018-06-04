@@ -4,6 +4,7 @@
 #include <dusk/Config.hpp>
 
 #include <dusk/scene/Actor.hpp>
+#include <dusk/scene/Camera.hpp>
 #include <dusk/core/Event.hpp>
 #include <dusk/core/Context.hpp>
 #include <string>
@@ -16,7 +17,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Scene)
 
-    Scene(std::string id);
+    Scene(const std::string& id, const std::string& filename = "");
     virtual ~Scene() = default;
 
     virtual void Serialize(nlohmann::json& data);
@@ -24,13 +25,23 @@ public:
 
     inline std::string GetId() { return _id; }
 
+    inline std::string GetFilename() { return _filename; }
+
     virtual void Start();
     virtual void Stop();
 
-    bool Load(const std::string& filename);
-    bool Save(const std::string& filename);
+    bool Load();
+    bool Save();
+
+    inline bool IsLoaded() const { return _loaded; }
 
     void Update(UpdateContext& ctx);
+
+    Camera * AddCamera(std::unique_ptr<Camera>&& ptr);
+
+    Camera * GetCamera(const std::string& id);
+
+    // TODO: Camera Managemment
 
     template <class T>
     T * AddActor(std::unique_ptr<T>&& ptr);
@@ -50,6 +61,15 @@ public:
 private:
 
     std::string _id;
+
+    std::string _filename;
+
+    std::string _defaultCamera;
+    std::string _defaultShader;
+
+    bool _loaded = false;
+
+    std::vector<std::unique_ptr<Camera>> _cameras;
 
     std::vector<std::unique_ptr<Actor>> _actors;
 

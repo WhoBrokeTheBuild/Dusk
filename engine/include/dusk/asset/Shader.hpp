@@ -26,16 +26,13 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Shader)
 
-    static std::unique_ptr<Shader> Create();
-    static std::unique_ptr<Shader> Create(const std::vector<std::string>& filenames);
-
     /** Create an empty shader, for use with LoadFromFile().
      */
     Shader() = default;
 
     /** Create and load a shader from the given filenames.
      */
-    Shader(const std::vector<std::string>& filenames);
+    Shader(const std::string& id, const std::vector<std::string>& filenames);
 
     virtual ~Shader();
 
@@ -66,10 +63,12 @@ public:
      */
     virtual bool LoadFromFiles(const std::vector<std::string>& filenames);
 
+    inline std::string GetId() const { return _id; }
+
     /** Check if the shader has been successfully loaded.
      * @return True if the shader has successfully loaded.
      */
-    inline bool IsLoaded() { return _loaded; }
+    inline bool IsLoaded() const { return _loaded; }
 
     /** Bind the shader for use with rendering or update operations.
      * This internally calls glUseProgram()
@@ -177,6 +176,8 @@ private:
     void CacheAttributes();
 
     /// Variables
+
+    std::string _id;
 
     bool _loaded = false;
     GLuint _glId = 0;

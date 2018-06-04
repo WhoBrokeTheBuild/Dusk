@@ -2,6 +2,7 @@
 
 #include <dusk/core/App.hpp>
 #include <dusk/core/Log.hpp>
+#include <dusk/asset/AssetLoader.hpp>
 #include <dusk/asset/Shader.hpp>
 #include <sstream>
 
@@ -18,19 +19,19 @@ Material::Material(const Data& data)
 {
     if (!data.AmbientMap.empty())
     {
-        _ambientMap.reset(new Texture(data.AmbientMap));
+        _ambientMap = AssetLoader::LoadAndLock<Texture>(data.AmbientMap);
     }
     if (!data.DiffuseMap.empty())
     {
-        _diffuseMap.reset(new Texture(data.DiffuseMap));
+        _diffuseMap = AssetLoader::LoadAndLock<Texture>(data.DiffuseMap);
     }
     if (!data.SpecularMap.empty())
     {
-        _specularMap.reset(new Texture(data.SpecularMap));
+        _specularMap = AssetLoader::LoadAndLock<Texture>(data.SpecularMap);
     }
     if (!data.NormalMap.empty())
     {
-        _normalMap.reset(new Texture(data.NormalMap));
+        _normalMap = AssetLoader::LoadAndLock<Texture>(data.NormalMap);
     }
 
     _shaderData.Ambient  = _ambient;
@@ -38,42 +39,51 @@ Material::Material(const Data& data)
     _shaderData.Specular = _specular;
 
     _shaderData.MapFlags = 0;
-    _shaderData.MapFlags |= (_ambientMap && _ambientMap->IsLoaded()   ? AMBIENT_MAP_FLAG : 0);
-    _shaderData.MapFlags |= (_diffuseMap && _diffuseMap->IsLoaded()   ? DIFFUSE_MAP_FLAG : 0);
-    _shaderData.MapFlags |= (_specularMap && _specularMap->IsLoaded() ? SPECULAR_MAP_FLAG : 0);
-    _shaderData.MapFlags |= (_normalMap && _normalMap->IsLoaded()     ? NORMAL_MAP_FLAG : 0);
+    _shaderData.MapFlags |= (_ambientMap  ? AMBIENT_MAP_FLAG : 0);
+    _shaderData.MapFlags |= (_diffuseMap  ? DIFFUSE_MAP_FLAG : 0);
+    _shaderData.MapFlags |= (_specularMap ? SPECULAR_MAP_FLAG : 0);
+    _shaderData.MapFlags |= (_normalMap   ? NORMAL_MAP_FLAG : 0);
 }
 
 void Material::Bind(Shader * sp)
 {
+    App * app = App::Inst();
     Shader::SetUniformBufferData("DuskMaterialData", &_shaderData);
 
-    if (_ambientMap && _ambientMap->IsLoaded())
-    {
+    if (_normalMap) {
+        sp->SetUniform("_NormalMap", TextureID::NORMAL);
+        glActiveTexture(GL_TEXTURE0 + TextureID::NORMAL);
+        _normalMap->Bind();
+    }
+    else {
+        sp->SetUniform("_NormalMap", -1);
+    }
+
+    if (_ambientMap) {
         sp->SetUniform("_AmbientMap", TextureID::AMBIENT);
         glActiveTexture(GL_TEXTURE0 + TextureID::AMBIENT);
         _ambientMap->Bind();
     }
+    else {
+        sp->SetUniform("_AmbientMap", -1);
+    }
 
-    if (_diffuseMap && _diffuseMap->IsLoaded())
-    {
+    if (_diffuseMap) {
         sp->SetUniform("_DiffuseMap", TextureID::DIFFUSE);
         glActiveTexture(GL_TEXTURE0 + TextureID::DIFFUSE);
         _diffuseMap->Bind();
     }
+    else {
+        sp->SetUniform("_DiffuseMap", -1);
+    }
 
-    if (_specularMap && _specularMap->IsLoaded())
-    {
+    if (_specularMap) {
         sp->SetUniform("_SpecularMap", TextureID::SPECULAR);
         glActiveTexture(GL_TEXTURE0 + TextureID::SPECULAR);
         _specularMap->Bind();
     }
-
-    if (_normalMap && _normalMap->IsLoaded())
-    {
-        sp->SetUniform("_NormalMap", TextureID::NORMAL);
-        glActiveTexture(GL_TEXTURE0 + TextureID::NORMAL);
-        _normalMap->Bind();
+    else {
+        sp->SetUniform("_SpecularMap", -1);
     }
 
     glActiveTexture(0);

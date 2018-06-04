@@ -3,13 +3,14 @@
 
 #include <dusk/Config.hpp>
 
+#include <dusk/asset/Asset.hpp>
 #include <dusk/core/Event.hpp>
 #include <string>
 #include <vector>
 
 namespace dusk {
 
-class Texture
+class Texture : public Asset
 {
 public:
 
@@ -18,42 +19,19 @@ public:
     DISALLOW_COPY_AND_ASSIGN(Texture)
 
     Texture() = default;
-    Texture(const std::string& filename)
-    {
-        LoadFromFile(filename);
-    }
-
-    Texture(const glm::uvec2& size, const std::vector<uint8_t>& pixels, GLenum type = GL_RGBA)
-    {
-        LoadFromData(size, pixels, type);
-    }
-
-    Texture(Texture&& rhs)
-    {
-        std::swap(_loaded, rhs._loaded);
-        std::swap(_glID, rhs._glID);
-    }
-
-    virtual ~Texture()
-    {
-        if (_glID > 0) glDeleteTextures(1, &_glID);
-    }
+    Texture(const std::string& filename);
+    virtual ~Texture();
 
     /// Methods
 
     bool LoadFromFile(const std::string& filename);
 
-    bool LoadFromData(const glm::uvec2& size, const std::vector<uint8_t>& pixels, GLenum type = GL_RGBA);
-
     void Bind();
-
-    bool IsLoaded() const { return _loaded; }
 
 private:
 
-    bool FinishLoad(const glm::uvec2& size, const std::vector<uint8_t>& pixels, GLenum type);
-
-    bool _loaded = false;
+    virtual void Load() override;
+    virtual void Free() override;
 
     GLuint _glID = 0;
 

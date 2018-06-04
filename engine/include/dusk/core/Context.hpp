@@ -14,7 +14,7 @@ class Camera;
 
 struct UpdateContext : public IScriptRef
 {
-    float TargetFPS;
+    float TargetFPS = 60.0f;
     float CurrentFPS;
 
     float DeltaTime;

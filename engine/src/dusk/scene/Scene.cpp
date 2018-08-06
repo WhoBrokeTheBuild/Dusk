@@ -9,6 +9,25 @@
 
 namespace dusk {
 
+std::unordered_map<std::string, Scene::TypeFunc> Scene::_TypeFuncs;
+
+void Scene::RegisterType(const std::string& type, TypeFunc func)
+{
+    DuskLogInfo("Registering Scene Type '%s'", type.c_str());
+    if (_TypeFuncs.find(type) == _TypeFuncs.end()) {
+        _TypeFuncs[type] = func;
+    }
+}
+
+Scene * Scene::CreateInstanceOfType(const std::string& type, const std::string& id, const std::string& filename)
+{
+    if (_TypeFuncs.find(type) == _TypeFuncs.end()) {
+        DuskLogWarn("Failed to create Scene of type '%s'", type.c_str());
+        return nullptr;
+    }
+    return _TypeFuncs[type](id, filename);
+}
+
 Scene::Scene(const std::string& id, const std::string& filename /* = "" */)
     : _id(id)
     , _filename(filename)

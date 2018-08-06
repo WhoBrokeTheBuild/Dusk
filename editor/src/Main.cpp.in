@@ -36,6 +36,8 @@ void loadLibrary() {
         return;
     }
 
+    app.Reset();
+
     DuskLogInfo("%p", app);
     (*setup)(app);
 }
@@ -44,29 +46,21 @@ void loadLibrary() {
 
 int main(int argc, char** argv) {
     dusk::SetAssetPath(DUSK_ASSET_PATH);
+
     Editor app(argc, argv);
 
 #if defined(WIN32)
     app.TrackCallback(app.OnReset.AddStatic([]() {
         dusk::App * app = dusk::App::Inst();
         _DuskSetup(app);
+        app.LoadConfig(PROJECT_FILENAME);
     }));
 #elif defined(__linux__)
-    app.TrackCallback(app.OnStart.AddStatic([]() {
-        loadLibrary();
-    }));
     app.TrackCallback(app.OnReset.AddStatic([]() {
         loadLibrary();
+        app.LoadConfig(PROJECT_FILENAME);
     }));
 #endif
-
-    app.SetConfigFilename(PROJECT_FILENAME);
-
-    FILE * fp = fopen(PROJECT_FILENAME.c_str(), "rt");
-    if (fp) {
-        fclose(fp);
-        app.LoadConfig(PROJECT_FILENAME);
-    }
 
     app.Start();
     return 0;

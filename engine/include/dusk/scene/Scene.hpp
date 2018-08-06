@@ -15,6 +15,12 @@ class Scene : public ICallbackHost
 {
 public:
 
+    typedef std::function<Scene*(const std::string&, const std::string&)> TypeFunc;
+
+    static void RegisterType(const std::string& type, TypeFunc func);
+
+    static Scene * CreateInstanceOfType(const std::string& type, const std::string& id, const std::string& filename = "");
+
     DISALLOW_COPY_AND_ASSIGN(Scene)
 
     Scene(const std::string& id, const std::string& filename = "");
@@ -59,6 +65,8 @@ public:
     Event<RenderContext&> OnRender;
 
 private:
+
+    static std::unordered_map<std::string, TypeFunc> _TypeFuncs;
 
     std::string _id;
 

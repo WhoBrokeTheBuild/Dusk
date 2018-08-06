@@ -30,7 +30,6 @@ SET(_DUSK_EDITOR "Dusk-Editor")
 SET(_EDITOR_INCLUDES
     include/ActorPanel.hpp
     include/AssetsPanel.hpp
-    include/ComponentPanel.hpp
     include/Config.hpp
     include/Editor.hpp
     include/EditorPanel.hpp
@@ -43,7 +42,6 @@ SET(_EDITOR_INCLUDES
 SET(_EDITOR_SOURCES
     src/ActorPanel.cpp
     src/AssetsPanel.cpp
-    src/ComponentPanel.cpp
     src/Editor.cpp
     src/EditorPanel.cpp
     src/ImBind.cpp

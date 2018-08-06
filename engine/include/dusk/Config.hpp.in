@@ -52,7 +52,8 @@
     TypeName(const TypeName&) = delete;   \
     TypeName& operator=(const TypeName&) = delete;
 
-#define DUSK_CLASS(...)
+#define DUSK_SCENE(...)
+#define DUSK_ACTOR(...)
 #define DUSK_PROPERTY(...)
 
 #define DUSK_SYSTEM_NAME	"@CMAKE_SYSTEM_NAME@"

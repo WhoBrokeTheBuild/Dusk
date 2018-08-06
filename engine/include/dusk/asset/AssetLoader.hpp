@@ -60,6 +60,13 @@ public:
         }
     }
 
+    static void ReleaseAll()
+    {
+        _Assets.clear();
+        _AssetUseCount.clear();
+        _AssetsByFilename.clear();
+    }
+
     template <class T>
     static T * LoadAndLock(const std::string& filename)
     {

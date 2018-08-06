@@ -12,9 +12,9 @@ class IComponent : public ICallbackHost
 {
 public:
 
-    typedef std::function<IComponent*(Actor * actor)> CompTypeFunc;
+    typedef std::function<IComponent*(Actor * actor)> TypeFunc;
 
-    static void RegisterType(const std::string& type, CompTypeFunc func);
+    static void RegisterType(const std::string& type, TypeFunc func);
 
     static IComponent * CreateInstanceOfType(const std::string& type, Actor * actor);
 
@@ -28,9 +28,9 @@ public:
 
 private:
 
+    static std::unordered_map<std::string, TypeFunc> _TypeFuncs;
+    
     Actor * _actor;
-
-    static std::unordered_map<std::string, CompTypeFunc> _TypeFuncs;
 
 }; // class IComponent
 

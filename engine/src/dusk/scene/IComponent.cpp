@@ -4,9 +4,9 @@
 
 namespace dusk {
 
-std::unordered_map<std::string, IComponent::CompTypeFunc> IComponent::_TypeFuncs;
+std::unordered_map<std::string, IComponent::TypeFunc> IComponent::_TypeFuncs;
 
-void IComponent::RegisterType(const std::string& type, CompTypeFunc func)
+void IComponent::RegisterType(const std::string& type, TypeFunc func)
 {
     if (_TypeFuncs.find(type) == _TypeFuncs.end()) {
         _TypeFuncs[type] = func;

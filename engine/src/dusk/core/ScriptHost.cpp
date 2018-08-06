@@ -12,9 +12,10 @@
 
 namespace dusk {
 
-void as_print(std::string& str)
+void as_LogInfo(asIScriptContext * ctx, std::string& str)
 {
-    printf("%s", str.c_str());
+    int line = ctx->GetLineNumber(0, 0, NULL);
+    printf("%d: %s", line, str.c_str());
 }
 
 void MessageCallback(const asSMessageInfo *msg, void *param)
@@ -47,7 +48,9 @@ ScriptHost::ScriptHost()
     RegisterScriptArray(_as, true);
     RegisterStdString(_as);
 
-    _as->RegisterGlobalFunction("void print(string &in)", asFUNCTION(as_print), asCALL_CDECL);
+    _as->RegisterObjectType("asIScriptContext", 0, asOBJ_REF | asOBJ_NOCOUNT);
+
+    _as->RegisterGlobalFunction("void DuskLogInfo(asIScriptContext&, string &in)", asFUNCTION(as_LogInfo), asCALL_CDECL);
 
     _as->RegisterObjectType("ScriptHost", 0, asOBJ_REF);
 

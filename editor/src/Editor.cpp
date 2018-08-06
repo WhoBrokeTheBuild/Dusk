@@ -1,7 +1,6 @@
 #include "Editor.hpp"
 #include "ActorPanel.hpp"
 #include "AssetsPanel.hpp"
-#include "ComponentPanel.hpp"
 #include "ShadersPanel.hpp"
 #include "SettingsPanel.hpp"
 #include "ScenePanel.hpp"
@@ -60,17 +59,14 @@ Editor::Editor(int argc, char ** argv)
     _panels.emplace("Settings", std::make_unique<SettingsPanel>(this));
     _panelsLeft.push_back(_panels["Settings"].get());
 
-    _panels.emplace("Shaders", std::make_unique<ShadersPanel>(this));
-    _panelsLeft.push_back(_panels["Shaders"].get());
-
     _panels.emplace("Scene", std::make_unique<ScenePanel>(this));
     _panelsLeft.push_back(_panels["Scene"].get());
 
+    _panels.emplace("Shaders", std::make_unique<ShadersPanel>(this));
+    _panelsLeft.push_back(_panels["Shaders"].get());
+
     _panels.emplace("Actor", std::make_unique<ActorPanel>(this));
     _panelsRight.push_back(_panels["Actor"].get());
-
-    _panels.emplace("Component", std::make_unique<ComponentPanel>(this));
-    _panelsRight.push_back(_panels["Component"].get());
 
     _panels.emplace("Assets", std::make_unique<AssetsPanel>(this));
     _panelsBottom.push_back(_panels["Assets"].get());
@@ -276,6 +272,7 @@ void Editor::Render()
     ImBind::NewFrame();
 
     if (!GetActiveScene()) {
+        DuskLogWarn("Setting default scene due to lack of scene");
         SetActiveScene(AddScene(std::make_unique<dusk::Scene>("default")));
     }
 
@@ -388,8 +385,11 @@ void Editor::Render()
                 Play();
             }
 
-            ImGui::SameLine((float)winSize.x - 260, 0.0f);
-            ImGui::PlotLines("", _frameTimes.data(), _frameTimes.size(), 0, "", 0.0f, ctx.TargetFPS, ImVec2(100, 18));
+            if (!_frameTimes.empty())
+            {
+                ImGui::SameLine((float)winSize.x - 260, 0.0f);
+                ImGui::PlotLines("", _frameTimes.data(), _frameTimes.size(), 0, "", 0.0f, ctx.TargetFPS, ImVec2(100, 18));
+            }
 
             ImGui::SameLine((float)winSize.x - 150, 0.0f);
             ImGui::Text("%.2f FPS (%.2f ms)", ctx.CurrentFPS, 1000.0f / ctx.CurrentFPS);

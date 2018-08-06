@@ -65,6 +65,8 @@ void App::Reset()
 
     OnFileDrop.RemoveAllCallbacks();
 
+    AssetLoader::ReleaseAll();
+
     OnReset.Call();
 }
 
@@ -150,21 +152,12 @@ void App::Stop()
 
 void App::Serialize(nlohmann::json& data)
 {
-    data["Size"] = { _windowSize.x, _windowSize.y };
     data["Title"] = _windowTitle;
     data["StartScene"] = _startScene;
 }
 
 void App::Deserialize(nlohmann::json& data)
 {
-    if (data.find("Size") != data.end())
-    {
-        _windowSize.x = data["Size"][0];
-        _windowSize.y = data["Size"][1];
-        SetWindowSize(_windowSize);
-        SDL_SetWindowPosition(_sdlWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-    }
-
 	if (data.find("Title") != data.end())
 	{
 		_windowTitle = data["Title"].get<std::string>();
@@ -175,11 +168,24 @@ void App::Deserialize(nlohmann::json& data)
     {
         for (auto& scene : data["Scenes"])
         {
+            std::string type = "Scene";
+            if (scene.find("Type") != scene.end())
+            {
+                type = scene["Type"];
+            }
+
             // TODO: Harden
             std::string id = scene["Id"];
             std::string file = scene["File"];
 
-            AddScene(std::make_unique<Scene>(id, file));
+            if (type == "Scene")
+            {
+                AddScene(std::make_unique<Scene>(id, file));
+            }
+            else
+            {
+                AddScene(std::unique_ptr<Scene>(Scene::CreateInstanceOfType(type, id, file)));
+            }
         }
     }
 
@@ -218,8 +224,6 @@ bool App::LoadConfig(const std::string& filename)
     {
         _configFilename = filename;
     }
-
-    Reset();
 
     std::ifstream file(_configFilename);
     nlohmann::json data;
@@ -294,8 +298,9 @@ std::string App::GetProjectDir() const
 void App::SetWindowSize(const glm::ivec2& size)
 {
     _windowSize = size;
-    glViewport(0, 0, _windowSize.x, _windowSize.y);
     SDL_SetWindowSize(_sdlWindow, _windowSize.x, _windowSize.y);
+    SDL_GetWindowSize(_sdlWindow, &_windowSize.x, &_windowSize.y);
+    glViewport(0, 0, _windowSize.x, _windowSize.y);
 }
 
 void App::SetWindowTitle(const std::string& title)

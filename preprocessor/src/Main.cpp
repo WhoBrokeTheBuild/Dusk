@@ -10,8 +10,38 @@
 
 using json = nlohmann::json;
 
-const std::regex CLASS_REGEX("DUSK_CLASS\\((.*)\\)");
+const std::regex SCENE_REGEX("DUSK_SCENE\\((.*)\\)");
+const std::regex ACTOR_REGEX("DUSK_ACTOR\\((.*)\\)");
+const std::regex COMPONENT_REGEX("DUSK_COMPONENT\\((.*)\\)");
 const std::regex PROPERTY_REGEX("DUSK_PROPERTY\\((.*)\\)\\n\\s*(.*)\\n");
+
+void CleanSlashes(std::string& path)
+{
+    for (unsigned int i = 0; i < path.size(); ++i)
+    {
+        if (path[i] == '\\')
+        {
+            path[i] = '/';
+        }
+    }
+}
+
+std::string GetDirname(std::string path)
+{
+    CleanSlashes(path);
+    size_t pivot = path.find_last_of('/');
+    return (pivot == std::string::npos
+        ? "./"
+        : path.substr(0, pivot));
+}
+
+std::string GetExtension(std::string path)
+{
+    size_t pivot = path.find_last_of('.');
+    return (pivot == std::string::npos
+        ? std::string()
+        : path.substr(pivot + 1));
+}
 
 std::string StringTrim(const std::string& str)
 {
@@ -111,60 +141,38 @@ void PreProcess(const std::string& filename, nlohmann::json& data)
     std::ifstream file(filename);
     std::string buffer((std::istreambuf_iterator<char>(file)),
                        std::istreambuf_iterator<char>());
+    file.close();
 
-    std::smatch match;
-    if (std::regex_search(buffer, match, CLASS_REGEX) && match.size() == 2) {
-        std::string info = match[1].str();
+    auto end = std::sregex_iterator();
+    auto sceneIt = std::sregex_iterator(buffer.begin(), buffer.end(), SCENE_REGEX);
 
-        const std::vector<std::string>& parts = SplitString(info, ',');
+    for (; sceneIt != end; ++sceneIt) {
+        std::smatch match = *sceneIt;
+        std::string name = match[1].str();
 
-        std::string className = StringTrim(parts[0]);
-        std::string parent = StringTrim(parts[1]);
-        json fields = json::array();
-
-        std::string remain = buffer;
-        while (std::regex_search(remain, match, PROPERTY_REGEX)) {
-            if (match.size() < 3) continue;
-
-            std::unordered_map<std::string, std::string> params;
-            const std::vector<std::string>& paramList = SplitString(match[1].str(), ',');
-            std::vector<std::string> defn = SplitString(match[2].str(), ' ');
-
-            for (const auto& p : paramList) {
-                params.emplace(StringTrim(p), "");
-            }
-
-            defn.erase(defn.begin());
-            if (defn.front() == "*") defn.erase(defn.begin());
-            if (defn.front().back() == ';') defn.front().pop_back();
-
-            fields.push_back({
-                { "Name", defn.front() },
-                { "Params", params },
-            });
-
-            remain = match.suffix().str();
-        }
-
-        data.push_back({
-            { "Name", className },
-            { "Parent", parent },
-            { "Fields", fields },
+        data["Scenes"].push_back({
+            { "Name", name },
         });
     }
 
-    file.close();
 }
 
-void GenerateCache(std::string outputFile, std::string projectFile, std::vector<std::string> sourceFiles)
+void GenerateCache(std::string outputFile, std::string projectName, std::string projectFile, std::vector<std::string> sourceFiles)
 {
     json data;
+    data["ProjectName"] = projectName;
     data["ProjectFile"] = projectFile;
     data["Files"] = sourceFiles;
-    data["Types"] = nlohmann::json::array();
+    data["Scenes"] = nlohmann::json::array();
+    data["Actors"] = nlohmann::json::array();
+    data["Components"] = nlohmann::json::array();
+    data["Cameras"] = nlohmann::json::array();
+    data["Lights"] = nlohmann::json::array();
+
+    std::string dir = GetDirname(projectFile);
 
     for (std::string& source : sourceFiles) {
-        PreProcess(source, data["Types"]);
+        PreProcess(dir + "/" + source, data);
     }
 
     std::ofstream file(outputFile);
@@ -178,115 +186,125 @@ void GenerateEngineMain(std::string outputFile, std::string cacheFile)
     cache >> data;
 
     std::ofstream file(outputFile);
-    file << R"#(
-#include <dusk/Main.hpp>
-
-)#";
+    file << "#include <dusk/Main.hpp>\n";
 
     for (auto inc : data["Files"]) {
-        file << "#include <" << inc.get<std::string>() << ">\n";
+        std::string tmp = inc.get<std::string>();
+        if (GetExtension(tmp) == "hpp") {
+            file << "#include <" << tmp << ">\n";
+        }
     }
 
+    file << "const std::string PROJECT_FILENAME = \"" << data["ProjectFile"].get<std::string>() << "\";\n";
     file << R"#(
-const std::string PROJECT_FILENAME = ")#" << data["ProjectFile"].get<std::string>() << R"#(";
-
 int main(int argc, char** argv) {
+    dusk::SetAssetPath(DUSK_ASSET_PATH);
     dusk::App app(argc, argv);
-
 )#";
 
-    for (auto type : data["Types"]) {
+    for (auto type : data["Scenes"]) {
         std::string typeName = type["Name"].get<std::string>();
-        std::string parent = type["Parent"].get<std::string>();
 
-        file << "dusk::BaseClass::Types.emplace(\"" << typeName << "\", typeid(\"" << typeName << "\"));\n";
-        file << "dusk::BaseClass::Initializers.emplace(\"" << typeName << "\","
-             << "[]() -> dusk::BaseClass* { return dynamic_cast<dusk::BaseClass*>(new " << typeName << "()); }"
-             <<");\n";
-        file << "dusk::BaseClass::Serializers.emplace(\"" << typeName << "\","
-             << "[](dusk::BaseClass* base, nlohmann::json& data) { \n"
-             << "    dusk::BaseClass::Serializers[\"" << parent << "\"](base, data);\n"
-             << "    " << typeName << "* inst = dynamic_cast<" << typeName << "*>(base);\n";
-        for (auto field : type["Fields"]) {
-            std::string fieldName = field["Name"].get<std::string>();
-            auto& params = field["Params"];
-            if (params.find("INT") != params.end() ||
-                params.find("FLOAT") != params.end()) {
-                file << "    inst->" << fieldName << " = data[\"" << fieldName << "\"];\n";
-            }
-            else if (params.find("STRING") != params.end()) {
-                file << "    inst->" << fieldName << " = data[\"" << fieldName << "\"].get<std::string>();\n";
-            }
-            else if (params.find("VEC2") != params.end()) {
-                file << "    inst->" << fieldName << " = { data[\"" << fieldName << "\"][0], data[\"" << fieldName << "\"][1] };\n";
-            }
-            else if (params.find("VEC3") != params.end()) {
-                file << "    inst->" << fieldName << " = { data[\"" << fieldName << "\"][0], data[\"" << fieldName << "\"][1], data[\"" << fieldName << "\"][2] };\n";
-            }
-            else if (params.find("VEC4") != params.end()) {
-                file << "    inst->" << fieldName << " = { data[\"" << fieldName << "\"][0], data[\"" << fieldName << "\"][1], data[\"" << fieldName << "\"][2], data[\"" << fieldName << "\"][3] };\n";
-            }
-        }
-        file <<"});\n";
-        file << "dusk::BaseClass::Deserializers.emplace(\"" << typeName << "\","
-             << "[](dusk::BaseClass* base, nlohmann::json& data) { \n"
-             << "    dusk::BaseClass::Deserializers[\"" << parent << "\"](base, data);\n"
-             << "    " << typeName << "* inst = dynamic_cast<" << typeName << "*>(base);\n";
-        for (auto field : type["Fields"]) {
-            std::string fieldName = field["Name"].get<std::string>();
-            auto& params = field["Params"];
-            if (params.find("INT") != params.end() ||
-                params.find("FLOAT") != params.end() ||
-                params.find("STRING") != params.end()) {
-                file << "    data[\"" << fieldName << "\"] = inst->" << fieldName << ";\n";
-            }
-            else if (params.find("VEC2") != params.end()) {
-                file << "    data[\"" << fieldName << "\"] = { inst->" << fieldName << "[0], inst->" << fieldName << "[1] };\n";
-            }
-            else if (params.find("VEC3") != params.end()) {
-                file << "    data[\"" << fieldName << "\"] = { inst->" << fieldName << "[0], inst->" << fieldName << "[1], inst->" << fieldName << "[2] };\n";
-            }
-            else if (params.find("VEC4") != params.end()) {
-                file << "    data[\"" << fieldName << "\"] = { inst->" << fieldName << "[0], inst->" << fieldName << "[1], inst->" << fieldName << "[2], inst->" << fieldName << "[3] };\n";
-            }
-        }
-        file <<"});\n";
+        file << "dusk::Scene::RegisterType(\"" << typeName << "\", [](const std::string& id, const std::string& filename) -> dusk::Scene * { return static_cast<dusk::Scene*>(new " << typeName << "(id, filename)); });\n";
     }
 
     file << R"#(
-    app.EvtLoadConfig.AddStatic([&](std::string) {
-        _DuskSetup(&app);
-    });
     app.LoadConfig(PROJECT_FILENAME);
-
+    _DuskSetup(&app);
     app.Start();
     return 0;
 }
 )#";
-
 }
 
 void GenerateEditorMain(std::string outputFile, std::string cacheFile)
 {
-    nlohmann::json data;
+    json data;
     std::ifstream cache(cacheFile);
     cache >> data;
 
     std::ofstream file(outputFile);
+    file << "#include <dusk/Main.hpp>\n";
+    file << "#include <Editor.hpp>\n";
+
+    // TODO: Just headers
+    for (auto inc : data["Files"]) {
+        std::string tmp = inc.get<std::string>();
+        if (GetExtension(tmp) == "hpp") {
+            file << "#include <" << tmp << ">\n";
+        }
+    }
+
+    file << "const std::string PROJECT_FILENAME = \"" << data["ProjectFile"].get<std::string>() << "\";\n";
+
+#ifdef __linux__
+    file << "const std::string PROJECT_LIBRARY = \"./lib" << data["ProjectName"].get<std::string>() << "-Library.so\";\n";
     file << R"#(
-#include <dusk/Main.hpp>
-#include <Editor.hpp>
+#include <dlfcn.h>
+void * libraryHandle = nullptr;
+void loadLibrary() {
+    dusk::App * app = dusk::App::Inst();
 
-const std::string PROJECT_FILENAME = ")#" << data["ProjectFile"].get<std::string>() << R"#(";
+    if (libraryHandle) {
+        dlclose(libraryHandle);
+    }
 
+    DuskLogLoad("Loading library '%s'", PROJECT_LIBRARY.c_str());
+    libraryHandle = dlopen(PROJECT_LIBRARY.c_str(), RTLD_LOCAL | RTLD_LAZY);
+
+    if (!libraryHandle) {
+        DuskLogError("Failed to load '%s', %s", PROJECT_LIBRARY.c_str(), dlerror());
+        return;
+    }
+
+    DuskSetupFn setup;
+    *(void **) (&setup) = dlsym(libraryHandle, "_DuskSetup");
+
+    if (!setup) {
+        DuskLogError("Failed to find '_DuskSetup' in '%s', %s", PROJECT_LIBRARY.c_str(), dlerror());
+        return;
+    }
+
+    DuskLogInfo("%p", app);
+    (*setup)(app);
+    app->LoadConfig(PROJECT_FILENAME);
+}
+)#";
+#endif
+
+file << R"#(
 int main(int argc, char** argv) {
+    dusk::SetAssetPath(DUSK_ASSET_PATH);
     Editor app(argc, argv);
+    app.SetConfigFilename(PROJECT_FILENAME);
+)#";
 
-    app.EvtLoadConfig.AddStatic([&](std::string) {
-        _DuskSetup(&app);
-    });
-    app.LoadConfig(PROJECT_FILENAME);
+    for (auto type : data["Scenes"]) {
+        std::string typeName = type["Name"].get<std::string>();
 
+        file << "dusk::Scene::RegisterType(\"" << typeName << "\", [](const std::string& id, const std::string& filename) -> dusk::Scene * { return static_cast<dusk::Scene*>(new " << typeName << "(id, filename)); });\n";
+    }
+
+#if defined(WIN32)
+    file << R"#(
+    app.TrackCallback(app.OnReset.AddStatic([]() {
+        dusk::App * app = dusk::App::Inst();
+        _DuskSetup(app);
+        app->LoadConfig(PROJECT_FILENAME);
+    }));
+)#";
+#elif defined(__linux__)
+file << R"#(
+    app.TrackCallback(app.OnStart.AddStatic([]() {
+        loadLibrary();
+    }));
+    app.TrackCallback(app.OnReset.AddStatic([]() {
+        loadLibrary();
+    }));
+)#";
+#endif
+
+    file << R"#(
     app.Start();
     return 0;
 }
@@ -297,7 +315,7 @@ void Usage() {
     printf(
 R"#(Usage: DuskPP COMMAND [OPTIONS]
 Commands:
-    cache OUTPUT PROJECT_FILE [SOURCE_FILES]
+    cache OUTPUT PROJECT_NAME PROJECT_FILE [SOURCE_FILES]
     engine-main OUTPUT CACHE_FILE
     editor-main OUTPUT CACHE_FILE
 )#");
@@ -313,19 +331,20 @@ int main(int argc, char** argv)
     std::string command = argv[1];
 
     if (command == "cache") {
-        if (argc < 4) {
+        if (argc < 5) {
             Usage();
             return 1;
         }
 
         std::string outputFile(argv[2]);
-        std::string projectFile(argv[3]);
+        std::string projectName(argv[3]);
+        std::string projectFile(argv[4]);
         std::vector<std::string> sourceFiles;
-        for (int i = 4; i < argc; ++i) {
+        for (int i = 5; i < argc; ++i) {
             sourceFiles.push_back(argv[i]);
         }
 
-        GenerateCache(outputFile, projectFile, sourceFiles);
+        GenerateCache(outputFile, projectName, projectFile, sourceFiles);
     }
     else if (command == "engine-main") {
         if (argc < 4) {

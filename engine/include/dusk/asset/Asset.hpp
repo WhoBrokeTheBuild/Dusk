@@ -12,7 +12,9 @@ public:
     Asset(const std::string& filename)
         : _filename(filename)
     { }
-    
+
+    virtual ~Asset() = default;
+
     inline bool IsLoaded() const { return _loaded; }
     inline std::string GetFilename() const { return _filename; }
 

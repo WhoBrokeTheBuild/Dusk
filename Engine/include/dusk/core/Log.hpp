@@ -2,7 +2,6 @@
 #define DUSK_DEBUG_HPP
 
 #include <dusk/Config.hpp>
-#include <dusk/core/Platform.hpp>
 #include <dusk/core/Util.hpp>
 
 #include <cstdarg> // for va_list
@@ -23,10 +22,44 @@ namespace dusk {
 
     static inline void Log(LogLevel level, const char * format, ...)
     {
-        const short FG_DEFAULT = 39;
-        const short BG_DEFAULT = 49;
+        #if defined(WIN32)
+
+        static HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+        const int DEFAULT = 7;
+
+        int color = DEFAULT;
+
+        switch (level)
+        {
+        case LOG_INFO:
+            color = 7; // White
+            break;
+        case LOG_WARN:
+            color = 6; // Yellow
+            break;
+        case LOG_ERROR:
+            color = 4; // Red
+            break;
+        case LOG_PERF:
+            color = 5; // Magenta
+            break;
+        case LOG_VERBOSE:
+            color = 8; // Grey
+            break;
+        case LOG_LOAD:
+            color = 2; // Green
+            break;
+        }
+
+        SetConsoleTextAttribute(hConsole, color);
+
+        #else 
 
         //static const char * TERM = getenv("TERM");
+        
+        const short FG_DEFAULT = 39;
+        const short BG_DEFAULT = 49;
 
         short fgColor = FG_DEFAULT;
         short bgColor = BG_DEFAULT;
@@ -53,8 +86,8 @@ namespace dusk {
             break;
         }
 
-        #ifndef DUSK_OS_WINDOWS
-            printf("\033[%dm\033[%dm", fgColor, bgColor);
+        printf("\033[%dm\033[%dm", fgColor, bgColor);
+
         #endif
 
         va_list valist;
@@ -62,8 +95,14 @@ namespace dusk {
         vprintf(format, valist);
         va_end(valist);
 
-        #ifndef DUSK_OS_WINDOWS
-            printf("\033[%dm\033[%dm", FG_DEFAULT, BG_DEFAULT);
+        #if defined(WIN32)
+        
+        SetConsoleTextAttribute(hConsole, DEFAULT);
+
+        #else
+
+        printf("\033[%dm\033[%dm", FG_DEFAULT, BG_DEFAULT);
+
         #endif
     }
 

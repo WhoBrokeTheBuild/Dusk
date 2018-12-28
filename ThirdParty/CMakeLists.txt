@@ -53,6 +53,8 @@ ExternalProject_Add(
     SOURCE_DIR          "${_SDL2_SOURCE_DIR}"
     BINARY_DIR          "${_SDL2_BINARY_DIR}"
     CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${_SDL2_DIR}
+    BUILD_COMMAND       ""
+    INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
     UPDATE_COMMAND      ""
     TEST_COMMAND        ""
 )
@@ -85,6 +87,8 @@ ExternalProject_Add(
     SOURCE_DIR          "${_ASSIMP_SOURCE_DIR}"
     BINARY_DIR          "${_ASSIMP_BINARY_DIR}"
     CMAKE_ARGS          ${_ASSIMP_CMAKE_ARGS}
+    BUILD_COMMAND       ""
+    INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
     UPDATE_COMMAND      ""
     TEST_COMMAND        ""
 )

@@ -4,7 +4,6 @@
 #include <dusk/Config.hpp>
 
 #include <dusk/core/App.hpp>
-#include <dusk/core/Filesystem.hpp>
 #include <dusk/core/ScriptHost.hpp>
 #include <dusk/core/Util.hpp>
 #include <dusk/asset/Shader.hpp>

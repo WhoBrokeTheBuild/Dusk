@@ -1,16 +1,37 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.2 FATAL_ERROR)
 CMAKE_POLICY(SET CMP0048 NEW)
+IF(NOT ${CMAKE_VERSION} VERSION_LESS "3.13")
+    CMAKE_POLICY(SET CMP0076 NEW)
+ENDIF()
 
 PROJECT(Dusk VERSION 0.0.2)
 
-INCLUDE("cmake/Compiler.cmake")
+INCLUDE("CMake/Compiler.cmake")
 
 ###
-### Global configuration
+### Options
+###
+
+OPTION(VERBOSE_LOGGING "Build Dusk with Verbose Logging enabled" OFF)
+IF(VERBOSE_LOGGING)
+    ADD_DEFINITIONS(-DDUSK_ENABLE_VERBOSE_LOGGING)
+ENDIF()
+
+OPTION(BINARY_SHADERS "Build Dusk with Binary Shader support" OFF)
+IF(BINARY_SHADERS)
+    ADD_DEFINITIONS(-DDUSK_ENABLE_BINARY_SHADERS)
+ENDIF()
+
+OPTION(BUILD_DEMOS "Build Dusk Demo Projects" ON)
+
+OPTION(BUILD_THIRDPARTY "Build Dusk ThirdParty Dependencies" ON)
+
+###
+### Configuration
 ###
 
 # Allow for custom CMake modules
-LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
 
 # Allow for custom organization of files in VisualStudio
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -20,45 +41,72 @@ INCLUDE(GetGitRevisionDescription)
 GET_GIT_HEAD_REVISION(GIT_REFSPEC DUSK_REVISION)
 STRING(SUBSTRING "${DUSK_REVISION}" 0 12 DUSK_REVISION)
 
-SET(ASSET_PATH "${CMAKE_SOURCE_DIR}/assets")
+# Minimum OpenGL Version
+SET(MIN_OPENGL_VERSION "4.1" CACHE STRING "Minimum supported OpenGL Version")
+
+STRING(REPLACE "." ";" _VERSION_LIST ${MIN_OPENGL_VERSION})
+LIST(GET _VERSION_LIST 0 _MIN_OPENGL_VERSION_MAJOR)
+LIST(GET _VERSION_LIST 1 _MIN_OPENGL_VERSION_MINOR)
+
+ADD_DEFINITIONS(-DDUSK_MIN_OPENGL_VERSION_MAJOR=${_MIN_OPENGL_VERSION_MAJOR}
+                -DDUSK_MIN_OPENGL_VERSION_MINOR=${_MIN_OPENGL_VERSION_MINOR})
+
+SET(_ASSET_PATH "${CMAKE_SOURCE_DIR}/Assets")
+
+###
+### Third Party Dependencies
+###
+
+IF(BUILD_THIRDPARTY)
+    FILE(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/ThirdParty")
+
+    SET(GLM_ROOT_DIR    "${CMAKE_BINARY_DIR}/ThirdParty/glm")
+    SET(JSON_ROOT_DIR   "${CMAKE_BINARY_DIR}/ThirdParty/json")
+    SET(SDL2_ROOT_DIR   "${CMAKE_BINARY_DIR}/ThirdParty/SDL2")
+    SET(Assimp_ROOT_DIR "${CMAKE_BINARY_DIR}/ThirdParty/Assimp")
+
+    EXECUTE_PROCESS(
+        COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" "${CMAKE_SOURCE_DIR}/ThirdParty"
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/ThirdParty"
+        RESULT_VARIABLE result
+    )
+    IF(result)
+        MESSAGE("${result}")
+        MESSAGE(FATAL_ERROR "Failed to configure ThirdParty projects")
+    ENDIF()
+
+    SET(BUILD_COMMAND ${CMAKE_COMMAND} --build . )
+    IF("${CMAKE_GENERATOR}" STREQUAL "Unix Makefiles")
+        SET(BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} -l )
+    ENDIF()
+
+    EXECUTE_PROCESS(
+        COMMAND ${BUILD_COMMAND}
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/ThirdParty"
+        RESULT_VARIABLE result
+    )
+
+    IF(result)
+        MESSAGE("${result}")
+        MESSAGE(FATAL_ERROR "Failed to build ThirdParty projects")
+    ENDIF()
+ENDIF()
+
+FIND_PACKAGE(GLM REQUIRED)
+FIND_PACKAGE(JSON REQUIRED)
+FIND_PACKAGE(SDL2 REQUIRED)
+FIND_PACKAGE(Assimp REQUIRED)
 
 ###
 ### Projects
 ###
 
-# Dependencies to be built with the project
-ADD_SUBDIRECTORY(depend)
+ADD_SUBDIRECTORY(Engine)
 
-# Engine library
-ADD_SUBDIRECTORY(engine)
+###
+### Demos
+###
 
-# Editor library
-ADD_SUBDIRECTORY(editor)
-
-# Preprocessor
-ADD_SUBDIRECTORY(preprocessor)
-
-# Example projects
-#ADD_SUBDIRECTORY(examples)
-
-STRING(REPLACE "\\" "/" DUSK_PATH ${CMAKE_SOURCE_DIR})
-STRING(REPLACE " " "\\ " DUSK_PATH ${CMAKE_SOURCE_DIR})
-
-CONFIGURE_FILE(
-    "${CMAKE_SOURCE_DIR}/cmake/Config.cmake.in"
-    "${CMAKE_SOURCE_DIR}/cmake/Config.cmake"
-    @ONLY
-)
-
-IF(WIN32)
-    CONFIGURE_FILE(
-        "${CMAKE_SOURCE_DIR}/cmake/DuskPath.reg.in"
-        "${CMAKE_SOURCE_DIR}/cmake/DuskPath.reg"
-        @ONLY
-    )
-    CONFIGURE_FILE(
-        "${CMAKE_SOURCE_DIR}/cmake/NewDuskProject.reg.in"
-        "${CMAKE_SOURCE_DIR}/cmake/NewDuskProject.reg"
-        @ONLY
-    )
+IF(BUILD_DEMOS)    
+    ADD_SUBDIRECTORY(Demos/HelloWorld)
 ENDIF()

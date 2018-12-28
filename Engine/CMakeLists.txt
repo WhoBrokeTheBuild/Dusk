@@ -17,21 +17,12 @@ FILE(GLOB_RECURSE
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
 )
 
-IF(WIN32)
-    ADD_LIBRARY(
-        ${_ENGINE}  
-        ${_ENGINE_INCLUDES}
-        ${_ENGINE_SOURCES}
-        ${_ENGINE_CONFIG_OUT}
-    )
-ELSE()
-    ADD_LIBRARY(
-        ${_ENGINE} SHARED
-        ${_ENGINE_INCLUDES}
-        ${_ENGINE_SOURCES}
-        ${_ENGINE_CONFIG_OUT}
-    )
-ENDIF()
+ADD_LIBRARY(
+    ${_ENGINE} SHARED 
+    ${_ENGINE_INCLUDES}
+    ${_ENGINE_SOURCES}
+    ${_ENGINE_CONFIG_OUT}
+)
 
 TARGET_INCLUDE_DIRECTORIES(
     ${_ENGINE}

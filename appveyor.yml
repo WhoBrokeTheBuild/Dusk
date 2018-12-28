@@ -21,13 +21,8 @@ init:
 
 clone_folder: C:\projects\Dusk
 
-install:
-  - cmd: git submodule update --init --recursive
-
 before_build:
   - cmd: set DUSK_INSTALL_DIR=C:\projects\Dusk
-#  - cmd: if "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2015" if "%PLATFORM%"=="Win32" set CMAKE_GENERATOR_NAME=Visual Studio 14 2015
-#  - cmd: if "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2015" if "%PLATFORM%"=="x64"   set CMAKE_GENERATOR_NAME=Visual Studio 14 2015 Win64
   - cmd: if "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2017" if "%PLATFORM%"=="Win32" set CMAKE_GENERATOR_NAME=Visual Studio 15 2017
   - cmd: if "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2017" if "%PLATFORM%"=="x64"   set CMAKE_GENERATOR_NAME=Visual Studio 15 2017 Win64
 
@@ -36,11 +31,7 @@ build_script:
   - cmd: md build
   - cmd: cd build
   - cmd: cmake -G "%CMAKE_GENERATOR_NAME%" ..
-  - cmd: msbuild C:\projects\Dusk\build\Dusk.sln
-  - cmd: md examples\HelloWorld
-  - cmd: cd examples\HelloWorld
-  - cmd: cmake -G "%CMAKE_GENERATOR_NAME%" ..\..\..\examples\HelloWorld
-  - cmd: msbuild C:\projects\Dusk\build\examples\HelloWorld\HelloWorld.sln
+  - cmd: cmake --build .
 
 test: off
 

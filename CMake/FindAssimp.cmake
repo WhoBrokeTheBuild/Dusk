@@ -7,6 +7,7 @@
 #   Assimp_FOUND
 #   Assimp_INCLUDE_DIR
 #   Assimp_LIBRARIES
+#   Assimp_RUNTIME_DIR
 #
 # and the following imported targets
 #
@@ -41,21 +42,28 @@ ENDIF()
 FIND_PATH(
     Assimp_INCLUDE_DIR
     NAMES assimp/config.h
-    PATHS ${_ASSIMP_PC_INCLUDE_DIRS} ${Assimp_ROOT_DIR}
+    PATHS ${Assimp_ROOT_DIR} ${_ASSIMP_PC_INCLUDE_DIRS} 
     PATH_SUFFIXES include
+)
+
+FIND_PATH(
+    Assimp_RUNTIME_DIR
+    NAMES assimp-${MSVC_PREFIX}-mt.dll
+    PATHS ${Assimp_ROOT_DIR} ${_ASSIMP_PC_INCLUDE_DIRS} 
+    PATH_SUFFIXES bin
 )
 
 FIND_LIBRARY(
     Assimp_LIBRARY
     NAMES assimp assimp-${MSVC_PREFIX}-mt
-    PATHS ${_ASSIMP_PC_INCLUDE_DIRS} ${Assimp_ROOT_DIR}
+    PATHS ${Assimp_ROOT_DIR} ${_ASSIMP_PC_INCLUDE_DIRS} 
     PATH_SUFFIXES lib
 )
 
 FIND_LIBRARY(
     IrrXML_LIBRARY
     NAMES IrrXML
-    PATHS ${_ASSIMP_PC_INCLUDE_DIRS} ${Assimp_ROOT_DIR}
+    PATHS ${Assimp_ROOT_DIR} ${_ASSIMP_PC_INCLUDE_DIRS} 
     PATH_SUFFIXES lib
 )
 

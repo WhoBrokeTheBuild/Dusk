@@ -8,35 +8,14 @@ notifications:
 git:
   depth: 5
 
-# sources  list: https://github.com/travis-ci/apt-source-whitelist/blob/master/ubuntu.json,
-# packages list: https://github.com/travis-ci/apt-package-whitelist/blob/master/ubuntu-precise
-
-# sourced from https://github.com/tplgy/bonefish/blob/master/.travis.yml
-
 matrix:
   include:
-#    - os: linux
-#      compiler: gcc
-#      addons:
-#        apt:
-#          sources: [ 'ubuntu-toolchain-r-test', 'kalakris-cmake' ]
-#          packages: [ 'g++-7', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
-#      env: CMAKE_BUILD_TYPE=DEBUG
-#
-#    - os: linux
-#      compiler: gcc
-#      addons:
-#        apt:
-#          sources: [ 'ubuntu-toolchain-r-test', 'kalakris-cmake' ]
-#          packages: [ 'g++-7', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
-#      env: CMAKE_BUILD_TYPE=RELEASE
-
     - os: linux
       compiler: clang
       addons:
         apt:
           sources: [ 'llvm-toolchain-trusty-4.0', 'ubuntu-toolchain-r-test', 'kalakris-cmake' ]
-          packages: [ 'clang-4.0', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
+          packages: [ 'clang-4.0', 'libstdc++-6-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
       env: CMAKE_BUILD_TYPE=DEBUG
 
     - os: linux
@@ -44,26 +23,19 @@ matrix:
       addons:
         apt:
           sources: [ 'llvm-toolchain-trusty-4.0', 'ubuntu-toolchain-r-test', 'kalakris-cmake' ]
-          packages: [ 'clang-4.0', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
+          packages: [ 'clang-4.0', 'libstdc++-6-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
       env: CMAKE_BUILD_TYPE=RELEASE
 
 before_install:
   - env
-  - export DUSK_INSTALL_DIR="`pwd`"
-#  - if [ "$CXX" = "g++" ]; then export CXX="g++-7" CC="gcc-7" NINJA_ARG="-j1"; fi
+  - export SRC_DIR="`pwd`"
   - if [ "$CXX" = "clang++" ]; then export CXX="clang++-4.0" CC="clang-4.0"; fi
 
 script:
   - $CXX --version
   - cmake --version
-  - ninja --version
-  - mkdir -p "$TRAVIS_BUILD_DIR/build-ninja"
-  - cd "$TRAVIS_BUILD_DIR/build-ninja"
+  - mkdir -p "$TRAVIS_BUILD_DIR/build"
+  - cd "$TRAVIS_BUILD_DIR/build"
   - pwd
-  - cmake -Dstdlib=libstdc++ -GNinja "$DUSK_INSTALL_DIR"
-  - ninja -v
-  - mkdir -p "$TRAVIS_BUILD_DIR/build-ninja/examples/HelloWorld"
-  - cd "$TRAVIS_BUILD_DIR/build-ninja/examples/HelloWorld"
-  - pwd
-  - cmake -Dstdlib=libstdc++ -GNinja "$DUSK_INSTALL_DIR/examples/HelloWorld"
-  - ninja -v
+  - cmake -G "Unix Makefiles" "$SRC_DIR"
+  - make -j

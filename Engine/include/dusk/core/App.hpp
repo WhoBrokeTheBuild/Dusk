@@ -7,19 +7,10 @@
 #include <dusk/asset/Shader.hpp>
 #include <dusk/scene/Scene.hpp>
 
-using glm::ivec2;
-
 #include <string>
-using std::string;
-
 #include <unordered_map>
-using std::unordered_map;
-
 #include <vector>
-using std::vector;
-
 #include <memory>
-using std::unique_ptr;
 
 namespace dusk {
 
@@ -76,7 +67,7 @@ protected:
 
     SDL_Window * GetSdlWindow() { return _sdlWindow; }
     SDL_GLContext GetSdlContext() { return _sdlContext; }
-
+    
     vector<unique_ptr<Scene>>& GetScenes() { return _scenes; }
     vector<unique_ptr<Shader>>& GetShaders() { return _shaders; }
 

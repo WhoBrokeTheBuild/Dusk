@@ -1,8 +1,9 @@
 #include <dusk/Dusk.hpp>
 
 #include <memory>
-using std::unique_ptr;
-using std::make_unique;
+
+using namespace std;
+using namespace glm;
 
 class TestScene : public dusk::Scene
 {
@@ -10,7 +11,7 @@ public:
 
     TestScene() 
     {
-        _mesh.reset(new dusk::Mesh("models/teapot.fbx"));
+        _mesh.reset(new dusk::Mesh("models/teapot.glb"));
 
         auto app = dusk::App::Inst();
 

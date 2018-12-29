@@ -2,36 +2,40 @@
 #define DUSK_FONT_HPP
 
 #include <dusk/Config.hpp>
-
 #include <dusk/asset/Shader.hpp>
+
 #include <vector>
+#include <memory>
 
 namespace dusk
 {
+
+struct stbtt_fontinfo;
 
 class Font
 {
 public:
 
-    Font(const std::string& filename, unsigned int size);
+    Font(const string& filename, unsigned int size);
     virtual ~Font() = default;
 
-    std::string GetFilename() const { return _filename; }
+    string GetFilename() const { return _filename; }
 
     unsigned int GetSize() const { return _size; }
 
-    stbtt_fontinfo * GetSTBFontInfo() { return &_stbFontInfo; }
-    const stbtt_fontinfo * GetSTBFontInfo() const { return &_stbFontInfo; }
+    stbtt_fontinfo * GetSTBFontInfo() { return _stbFontInfo.get(); }
+
+    const stbtt_fontinfo * GetSTBFontInfo() const { return _stbFontInfo.get(); }
 
 private:
 
-    std::string _filename;
+    string _filename;
 
     unsigned int _size;
 
-    std::vector<uint8_t> _buffer;
+    vector<uint8_t> _buffer;
 
-    stbtt_fontinfo _stbFontInfo;
+    unique_ptr<stbtt_fontinfo> _stbFontInfo = nullptr;
 
 }; // class Font
 
@@ -39,10 +43,10 @@ class Text
 {
 public:
 
-    Text(const std::string& text, std::shared_ptr<Font> font, Shader * shader = nullptr);
+    Text(const string& text, shared_ptr<Font> font, Shader * shader = nullptr);
     virtual ~Text();
 
-    void SetText(const std::string& text);
+    void SetText(const string& text);
 
     void SetBaseTransform(const glm::mat4& baseTransform);
 
@@ -62,8 +66,8 @@ public:
 
 private:
 
-    const GLint TEXTURE_ID = 0;
-    const GLint ATTR_ID    = 0;
+    const int TEXTURE_ID     = 0;
+    const int ATTR_ID        = 0;
     const int TEXTURE_WIDTH  = 1024;
     const int TEXTURE_HEIGHT = 1024;
 
@@ -79,13 +83,13 @@ private:
 
     glm::vec4 _color;
 
-    std::string _text;
+    string _text;
 
-    std::shared_ptr<Font> _font;
+    shared_ptr<Font> _font;
 
-    GLuint _glTexture;
-    GLuint _glVAO;
-    GLuint _glVBOs[2];
+    int _glTexture;
+    int _glVAO;
+    int _glVBOs[2];
 
 }; // class Text
 

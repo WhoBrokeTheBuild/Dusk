@@ -2,18 +2,11 @@
 #define DUSK_MATERIAL_HPP
 
 #include <dusk/Config.hpp>
-
 #include <dusk/asset/Texture.hpp>
 #include <dusk/asset/Shader.hpp>
 
-using glm::vec4;
-using glm::vec3;
-
 #include <string>
-using std::string;
-
 #include <memory>
-using std::shared_ptr;
 
 namespace dusk {
 
@@ -32,15 +25,14 @@ struct MaterialData
     float ClearcoatRoughness = 0.0f;
     float Anisotropy         = 0.0f;
     float AnisotropyRotation = 0.0f;
-    GLuint MapFlags          = 0;
+    int MapFlags             = 0;
 };
 
 class Material 
 {
 public:
 
-    enum TextureID
-    {
+    enum TextureID {
         AMBIENT         = 0,
         DIFFUSE         = 1,
         SPECULAR        = 2,
@@ -53,8 +45,7 @@ public:
         EMISSIVE        = 9,
     };
 
-    enum MapFlags : GLuint
-    {
+    enum MapFlags : int {
         AMBIENT_MAP_FLAG        = 1,
         DIFFUSE_MAP_FLAG        = 2,
         SPECULAR_MAP_FLAG       = 3,
@@ -67,8 +58,7 @@ public:
         EMISSIVE_MAP_FLAG       = 10,
     };
 
-    struct Data
-    {
+    struct Data {
         vec3 Ambient    = vec3(0);
         vec3 Diffuse    = vec3(0);
         vec3 Specular   = vec3(0);

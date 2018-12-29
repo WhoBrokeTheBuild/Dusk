@@ -16,21 +16,11 @@ std::unordered_map<std::string, Shader::UniformBufferRecord> Shader::_UniformBuf
 Shader::Shader(const std::vector<std::string>& filenames)
 {
     LoadFromFiles(filenames);
-}
+} 
 
 Shader::~Shader()
 {
     if (_glId > 0) glDeleteProgram(_glId);
-}
-
-std::unique_ptr<Shader> Shader::Create()
-{
-    return std::make_unique<Shader>();
-}
-
-std::unique_ptr<Shader> Shader::Create(const std::vector<std::string>& filenames)
-{
-    return std::make_unique<Shader>(filenames);
 }
 
 void Shader::InitializeVersionString()

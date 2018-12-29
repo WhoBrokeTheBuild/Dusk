@@ -3,13 +3,12 @@
 
 #include <dusk/Config.hpp>
 
-using glm::vec3;
-
 #include <string>
-using std::string;
-
 #include <vector>
-using std::vector;
+
+#ifndef DUSK_ASSET_PATH
+#define DUSK_ASSET_PATH "."
+#endif // DUSK_ASSET_PATH
 
 namespace dusk {
 

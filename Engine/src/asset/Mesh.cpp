@@ -5,9 +5,10 @@
 #include <dusk/scene/Actor.hpp>
 #include <dusk/scene/Camera.hpp>
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
+#include <unordered_map>
+
+#define TINYGLTF_NO_STB_IMAGE_WRITE
+#include <tiny_gltf.h>
 
 namespace dusk {
 
@@ -15,9 +16,6 @@ Mesh::Mesh(Mesh&& rhs)
 {
     swap(_loaded, rhs._loaded);
     swap(_glVAO, rhs._glVAO);
-    memcpy(_glVBOs, rhs._glVBOs, sizeof(_glVBOs));
-    memset(rhs._glVBOs, 0, sizeof(rhs._glVBOs));
-    _renderGroups = move(rhs._renderGroups);
 }
 
 Mesh::Mesh(const string& filename)
@@ -25,229 +23,95 @@ Mesh::Mesh(const string& filename)
     LoadFromFile(filename);
 }
 
-Mesh::Mesh(const Data& data)
-{
-    AddData(data);
-    FinishLoad();
-}
-
-Mesh::Mesh(const vector<Data>& datum)
-{
-    for (const auto& data : datum) {
-        AddData(data);
-    }
-    FinishLoad();
-}
-
 Mesh::~Mesh()
 {
-    glDeleteBuffers(sizeof(_glVBOs) / sizeof(GLuint), _glVBOs);
     glDeleteVertexArrays(1, &_glVAO);
 }
 
 bool Mesh::LoadFromFile(const std::string& filename)
 {
+    DuskBenchStart();
+
+    using namespace tinygltf;
+
     _filename = filename;
 
-    const unsigned int flags = aiProcess_Triangulate | aiProcess_FlipUVs;
-
-    Assimp::Importer importer;
     std::string fullPath;
     const auto& paths = GetAssetPaths();
-    const aiScene* scene = nullptr;
 
+    tinygltf::Model model;
+    TinyGLTF loader;
+    string err;
+    string warn;
+
+    bool loaded = false;
     for (auto& p : paths) {
         fullPath = p + filename;
 
         DuskLogVerbose("Checking %s", fullPath.c_str());
-        scene = importer.ReadFile(fullPath, flags);
+        loaded = loader.LoadBinaryFromFile(&model, &err, &warn, fullPath.c_str());
 
-        if (scene) break;
+        if (loaded) break;
     }
 
-	if (!scene)
+	if (!loaded)
     {
         DuskLogError("Failed to load model, '%s'", filename.c_str());
         return false;
     }
 
-	std::string dirname = GetDirname(filename) + "/";
+    unordered_map<int, GLuint> vbos;
+    for (size_t i = 0; i < model.bufferViews.size(); ++i) {
+        auto& bufferView = model.bufferViews[i];
+        auto& buffer = model.buffers[i];
 
-    auto toVec2 = [](const aiVector3D& v) -> glm::vec2 {
-        return { v.x, v.y };
-    };
+        GLuint vbo;
+        glGenBuffers(1, &vbo);
+        vbos[(int)i] = vbo;
 
-    auto toVec3 = [](const aiVector3D& v) -> glm::vec3 {
-        return { v.x, v.y, v.z };
-    };
+        glBindBuffer(bufferView.target, vbo);
+        glBufferData(bufferView.target, bufferView.byteLength, 
+            buffer.data.data() + bufferView.byteOffset, GL_STATIC_DRAW);
+    }
 
-    auto toVec4 = [](const aiColor4D& c) -> glm::vec4 {
-        return { c.r, c.g, c.b, 1.0f };
-    };
+    const auto& scene = model.scenes[model.defaultScene];
+	for (int id : scene.nodes) {
+        auto& node = model.nodes[id];
+        auto& mesh = model.meshes[node.mesh];
+        for (size_t i = 0; i < mesh.primitives.size(); ++i) {
+            auto& primitive = mesh.primitives[i];
+            auto& indexAccessor = model.accessors[primitive.indices];
 
-    for (unsigned int m = 0; m < scene->mNumMeshes; ++m)
-    {
-        aiMesh * aiMesh = scene->mMeshes[m];
-        Data data;
+            for (auto& attrib : primitive.attributes) {
+                auto& accessor = model.accessors[attrib.second];
+                int byteStride = accessor.ByteStride(model.bufferViews[accessor.bufferView]);
 
-        data.Vertices.reserve(aiMesh->mNumFaces * 3);
+                glBindBuffer(GL_ARRAY_BUFFER, vbos[accessor.bufferView]);
 
-        if (aiMesh->HasNormals())
-        {
-            data.Normals.reserve(aiMesh->mNumFaces * 3);
-        }
+                GLint size = (accessor.type == TINYGLTF_TYPE_SCALAR ? 1 : accessor.type);
 
-        if (aiMesh->HasTextureCoords(0))
-        {
-            data.TexCoords.reserve(aiMesh->mNumFaces * 3);
-        }
-
-        for (unsigned int f = 0; f < aiMesh->mNumFaces; ++f)
-        {
-            aiFace& aiFace = aiMesh->mFaces[f];
-            assert(aiFace.mNumIndices == 3);
-
-            for (int i = 0; i < 3; ++i) {
-                unsigned int index = aiFace.mIndices[i];
-
-                data.Vertices.push_back(toVec3(aiMesh->mVertices[index]));
-
-                if (aiMesh->HasNormals())
-                {
-                    data.Normals.push_back(toVec3(aiMesh->mNormals[index]));
+                GLint vaa = -1;
+                if (attrib.first.compare("POSITION") == 0) {
+                    vaa = AttributeID::POSITION;
+                }
+                if (attrib.first.compare("NORMAL") == 0) {
+                    vaa = AttributeID::NORMAL;
+                }
+                if (attrib.first.compare("TEXCOORD_0") == 0) {
+                    vaa = AttributeID::TEXCOORD;
                 }
 
-                if (aiMesh->HasTextureCoords(0))
-                {
-                    data.TexCoords.push_back(toVec2(aiMesh->mTextureCoords[0][index]));
+                if (vaa > -1) {
+                    glEnableVertexAttribArray(vaa);
+                    glVertexAttribPointer(vaa, size, accessor.componentType, 
+                        accessor.normalized ? GL_TRUE : GL_FALSE, byteStride,
+                        (char*)(accessor.byteOffset));
                 }
             }
         }
-
-        if (scene->HasMaterials())
-        {
-            aiMaterial * aiMat = scene->mMaterials[aiMesh->mMaterialIndex];
-            Material::Data matData;
-            aiString path;
-
-            if (aiMat->GetTextureCount(aiTextureType_AMBIENT) > 0) {
-                aiMat->GetTexture(aiTextureType_AMBIENT, 0, &path);
-                matData.AmbientMap = dirname + path.C_Str();
-            }
-
-            if (aiMat->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
-                aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &path);
-                matData.DiffuseMap = dirname + path.C_Str();
-            }
-
-            if (aiMat->GetTextureCount(aiTextureType_SPECULAR) > 0) {
-                aiMat->GetTexture(aiTextureType_SPECULAR, 0, &path);
-                matData.SpecularMap = dirname + path.C_Str();
-            }
-
-            if (aiMat->GetTextureCount(aiTextureType_NORMALS) > 0) {
-                aiMat->GetTexture(aiTextureType_NORMALS, 0, &path);
-                matData.NormalMap = dirname + path.C_Str();
-            }
-
-            if (aiMat->GetTextureCount(aiTextureType_OPACITY) > 0) {
-                aiMat->GetTexture(aiTextureType_OPACITY, 0, &path);
-                matData.AlphaMap = dirname + path.C_Str();
-            }
-
-            if (aiMat->GetTextureCount(aiTextureType_DISPLACEMENT ) > 0) {
-                aiMat->GetTexture(aiTextureType_DISPLACEMENT , 0, &path);
-                matData.DisplacementMap = dirname + path.C_Str();
-            }
-
-            //if (aiMat->GetTextureCount(aiTextureType_OPACITY) > 0) {
-            //    aiMat->GetTexture(aiTextureType_OPACITY, 0, &path);
-            //    matData.RoughnessMap = dirname + path.C_Str();
-            //}
-
-            //if (aiMat->GetTextureCount(aiTextureType_OPACITY) > 0) {
-            //    aiMat->GetTexture(aiTextureType_OPACITY, 0, &path);
-            //    matData.MetallicMap = dirname + path.C_Str();
-            //}
-
-            //if (aiMat->GetTextureCount(aiTextureType_SHININESS ) > 0) {
-            //    aiMat->GetTexture(aiTextureType_SHININESS , 0, &path);
-            //    matData.SheenMap = dirname + path.C_Str();
-            //}
-
-            if (aiMat->GetTextureCount(aiTextureType_EMISSIVE) > 0) {
-                aiMat->GetTexture(aiTextureType_EMISSIVE, 0, &path);
-                matData.EmissiveMap = dirname + path.C_Str();
-            }
-
-			aiColor3D aiAmbient;
-			aiMat->Get(AI_MATKEY_COLOR_AMBIENT, aiAmbient);
-
-			aiColor3D aiDiffuse;
-			aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, aiDiffuse);
-
-			aiColor3D aiSpecular;
-			aiMat->Get(AI_MATKEY_COLOR_SPECULAR, aiSpecular);
-            
-			aiColor3D aiEmissive;
-			aiMat->Get(AI_MATKEY_COLOR_EMISSIVE, aiEmissive);
-
-            data.Material.reset(new Material(matData));
-        }
-
-        AddData(data);
     }
 
-    FinishLoad();
-
-    DuskLogLoad("Finished loading Mesh from '%s'", fullPath.c_str());
-
-    return false;
-}
-
-void Mesh::AddData(const Data& data)
-{
-    _data.push_back(data);
-}
-
-bool Mesh::FinishLoad()
-{
-    DuskBenchStart();
-    _loaded = false;
-
-    std::vector<glm::vec3> verts;
-    std::vector<glm::vec3> norms;
-    std::vector<glm::vec2> txcds;
-
-    for (auto& data : _data)
-    {
-        _renderGroups.push_back({
-            data.DrawMode,
-            data.Material,
-            verts.size(),
-            data.Vertices.size()
-        });
-
-        verts.reserve(verts.size() + data.Vertices.size());
-        verts.insert(verts.end(), data.Vertices.begin(), data.Vertices.end());
-
-        norms.reserve(norms.size() + data.Normals.size());
-        norms.insert(norms.end(), data.Normals.begin(), data.Normals.end());
-
-        txcds.reserve(txcds.size() + data.TexCoords.size());
-        txcds.insert(txcds.end(), data.TexCoords.begin(), data.TexCoords.end());
-    }
-
-    if (verts.empty())
-    {
-        DuskLogWarn("Cannot create an empty mesh");
-        return false;
-    }
-
-    _bounds = ComputeBounds(verts);
-
-    DuskLogVerbose("Uploading Mesh Data to OpenGL");
-
+    /*
     glGenVertexArrays(1, &_glVAO);
     glBindVertexArray(_glVAO);
 
@@ -279,13 +143,13 @@ bool Mesh::FinishLoad()
     }
 
     DuskLogVerbose("Bound mesh to VAO %u", _glVAO);
+    */
 
-    // TODO: Colors?
-
-    DuskBenchEnd("Mesh::FinishLoad");
     _loaded = true;
-    return true;
+    DuskBenchEnd("Mesh::LoadFromFile");
+    return false;
 }
+
 
 void Mesh::Render(RenderContext& ctx)
 {
@@ -295,36 +159,7 @@ void Mesh::Render(RenderContext& ctx)
 
     glBindVertexArray(_glVAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, _glVBOs[0]);
-    glVertexAttribPointer(ctx.CurrentShader->GetAttributeLocation("_Position"), 3, GL_FLOAT, GL_FALSE, 0, NULL);
-    glEnableVertexAttribArray(ctx.CurrentShader->GetAttributeLocation("_Position"));
-
-    if (_glVBOs[1] > 0)
-    {
-        glBindBuffer(GL_ARRAY_BUFFER, _glVBOs[1]);
-        glVertexAttribPointer(ctx.CurrentShader->GetAttributeLocation("_Normal"), 3, GL_FLOAT, GL_FALSE, 0, NULL);
-        glEnableVertexAttribArray(ctx.CurrentShader->GetAttributeLocation("_Normal"));
-    }
-
-    if (_glVBOs[2] > 0)
-    {
-        glBindBuffer(GL_ARRAY_BUFFER, _glVBOs[2]);
-        glVertexAttribPointer(ctx.CurrentShader->GetAttributeLocation("_TexCoord"), 2, GL_FLOAT, GL_FALSE, 0, NULL);
-        glEnableVertexAttribArray(ctx.CurrentShader->GetAttributeLocation("_TexCoord"));
-    }
-
-    for (const RenderGroup& group : _renderGroups)
-    {
-        if (group.material)
-        {
-            group.material->Bind(ctx.CurrentShader);
-        }
-
-        glDrawArrays(group.drawMode, group.start, group.count);
-    }
-
     glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 Box Mesh::ComputeBounds(const std::vector<glm::vec3>& verts)

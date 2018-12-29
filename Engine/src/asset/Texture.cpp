@@ -3,6 +3,8 @@
 #include <dusk/core/Log.hpp>
 #include <dusk/core/Benchmark.hpp>
 
+#include <stb/stb_image.h>
+
 namespace dusk {
 
 bool Texture::LoadFromFile(const std::string& filename)

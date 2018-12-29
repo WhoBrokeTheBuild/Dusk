@@ -60,10 +60,15 @@ bool Mesh::LoadFromFile(const std::string& filename)
         return false;
     }
 
+	DuskLogVerbose("Model Generator %s", model.asset.generator.c_str());
+
+	glGenVertexArrays(1, &_glVAO);
+	glBindVertexArray(_glVAO);
+
     unordered_map<int, GLuint> vbos;
     for (size_t i = 0; i < model.bufferViews.size(); ++i) {
         auto& bufferView = model.bufferViews[i];
-        auto& buffer = model.buffers[i];
+        auto& buffer = model.buffers[bufferView.buffer];
 
         GLuint vbo;
         glGenBuffers(1, &vbo);
@@ -72,6 +77,22 @@ bool Mesh::LoadFromFile(const std::string& filename)
         glBindBuffer(bufferView.target, vbo);
         glBufferData(bufferView.target, bufferView.byteLength, 
             buffer.data.data() + bufferView.byteOffset, GL_STATIC_DRAW);
+    }
+
+    for (auto& material : model.materials) {
+        Material::Data data;
+
+		auto it = material.values.find("baseColorFactor");
+		if (it != material.values.end()) {
+			auto& vals = it->second.number_array;
+			data.Diffuse = vec3(vals[0], vals[1], vals[2]);
+		}
+
+        _materials.push_back(make_unique<Material>(data));
+    }
+    if (_materials.empty()) {
+        DuskLogWarn("No Materials found, adding default");
+        _materials.push_back(make_unique<Material>(Material::Data{}));
     }
 
     const auto& scene = model.scenes[model.defaultScene];
@@ -100,50 +121,36 @@ bool Mesh::LoadFromFile(const std::string& filename)
                 if (attrib.first.compare("TEXCOORD_0") == 0) {
                     vaa = AttributeID::TEXCOORD;
                 }
+				if (attrib.first.compare("TANGENT") == 0) {
+					vaa = AttributeID::TANGENT;
+				}
 
                 if (vaa > -1) {
+					DuskLogVerbose("Binding VAA %d", vaa);
                     glEnableVertexAttribArray(vaa);
                     glVertexAttribPointer(vaa, size, accessor.componentType, 
                         accessor.normalized ? GL_TRUE : GL_FALSE, byteStride,
-                        (char*)(accessor.byteOffset));
-                }
+                        (char*)0 + accessor.byteOffset);
+                } else {
+					DuskLogWarn("Ignoring VAA %s", attrib.first.c_str());
+				}
             }
+
+			_primitives.push_back({
+				(GLenum)primitive.mode,
+				(GLsizei)indexAccessor.count,
+				(GLenum)indexAccessor.componentType,
+				(GLsizei)indexAccessor.byteOffset,
+                (primitive.material < 0 ? 0 : primitive.material),
+			});
         }
     }
 
-    /*
-    glGenVertexArrays(1, &_glVAO);
-    glBindVertexArray(_glVAO);
+	glBindVertexArray(0);
 
-    glGenBuffers(sizeof(_glVBOs) / sizeof(GLuint), _glVBOs);
-
-    glBindBuffer(GL_ARRAY_BUFFER, _glVBOs[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * verts.size(), (GLfloat *) verts.data(), GL_STATIC_DRAW);
-
-    if (norms.empty())
-    {
-        glDeleteBuffers(1, &_glVBOs[1]);
-        _glVBOs[1] = 0;
-    }
-    else
-    {
-        glBindBuffer(GL_ARRAY_BUFFER, _glVBOs[1]);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * norms.size(), (GLfloat *) norms.data(), GL_STATIC_DRAW);
-    }
-
-    if (txcds.empty())
-    {
-        glDeleteBuffers(1, &_glVBOs[2]);
-        _glVBOs[2] = 0;
-    }
-    else
-    {
-        glBindBuffer(GL_ARRAY_BUFFER, _glVBOs[2]);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * txcds.size(), (GLfloat *) txcds.data(), GL_STATIC_DRAW);
-    }
-
-    DuskLogVerbose("Bound mesh to VAO %u", _glVAO);
-    */
+	for (auto vbo : vbos) {
+		glDeleteBuffers(1, &vbo.second);
+	}
 
     _loaded = true;
     DuskBenchEnd("Mesh::LoadFromFile");
@@ -158,6 +165,15 @@ void Mesh::Render(RenderContext& ctx)
     ctx.CurrentShader->Bind();
 
     glBindVertexArray(_glVAO);
+
+	for (auto& p : _primitives) {
+        if (p.material >= 0) {
+            auto& mat = _materials[p.material];
+            mat->Bind(ctx.CurrentShader);
+        }
+
+		glDrawElements(p.mode, p.count, p.type, (char*)0 + p.offset);
+	}
 
     glBindVertexArray(0);
 }

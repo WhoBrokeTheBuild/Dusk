@@ -3,8 +3,10 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-function"
 
-#define TINYGLTF_NO_STB_IMAGE_WRITE
 #define TINYGLTF_IMPLEMENTATION
+#define TINYGLTF_NO_STB_IMAGE_WRITE
+#define TINYGLTF_NOEXCEPTION
+#define JSON_NOEXCEPTION
 #include <tiny_gltf.h>
 
 #define STB_IMAGE_IMPLEMENTATION

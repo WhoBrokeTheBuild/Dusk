@@ -70,6 +70,16 @@ private:
 
     Box _bounds;
 
+	struct Primitive {
+		GLenum	mode;
+		GLsizei count;
+		GLenum	type;
+		GLsizei offset;
+        int material;
+	};
+
+    vector<unique_ptr<Material>> _materials;
+	vector<Primitive> _primitives;
 };
 
 } // namespace dusk

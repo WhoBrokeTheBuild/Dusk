@@ -11,7 +11,7 @@ public:
 
     TestScene() 
     {
-        _mesh.reset(new dusk::Mesh("models/teapot.glb"));
+        _mesh.reset(new dusk::Mesh("models/cube.glb"));
 
         auto app = dusk::App::Inst();
 

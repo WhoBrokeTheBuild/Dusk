@@ -31,7 +31,7 @@ OPTION(BUILD_THIRDPARTY "Build Dusk ThirdParty Dependencies" ON)
 ###
 
 # Allow for custom CMake modules
-LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
+LIST(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_SOURCE_DIR}/CMake")
 
 # Allow for custom organization of files in VisualStudio
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)

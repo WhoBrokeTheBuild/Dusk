@@ -56,7 +56,12 @@ namespace dusk {
 
         #else 
 
-        //static const char * TERM = getenv("TERM");
+        static const char * TERM = getenv("TERM");
+        static bool hasColor = (TERM && (
+            strncmp(TERM, "xterm", 5)   == 0 || 
+            strncmp(TERM, "rxvt", 4)    == 0 ||
+            strncmp(TERM, "konsole", 8) == 0
+        ));
         
         const short FG_DEFAULT = 39;
         const short BG_DEFAULT = 49;
@@ -86,7 +91,9 @@ namespace dusk {
             break;
         }
 
-        printf("\033[%dm\033[%dm", fgColor, bgColor);
+        if (hasColor) {
+            printf("\033[%dm\033[%dm", fgColor, bgColor);
+        }
 
         #endif
 
@@ -101,7 +108,9 @@ namespace dusk {
 
         #else
 
-        printf("\033[%dm\033[%dm", FG_DEFAULT, BG_DEFAULT);
+        if (hasColor) {
+            printf("\033[%dm\033[%dm", FG_DEFAULT, BG_DEFAULT);
+        }
 
         #endif
     }

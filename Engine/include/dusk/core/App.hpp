@@ -80,7 +80,7 @@ protected:
     vector<unique_ptr<Scene>>& GetScenes() { return _scenes; }
     vector<unique_ptr<Shader>>& GetShaders() { return _shaders; }
 
-    virtual int GetSdlWindowFlags() const { return SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN; }
+    virtual int GetSdlWindowFlags() const { return SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED; }
 
 private:
 

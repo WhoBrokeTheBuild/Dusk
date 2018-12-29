@@ -1,8 +1,18 @@
 layout(std140) uniform DuskMaterialData
 {
-    vec4 Ambient;
-    vec4 Diffuse;
-    vec4 Specular;
+    vec3 Ambient;
+    float Roughness;
+    vec3 Diffuse;
+    float Metallic;
+    vec3 Specular;
+    float SpecularExponent;
+    vec3 Emission;
+    float Dissolve;
+    float Sheen;
+    float ClearcoatThickness;
+    float ClearcoatRoughness;
+    float Anisotropy;
+    float AnisotropyRotation;
 
     uint MapFlags;
 

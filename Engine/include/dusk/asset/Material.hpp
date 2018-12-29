@@ -7,6 +7,7 @@
 #include <dusk/asset/Shader.hpp>
 
 using glm::vec4;
+using glm::vec3;
 
 #include <string>
 using std::string;
@@ -18,11 +19,20 @@ namespace dusk {
 
 struct MaterialData
 {
-    alignas(16) vec4 Ambient  = vec4(0, 0, 0, 1);
-    alignas(16) vec4 Diffuse  = vec4(0, 0, 0, 1);
-    alignas(16) vec4 Specular = vec4(0, 0, 0, 1);
-
-    alignas(4) GLuint MapFlags = 0;
+    vec3 Ambient             = vec3(0, 0, 0);
+    float Roughness          = 0.0f;
+    vec3 Diffuse             = vec3(0, 0, 0);
+    float Metallic           = 0.0f;
+    vec3 Specular            = vec3(0, 0, 0);
+    float SpecularExponent   = 1.0f;
+    vec3 Emission            = vec3(0, 0, 0);
+    float Dissolve           = 1.0f;
+    float Sheen              = 0.0f;
+    float ClearcoatThickness = 0.0f;
+    float ClearcoatRoughness = 0.0f;
+    float Anisotropy         = 0.0f;
+    float AnisotropyRotation = 0.0f;
+    GLuint MapFlags          = 0;
 };
 
 class Material 
@@ -47,9 +57,9 @@ public:
 
     struct Data
     {
-        vec4 Ambient = vec4(0);
-        vec4 Diffuse = vec4(0);
-        vec4 Specular = vec4(0);
+        vec3 Ambient = vec3(0);
+        vec3 Diffuse = vec3(0);
+        vec3 Specular = vec3(0);
 
         string AmbientMap = "";
         string DiffuseMap = "";
@@ -69,9 +79,9 @@ private:
 
     MaterialData _shaderData;
 
-    vec4 _ambient;
-    vec4 _diffuse;
-    vec4 _specular;
+    vec3 _ambient;
+    vec3 _diffuse;
+    vec3 _specular;
 
     shared_ptr<Texture> _ambientMap;
     shared_ptr<Texture> _diffuseMap;

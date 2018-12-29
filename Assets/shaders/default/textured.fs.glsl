@@ -15,14 +15,16 @@ void main() {
     //if (HasNormalMap()) {
     //    normal = texture(_NormalMap, p_TexCoord);
     //}
+    
+    float alpha = _MaterialData.Dissolve;
+    vec3 diffuse = _MaterialData.Diffuse;
+    if (HasDiffuseMap()) {
+        diffuse = texture(_DiffuseMap, p_TexCoord).rgb;
+        alpha = texture(_DiffuseMap, p_TexCoord).a;
+    }
 
     float diff = max(0.0, dot(normal.xyz, p_LightDir.xyz));
-
-    vec4 diffuse = _MaterialData.Diffuse;
-    if (HasDiffuseMap()) {
-        diffuse = texture(_DiffuseMap, p_TexCoord);
-    }
-    diffuse = vec4(diff * diffuse.rgb, diffuse.a);
+    diffuse = diff * diffuse;
 
     vec3 ambient = _MaterialData.Ambient.rgb;
     if (HasAmbientMap()) {
@@ -39,5 +41,5 @@ void main() {
     }
     specular *= spec;
 
-    _Color = vec4(diffuse.rgb + ambient + specular, diffuse.a);
+    _Color = vec4(diffuse + ambient + specular, alpha);
 }

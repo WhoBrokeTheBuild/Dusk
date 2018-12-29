@@ -116,11 +116,17 @@ void App::Stop()
     _running = false;
 }
 
+glm::ivec2 App::GetWindowSize() const
+{
+    glm::ivec2 size;
+    SDL_GetWindowSize(_sdlWindow, &size.x, &size.y);
+    return size;
+}
+
 void App::SetWindowSize(const glm::ivec2& size)
 {
-    _windowSize = size;
-    glViewport(0, 0, _windowSize.x, _windowSize.y);
-    SDL_SetWindowSize(_sdlWindow, _windowSize.x, _windowSize.y);
+    SDL_SetWindowSize(_sdlWindow, size.x, size.y);
+    glViewport(0, 0, size.x, size.y);
 }
 
 void App::SetWindowTitle(const std::string& title)
@@ -199,7 +205,7 @@ void App::ProcessSdlEvent(SDL_Event * evt)
     case SDL_WINDOWEVENT:
         if (evt->window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
         {
-            glViewport(0, 0, _windowSize.x, _windowSize.y);
+            glViewport(0, 0, evt->window.data1, evt->window.data2);
         }
         break;
     }
@@ -215,8 +221,8 @@ void App::CreateWindow()
         return;
     }
 
-    const std::vector<glm::ivec2>& windowSizes = GetAvailableWindowSizes();
-    _windowSize = windowSizes.front();
+    const std::vector<ivec2>& windowSizes = GetAvailableWindowSizes();
+    ivec2 size = windowSizes.front();
 
     int sdlGlFlags = SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG;
 
@@ -233,12 +239,13 @@ void App::CreateWindow()
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 
     int sdlWindowFlags = GetSdlWindowFlags();
+    DuskLogVerbose("SDL Window Flags: 0x%08X", sdlWindowFlags);
 
     for (int multisamples = 16; multisamples > 0; multisamples /= 2)
     {
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, multisamples);
 
-        _sdlWindow = SDL_CreateWindow(_windowTitle.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, _windowSize.x, _windowSize.y, sdlWindowFlags);
+        _sdlWindow = SDL_CreateWindow(_windowTitle.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, size.x, size.y, sdlWindowFlags);
         if (_sdlWindow) break;
     }
 

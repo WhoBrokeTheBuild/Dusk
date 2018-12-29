@@ -36,9 +36,7 @@
 // glm
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
-#include <glm/gtx/transform.hpp>
-#include <glm/gtx/vector_angle.hpp>
-#include <glm/gtx/norm.hpp>
+#include <glm/ext.hpp>
 
 // nlohmann json
 #include <nlohmann/json.hpp>

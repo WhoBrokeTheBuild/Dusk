@@ -14,12 +14,11 @@ public:
 
         auto app = dusk::App::Inst();
 
-        auto camera = make_unique<dusk::Camera>();
-        auto pCamera = camera.get();
-        camera->SetAspect(app->GetWindowSize());
-        camera->SetPosition({ 3.0f, 3.0f, 3.0f });
-        camera->SetLookAt({ 0.0f, 0.0f, 0.0f });
-        app->GetRenderContext().CurrentCamera = pCamera;
+		_camera.reset(new dusk::Camera());
+        _camera->SetAspect(app->GetWindowSize());
+        _camera->SetPosition({ 3.0f, 3.0f, 3.0f });
+        _camera->SetForward({ -1.0f, -1.0f, -1.0f });
+        app->GetRenderContext().CurrentCamera = _camera.get();
     }
 
     virtual void Update(dusk::UpdateContext& ctx) override
@@ -49,6 +48,7 @@ private:
 
     dusk::TransformData _transform;
 
+	unique_ptr<dusk::Camera> _camera;
     unique_ptr<dusk::Mesh> _mesh;
 
 };

@@ -50,7 +50,7 @@ public:
     RenderContext& GetRenderContext() { return _renderContext; }
     UpdateContext& GetUpdateContext() { return _updateContext; }
 
-    ivec2 GetWindowSize() const { return _windowSize; }
+    ivec2 GetWindowSize() const;
     void SetWindowSize(const ivec2& size);
 
     string GetWindowTitle() const { return _windowTitle; }
@@ -91,7 +91,6 @@ private:
 
     bool _running;
 
-    ivec2 _windowSize = { 1024, 768 };
     string _windowTitle = "Dusk";
     string _startScene = "";
 

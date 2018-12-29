@@ -5,7 +5,7 @@ layout(std140) uniform DuskMaterialData
     vec3 Diffuse;
     float Metallic;
     vec3 Specular;
-    float SpecularExponent;
+    float Shininess;
     vec3 Emission;
     float Dissolve;
     float Sheen;

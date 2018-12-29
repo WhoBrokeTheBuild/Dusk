@@ -127,49 +127,72 @@ bool Mesh::LoadFromFile(const std::string& filename)
         if (scene->HasMaterials())
         {
             aiMaterial * aiMat = scene->mMaterials[aiMesh->mMaterialIndex];
+            Material::Data matData;
             aiString path;
 
-            std::string ambientTex;
-            if (aiMat->GetTextureCount(aiTextureType_AMBIENT) > 0)
-            {
+            if (aiMat->GetTextureCount(aiTextureType_AMBIENT) > 0) {
                 aiMat->GetTexture(aiTextureType_AMBIENT, 0, &path);
-                ambientTex = dirname + path.C_Str();
+                matData.AmbientMap = dirname + path.C_Str();
             }
 
-            std::string diffuseTex;
-            if (aiMat->GetTextureCount(aiTextureType_DIFFUSE) > 0)
-            {
+            if (aiMat->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
                 aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &path);
-                diffuseTex = dirname + path.C_Str();
+                matData.DiffuseMap = dirname + path.C_Str();
             }
 
-            std::string specularTex;
-            if (aiMat->GetTextureCount(aiTextureType_SPECULAR) > 0)
-            {
+            if (aiMat->GetTextureCount(aiTextureType_SPECULAR) > 0) {
                 aiMat->GetTexture(aiTextureType_SPECULAR, 0, &path);
-                specularTex = dirname + path.C_Str();
+                matData.SpecularMap = dirname + path.C_Str();
             }
 
-            std::string normalTex;
-            if (aiMat->GetTextureCount(aiTextureType_NORMALS) > 0)
-            {
+            if (aiMat->GetTextureCount(aiTextureType_NORMALS) > 0) {
                 aiMat->GetTexture(aiTextureType_NORMALS, 0, &path);
-                normalTex = dirname + path.C_Str();
+                matData.NormalMap = dirname + path.C_Str();
             }
 
-			aiColor4D aiAmbient;
-			aiGetMaterialColor(aiMat, AI_MATKEY_COLOR_AMBIENT, &aiAmbient);
+            if (aiMat->GetTextureCount(aiTextureType_OPACITY) > 0) {
+                aiMat->GetTexture(aiTextureType_OPACITY, 0, &path);
+                matData.AlphaMap = dirname + path.C_Str();
+            }
 
-			aiColor4D aiDiffuse;
-			aiGetMaterialColor(aiMat, AI_MATKEY_COLOR_DIFFUSE, &aiDiffuse);
+            if (aiMat->GetTextureCount(aiTextureType_DISPLACEMENT ) > 0) {
+                aiMat->GetTexture(aiTextureType_DISPLACEMENT , 0, &path);
+                matData.DisplacementMap = dirname + path.C_Str();
+            }
 
-			aiColor4D aiSpecular;
-			aiGetMaterialColor(aiMat, AI_MATKEY_COLOR_SPECULAR, &aiSpecular);
+            //if (aiMat->GetTextureCount(aiTextureType_OPACITY) > 0) {
+            //    aiMat->GetTexture(aiTextureType_OPACITY, 0, &path);
+            //    matData.RoughnessMap = dirname + path.C_Str();
+            //}
 
-            data.Material.reset(new Material({
-                toVec4(aiAmbient), toVec4(aiDiffuse), toVec4(aiSpecular),
-                ambientTex, diffuseTex, specularTex, normalTex
-            }));
+            //if (aiMat->GetTextureCount(aiTextureType_OPACITY) > 0) {
+            //    aiMat->GetTexture(aiTextureType_OPACITY, 0, &path);
+            //    matData.MetallicMap = dirname + path.C_Str();
+            //}
+
+            //if (aiMat->GetTextureCount(aiTextureType_SHININESS ) > 0) {
+            //    aiMat->GetTexture(aiTextureType_SHININESS , 0, &path);
+            //    matData.SheenMap = dirname + path.C_Str();
+            //}
+
+            if (aiMat->GetTextureCount(aiTextureType_EMISSIVE) > 0) {
+                aiMat->GetTexture(aiTextureType_EMISSIVE, 0, &path);
+                matData.EmissiveMap = dirname + path.C_Str();
+            }
+
+			aiColor3D aiAmbient;
+			aiMat->Get(AI_MATKEY_COLOR_AMBIENT, aiAmbient);
+
+			aiColor3D aiDiffuse;
+			aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, aiDiffuse);
+
+			aiColor3D aiSpecular;
+			aiMat->Get(AI_MATKEY_COLOR_SPECULAR, aiSpecular);
+            
+			aiColor3D aiEmissive;
+			aiMat->Get(AI_MATKEY_COLOR_EMISSIVE, aiEmissive);
+
+            data.Material.reset(new Material(matData));
         }
 
         AddData(data);

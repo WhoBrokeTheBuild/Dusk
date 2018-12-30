@@ -81,12 +81,23 @@ bool Mesh::LoadFromFile(const std::string& filename)
 
     for (auto& material : model.materials) {
         Material::Data data;
+        auto& vals := material.values;
+        auto& it = vals.end();
 
-		auto it = material.values.find("baseColorFactor");
-		if (it != material.values.end()) {
-			auto& vals = it->second.number_array;
-			data.Diffuse = vec3(vals[0], vals[1], vals[2]);
+		it = vals.find("baseColorFactor");
+		if (it != vals.end()) {
+			auto& arr = it->second.number_array;
+			data.Diffuse = vec3(arr[0], arr[1], arr[2]);
 		}
+        
+        it = vals.find("baseColorTexture");
+        if (it != vals.end()) {
+            
+        }
+
+        for (auto& val : material.values) {
+            DuskLogInfo("%s", val.first.c_str());
+        }
 
         _materials.push_back(make_unique<Material>(data));
     }

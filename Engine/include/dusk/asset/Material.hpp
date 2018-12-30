@@ -10,24 +10,6 @@
 
 namespace dusk {
 
-struct MaterialData
-{
-    vec3 Ambient             = vec3(0, 0, 0);
-    float Roughness          = 0.0f;
-    vec3 Diffuse             = vec3(0, 0, 0);
-    float Metallic           = 0.0f;
-    vec3 Specular            = vec3(0, 0, 0);
-    float Shininess          = 1.0f;
-    vec3 Emission            = vec3(0, 0, 0);
-    float Dissolve           = 1.0f;
-    float Sheen              = 0.0f;
-    float ClearcoatThickness = 0.0f;
-    float ClearcoatRoughness = 0.0f;
-    float Anisotropy         = 0.0f;
-    float AnisotropyRotation = 0.0f;
-    int MapFlags             = 0;
-};
-
 class Material 
 {
 public:
@@ -45,67 +27,50 @@ public:
         EMISSIVE        = 9,
     };
 
-    enum MapFlags : int {
-        AMBIENT_MAP_FLAG        = 1,
-        DIFFUSE_MAP_FLAG        = 2,
-        SPECULAR_MAP_FLAG       = 3,
-        NORMAL_MAP_FLAG         = 4,
-        ALPHA_MAP_FLAG          = 5,
-        DISPLACEMENT_MAP_FLAG   = 6,
-        ROUGHNESS_MAP_FLAG      = 7,
-        METALLIC_MAP_FLAG       = 8,
-        SHEEN_MAP_FLAG          = 9,
-        EMISSIVE_MAP_FLAG       = 10,
+    enum TextureFlags : uint {
+        HAS_AMBIENT_MAP        = 1 << 0,
+        HAS_DIFFUSE_MAP        = 1 << 1,
+        HAS_SPECULAR_MAP       = 1 << 2,
+        HAS_NORMAL_MAP         = 1 << 3,
+        HAS_ALPHA_MAP          = 1 << 4,
+        HAS_DISPLACEMENT_MAP   = 1 << 5,
+        HAS_ROUGHNESS_MAP      = 1 << 6,
+        HAS_METALLIC_MAP       = 1 << 7,
+        HAS_SHEEN_MAP          = 1 << 8,
+        HAS_EMISSIVE_MAP       = 1 << 9,
     };
+    
+    vec3 Ambient    = vec3(0);
+    vec3 Diffuse    = vec3(0);
+    vec3 Specular   = vec3(0);
+    vec3 Emission   = vec3(0);
+    
+    float Roughness             = 0.0f;
+    float Metallic              = 0.0f;
+    float Shininess             = 1.0f;
+    float Dissolve              = 1.0f;
+    float Sheen                 = 0.0f;
+    float ClearcoatThickness    = 0.0f;
+    float ClearcoatRoughness    = 0.0f;
+    float Anisotropy            = 0.0f;
+    float AnisotropyRotation    = 0.0f;
+    
+    shared_ptr<Texture> AmbientMap;
+    shared_ptr<Texture> DiffuseMap;
+    shared_ptr<Texture> SpecularMap;
+    shared_ptr<Texture> NormalMap;
+    shared_ptr<Texture> AlphaMap;
+    shared_ptr<Texture> DisplacementMap;
+    shared_ptr<Texture> RoughnessMap;
+    shared_ptr<Texture> MetallicMap;
+    shared_ptr<Texture> SheenMap;
+    shared_ptr<Texture> EmissiveMap;
 
-    struct Data {
-        vec3 Ambient    = vec3(0);
-        vec3 Diffuse    = vec3(0);
-        vec3 Specular   = vec3(0);
-        vec3 Emission   = vec3(0);
-        
-        float Roughness             = 0.0f;
-        float Metallic              = 0.0f;
-        float Shininess             = 1.0f;
-        float Dissolve              = 1.0f;
-        float Sheen                 = 0.0f;
-        float ClearcoatThickness    = 0.0f;
-        float ClearcoatRoughness    = 0.0f;
-        float Anisotropy            = 0.0f;
-        float AnisotropyRotation    = 0.0f;
-
-        string AmbientMap       = "";
-        string DiffuseMap       = "";
-        string SpecularMap      = "";
-        string NormalMap        = "";
-        string AlphaMap         = "";
-        string DisplacementMap  = "";
-        string RoughnessMap     = "";
-        string MetallicMap      = "";
-        string SheenMap         = "";
-        string EmissiveMap      = "";
-    };
-
-    DISALLOW_COPY_AND_ASSIGN(Material)
-
-    Material(const Data& data);
+    Material() = default;
 
     virtual ~Material() = default;
 
     void Bind(Shader * sp);
-
-private:
-
-    MaterialData _shaderData;
-
-    vec3 _ambient;
-    vec3 _diffuse;
-    vec3 _specular;
-
-    shared_ptr<Texture> _ambientMap;
-    shared_ptr<Texture> _diffuseMap;
-    shared_ptr<Texture> _specularMap;
-    shared_ptr<Texture> _normalMap;
 
 };
 

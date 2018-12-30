@@ -11,7 +11,9 @@ public:
 
     TestScene() 
     {
-        _mesh.reset(new dusk::Mesh("models/cube.glb"));
+        _model.reset(new dusk::Model());
+        _model->AddMesh(std::make_shared<dusk::Mesh>("models/cube.glb"));
+        //_model->SetScale(vec3(0.01f));
 
         auto app = dusk::App::Inst();
 
@@ -24,9 +26,7 @@ public:
 
     virtual void Update(dusk::UpdateContext& ctx) override
     {
-        _transform.Model = mat4(1.0f);
-        _transform.Model = glm::scale(_transform.Model, vec3(0.01f));
-        _transform.Model = glm::rotate(_transform.Model, (float)ctx.TotalTime * 0.001f, vec3(0.0f, 1.0f, 0.0f));
+        _model->SetRotation(glm::vec3(0.0f, (float)ctx.TotalTime * 0.001f, 0.0f));
         
         dusk::Scene::Update(ctx);
     }
@@ -35,22 +35,15 @@ public:
     {
         auto camera = ctx.CurrentCamera;
 
-        _transform.View = camera->GetView();
-        _transform.Proj = camera->GetProjection();
-        _transform.MVP = _transform.Proj * _transform.View * _transform.Model;
-        dusk::Shader::SetUniformBufferData("DuskTransformData", &_transform);
-
-        _mesh->Render(ctx);
+        _model->Render(ctx);
 
         dusk::Scene::Render(ctx);
     }
     
 private:
 
-    dusk::TransformData _transform;
-
 	unique_ptr<dusk::Camera> _camera;
-    unique_ptr<dusk::Mesh> _mesh;
+    unique_ptr<dusk::Model> _model;
 
 };
 
@@ -58,12 +51,12 @@ int main(int argc, char** argv) {
     dusk::SetAssetPath(DUSK_ASSET_PATH);
     dusk::App app(argc, argv);
 
-    auto shader = make_unique<dusk::Shader>(vector<string>({ "shaders/default/textured.vs.glsl", "shaders/default/textured.fs.glsl" }));
+    auto shader = std::make_unique<dusk::Shader>(vector<string>({ "shaders/default/textured.vs.glsl", "shaders/default/textured.fs.glsl" }));
     auto pShader = shader.get();
     app.AddShader(move(shader));
     app.GetRenderContext().CurrentShader = pShader;
 
-    auto scene = unique_ptr<dusk::Scene>(new TestScene());
+    auto scene = std::unique_ptr<dusk::Scene>(new TestScene());
     auto pScene = scene.get();
     app.AddScene(move(scene));
     app.SetActiveScene(pScene);

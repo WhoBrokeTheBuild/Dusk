@@ -7,14 +7,9 @@
 #include <dusk/core/Log.hpp>
 #include <dusk/scene/IComponent.hpp>
 
-#include <string>
-using std::string;
-
-#include <vector>
-using std::vector;
-
 #include <memory>
-using std::unique_ptr;
+#include <string>
+#include <vector>
 
 namespace dusk {
 
@@ -26,10 +21,10 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Actor)
 
-    Actor(string id, Scene * scene);
+    Actor(std::string id, Scene * scene);
     virtual ~Actor() = default;
 
-    inline string GetId() { return _id; }
+    inline std::string GetId() { return _id; }
 
     void SetPosition(const glm::vec3& pos);
     inline glm::vec3 GetPosition() const { return _position; }
@@ -42,24 +37,24 @@ public:
 
     glm::mat4 GetTransform();
 
-    void AddComponent(unique_ptr<IComponent>&& ptr);
+    void AddComponent(std::unique_ptr<IComponent>&& ptr);
 
-    vector<IComponent *> GetComponents() const;
+    std::vector<IComponent *> GetComponents() const;
 
 private:
 
     Scene * _scene;
 
-    string _id;
+    std::string _id;
 
     glm::mat4 _transform;
     glm::vec3 _position;
     glm::vec3 _rotation;
     glm::vec3 _scale;
 
-    vector<unique_ptr<IComponent>> _components;
+    std::vector<std::unique_ptr<IComponent>> _components;
 
-    vector<IComponent *> _rawComponents;
+    std::vector<IComponent *> _rawComponents;
 
 }; // class Actor
 

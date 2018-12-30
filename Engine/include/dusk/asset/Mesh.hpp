@@ -16,19 +16,12 @@
 
 namespace dusk {
 
-struct TransformData
-{
-    alignas(64) mat4 Model = mat4(1);
-    alignas(64) mat4 View  = mat4(1);
-    alignas(64) mat4 Proj  = mat4(1);
-    alignas(64) mat4 MVP   = mat4(1);
-};
-
 class Mesh
 {
 public:
 
-    enum AttributeID : GLint {
+    enum AttributeID : GLint 
+    {
         POSITION    = 0,
         NORMAL      = 1,
         TEXCOORD    = 2,
@@ -44,33 +37,32 @@ public:
 
     Mesh(Mesh&& rhs);
 
-    Mesh(const string& filename);
+    Mesh(const std::string& filename);
 
     virtual ~Mesh();
 
-    bool LoadFromFile(const string& filename);
+    bool LoadFromFile(const std::string& filename);
 
-    string GetFilename() { return _filename; }
+    std::string GetFilename() { 
+        return _filename; 
+    }
 
-    bool IsLoaded() const { return _loaded; }
-
-    Box GetBounds() const { return _bounds; }
+    bool IsLoaded() const { 
+        return _loaded; 
+    }
 
     void Render(RenderContext& ctx);
 
 private:
 
-    Box ComputeBounds(const vector<vec3>& verts);
-
     bool _loaded = false;
 
-    string _filename;
+    std::string _filename;
 
     GLuint _glVAO;
 
-    Box _bounds;
-
-	struct Primitive {
+	struct Primitive 
+    {
 		GLenum	mode;
 		GLsizei count;
 		GLenum	type;
@@ -78,8 +70,9 @@ private:
         int material;
 	};
 
-    vector<unique_ptr<Material>> _materials;
-	vector<Primitive> _primitives;
+    std::vector<std::unique_ptr<Material>> _materials;
+
+	std::vector<Primitive> _primitives;
 };
 
 } // namespace dusk

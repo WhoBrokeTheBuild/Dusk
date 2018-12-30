@@ -22,17 +22,11 @@
 #include <glad/glad.h>
 #undef CreateWindow
 
-// SDL2
 #include <SDL.h>
-// glm
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
-
-namespace dusk {
-    using namespace std;
-    using namespace glm;
-}
 
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
     TypeName(const TypeName&) = delete;   \

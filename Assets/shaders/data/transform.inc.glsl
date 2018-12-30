@@ -1,8 +1,4 @@
-layout(std140) uniform DuskTransformData
-{
-    mat4 Model;
-    mat4 View;
-    mat4 Proj;
-    mat4 MVP;
-    
-} _TransformData;
+mat4 u_Model;
+mat4 u_View;
+mat4 u_Proj;
+mat4 u_MVP;

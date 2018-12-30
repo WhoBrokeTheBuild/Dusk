@@ -33,7 +33,6 @@ void Actor::SetScale(const glm::vec3& scale)
 
 glm::mat4 Actor::GetTransform()
 {
-    //_transform = (_parent ? _parent->GetTransform() : glm::mat4());
     _transform = glm::mat4();
     _transform = glm::translate(_transform, _position);
     _transform = glm::rotate(_transform, _rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));

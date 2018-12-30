@@ -14,11 +14,11 @@ namespace dusk {
 
 Mesh::Mesh(Mesh&& rhs)
 {
-    swap(_loaded, rhs._loaded);
-    swap(_glVAO, rhs._glVAO);
+    std::swap(_loaded, rhs._loaded);
+    std::swap(_glVAO, rhs._glVAO);
 }
 
-Mesh::Mesh(const string& filename)
+Mesh::Mesh(const std::string& filename)
 {
     LoadFromFile(filename);
 }
@@ -41,8 +41,8 @@ bool Mesh::LoadFromFile(const std::string& filename)
 
     tinygltf::Model model;
     TinyGLTF loader;
-    string err;
-    string warn;
+    std::string err;
+    std::string warn;
 
     bool loaded = false;
     for (auto& p : paths) {
@@ -65,7 +65,7 @@ bool Mesh::LoadFromFile(const std::string& filename)
 	glGenVertexArrays(1, &_glVAO);
 	glBindVertexArray(_glVAO);
 
-    unordered_map<int, GLuint> vbos;
+    std::unordered_map<int, GLuint> vbos;
     for (size_t i = 0; i < model.bufferViews.size(); ++i) {
         auto& bufferView = model.bufferViews[i];
         auto& buffer = model.buffers[bufferView.buffer];
@@ -80,14 +80,15 @@ bool Mesh::LoadFromFile(const std::string& filename)
     }
 
     for (auto& material : model.materials) {
-        Material::Data data;
-        auto& vals := material.values;
-        auto& it = vals.end();
+        auto mat = std::make_unique<Material>();
+
+        auto& vals = material.values;
+        auto it = vals.end();
 
 		it = vals.find("baseColorFactor");
 		if (it != vals.end()) {
 			auto& arr = it->second.number_array;
-			data.Diffuse = vec3(arr[0], arr[1], arr[2]);
+			mat->Diffuse = glm::vec3(arr[0], arr[1], arr[2]);
 		}
         
         it = vals.find("baseColorTexture");
@@ -99,11 +100,12 @@ bool Mesh::LoadFromFile(const std::string& filename)
             DuskLogInfo("%s", val.first.c_str());
         }
 
-        _materials.push_back(make_unique<Material>(data));
+        _materials.push_back(std::move(mat));
     }
+
     if (_materials.empty()) {
         DuskLogWarn("No Materials found, adding default");
-        _materials.push_back(make_unique<Material>(Material::Data{}));
+        _materials.push_back(std::make_unique<Material>());
     }
 
     const auto& scene = model.scenes[model.defaultScene];
@@ -177,29 +179,19 @@ void Mesh::Render(RenderContext& ctx)
 
     glBindVertexArray(_glVAO);
 
+    DuskLogInfo("%zu", _primitives.size());
 	for (auto& p : _primitives) {
         if (p.material >= 0) {
             auto& mat = _materials[p.material];
             mat->Bind(ctx.CurrentShader);
         }
 
+        DuskLogInfo("###");
 		glDrawElements(p.mode, p.count, p.type, (char*)0 + p.offset);
+        DuskLogInfo("???");
 	}
 
     glBindVertexArray(0);
-}
-
-Box Mesh::ComputeBounds(const std::vector<glm::vec3>& verts)
-{
-    Box bounds;
-
-    for (const glm::vec3& v : verts)
-    {
-        bounds.Min = glm::min(bounds.Min, v);
-        bounds.Max = glm::max(bounds.Max, v);
-    }
-
-    return bounds;
 }
 
 } // namespace dusk

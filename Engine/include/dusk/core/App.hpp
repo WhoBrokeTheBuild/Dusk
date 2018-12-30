@@ -41,17 +41,17 @@ public:
     RenderContext& GetRenderContext() { return _renderContext; }
     UpdateContext& GetUpdateContext() { return _updateContext; }
 
-    ivec2 GetWindowSize() const;
-    void SetWindowSize(const ivec2& size);
+    glm::ivec2 GetWindowSize() const;
+    void SetWindowSize(const glm::ivec2& size);
 
-    string GetWindowTitle() const { return _windowTitle; }
-    void SetWindowTitle(const string& title);
+    std::string GetWindowTitle() const { return _windowTitle; }
+    void SetWindowTitle(const std::string& title);
 
-    vector<ivec2> GetAvailableWindowSizes();
+    std::vector<glm::ivec2> GetAvailableWindowSizes();
 
-    Shader * AddShader(unique_ptr<Shader>&& sp);
+    Shader * AddShader(std::unique_ptr<Shader>&& sp);
 
-    Scene * AddScene(unique_ptr<Scene>&& scene);
+    Scene * AddScene(std::unique_ptr<Scene>&& scene);
 
     bool SetActiveScene(Scene *);
     Scene * GetActiveScene();
@@ -68,8 +68,8 @@ protected:
     SDL_Window * GetSdlWindow() { return _sdlWindow; }
     SDL_GLContext GetSdlContext() { return _sdlContext; }
     
-    vector<unique_ptr<Scene>>& GetScenes() { return _scenes; }
-    vector<unique_ptr<Shader>>& GetShaders() { return _shaders; }
+    std::vector<std::unique_ptr<Scene>>& GetScenes() { return _scenes; }
+    std::vector<std::unique_ptr<Shader>>& GetShaders() { return _shaders; }
 
     virtual int GetSdlWindowFlags() const { return SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED; }
 
@@ -95,9 +95,9 @@ private:
 
     Scene * _activeScene = nullptr;
 
-    vector<unique_ptr<Scene>> _scenes;
+    std::vector<std::unique_ptr<Scene>> _scenes;
 
-    vector<unique_ptr<Shader>> _shaders;
+    std::vector<std::unique_ptr<Shader>> _shaders;
 
 }; // class App
 

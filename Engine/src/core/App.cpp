@@ -222,8 +222,8 @@ void App::CreateWindow()
         return;
     }
 
-    const std::vector<ivec2>& windowSizes = GetAvailableWindowSizes();
-    ivec2 size = windowSizes.front();
+    const std::vector<glm::ivec2>& windowSizes = GetAvailableWindowSizes();
+    glm::ivec2 size = windowSizes.front();
 
     int sdlGlFlags = SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG;
 
@@ -293,7 +293,6 @@ void App::CreateWindow()
 #endif // DUSK_ENABLE_BINARY_SHADERS
 
     Shader::InitializeVersionString();
-    Shader::InitializeUniformBuffers();
 
     // V-Sync
     SDL_GL_SetSwapInterval(1);

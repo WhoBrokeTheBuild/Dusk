@@ -4,8 +4,9 @@
 #include <dusk/Config.hpp>
 #include <dusk/asset/Shader.hpp>
 
-#include <vector>
 #include <memory>
+#include <string>
+#include <vector>
 
 namespace dusk
 {
@@ -16,10 +17,10 @@ class Font
 {
 public:
 
-    Font(const string& filename, unsigned int size);
+    Font(const std::string& filename, unsigned int size);
     virtual ~Font() = default;
 
-    string GetFilename() const { return _filename; }
+    std::string GetFilename() const { return _filename; }
 
     unsigned int GetSize() const { return _size; }
 
@@ -29,13 +30,13 @@ public:
 
 private:
 
-    string _filename;
+    std::string _filename;
 
     unsigned int _size;
 
-    vector<uint8_t> _buffer;
+    std::vector<uint8_t> _buffer;
 
-    unique_ptr<stbtt_fontinfo> _stbFontInfo = nullptr;
+    std::unique_ptr<stbtt_fontinfo> _stbFontInfo = nullptr;
 
 }; // class Font
 
@@ -43,10 +44,10 @@ class Text
 {
 public:
 
-    Text(const string& text, shared_ptr<Font> font, Shader * shader = nullptr);
+    Text(const std::string& text, std::shared_ptr<Font> font, Shader * shader = nullptr);
     virtual ~Text();
 
-    void SetText(const string& text);
+    void SetText(const std::string& text);
 
     void SetBaseTransform(const glm::mat4& baseTransform);
 
@@ -83,9 +84,9 @@ private:
 
     glm::vec4 _color;
 
-    string _text;
+    std::string _text;
 
-    shared_ptr<Font> _font;
+    std::shared_ptr<Font> _font;
 
     int _glTexture;
     int _glVAO;

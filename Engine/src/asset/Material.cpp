@@ -22,7 +22,7 @@ void Material::Bind(Shader * sp) {
     sp->SetUniform("u_Anisotropy", Anisotropy);
     sp->SetUniform("u_AnisotropyRotation", AnisotropyRotation);
 
-    uint flags = 0;
+    unsigned int flags = 0;
     
     if (AmbientMap) {
         flags |= HAS_AMBIENT_MAP;

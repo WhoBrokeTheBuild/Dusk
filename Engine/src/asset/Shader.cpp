@@ -42,7 +42,7 @@ void Shader::InitializeVersionString()
 
 bool Shader::LoadFromFiles(const std::initializer_list<std::string>& filenames)
 {
-    LoadFromFiles(std::vector<std::string>(filenames));
+    return LoadFromFiles(std::vector<std::string>(filenames));
 }
 
 bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)

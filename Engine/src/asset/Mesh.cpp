@@ -76,7 +76,7 @@ bool Mesh::LoadFromFile(const std::string& filename)
 
         glBindBuffer(bufferView.target, vbo);
         glBufferData(bufferView.target, bufferView.byteLength, 
-            buffer.data.data() + bufferView.byteOffset, GL_STATIC_DRAW);
+            &buffer.data.at(0) + bufferView.byteOffset, GL_STATIC_DRAW);
     }
 
     for (auto& material : model.materials) {
@@ -173,10 +173,6 @@ bool Mesh::LoadFromFile(const std::string& filename)
 
 void Mesh::Render(RenderContext& ctx)
 {
-    if (!ctx.CurrentShader) return;
-
-    ctx.CurrentShader->Bind();
-
     glBindVertexArray(_glVAO);
 
     DuskLogInfo("%zu", _primitives.size());

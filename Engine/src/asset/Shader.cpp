@@ -135,7 +135,7 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
         {
             glLinkProgram(_glID);
             glGetProgramiv(_glID, GL_LINK_STATUS, &linked);
-            if (!linked)
+            if (linked == GL_FALSE)
             {
                 DuskLogError("Failed to link shader program");
                 PrintProgramLog();
@@ -187,16 +187,16 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
 
 #endif // defined(DUSK_ENABLE_BINARY_SHADERS) && defined(GL_VERSION_4_1)
 
+	if (_loaded)
+	{
+		CacheUniforms();
+		CacheAttributes();
+	}
+
     for (GLuint shader : shaders)
     {
         glDetachShader(_glID, shader);
         glDeleteShader(shader);
-    }
-
-    if (_loaded)
-    {
-        CacheUniforms();
-        CacheAttributes();
     }
 
     return _loaded;
@@ -209,14 +209,14 @@ void Shader::Bind()
 
 GLint Shader::GetAttributeLocation(const std::string& name) const
 {
-    if (_attributes.find(name) == _attributes.end()) return std::numeric_limits<GLint>::max();
+    if (_attributes.find(name) == _attributes.end()) return -1;
     return _attributes.at(name);
 }
 
 GLint Shader::GetUniformLocation(const std::string& name) const
 {
-    if (_uniforms.find(name) == _uniforms.end()) return 0;
-    return _uniforms.at(name).Location;
+    if (_uniforms.find(name) == _uniforms.end()) return -1;
+    return _uniforms.at(name);
 }
 
 std::string Shader::GetBinaryName(const std::vector<std::string> filenames)
@@ -421,66 +421,30 @@ void Shader::PrintProgramLog()
 
 void Shader::CacheUniforms()
 {
-    GLint tmpSize; // size of the variable
-    GLenum tmpType; // type of the variable (float, vec3 or mat4, etc)
-
-    GLchar buffer[256]; // variable name in GLSL
-    GLsizei length; // name length
+	GLint size;
+	GLenum type;
+    GLchar name[256]; // variable name in GLSL
 
     GLint count;
     glGetProgramiv(_glID, GL_ACTIVE_UNIFORMS, &count);
     for (GLint i = 0; i < count; ++i)
     {
-        glGetActiveUniform(_glID, (GLuint)i, sizeof(buffer), &length, &tmpSize, &tmpType, buffer);
-        _uniforms.emplace(buffer, UniformRecord{
-            glGetUniformLocation(_glID, buffer),
-            tmpSize,
-            tmpType
-        });
-    }
-
-    const int STRIDE = 16;
-
-    std::string name;
-    UniformRecord uniform;
-    std::unordered_map<std::string, size_t> uboSizes;
-    for (auto pair : _uniforms)
-    {
-        std::tie(name, uniform) = pair;
-
-        if (name.find('.') == std::string::npos) continue;
-
-        std::string uboName = name.substr(0, name.find('.'));
-        if (uboSizes.find(uboName) == uboSizes.end())
-        {
-            uboSizes.emplace(uboName, 0);
-        }
-
-        size_t uniformSize = uniform.Size * GetGLTypeSize(uniform.Type);
-        size_t allowedSize = STRIDE - (uboSizes[uboName] % STRIDE);
-
-        if (uniformSize > allowedSize && allowedSize < STRIDE)
-        {
-            uboSizes[uboName] += allowedSize; // Pad to stride
-        }
-
-        uboSizes[uboName] += uniformSize;
+        glGetActiveUniform(_glID, (GLuint)i, sizeof(name), nullptr, &size, &type, name);
+        _uniforms.emplace(name, glGetUniformLocation(_glID, name));
     }
 }
 
 void Shader::CacheAttributes()
 {
-    GLint size;
-    GLenum type;
-
+	GLint size;
+	GLenum type;
     GLchar name[256];
-    GLsizei length;
 
     GLint count;
     glGetProgramiv(_glID, GL_ACTIVE_ATTRIBUTES, &count);
     for (GLint i = 0; i < count; ++i)
     {
-        glGetActiveAttrib(_glID, (GLuint)i, sizeof(name), &length, &size, &type, name);
+        glGetActiveAttrib(_glID, (GLuint)i, sizeof(name), nullptr, &size, &type, name);
         _attributes.emplace(name, glGetAttribLocation(_glID, name));
     }
 }

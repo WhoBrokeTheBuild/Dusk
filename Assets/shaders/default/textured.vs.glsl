@@ -1,6 +1,5 @@
-#include shaders/data/transform.inc.glsl
-#include shaders/data/material.inc.glsl
 #include shaders/data/attributes.inc.glsl
+#include shaders/data/transform.inc.glsl
 
 out vec4 p_Position;
 out vec4 p_Normal;

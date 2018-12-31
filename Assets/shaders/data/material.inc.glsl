@@ -1,19 +1,19 @@
-vec3 u_Ambient;
-vec3 u_Diffuse;
-vec3 u_Specular;
-vec3 u_Emission;
+uniform vec3 u_Ambient;
+uniform vec3 u_Diffuse;
+uniform vec3 u_Specular;
+uniform vec3 u_Emission;
 
-float u_Roughness;
-float u_Metallic;
-float u_Shininess;
-float u_Dissolve;
-float u_Sheen;
-float u_ClearcoatThickness;
-float u_ClearcoatRoughness;
-float u_Anisotropy;
-float u_AnisotropyRotation;
+uniform float u_Roughness;
+uniform float u_Metallic;
+uniform float u_Shininess;
+uniform float u_Dissolve;
+uniform float u_Sheen;
+uniform float u_ClearcoatThickness;
+uniform float u_ClearcoatRoughness;
+uniform float u_Anisotropy;
+uniform float u_AnisotropyRotation;
 
-uint u_TextureFlags;
+uniform uint u_TextureFlags;
 
 const uint HAS_AMBIENT_MAP      = 1 << 0;
 const uint HAS_DIFFUSE_MAP      = 1 << 1;
@@ -26,16 +26,16 @@ const uint HAS_METALLIC_MAP     = 1 << 7;
 const uint HAS_SHEEN_MAP        = 1 << 8;
 const uint HAS_EMISSIVE_MAP     = 1 << 9;
 
-uniform sampler u_AmbientMap;
-uniform sampler u_DiffuseMap;
-uniform sampler u_SpecularMap;
-uniform sampler u_NormalMap;
-uniform sampler u_AlphaMap;
-uniform sampler u_DisplacementMap;
-uniform sampler u_RoughnessMap;
-uniform sampler u_MetallicMap;
-uniform sampler u_SheenMap;
-uniform sampler u_EmissiveMap;
+uniform sampler2D u_AmbientMap;
+uniform sampler2D u_DiffuseMap;
+uniform sampler2D u_SpecularMap;
+uniform sampler2D u_NormalMap;
+uniform sampler2D u_AlphaMap;
+uniform sampler2D u_DisplacementMap;
+uniform sampler2D u_RoughnessMap;
+uniform sampler2D u_MetallicMap;
+uniform sampler2D u_SheenMap;
+uniform sampler2D u_EmissiveMap;
 
 bool HasAmbientMap() {
     return ((u_TextureFlags & HAS_AMBIENT_MAP) > 0u);

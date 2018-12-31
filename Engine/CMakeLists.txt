@@ -6,7 +6,12 @@ SET(_ENGINE_CONFIG_OUT "${CMAKE_CURRENT_BINARY_DIR}/include/dusk/Config.hpp")
 CONFIGURE_FILE(${_ENGINE_CONFIG_IN} ${_ENGINE_CONFIG_OUT})
 
 FILE(GLOB_RECURSE 
-    _ENGINE_INCLUDES 
+    _ENGINE_ASSETS
+    "${CMAKE_SOURCE_DIR}/Assets/*"
+)
+
+FILE(GLOB_RECURSE 
+    _ENGINE_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp"
 )
 
@@ -24,6 +29,7 @@ IF(WIN32)
         ${_ENGINE_INCLUDES}
         ${_ENGINE_SOURCES}
         ${_ENGINE_CONFIG_OUT}
+        ${_ENGINE_ASSETS}
     )
 ELSE()
     ADD_LIBRARY(
@@ -31,6 +37,7 @@ ELSE()
         ${_ENGINE_INCLUDES}
         ${_ENGINE_SOURCES}
         ${_ENGINE_CONFIG_OUT}
+        ${_ENGINE_ASSETS}
     )
 ENDIF()
 
@@ -66,6 +73,28 @@ TARGET_LINK_LIBRARIES(
     JSON::JSON
     SDL2::SDL2
 )
+
+FOREACH(file IN ITEMS ${_ENGINE_ASSETS})
+    FILE(RELATIVE_PATH file_path ${CMAKE_SOURCE_DIR} ${file})
+    GET_FILENAME_COMPONENT(file_path ${file_path} DIRECTORY)
+    FILE(TO_NATIVE_PATH ${file_path} file_path)
+    SOURCE_GROUP(${file_path} FILES ${file})
+ENDFOREACH()
+
+FOREACH(file IN ITEMS ${_ENGINE_INCLUDES} ${_ENGINE_SOURCES})
+    FILE(RELATIVE_PATH file_path ${CMAKE_CURRENT_SOURCE_DIR} ${file})
+    GET_FILENAME_COMPONENT(file_path ${file_path} DIRECTORY)
+    FILE(TO_NATIVE_PATH ${file_path} file_path)
+    SOURCE_GROUP(${file_path} FILES ${file})
+ENDFOREACH()
+
+FOREACH(file IN ITEMS ${_ENGINE_CONFIG_OUT})
+    FILE(RELATIVE_PATH file_path ${CMAKE_CURRENT_BINARY_DIR} ${file})
+    GET_FILENAME_COMPONENT(file_path ${file_path} DIRECTORY)
+    FILE(TO_NATIVE_PATH ${file_path} file_path)
+    SOURCE_GROUP(${file_path} FILES ${file})
+ENDFOREACH()
+
 
 IF(MSVC)
     SET_TARGET_PROPERTIES(

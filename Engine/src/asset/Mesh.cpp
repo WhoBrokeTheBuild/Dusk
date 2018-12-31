@@ -60,6 +60,8 @@ bool Mesh::LoadFromFile(const std::string& filename)
         return false;
     }
 
+	DuskLogLoad("Loading Mesh from %s", fullPath.c_str());
+
 	DuskLogVerbose("Model Generator %s", model.asset.generator.c_str());
 
 	glGenVertexArrays(1, &_glVAO);
@@ -175,16 +177,16 @@ void Mesh::Render(RenderContext& ctx)
 {
     glBindVertexArray(_glVAO);
 
-    DuskLogInfo("%zu", _primitives.size());
+    //DuskLogInfo("%zu", _primitives.size());
 	for (auto& p : _primitives) {
         if (p.material >= 0) {
             auto& mat = _materials[p.material];
             mat->Bind(ctx.CurrentShader);
         }
 
-        DuskLogInfo("###");
+        //DuskLogInfo("###");
 		glDrawElements(p.mode, p.count, p.type, (char*)0 + p.offset);
-        DuskLogInfo("???");
+        //DuskLogInfo("???");
 	}
 
     glBindVertexArray(0);

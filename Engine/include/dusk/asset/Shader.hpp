@@ -105,15 +105,6 @@ private:
 
     static std::string _GLSLVersionString;
 
-    /// Types
-
-    struct UniformRecord
-    {
-        GLint  Location;
-        GLint  Size;
-        GLenum Type;
-    };
-
     /// Variables
 
     bool _loaded = false;
@@ -122,7 +113,7 @@ private:
 
     std::vector<std::string> _filenames;
 
-    std::unordered_map<std::string, UniformRecord> _uniforms;
+    std::unordered_map<std::string, GLint> _uniforms;
 
     std::unordered_map<std::string, GLuint> _attributes;
 

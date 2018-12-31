@@ -8,6 +8,8 @@
 namespace dusk {
 
 void Material::Bind(Shader * sp) {
+    sp->Bind();
+
     sp->SetUniform("u_Ambient", Ambient);
     sp->SetUniform("u_Diffuse", Diffuse);
     sp->SetUniform("u_Specular", Specular);

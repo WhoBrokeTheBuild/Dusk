@@ -98,7 +98,6 @@ FIND_PACKAGE(SDL2 REQUIRED)
 # Allow VS to find .dll's
 SET(CMAKE_MSVCIDE_RUN_PATH 
     ${SDL2_RUNTIME_DIR}
-    ${Assimp_RUNTIME_DIR}
 )
 
 ###

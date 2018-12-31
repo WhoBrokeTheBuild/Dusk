@@ -37,6 +37,8 @@ void main() {
 
     vec3 specular = u_Specular.rgb;
     if (HasSpecularMap()) {
+		_Color = vec4(1, 0, 0, 1);
+		return;
         specular = texture(u_SpecularMap, p_TexCoord).rgb;
     }
     specular *= spec;

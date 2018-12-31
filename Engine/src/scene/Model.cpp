@@ -1,6 +1,7 @@
 #include "dusk/scene/Model.hpp"
 
 #include <dusk/scene/Camera.hpp>
+#include <dusk/core/Log.hpp>
 
 namespace dusk {
 
@@ -41,7 +42,7 @@ void Model::SetScale(const glm::vec3& scale)
 
 glm::mat4 Model::GetTransform()
 {
-    _transform = glm::mat4();
+    _transform = glm::mat4(1.0f);
     _transform = glm::translate(_transform, _position);
     _transform = glm::rotate(_transform, _rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
     _transform = glm::rotate(_transform, _rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));

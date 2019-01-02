@@ -13,15 +13,21 @@ public:
 
     struct Options 
     {
-		Options() = default;
+		Options()
+            : WrapS(GL_REPEAT)
+            , WrapT(GL_REPEAT)
+            , MagFilter(GL_NEAREST)
+            , MinFilter(GL_NEAREST)
+            , Mipmap(true)
+        { }
 
-        GLenum WrapS = GL_REPEAT;
-        GLenum WrapT = GL_REPEAT;
+        GLenum WrapS;
+        GLenum WrapT;
 
-        GLenum MagFilter = GL_NEAREST;
-        GLenum MinFilter = GL_NEAREST;
+        GLenum MagFilter;
+        GLenum MinFilter;
 
-        bool Mipmap = true;
+        bool Mipmap;
     };
 
     /// Class Boilerplate

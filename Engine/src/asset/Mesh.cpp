@@ -15,7 +15,7 @@ namespace dusk {
 Mesh::Mesh(Mesh&& rhs)
 {
     std::swap(_loaded, rhs._loaded);
-    std::swap(_glVAO, rhs._glVAO);
+    std::swap(_primitives, rhs._primitives);
 }
 
 Mesh::Mesh(const std::string& filename)
@@ -25,7 +25,9 @@ Mesh::Mesh(const std::string& filename)
 
 Mesh::~Mesh()
 {
-    glDeleteVertexArrays(1, &_glVAO);
+	for (auto& p : _primitives) {
+    	glDeleteVertexArrays(1, &p.vao);
+	}
 }
 
 bool Mesh::LoadFromFile(const std::string& filename)
@@ -71,16 +73,27 @@ bool Mesh::LoadFromFile(const std::string& filename)
 	DuskLogLoad("Loading Mesh from %s", fullPath.c_str());
 
 	DuskLogVerbose("Model Generator %s", model.asset.generator.c_str());
-
-	glGenVertexArrays(1, &_glVAO);
-	glBindVertexArray(_glVAO);
+    DuskLogVerbose("%zu accessors", model.accessors.size());
+    DuskLogVerbose("%zu animations", model.animations.size());
+    DuskLogVerbose("%zu buffers", model.buffers.size());
+    DuskLogVerbose("%zu bufferViews", model.bufferViews.size());
+    DuskLogVerbose("%zu materials", model.materials.size());
+    DuskLogVerbose("%zu meshes", model.meshes.size());
+    DuskLogVerbose("%zu nodes", model.nodes.size());
+    DuskLogVerbose("%zu textures", model.textures.size());
+    DuskLogVerbose("%zu images", model.images.size());
+    DuskLogVerbose("%zu skins", model.skins.size());
+    DuskLogVerbose("%zu samplers", model.samplers.size());
+    DuskLogVerbose("%zu cameras", model.cameras.size());
+    DuskLogVerbose("%zu scenes", model.scenes.size());
+	DuskLogVerbose("%zu lights", model.lights.size());
 
     std::unordered_map<int, GLuint> vbos;
 
 	std::vector<std::shared_ptr<Texture>> textures;
 	for (auto& texture : model.textures) {
 		tinygltf::Image &image = model.images[texture.source];
-		if (texture.sampler < 0) {
+		if (texture.sampler <= 0) {
 			textures.push_back(std::make_shared<Texture>(image.image.data(), glm::ivec2(image.width, image.height), image.component));
 		}
 		else {
@@ -134,6 +147,12 @@ bool Mesh::LoadFromFile(const std::string& filename)
 	for (int id : scene.nodes) {
         auto& node = model.nodes[id];
         auto& mesh = model.meshes[node.mesh];
+		DuskLogVerbose("%zu primitives", mesh.primitives.size());
+		
+		GLuint vao;
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+
         for (size_t i = 0; i < mesh.primitives.size(); ++i) {
 			for (size_t j = 0; j < model.bufferViews.size(); ++j) {
 				auto& bufferView = model.bufferViews[j];
@@ -148,7 +167,7 @@ bool Mesh::LoadFromFile(const std::string& filename)
 
 				glBindBuffer(bufferView.target, vbo);
 				glBufferData(bufferView.target, bufferView.byteLength,
-					&buffer.data.at(0) + bufferView.byteOffset, GL_STATIC_DRAW);
+					buffer.data.data() + bufferView.byteOffset, GL_STATIC_DRAW);
 			}
 
             auto& primitive = mesh.primitives[i];
@@ -192,7 +211,14 @@ bool Mesh::LoadFromFile(const std::string& filename)
 				}
             }
 
+			if (auto norm = primitive.attributes.find("NORMAL"); norm != primitive.attributes.end()) {
+				if (auto tang = primitive.attributes.find("TANGENT"); tang != primitive.attributes.end()) {
+					// TODO: Compute Bitangent
+				}
+			}
+
 			_primitives.push_back({
+				vao,
 				(GLenum)primitive.mode,
 				(GLsizei)indexAccessor.count,
 				(GLenum)indexAccessor.componentType,
@@ -216,18 +242,18 @@ bool Mesh::LoadFromFile(const std::string& filename)
 
 void Mesh::Render(RenderContext& ctx)
 {
-    glBindVertexArray(_glVAO);
-
 	for (auto& p : _primitives) {
+    	glBindVertexArray(p.vao);
+
         if (p.material >= 0) {
             auto& mat = _materials[p.material];
             mat->Bind(ctx.CurrentShader);
         }
 
 		glDrawElements(p.mode, p.count, p.type, (char*)0 + p.offset);
-	}
 
-    glBindVertexArray(0);
+		glBindVertexArray(0);
+	}
 }
 
 void Mesh::ComputeBounds(const glm::vec3* data, size_t length)

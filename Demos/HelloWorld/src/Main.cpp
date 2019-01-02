@@ -17,9 +17,10 @@ public:
         auto app = dusk::App::Inst();
 
 		auto bounds = _model->GetBounds();
+        float max = std::max({ bounds.Max.x, bounds.Max.y, bounds.Max.z });
 		_camera.reset(new dusk::Camera());
         _camera->SetAspect(app->GetWindowSize());
-        _camera->SetPosition(bounds.Max * 2.0f);
+        _camera->SetPosition(glm::vec3(max) * 2.0f);
         _camera->SetLookAt(bounds.GetSize() * 0.5f);
         app->GetRenderContext().CurrentCamera = _camera.get();
     }

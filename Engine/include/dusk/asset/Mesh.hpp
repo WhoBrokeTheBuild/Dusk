@@ -65,10 +65,9 @@ private:
 
 	Box _bounds;
 
-    GLuint _glVAO;
-
 	struct Primitive 
     {
+        GLuint vao;
 		GLenum	mode;
 		GLsizei count;
 		GLenum	type;

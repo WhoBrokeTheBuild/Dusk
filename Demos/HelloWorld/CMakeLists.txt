@@ -1,7 +1,21 @@
 
+FILE(GLOB_RECURSE 
+    _ASSETS
+    "${CMAKE_CURRENT_SOURCE_DIR}/Assets/*"
+)
+
+FILE(GLOB_RECURSE 
+    _SOURCES  
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+)
+
 ADD_EXECUTABLE(
     HelloWorld
-    src/Main.cpp
+    ${_SOURCES}
+    ${_ASSETS}
 )
 
 TARGET_LINK_LIBRARIES(
@@ -30,6 +44,13 @@ ADD_CUSTOM_TARGET(
     DEPENDS HelloWorld
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+FOREACH(file IN ITEMS ${_SOURCES} ${_ASSETS})
+    FILE(RELATIVE_PATH file_path ${CMAKE_CURRENT_SOURCE_DIR} ${file})
+    GET_FILENAME_COMPONENT(file_path ${file_path} DIRECTORY)
+    FILE(TO_NATIVE_PATH ${file_path} file_path)
+    SOURCE_GROUP(${file_path} FILES ${file})
+ENDFOREACH()
 
 IF(MSVC)
     SET_TARGET_PROPERTIES(

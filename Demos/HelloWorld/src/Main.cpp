@@ -12,15 +12,15 @@ public:
     TestScene() 
     {
         _model.reset(new dusk::Model());
-        _model->AddMesh(std::make_shared<dusk::Mesh>("models/cube.glb"));
-        //_model->SetScale(vec3(0.01f));
+        _model->AddMesh(std::make_shared<dusk::Mesh>("models/AntiqueCamera.glb"));
 
         auto app = dusk::App::Inst();
 
+		auto bounds = _model->GetBounds();
 		_camera.reset(new dusk::Camera());
         _camera->SetAspect(app->GetWindowSize());
-        _camera->SetPosition({ 3.0f, 3.0f, 3.0f });
-        _camera->SetForward({ -1.0f, -1.0f, -1.0f });
+        _camera->SetPosition(bounds.Max * 2.0f);
+        _camera->SetLookAt(bounds.GetSize() * 0.5f);
         app->GetRenderContext().CurrentCamera = _camera.get();
     }
 

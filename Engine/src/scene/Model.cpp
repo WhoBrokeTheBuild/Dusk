@@ -52,6 +52,17 @@ glm::mat4 Model::GetTransform()
     return _transform;
 }
 
+Box Model::GetBounds() const
+{
+	Box bounds;
+
+	for (auto& mesh : _meshes) {
+		bounds += mesh->GetBounds();
+	}
+
+	return bounds;
+}
+
 void Model::Render(RenderContext& ctx)
 {
     auto sp = ctx.CurrentShader;

@@ -13,6 +13,8 @@ public:
 
     struct Options 
     {
+		Options() = default;
+
         GLenum WrapS = GL_REPEAT;
         GLenum WrapT = GL_REPEAT;
 
@@ -28,9 +30,9 @@ public:
 
     Texture() = default;
 
-    Texture(const std::string& filename);
+    Texture(const std::string& filename, Options opts = Options());
 
-    Texture(const std::string& filename, Options opts);
+	Texture(const uint8_t * data, glm::ivec2 size, int comp = 4, Options opts = Options());
 
     Texture(GLuint&& id, glm::ivec2 size);
 
@@ -40,9 +42,9 @@ public:
 
     /// Methods
 
-    bool LoadFromFile(const std::string& filename);
+    bool LoadFromFile(const std::string& filename, Options opts = Options());
 
-    bool LoadFromFile(const std::string& filename, Options opts);
+	bool LoadFromBuffer(const uint8_t * data, glm::ivec2 size, int comp = 4, Options opts = Options());
 
     void Bind();
 

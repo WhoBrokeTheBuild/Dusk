@@ -49,6 +49,8 @@ public:
 
     glm::mat4 GetTransform();
 
+	Box GetBounds() const;
+
     void Render(RenderContext& ctx);
 
 private:

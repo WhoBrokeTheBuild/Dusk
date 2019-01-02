@@ -19,7 +19,11 @@ public:
     glm::vec3 Min;
     glm::vec3 Max;
 
-    Box() = default;
+	Box()
+		: Min(std::numeric_limits<float>::max())
+		, Max(std::numeric_limits<float>::min())
+	{ }
+
     Box(glm::vec3 min, glm::vec3 max)
         : Min(min)
         , Max(max)

@@ -8,23 +8,24 @@
 
 namespace dusk {
 
-Texture::Texture(const std::string& filename)
-{
-    LoadFromFile(filename);
-}
-
-Texture::Texture(const std::string& filename, Options opts)
+Texture::Texture(const std::string& filename, Options opts /*= Options()*/)
 {
     LoadFromFile(filename, opts);
+}
+
+Texture::Texture(const uint8_t * data, glm::ivec2 size, int comp /*= 4*/, Options opts /*= Options()*/)
+{
+	LoadFromBuffer(data, size, comp, opts);
 }
 
 Texture::Texture(GLuint&& id, glm::ivec2 size)
 {
     std::swap(_glID, id);
     _size = size;
-    if (_glID > 0) 
+    if (_glID >= 0) 
     {
         _loaded = true;
+		DuskLogLoad("Loaded from existing ID %u", _glID);
     }
 }
 
@@ -41,22 +42,9 @@ Texture::~Texture()
     }
 }
 
-bool Texture::LoadFromFile(const std::string& filename)
-{
-    return LoadFromFile(filename, Options{});
-}
-
-bool Texture::LoadFromFile(const std::string& filename, Options opts)
+bool Texture::LoadFromFile(const std::string& filename, Options opts /*= Options()*/)
 {
     DuskBenchStart();
-
-    _loaded = false;
-
-    if (_glID > 0)
-    {
-        glDeleteTextures(1, &_glID);
-        _glID = 0;
-    }
 
     const auto& paths = GetAssetPaths();
 
@@ -80,36 +68,76 @@ bool Texture::LoadFromFile(const std::string& filename, Options opts)
         return false;
     }
 
-    glGenTextures(1, &_glID);
-
-    if (0 == _glID)
-    {
-        DuskLogError("Failed to create GL Texture");
-        return false;
-    }
-
-    glBindTexture(GL_TEXTURE_2D, _glID);
-    DuskLogVerbose("Binding texture to ID %u", _glID);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, opts.WrapS);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, opts.WrapT);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, opts.MagFilter);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, opts.MinFilter);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture);
-
-    if (opts.Mipmap) 
-    {
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-
-    glBindTexture(GL_TEXTURE_2D, 0);
+	LoadFromBuffer(texture, _size, comp, opts);
 
     stbi_image_free(texture);
 
     DuskBenchEnd("Texture::LoadFromFile");
     return _loaded;
+}
+
+bool Texture::LoadFromBuffer(const uint8_t * buffer, glm::ivec2 size, int comp /*= 4*/, Options opts /*= Options()*/)
+{
+	DuskBenchStart();
+
+	_loaded = false;
+
+	if (_glID > 0)
+	{
+		glDeleteTextures(1, &_glID);
+		_glID = 0;
+	}
+
+	glGenTextures(1, &_glID);
+
+	if (0 == _glID)
+	{
+		DuskLogError("Failed to create GL Texture");
+		return false;
+	}
+
+	GLint intfmt;
+	GLenum fmt;
+
+	switch (comp) {
+	case 1:
+		intfmt = GL_RED;
+		fmt = GL_RED;
+	case 2:
+		intfmt = GL_RG;
+		fmt = GL_RG;
+	case 3:
+		intfmt = GL_RGB;
+		fmt = GL_RGB;
+	case 4:
+	default:
+		intfmt = GL_RGBA;
+		fmt = GL_RGBA;
+	}
+
+	glBindTexture(GL_TEXTURE_2D, _glID);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	DuskLogVerbose("Binding texture to ID %u", _glID);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, opts.WrapS);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, opts.WrapT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, opts.MagFilter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, opts.MinFilter);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, intfmt, size.x, size.y, 0, fmt, GL_UNSIGNED_BYTE, buffer);
+
+	if (opts.Mipmap)
+	{
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	_loaded = true;
+
+	DuskBenchEnd("Texture::LoadFromBuffer");
+	return _loaded;
 }
 
 void Texture::Bind()

@@ -51,6 +51,10 @@ public:
         return _loaded; 
     }
 
+	Box GetBounds() const { 
+		return _bounds; 
+	}
+
     void Render(RenderContext& ctx);
 
 private:
@@ -58,6 +62,8 @@ private:
     bool _loaded = false;
 
     std::string _filename;
+
+	Box _bounds;
 
     GLuint _glVAO;
 
@@ -73,6 +79,9 @@ private:
     std::vector<std::unique_ptr<Material>> _materials;
 
 	std::vector<Primitive> _primitives;
+
+	void ComputeBounds(const glm::vec3* data, size_t length);
+	
 };
 
 } // namespace dusk

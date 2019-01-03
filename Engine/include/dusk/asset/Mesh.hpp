@@ -51,9 +51,9 @@ public:
         return _loaded; 
     }
 
-	Box GetBounds() const { 
-		return _bounds; 
-	}
+    Box GetBounds() const { 
+        return _bounds; 
+    }
 
     void Render(RenderContext& ctx);
 
@@ -63,24 +63,24 @@ private:
 
     std::string _filename;
 
-	Box _bounds;
+    Box _bounds;
 
-	struct Primitive 
+    struct Primitive 
     {
         GLuint vao;
-		GLenum	mode;
-		GLsizei count;
-		GLenum	type;
-		GLsizei offset;
+        GLenum    mode;
+        GLsizei count;
+        GLenum    type;
+        GLsizei offset;
         int material;
-	};
+    };
 
     std::vector<std::unique_ptr<Material>> _materials;
 
-	std::vector<Primitive> _primitives;
+    std::vector<Primitive> _primitives;
 
-	void ComputeBounds(const glm::vec3* data, size_t length);
-	
+    void ComputeBounds(const glm::vec3* data, size_t length);
+    
 };
 
 } // namespace dusk

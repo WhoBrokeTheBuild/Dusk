@@ -187,11 +187,11 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
 
 #endif // defined(DUSK_ENABLE_BINARY_SHADERS) && defined(GL_VERSION_4_1)
 
-	if (_loaded)
-	{
-		CacheUniforms();
-		CacheAttributes();
-	}
+    if (_loaded)
+    {
+        CacheUniforms();
+        CacheAttributes();
+    }
 
     for (GLuint shader : shaders)
     {
@@ -421,8 +421,8 @@ void Shader::PrintProgramLog()
 
 void Shader::CacheUniforms()
 {
-	GLint size;
-	GLenum type;
+    GLint size;
+    GLenum type;
     GLchar name[256]; // variable name in GLSL
 
     GLint count;
@@ -436,8 +436,8 @@ void Shader::CacheUniforms()
 
 void Shader::CacheAttributes()
 {
-	GLint size;
-	GLenum type;
+    GLint size;
+    GLenum type;
     GLchar name[256];
 
     GLint count;

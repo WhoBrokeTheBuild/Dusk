@@ -49,16 +49,16 @@ public:
 
     glm::mat4 GetTransform();
 
-	Box GetBounds() const;
+    Box GetBounds() const;
 
     void Render(RenderContext& ctx);
 
 private:
 
     glm::mat4 _transform = glm::mat4(1.0f);
-	glm::vec3 _position  = glm::vec3(0.0f);
-	glm::vec3 _rotation  = glm::vec3(0.0f);
-	glm::vec3 _scale	 = glm::vec3(1.0f);
+    glm::vec3 _position  = glm::vec3(0.0f);
+    glm::vec3 _rotation  = glm::vec3(0.0f);
+    glm::vec3 _scale     = glm::vec3(1.0f);
 
     std::vector<std::shared_ptr<Mesh>> _meshes;
 

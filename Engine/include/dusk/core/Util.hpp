@@ -19,10 +19,10 @@ public:
     glm::vec3 Min;
     glm::vec3 Max;
 
-	Box()
-		: Min(std::numeric_limits<float>::max())
-		, Max(std::numeric_limits<float>::min())
-	{ }
+    Box()
+        : Min(std::numeric_limits<float>::max())
+        , Max(std::numeric_limits<float>::min())
+    { }
 
     Box(glm::vec3 min, glm::vec3 max)
         : Min(min)
@@ -81,14 +81,14 @@ std::string RunCommand(const std::string& cmd);
 
 template <typename F>
 struct privDefer {
-	F f;
-	privDefer(F f) : f(f) {}
-	~privDefer() { f(); }
+    F f;
+    privDefer(F f) : f(f) {}
+    ~privDefer() { f(); }
 };
 
 template <typename F>
 privDefer<F> defer_func(F f) {
-	return privDefer<F>(f);
+    return privDefer<F>(f);
 }
 
 #define DEFER_1(x, y) x##y

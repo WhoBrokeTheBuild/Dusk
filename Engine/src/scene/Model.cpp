@@ -54,13 +54,13 @@ glm::mat4 Model::GetTransform()
 
 Box Model::GetBounds() const
 {
-	Box bounds;
+    Box bounds;
 
-	for (auto& mesh : _meshes) {
-		bounds += mesh->GetBounds();
-	}
+    for (auto& mesh : _meshes) {
+        bounds += mesh->GetBounds();
+    }
 
-	return bounds;
+    return bounds;
 }
 
 void Model::Render(RenderContext& ctx)
@@ -77,6 +77,8 @@ void Model::Render(RenderContext& ctx)
     sp->SetUniformMatrix("u_View", view);
     sp->SetUniformMatrix("u_Projection", proj);
     sp->SetUniformMatrix("u_MVP", mvp);
+
+    sp->SetUniform("u_EyePos", ctx.CurrentCamera->GetPosition());
 
     for (auto& mesh : _meshes) {
         mesh->Render(ctx);

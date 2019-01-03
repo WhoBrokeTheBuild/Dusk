@@ -69,10 +69,10 @@ void App::Start()
         auto elapsedTime = duration_cast<double_ms>(high_resolution_clock::now() - timeOffset);
         timeOffset = high_resolution_clock::now();
 
-		while (SDL_PollEvent(&evt))
-		{
+        while (SDL_PollEvent(&evt))
+        {
             ProcessSdlEvent(&evt);
-		}
+        }
 
         _updateContext.DeltaTime = duration_cast<double_ms>(elapsedTime / frameDelay.count()).count();
         _updateContext.ElapsedTime = elapsedTime.count();

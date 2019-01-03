@@ -68,18 +68,11 @@ void Material::Bind(Shader * sp) {
         DisplacementMap->Bind();
     }
     
-    if (RoughnessMap) {
-        flags |= HAS_ROUGHNESS_MAP;
-        sp->SetUniform("u_RoughnessMap", TextureID::ROUGHNESS);
-        glActiveTexture(GL_TEXTURE0 + TextureID::ROUGHNESS);
-        RoughnessMap->Bind();
-    }
-    
-    if (MetallicMap) {
-        flags |= HAS_METALLIC_MAP;
-        sp->SetUniform("u_MetallicMap", TextureID::METALLIC);
-        glActiveTexture(GL_TEXTURE0 + TextureID::METALLIC);
-        MetallicMap->Bind();
+    if (MetallicRoughnessMap) {
+        flags |= HAS_METALLIC_ROUGHNESS_MAP;
+        sp->SetUniform("u_RoughnessMap", TextureID::METALLIC_ROUGHNESS);
+        glActiveTexture(GL_TEXTURE0 + TextureID::METALLIC_ROUGHNESS);
+        MetallicRoughnessMap->Bind();
     }
     
     if (SheenMap) {

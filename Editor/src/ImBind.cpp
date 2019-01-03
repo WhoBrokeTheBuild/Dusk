@@ -329,9 +329,9 @@ bool ImBind::CreateDeviceObjects()
         "out vec4 Fra_Color;\n"
         "void main()\n"
         "{\n"
-        "	Fra_UV = UV;\n"
-        "	Fra_Color = Color;\n"
-        "	gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
+        "    Fra_UV = UV;\n"
+        "    Fra_Color = Color;\n"
+        "    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
         "}\n";
 
     const GLchar* fragment_shader =
@@ -341,7 +341,7 @@ bool ImBind::CreateDeviceObjects()
         "out vec4 Out_Color;\n"
         "void main()\n"
         "{\n"
-        "	Out_Color = Fra_Color * texture( Texture, Fra_UV.st);\n"
+        "    Out_Color = Fra_Color * texture( Texture, Fra_UV.st);\n"
         "}\n";
 
     const GLchar* vertex_shader_with_version[2] = { _GlslVersion, vertex_shader };

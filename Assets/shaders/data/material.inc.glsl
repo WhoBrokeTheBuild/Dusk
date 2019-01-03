@@ -15,16 +15,15 @@ uniform float u_AnisotropyRotation;
 
 uniform uint u_TextureFlags;
 
-const uint HAS_AMBIENT_MAP      = 1 << 0;
-const uint HAS_DIFFUSE_MAP      = 1 << 1;
-const uint HAS_SPECULAR_MAP     = 1 << 2;
-const uint HAS_NORMAL_MAP       = 1 << 3;
-const uint HAS_ALPHA_MAP        = 1 << 4;
-const uint HAS_DISPLACEMENT_MAP = 1 << 5;
-const uint HAS_ROUGHNESS_MAP    = 1 << 6;
-const uint HAS_METALLIC_MAP     = 1 << 7;
-const uint HAS_SHEEN_MAP        = 1 << 8;
-const uint HAS_EMISSIVE_MAP     = 1 << 9;
+const uint HAS_AMBIENT_MAP				= 1 << 0;
+const uint HAS_DIFFUSE_MAP				= 1 << 1;
+const uint HAS_SPECULAR_MAP				= 1 << 2;
+const uint HAS_NORMAL_MAP				= 1 << 3;
+const uint HAS_ALPHA_MAP				= 1 << 4;
+const uint HAS_DISPLACEMENT_MAP			= 1 << 5;
+const uint HAS_METALLIC_ROUGHNESS_MAP	= 1 << 6;
+const uint HAS_SHEEN_MAP				= 1 << 7;
+const uint HAS_EMISSIVE_MAP				= 1 << 8;
 
 uniform sampler2D u_AmbientMap;
 uniform sampler2D u_DiffuseMap;
@@ -32,8 +31,7 @@ uniform sampler2D u_SpecularMap;
 uniform sampler2D u_NormalMap;
 uniform sampler2D u_AlphaMap;
 uniform sampler2D u_DisplacementMap;
-uniform sampler2D u_RoughnessMap;
-uniform sampler2D u_MetallicMap;
+uniform sampler2D u_MetallicRoughnessMap;
 uniform sampler2D u_SheenMap;
 uniform sampler2D u_EmissiveMap;
 
@@ -61,12 +59,8 @@ bool HasDisplacementMap() {
     return ((u_TextureFlags & HAS_DISPLACEMENT_MAP) > 0u);
 }
 
-bool HasRoughnessMap() {
-    return ((u_TextureFlags & HAS_ROUGHNESS_MAP) > 0u);
-}
-
-bool HasMetallicMap() {
-    return ((u_TextureFlags & HAS_METALLIC_MAP) > 0u);
+bool HasMetallicRoughnessMap() {
+    return ((u_TextureFlags & HAS_METALLIC_ROUGHNESS_MAP) > 0u);
 }
 
 bool HasSheenMap() {

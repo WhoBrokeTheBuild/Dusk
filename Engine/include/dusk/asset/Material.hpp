@@ -21,24 +21,22 @@ public:
         NORMAL                  = 3,
         ALPHA                   = 4,
         DISPLACEMENT            = 5,
-        ROUGHNESS               = 6,
-        METALLIC                = 7,
+        METALLIC_ROUGHNESS      = 6,
         SHEEN                   = 8,
         EMISSIVE                = 9,
     };
 
     enum TextureFlags : GLuint 
     {
-        HAS_AMBIENT_MAP         = 1 << 0,
-        HAS_DIFFUSE_MAP         = 1 << 1,
-        HAS_SPECULAR_MAP        = 1 << 2,
-        HAS_NORMAL_MAP          = 1 << 3,
-        HAS_ALPHA_MAP           = 1 << 4,
-        HAS_DISPLACEMENT_MAP    = 1 << 5,
-        HAS_ROUGHNESS_MAP       = 1 << 6,
-        HAS_METALLIC_MAP        = 1 << 7,
-        HAS_SHEEN_MAP           = 1 << 8,
-        HAS_EMISSIVE_MAP        = 1 << 9,
+        HAS_AMBIENT_MAP				= 1 << 0,
+        HAS_DIFFUSE_MAP				= 1 << 1,
+        HAS_SPECULAR_MAP			= 1 << 2,
+        HAS_NORMAL_MAP				= 1 << 3,
+        HAS_ALPHA_MAP				= 1 << 4,
+        HAS_DISPLACEMENT_MAP		= 1 << 5,
+        HAS_METALLIC_ROUGHNESS_MAP	= 1 << 6,
+        HAS_SHEEN_MAP				= 1 << 7,
+        HAS_EMISSIVE_MAP			= 1 << 8,
     };
     
     glm::vec3 Ambient           = glm::vec3(0);
@@ -62,8 +60,7 @@ public:
     std::shared_ptr<Texture> NormalMap;
     std::shared_ptr<Texture> AlphaMap;
     std::shared_ptr<Texture> DisplacementMap;
-    std::shared_ptr<Texture> RoughnessMap;
-    std::shared_ptr<Texture> MetallicMap;
+    std::shared_ptr<Texture> MetallicRoughnessMap;
     std::shared_ptr<Texture> SheenMap;
     std::shared_ptr<Texture> EmissiveMap;
 

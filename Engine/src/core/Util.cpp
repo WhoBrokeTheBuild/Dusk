@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <array>
 #include <sstream>
+#include <algorithm>
 
 namespace dusk {
 
@@ -37,7 +38,7 @@ std::vector<std::string> GetAssetPaths()
         }
     }
 
-    std::reverse(_assetPaths.begin(), _assetPaths.end());
+    reverse(_assetPaths.begin(), _assetPaths.end());
     return _assetPaths;
 }
 

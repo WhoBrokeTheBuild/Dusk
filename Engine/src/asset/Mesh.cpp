@@ -5,339 +5,311 @@
 #include <dusk/scene/Actor.hpp>
 #include <dusk/scene/Camera.hpp>
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
+#include <unordered_map>
+
+#define TINYGLTF_NO_STB_IMAGE_WRITE
+#include <tiny_gltf.h>
 
 namespace dusk {
 
 Mesh::Mesh(Mesh&& rhs)
 {
-    swap(_loaded, rhs._loaded);
-    swap(_glVAO, rhs._glVAO);
-    memcpy(_glVBOs, rhs._glVBOs, sizeof(_glVBOs));
-    memset(rhs._glVBOs, 0, sizeof(rhs._glVBOs));
-    _renderGroups = move(rhs._renderGroups);
+    std::swap(_loaded, rhs._loaded);
+    std::swap(_primitives, rhs._primitives);
 }
 
-Mesh::Mesh(const string& filename)
+Mesh::Mesh(const std::string& filename)
 {
     LoadFromFile(filename);
 }
 
-Mesh::Mesh(const Data& data)
-{
-    AddData(data);
-    FinishLoad();
-}
-
-Mesh::Mesh(const vector<Data>& datum)
-{
-    for (const auto& data : datum) {
-        AddData(data);
-    }
-    FinishLoad();
-}
-
 Mesh::~Mesh()
 {
-    glDeleteBuffers(sizeof(_glVBOs) / sizeof(GLuint), _glVBOs);
-    glDeleteVertexArrays(1, &_glVAO);
+    for (auto& p : _primitives) {
+        glDeleteVertexArrays(1, &p.vao);
+    }
 }
 
 bool Mesh::LoadFromFile(const std::string& filename)
 {
+    DuskBenchStart();
+
+    using namespace tinygltf;
+
     _filename = filename;
 
-    const unsigned int flags = aiProcess_Triangulate | aiProcess_FlipUVs;
+    std::string ext = GetExtension(_filename);
+    bool binary = (ext == "glb");
 
-    Assimp::Importer importer;
     std::string fullPath;
     const auto& paths = GetAssetPaths();
-    const aiScene* scene = nullptr;
 
+    tinygltf::Model model;
+    TinyGLTF loader;
+    std::string err;
+    std::string warn;
+
+    bool loaded = false;
     for (auto& p : paths) {
         fullPath = p + filename;
 
         DuskLogVerbose("Checking %s", fullPath.c_str());
-        scene = importer.ReadFile(fullPath, flags);
+        if (binary) {
+            loaded = loader.LoadBinaryFromFile(&model, &err, &warn, fullPath.c_str());
+        }
+        else {
+            loaded = loader.LoadASCIIFromFile(&model, &err, &warn, fullPath.c_str());
+        }
 
-        if (scene) break;
+        if (loaded) break;
     }
 
-	if (!scene)
+    if (!loaded)
     {
         DuskLogError("Failed to load model, '%s'", filename.c_str());
         return false;
     }
 
-	std::string dirname = GetDirname(filename) + "/";
+    DuskLogLoad("Loading Mesh from %s", fullPath.c_str());
+    DuskLogVerbose("Model Generator %s", model.asset.generator.c_str());
 
-    auto toVec2 = [](const aiVector3D& v) -> glm::vec2 {
-        return { v.x, v.y };
-    };
+    std::vector<std::shared_ptr<Texture>> textures;
+    for (auto& texture : model.textures) {
+        tinygltf::Image &image = model.images[texture.source];
+        if (texture.sampler <= 0) {
+			DuskLogVerbose("Loading Texture from buffer (%d, %d, %d)", image.width, image.height, image.component);
+            textures.push_back(std::make_shared<Texture>(image.image.data(), glm::ivec2(image.width, image.height), image.component));
+        }
+        else {
+            textures.push_back(std::make_shared<Texture>((GLuint)texture.sampler, glm::ivec2(image.width, image.height)));
+        }
+    }
 
-    auto toVec3 = [](const aiVector3D& v) -> glm::vec3 {
-        return { v.x, v.y, v.z };
-    };
+    for (auto& material : model.materials) {
+        auto mat = std::make_unique<Material>();
 
-    auto toVec4 = [](const aiColor4D& c) -> glm::vec4 {
-        return { c.r, c.g, c.b, 1.0f };
-    };
+        auto& vals = material.values;
+        auto it = vals.end();
 
-    for (unsigned int m = 0; m < scene->mNumMeshes; ++m)
-    {
-        aiMesh * aiMesh = scene->mMeshes[m];
-        Data data;
+        auto& addVals = material.additionalValues;
+        auto addIt = addVals.end();
 
-        data.Vertices.reserve(aiMesh->mNumFaces * 3);
-
-        if (aiMesh->HasNormals())
-        {
-            data.Normals.reserve(aiMesh->mNumFaces * 3);
+        it = vals.find("baseColorFactor");
+        if (it != vals.end()) {
+            auto& arr = it->second.number_array;
+            mat->Diffuse = glm::vec3(arr[0], arr[1], arr[2]);
+        }
+        
+        it = vals.find("baseColorTexture");
+        if (it != vals.end()) {
+            mat->DiffuseMap = textures[it->second.TextureIndex()];
         }
 
-        if (aiMesh->HasTextureCoords(0))
-        {
-            data.TexCoords.reserve(aiMesh->mNumFaces * 3);
+		it = vals.find("metallicFactor");
+		if (it != vals.end()) {
+			mat->Metallic = (float)it->second.number_value;
+		}
+
+		it = vals.find("roughnessFactor");
+		if (it != vals.end()) {
+			mat->Roughness= (float)it->second.number_value;
+		}
+
+        it = vals.find("metallicRoughnessTexture");
+        if (it != vals.end()) {
+            mat->MetallicRoughnessMap = textures[it->second.TextureIndex()];
         }
 
-        for (unsigned int f = 0; f < aiMesh->mNumFaces; ++f)
-        {
-            aiFace& aiFace = aiMesh->mFaces[f];
-            assert(aiFace.mNumIndices == 3);
+        addIt = addVals.find("normalTexture");
+        if (addIt != addVals.end()) {
+            mat->NormalMap = textures[addIt->second.TextureIndex()];
+        }
 
-            for (int i = 0; i < 3; ++i) {
-                unsigned int index = aiFace.mIndices[i];
+        for (auto& val : material.values) {
+            DuskLogVerbose("Material value %s", val.first.c_str());
+        }
 
-                data.Vertices.push_back(toVec3(aiMesh->mVertices[index]));
+		for (auto& val : material.additionalValues) {
+			DuskLogVerbose("Material additional value %s", val.first.c_str());
+		}
 
-                if (aiMesh->HasNormals())
-                {
-                    data.Normals.push_back(toVec3(aiMesh->mNormals[index]));
+        _materials.push_back(std::move(mat));
+    }
+
+    if (_materials.empty()) {
+        DuskLogWarn("No Materials found, adding default");
+        _materials.push_back(std::make_unique<Material>());
+    }
+
+	std::vector<GLuint> vbos;
+
+    const auto& scene = model.scenes[model.defaultScene];
+    for (int id : scene.nodes) {
+        auto& node = model.nodes[id];
+		if (node.mesh < 0) {
+			continue;
+		}
+
+        auto& mesh = model.meshes[node.mesh];
+        for (size_t pInd = 0; pInd < mesh.primitives.size(); ++pInd) {
+            auto& primitive = mesh.primitives[pInd];
+			auto& indexAccessor = model.accessors[primitive.indices];
+
+			GLuint vao;
+			glGenVertexArrays(1, &vao);
+			glBindVertexArray(vao);
+
+			{
+				auto& bufferView = model.bufferViews[indexAccessor.bufferView];
+				auto& buffer = model.buffers[bufferView.buffer];
+
+				GLuint vbo;
+				glGenBuffers(1, &vbo);
+				vbos.push_back(vbo);
+
+				glBindBuffer(bufferView.target, vbo);
+				glBufferData(bufferView.target, bufferView.byteLength,
+					buffer.data.data() + bufferView.byteOffset, GL_STATIC_DRAW);
+			}
+
+            for (auto& attrib : primitive.attributes) {
+                auto& accessor = model.accessors[attrib.second];
+                auto& bufferView = model.bufferViews[accessor.bufferView];
+                auto& buffer = model.buffers[bufferView.buffer];
+                int byteStride = accessor.ByteStride(bufferView);
+
+				DuskLogVerbose("Attribute %s", attrib.first.c_str());
+
+				GLuint vbo;
+				glGenBuffers(1, &vbo);
+				vbos.push_back(vbo);
+
+				glBindBuffer(bufferView.target, vbo);
+				glBufferData(bufferView.target, bufferView.byteLength,
+					buffer.data.data() + bufferView.byteOffset, GL_STATIC_DRAW);
+
+                GLint size = (accessor.type == TINYGLTF_TYPE_SCALAR ? 1 : accessor.type);
+
+                GLint vaa = -1;
+                if (attrib.first.compare("POSITION") == 0) {
+                    vaa = AttributeID::POSITION;
+                    
+                    glm::vec3 * data = (glm::vec3 *)(&buffer.data.at(0) + bufferView.byteOffset);
+                    ComputeBounds(data, bufferView.byteLength / sizeof(glm::vec3));
+                }
+                if (attrib.first.compare("NORMAL") == 0) {
+                    vaa = AttributeID::NORMAL;
+                }
+                if (attrib.first.compare("TEXCOORD_0") == 0) {
+                    vaa = AttributeID::TEXCOORD;
+                }
+                if (attrib.first.compare("TANGENT") == 0) {
+                    vaa = AttributeID::TANGENT;
                 }
 
-                if (aiMesh->HasTextureCoords(0))
-                {
-                    data.TexCoords.push_back(toVec2(aiMesh->mTextureCoords[0][index]));
+                if (vaa > -1) {
+                    glEnableVertexAttribArray(vaa);
+                    glVertexAttribPointer(vaa, size, accessor.componentType, 
+                        accessor.normalized ? GL_TRUE : GL_FALSE, byteStride,
+                        (void*)accessor.byteOffset);
+                } else {
+                    DuskLogWarn("Ignoring attribute %s", attrib.first.c_str());
                 }
             }
-        }
-
-        if (scene->HasMaterials())
-        {
-            aiMaterial * aiMat = scene->mMaterials[aiMesh->mMaterialIndex];
-            Material::Data matData;
-            aiString path;
-
-            if (aiMat->GetTextureCount(aiTextureType_AMBIENT) > 0) {
-                aiMat->GetTexture(aiTextureType_AMBIENT, 0, &path);
-                matData.AmbientMap = dirname + path.C_Str();
-            }
-
-            if (aiMat->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
-                aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &path);
-                matData.DiffuseMap = dirname + path.C_Str();
-            }
-
-            if (aiMat->GetTextureCount(aiTextureType_SPECULAR) > 0) {
-                aiMat->GetTexture(aiTextureType_SPECULAR, 0, &path);
-                matData.SpecularMap = dirname + path.C_Str();
-            }
-
-            if (aiMat->GetTextureCount(aiTextureType_NORMALS) > 0) {
-                aiMat->GetTexture(aiTextureType_NORMALS, 0, &path);
-                matData.NormalMap = dirname + path.C_Str();
-            }
-
-            if (aiMat->GetTextureCount(aiTextureType_OPACITY) > 0) {
-                aiMat->GetTexture(aiTextureType_OPACITY, 0, &path);
-                matData.AlphaMap = dirname + path.C_Str();
-            }
-
-            if (aiMat->GetTextureCount(aiTextureType_DISPLACEMENT ) > 0) {
-                aiMat->GetTexture(aiTextureType_DISPLACEMENT , 0, &path);
-                matData.DisplacementMap = dirname + path.C_Str();
-            }
-
-            //if (aiMat->GetTextureCount(aiTextureType_OPACITY) > 0) {
-            //    aiMat->GetTexture(aiTextureType_OPACITY, 0, &path);
-            //    matData.RoughnessMap = dirname + path.C_Str();
-            //}
-
-            //if (aiMat->GetTextureCount(aiTextureType_OPACITY) > 0) {
-            //    aiMat->GetTexture(aiTextureType_OPACITY, 0, &path);
-            //    matData.MetallicMap = dirname + path.C_Str();
-            //}
-
-            //if (aiMat->GetTextureCount(aiTextureType_SHININESS ) > 0) {
-            //    aiMat->GetTexture(aiTextureType_SHININESS , 0, &path);
-            //    matData.SheenMap = dirname + path.C_Str();
-            //}
-
-            if (aiMat->GetTextureCount(aiTextureType_EMISSIVE) > 0) {
-                aiMat->GetTexture(aiTextureType_EMISSIVE, 0, &path);
-                matData.EmissiveMap = dirname + path.C_Str();
-            }
-
-			aiColor3D aiAmbient;
-			aiMat->Get(AI_MATKEY_COLOR_AMBIENT, aiAmbient);
-
-			aiColor3D aiDiffuse;
-			aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, aiDiffuse);
-
-			aiColor3D aiSpecular;
-			aiMat->Get(AI_MATKEY_COLOR_SPECULAR, aiSpecular);
             
-			aiColor3D aiEmissive;
-			aiMat->Get(AI_MATKEY_COLOR_EMISSIVE, aiEmissive);
+            /* Bitangent Generation
+			auto& norm = primitive.attributes.find("NORMAL");
+			auto& tang = primitive.attributes.find("TANGENT");
+            if (norm != primitive.attributes.end() && tang != primitive.attributes.end()) {
+				auto& nAccessor = model.accessors[norm->second];
+				auto& nBufferView = model.bufferViews[nAccessor.bufferView];
+				auto& nBuffer = model.buffers[nBufferView.buffer];
+				glm::vec3 * nData = (glm::vec3 *)(nBuffer.data.data() + nBufferView.byteOffset);
 
-            data.Material.reset(new Material(matData));
+				auto& tAccessor = model.accessors[tang->second];
+				auto& tBufferView = model.bufferViews[tAccessor.bufferView];
+				auto& tBuffer = model.buffers[tBufferView.buffer];
+				glm::vec4 * tData = (glm::vec4 *)(tBuffer.data.data() + tBufferView.byteOffset);
+
+				if (nAccessor.count != tAccessor.count) {
+					DuskLogWarn("Normal and Tangent data mismatch");
+				}
+				else {
+					using namespace glm;
+
+					size_t len = nAccessor.count;
+
+					std::vector<vec4> bitangents;
+					bitangents.reserve(len);
+
+					for (size_t i = 0; i < len; ++i) {
+						vec3& N = nData[i];
+						vec4& T = tData[i];
+						vec3 B = cross(N, vec3(T)) * T.w;
+						bitangents.push_back(vec4(B, 1.0f));
+					}
+
+					GLuint vbo;
+					glGenBuffers(1, &vbo);
+					vbos.push_back(vbo);
+
+					glBindBuffer(GL_ARRAY_BUFFER, vbo);
+					glBufferData(GL_ARRAY_BUFFER, bitangents.size() * sizeof(vec3),
+						bitangents.data(), GL_STATIC_DRAW);
+
+					glEnableVertexAttribArray(AttributeID::BITANGENT);
+					glVertexAttribPointer(AttributeID::BITANGENT, 3, GL_FLOAT,
+						GL_FALSE, sizeof(vec3), 0);
+				}
+            }
+            */
+
+            _primitives.push_back({
+                vao,
+                (GLenum)primitive.mode,
+                (GLsizei)indexAccessor.count,
+                (GLenum)indexAccessor.componentType,
+                (GLsizei)indexAccessor.byteOffset,
+                (primitive.material < 0 ? 0 : primitive.material),
+            });
         }
-
-        AddData(data);
-    }
-
-    FinishLoad();
-
-    DuskLogLoad("Finished loading Mesh from '%s'", fullPath.c_str());
-
-    return false;
-}
-
-void Mesh::AddData(const Data& data)
-{
-    _data.push_back(data);
-}
-
-bool Mesh::FinishLoad()
-{
-    DuskBenchStart();
-    _loaded = false;
-
-    std::vector<glm::vec3> verts;
-    std::vector<glm::vec3> norms;
-    std::vector<glm::vec2> txcds;
-
-    for (auto& data : _data)
-    {
-        _renderGroups.push_back({
-            data.DrawMode,
-            data.Material,
-            verts.size(),
-            data.Vertices.size()
-        });
-
-        verts.reserve(verts.size() + data.Vertices.size());
-        verts.insert(verts.end(), data.Vertices.begin(), data.Vertices.end());
-
-        norms.reserve(norms.size() + data.Normals.size());
-        norms.insert(norms.end(), data.Normals.begin(), data.Normals.end());
-
-        txcds.reserve(txcds.size() + data.TexCoords.size());
-        txcds.insert(txcds.end(), data.TexCoords.begin(), data.TexCoords.end());
-    }
-
-    if (verts.empty())
-    {
-        DuskLogWarn("Cannot create an empty mesh");
-        return false;
-    }
-
-    _bounds = ComputeBounds(verts);
-
-    DuskLogVerbose("Uploading Mesh Data to OpenGL");
-
-    glGenVertexArrays(1, &_glVAO);
-    glBindVertexArray(_glVAO);
-
-    glGenBuffers(sizeof(_glVBOs) / sizeof(GLuint), _glVBOs);
-
-    glBindBuffer(GL_ARRAY_BUFFER, _glVBOs[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * verts.size(), (GLfloat *) verts.data(), GL_STATIC_DRAW);
-
-    if (norms.empty())
-    {
-        glDeleteBuffers(1, &_glVBOs[1]);
-        _glVBOs[1] = 0;
-    }
-    else
-    {
-        glBindBuffer(GL_ARRAY_BUFFER, _glVBOs[1]);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * norms.size(), (GLfloat *) norms.data(), GL_STATIC_DRAW);
-    }
-
-    if (txcds.empty())
-    {
-        glDeleteBuffers(1, &_glVBOs[2]);
-        _glVBOs[2] = 0;
-    }
-    else
-    {
-        glBindBuffer(GL_ARRAY_BUFFER, _glVBOs[2]);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * txcds.size(), (GLfloat *) txcds.data(), GL_STATIC_DRAW);
-    }
-
-    DuskLogVerbose("Bound mesh to VAO %u", _glVAO);
-
-    // TODO: Colors?
-
-    DuskBenchEnd("Mesh::FinishLoad");
-    _loaded = true;
-    return true;
-}
-
-void Mesh::Render(RenderContext& ctx)
-{
-    if (!ctx.CurrentShader) return;
-
-    ctx.CurrentShader->Bind();
-
-    glBindVertexArray(_glVAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, _glVBOs[0]);
-    glVertexAttribPointer(ctx.CurrentShader->GetAttributeLocation("_Position"), 3, GL_FLOAT, GL_FALSE, 0, NULL);
-    glEnableVertexAttribArray(ctx.CurrentShader->GetAttributeLocation("_Position"));
-
-    if (_glVBOs[1] > 0)
-    {
-        glBindBuffer(GL_ARRAY_BUFFER, _glVBOs[1]);
-        glVertexAttribPointer(ctx.CurrentShader->GetAttributeLocation("_Normal"), 3, GL_FLOAT, GL_FALSE, 0, NULL);
-        glEnableVertexAttribArray(ctx.CurrentShader->GetAttributeLocation("_Normal"));
-    }
-
-    if (_glVBOs[2] > 0)
-    {
-        glBindBuffer(GL_ARRAY_BUFFER, _glVBOs[2]);
-        glVertexAttribPointer(ctx.CurrentShader->GetAttributeLocation("_TexCoord"), 2, GL_FLOAT, GL_FALSE, 0, NULL);
-        glEnableVertexAttribArray(ctx.CurrentShader->GetAttributeLocation("_TexCoord"));
-    }
-
-    for (const RenderGroup& group : _renderGroups)
-    {
-        if (group.material)
-        {
-            group.material->Bind(ctx.CurrentShader);
-        }
-
-        glDrawArrays(group.drawMode, group.start, group.count);
     }
 
     glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	for (auto vbo : vbos) {
+		glDeleteBuffers(1, &vbo);
+	}
+
+    _loaded = true;
+    DuskBenchEnd("Mesh::LoadFromFile");
+    return false;
 }
 
-Box Mesh::ComputeBounds(const std::vector<glm::vec3>& verts)
+
+void Mesh::Render(RenderContext& ctx)
 {
-    Box bounds;
+    for (auto& p : _primitives) {
+        glBindVertexArray(p.vao);
 
-    for (const glm::vec3& v : verts)
-    {
-        bounds.Min = glm::min(bounds.Min, v);
-        bounds.Max = glm::max(bounds.Max, v);
+        if (p.material >= 0) {
+            auto& mat = _materials[p.material];
+            mat->Bind(ctx.CurrentShader);
+        }
+
+        glDrawElements(p.mode, p.count, p.type, (char*)0 + p.offset);
+
+        glBindVertexArray(0);
     }
+}
 
-    return bounds;
+void Mesh::ComputeBounds(const glm::vec3* data, size_t length)
+{
+    for (size_t i = 0; i < length; ++i)
+    {
+        _bounds.Min = glm::min(_bounds.Min, data[i]);
+        _bounds.Max = glm::max(_bounds.Max, data[i]);
+    }
 }
 
 } // namespace dusk

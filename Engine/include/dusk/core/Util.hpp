@@ -3,13 +3,12 @@
 
 #include <dusk/Config.hpp>
 
-using glm::vec3;
-
 #include <string>
-using std::string;
-
 #include <vector>
-using std::vector;
+
+#ifndef DUSK_ASSET_PATH
+#define DUSK_ASSET_PATH "."
+#endif // DUSK_ASSET_PATH
 
 namespace dusk {
 
@@ -17,38 +16,42 @@ struct Box
 {
 public:
 
-    vec3 Min;
-    vec3 Max;
+    glm::vec3 Min;
+    glm::vec3 Max;
 
-    Box() = default;
-    Box(vec3 min, vec3 max)
+    Box()
+        : Min(std::numeric_limits<float>::max())
+        , Max(std::numeric_limits<float>::min())
+    { }
+
+    Box(glm::vec3 min, glm::vec3 max)
         : Min(min)
         , Max(max)
     { }
 
-    vec3 GetSize() { return Max - Min; }
+    glm::vec3 GetSize() { return Max - Min; }
 
     Box operator+(const Box& rhs)
     {
         Box box;
-        box.Min = min(Min, rhs.Min);
-        box.Max = max(Max, rhs.Max);
+        box.Min = glm::min(Min, rhs.Min);
+        box.Max = glm::max(Max, rhs.Max);
         return box;
     }
 
     Box& operator+=(const Box& rhs)
     {
-        Min = min(Min, rhs.Min);
-        Max = max(Max, rhs.Max);
+        Min = glm::min(Min, rhs.Min);
+        Max = glm::max(Max, rhs.Max);
         return *this;
     }
 
 };
 
-void SetAssetPath(const string& path);
-string GetAssetPath();
+void SetAssetPath(const std::string& path);
+std::string GetAssetPath();
 
-vector<string> GetAssetPaths();
+std::vector<std::string> GetAssetPaths();
 
 size_t GetGLTypeSize(GLenum type);
 
@@ -56,36 +59,36 @@ size_t GetGLTypeSize(GLenum type);
  * @param type The shader type, e.g. GL_FRAGMENT_SHADER.
  * @return The string representation of the shader type, e.g. "Fragment"
  */
-string GetShaderTypeString(GLuint type);
+std::string GetShaderTypeString(GLuint type);
 
-void PrintCode(const string& code);
+void PrintCode(const std::string& code);
 
-void CleanSlashes(string& path);
+void CleanSlashes(std::string& path);
 
-vector<string> StringSplit(const char& sep, const string& str);
-string StringJoin(const string& sep, const vector<string>& strs);
+std::vector<std::string> StringSplit(const char& sep, const std::string& str);
+std::string StringJoin(const std::string& sep, const std::vector<std::string>& strs);
 
-inline string StringJoin(const char& sep, const vector<string>& strs)
+inline std::string StringJoin(const char& sep, const std::vector<std::string>& strs)
 {
-    return StringJoin(string(1, sep), strs);
+    return StringJoin(std::string(1, sep), strs);
 }
 
-string GetDirname(string path);
-string GetBasename(string path);
-string GetExtension(string path);
+std::string GetDirname(std::string path);
+std::string GetBasename(std::string path);
+std::string GetExtension(std::string path);
 
-string RunCommand(const string& cmd);
+std::string RunCommand(const std::string& cmd);
 
 template <typename F>
 struct privDefer {
-	F f;
-	privDefer(F f) : f(f) {}
-	~privDefer() { f(); }
+    F f;
+    privDefer(F f) : f(f) {}
+    ~privDefer() { f(); }
 };
 
 template <typename F>
 privDefer<F> defer_func(F f) {
-	return privDefer<F>(f);
+    return privDefer<F>(f);
 }
 
 #define DEFER_1(x, y) x##y

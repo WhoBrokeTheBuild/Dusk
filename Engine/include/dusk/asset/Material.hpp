@@ -2,122 +2,75 @@
 #define DUSK_MATERIAL_HPP
 
 #include <dusk/Config.hpp>
-
 #include <dusk/asset/Texture.hpp>
 #include <dusk/asset/Shader.hpp>
 
-using glm::vec4;
-using glm::vec3;
-
-#include <string>
-using std::string;
-
 #include <memory>
-using std::shared_ptr;
 
 namespace dusk {
-
-struct MaterialData
-{
-    vec3 Ambient             = vec3(0, 0, 0);
-    float Roughness          = 0.0f;
-    vec3 Diffuse             = vec3(0, 0, 0);
-    float Metallic           = 0.0f;
-    vec3 Specular            = vec3(0, 0, 0);
-    float Shininess          = 1.0f;
-    vec3 Emission            = vec3(0, 0, 0);
-    float Dissolve           = 1.0f;
-    float Sheen              = 0.0f;
-    float ClearcoatThickness = 0.0f;
-    float ClearcoatRoughness = 0.0f;
-    float Anisotropy         = 0.0f;
-    float AnisotropyRotation = 0.0f;
-    GLuint MapFlags          = 0;
-};
 
 class Material 
 {
 public:
 
-    enum TextureID
+    enum TextureID : GLint
     {
-        AMBIENT         = 0,
-        DIFFUSE         = 1,
-        SPECULAR        = 2,
-        NORMAL          = 3,
-        ALPHA           = 4,
-        DISPLACEMENT    = 5,
-        ROUGHNESS       = 6,
-        METALLIC        = 7,
-        SHEEN           = 8,
-        EMISSIVE        = 9,
+        AMBIENT                 = 0,
+        DIFFUSE                 = 1,
+        SPECULAR                = 2,
+        NORMAL                  = 3,
+        ALPHA                   = 4,
+        DISPLACEMENT            = 5,
+        METALLIC_ROUGHNESS      = 6,
+        SHEEN                   = 8,
+        EMISSIVE                = 9,
     };
 
-    enum MapFlags : GLuint
+    enum TextureFlags : GLuint 
     {
-        AMBIENT_MAP_FLAG        = 1,
-        DIFFUSE_MAP_FLAG        = 2,
-        SPECULAR_MAP_FLAG       = 3,
-        NORMAL_MAP_FLAG         = 4,
-        ALPHA_MAP_FLAG          = 5,
-        DISPLACEMENT_MAP_FLAG   = 6,
-        ROUGHNESS_MAP_FLAG      = 7,
-        METALLIC_MAP_FLAG       = 8,
-        SHEEN_MAP_FLAG          = 9,
-        EMISSIVE_MAP_FLAG       = 10,
+        HAS_AMBIENT_MAP				= 1 << 0,
+        HAS_DIFFUSE_MAP				= 1 << 1,
+        HAS_SPECULAR_MAP			= 1 << 2,
+        HAS_NORMAL_MAP				= 1 << 3,
+        HAS_ALPHA_MAP				= 1 << 4,
+        HAS_DISPLACEMENT_MAP		= 1 << 5,
+        HAS_METALLIC_ROUGHNESS_MAP	= 1 << 6,
+        HAS_SHEEN_MAP				= 1 << 7,
+        HAS_EMISSIVE_MAP			= 1 << 8,
     };
+    
+    glm::vec3 Ambient           = glm::vec3(0);
+    glm::vec3 Diffuse           = glm::vec3(0);
+    glm::vec3 Specular          = glm::vec3(0);
+    glm::vec3 Emission          = glm::vec3(0);
+    
+    float Roughness             = 0.0f;
+    float Metallic              = 0.0f;
+    float Shininess             = 1.0f;
+    float Dissolve              = 1.0f;
+    float Sheen                 = 0.0f;
+    float ClearcoatThickness    = 0.0f;
+    float ClearcoatRoughness    = 0.0f;
+    float Anisotropy            = 0.0f;
+    float AnisotropyRotation    = 0.0f;
+    
+    std::shared_ptr<Texture> AmbientMap;
+    std::shared_ptr<Texture> DiffuseMap;
+    std::shared_ptr<Texture> SpecularMap;
+    std::shared_ptr<Texture> NormalMap;
+    std::shared_ptr<Texture> AlphaMap;
+    std::shared_ptr<Texture> DisplacementMap;
+    std::shared_ptr<Texture> MetallicRoughnessMap;
+    std::shared_ptr<Texture> SheenMap;
+    std::shared_ptr<Texture> EmissiveMap;
 
-    struct Data
-    {
-        vec3 Ambient    = vec3(0);
-        vec3 Diffuse    = vec3(0);
-        vec3 Specular   = vec3(0);
-        vec3 Emission   = vec3(0);
-        
-        float Roughness             = 0.0f;
-        float Metallic              = 0.0f;
-        float Shininess             = 1.0f;
-        float Dissolve              = 1.0f;
-        float Sheen                 = 0.0f;
-        float ClearcoatThickness    = 0.0f;
-        float ClearcoatRoughness    = 0.0f;
-        float Anisotropy            = 0.0f;
-        float AnisotropyRotation    = 0.0f;
-
-        string AmbientMap       = "";
-        string DiffuseMap       = "";
-        string SpecularMap      = "";
-        string NormalMap        = "";
-        string AlphaMap         = "";
-        string DisplacementMap  = "";
-        string RoughnessMap     = "";
-        string MetallicMap      = "";
-        string SheenMap         = "";
-        string EmissiveMap      = "";
-    };
-
-    DISALLOW_COPY_AND_ASSIGN(Material)
-
-    Material(const Data& data);
+    Material() = default;
 
     virtual ~Material() = default;
 
     void Bind(Shader * sp);
 
-private:
-
-    MaterialData _shaderData;
-
-    vec3 _ambient;
-    vec3 _diffuse;
-    vec3 _specular;
-
-    shared_ptr<Texture> _ambientMap;
-    shared_ptr<Texture> _diffuseMap;
-    shared_ptr<Texture> _specularMap;
-    shared_ptr<Texture> _normalMap;
-
-};
+}; // class Material
 
 } // namespace dusk
 

@@ -10,8 +10,10 @@ namespace dusk {
 
 std::string Shader::_GLSLVersionString;
 
-std::queue<GLuint> Shader::_AvailableUniformBufferBindings;
-std::unordered_map<std::string, Shader::UniformBufferRecord> Shader::_UniformBuffers;
+Shader::Shader(const std::initializer_list<std::string>& filenames)
+{
+    LoadFromFiles(filenames);
+}
 
 Shader::Shader(const std::vector<std::string>& filenames)
 {
@@ -20,17 +22,7 @@ Shader::Shader(const std::vector<std::string>& filenames)
 
 Shader::~Shader()
 {
-    if (_glId > 0) glDeleteProgram(_glId);
-}
-
-std::unique_ptr<Shader> Shader::Create()
-{
-    return std::make_unique<Shader>();
-}
-
-std::unique_ptr<Shader> Shader::Create(const std::vector<std::string>& filenames)
-{
-    return std::make_unique<Shader>(filenames);
+    if (_glID > 0) glDeleteProgram(_glID);
 }
 
 void Shader::InitializeVersionString()
@@ -48,52 +40,9 @@ void Shader::InitializeVersionString()
     DuskLogVerbose("Using GLSL version string '%s'", _GLSLVersionString.c_str());
 }
 
-void Shader::InitializeUniformBuffers()
+bool Shader::LoadFromFiles(const std::initializer_list<std::string>& filenames)
 {
-    while (!_AvailableUniformBufferBindings.empty())
-    {
-        _AvailableUniformBufferBindings.pop();
-    }
-
-    int maxBindings;
-    glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &maxBindings);
-    DuskLogVerbose("Max UBO Bindings %d", maxBindings);
-
-    for (int i = 0; i < maxBindings; ++i)
-    {
-        _AvailableUniformBufferBindings.push(static_cast<GLuint>(i));
-    }
-
-    int tmp;
-    glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &tmp);
-    DuskLogVerbose("Max UBO Size %d", tmp);
-
-    glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &tmp);
-    DuskLogVerbose("Max Vertex UBOs %d", tmp);
-
-    glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &tmp);
-    DuskLogVerbose("Max Fragment UBOs %d", tmp);
-
-    glGetIntegerv(GL_MAX_GEOMETRY_UNIFORM_BLOCKS, &tmp);
-    DuskLogVerbose("Max Geometry UBOs %d", tmp);
-}
-
-void Shader::SetUniformBufferData(const std::string& name, GLvoid * data)
-{
-    if (_UniformBuffers.find(name) == _UniformBuffers.end())
-    {
-        //DuskLogWarn("Attempt to set data to uknown UBO");
-        return;
-    }
-
-    UniformBufferRecord& record = _UniformBuffers[name];
-
-    glBindBuffer(GL_UNIFORM_BUFFER, record.GLID);
-
-    GLvoid* ptr = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-    memcpy(ptr, data, record.Size);
-
-    glUnmapBuffer(GL_UNIFORM_BUFFER);
+    return LoadFromFiles(std::vector<std::string>(filenames));
 }
 
 bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
@@ -110,8 +59,8 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
         return false;
     }
 
-    _glId = glCreateProgram();
-    if (0 == _glId)
+    _glID = glCreateProgram();
+    if (0 == _glID)
     {
         DuskLogError("Failed to create shader program.");
         return false;
@@ -121,7 +70,7 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
 
     DuskLogVerbose("Attempting Binary Shader Stuff");
 
-    glProgramParameteri(_glId, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
+    glProgramParameteri(_glID, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
 
     bool loadFromBinary = false;
     GLenum binaryFormat = GL_INVALID_ENUM;
@@ -148,8 +97,8 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
                                   std::istreambuf_iterator<char>());
         binFile.close();
 
-        glProgramBinary(_glId, binaryFormat, data.data(), data.size());
-        glGetProgramiv(_glId, GL_LINK_STATUS, &linked);
+        glProgramBinary(_glID, binaryFormat, data.data(), data.size());
+        glGetProgramiv(_glID, GL_LINK_STATUS, &linked);
 
         if (!linked)
         {
@@ -174,7 +123,7 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
                 continue;
             }
 
-            glAttachShader(_glId, id);
+            glAttachShader(_glID, id);
             shaders.push_back(id);
         }
 
@@ -184,9 +133,9 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
         }
         else
         {
-            glLinkProgram(_glId);
-            glGetProgramiv(_glId, GL_LINK_STATUS, &linked);
-            if (!linked)
+            glLinkProgram(_glID);
+            glGetProgramiv(_glID, GL_LINK_STATUS, &linked);
+            if (linked == GL_FALSE)
             {
                 DuskLogError("Failed to link shader program");
                 PrintProgramLog();
@@ -203,13 +152,13 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
     if (_loaded && !loadFromBinary)
     {
         GLint length = 0;
-        glGetProgramiv(_glId, GL_PROGRAM_BINARY_LENGTH, &length);
+        glGetProgramiv(_glID, GL_PROGRAM_BINARY_LENGTH, &length);
 
         if (length > 0)
         {
             std::vector<GLubyte> data(length);
 
-            glGetProgramBinary(_glId, data.size(), nullptr, &binaryFormat, data.data());
+            glGetProgramBinary(_glID, data.size(), nullptr, &binaryFormat, data.data());
 
             std::string outBinFilename;
             std::ofstream outBinFile;
@@ -238,16 +187,16 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
 
 #endif // defined(DUSK_ENABLE_BINARY_SHADERS) && defined(GL_VERSION_4_1)
 
-    for (GLuint shader : shaders)
-    {
-        glDetachShader(_glId, shader);
-        glDeleteShader(shader);
-    }
-
     if (_loaded)
     {
         CacheUniforms();
         CacheAttributes();
+    }
+
+    for (GLuint shader : shaders)
+    {
+        glDetachShader(_glID, shader);
+        glDeleteShader(shader);
     }
 
     return _loaded;
@@ -255,29 +204,19 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
 
 void Shader::Bind()
 {
-    glUseProgram(_glId);
-}
-
-bool Shader::HasAttribute(const std::string& name) const
-{
-    return (_attributes.find(name) != _attributes.end());
+    glUseProgram(_glID);
 }
 
 GLint Shader::GetAttributeLocation(const std::string& name) const
 {
-    if (_attributes.find(name) == _attributes.end()) return std::numeric_limits<GLint>::max();
+    if (_attributes.find(name) == _attributes.end()) return -1;
     return _attributes.at(name);
-}
-
-bool Shader::HasUniform(const std::string& name) const
-{
-    return (_uniforms.find(name) != _uniforms.end());
 }
 
 GLint Shader::GetUniformLocation(const std::string& name) const
 {
-    if (_uniforms.find(name) == _uniforms.end()) return 0;
-    return _uniforms.at(name).Location;
+    if (_uniforms.find(name) == _uniforms.end()) return -1;
+    return _uniforms.at(name);
 }
 
 std::string Shader::GetBinaryName(const std::vector<std::string> filenames)
@@ -449,7 +388,7 @@ void Shader::PrintShaderLog(GLuint id)
 
     if (!glIsShader(id))
     {
-        DuskLogError("Cannot print shader log, %d is not a shader", _glId);
+        DuskLogError("Cannot print shader log, %d is not a shader", _glID);
         return;
     }
 
@@ -466,113 +405,32 @@ void Shader::PrintProgramLog()
     std::vector<char> programLog;
     GLint logSize, retSize;
 
-    if (!glIsProgram(_glId))
+    if (!glIsProgram(_glID))
     {
-        DuskLogError("Cannot print shader program log, %d is not a shader program", _glId);
+        DuskLogError("Cannot print shader program log, %d is not a shader program", _glID);
         return;
     }
 
-    glGetProgramiv(_glId, GL_INFO_LOG_LENGTH, &logSize);
+    glGetProgramiv(_glID, GL_INFO_LOG_LENGTH, &logSize);
 
     programLog.resize(logSize);
-    glGetProgramInfoLog(_glId, logSize, &retSize, programLog.data());
+    glGetProgramInfoLog(_glID, logSize, &retSize, programLog.data());
 
-    DuskLogInfo("Log for shader program %d:\n%s", _glId, programLog.data());
+    DuskLogInfo("Log for shader program %d:\n%s", _glID, programLog.data());
 }
 
 void Shader::CacheUniforms()
 {
-    GLint tmpSize; // size of the variable
-    GLenum tmpType; // type of the variable (float, vec3 or mat4, etc)
-
-    GLchar buffer[256]; // variable name in GLSL
-    GLsizei length; // name length
+    GLint size;
+    GLenum type;
+    GLchar name[256]; // variable name in GLSL
 
     GLint count;
-    glGetProgramiv(_glId, GL_ACTIVE_UNIFORMS, &count);
+    glGetProgramiv(_glID, GL_ACTIVE_UNIFORMS, &count);
     for (GLint i = 0; i < count; ++i)
     {
-        glGetActiveUniform(_glId, (GLuint)i, sizeof(buffer), &length, &tmpSize, &tmpType, buffer);
-        _uniforms.emplace(buffer, UniformRecord{
-            glGetUniformLocation(_glId, buffer),
-            tmpSize,
-            tmpType
-        });
-    }
-
-    const int STRIDE = 16;
-
-    std::string name;
-    UniformRecord uniform;
-    std::unordered_map<std::string, size_t> uboSizes;
-    for (auto pair : _uniforms)
-    {
-        std::tie(name, uniform) = pair;
-
-        if (name.find('.') == std::string::npos) continue;
-
-        std::string uboName = name.substr(0, name.find('.'));
-        if (uboSizes.find(uboName) == uboSizes.end())
-        {
-            uboSizes.emplace(uboName, 0);
-        }
-
-        size_t uniformSize = uniform.Size * GetGLTypeSize(uniform.Type);
-        size_t allowedSize = STRIDE - (uboSizes[uboName] % STRIDE);
-
-        if (uniformSize > allowedSize && allowedSize < STRIDE)
-        {
-            uboSizes[uboName] += allowedSize; // Pad to stride
-        }
-
-        uboSizes[uboName] += uniformSize;
-    }
-
-    size_t size;
-    for (auto pair : uboSizes)
-    {
-        std::tie(name, size) = pair;
-
-        if (size % STRIDE > 0)
-        {
-            size += STRIDE - (size % STRIDE);
-        }
-
-        if (_UniformBuffers.find(name) == _UniformBuffers.end())
-        {
-            if (_AvailableUniformBufferBindings.empty())
-            {
-                DuskLogError("Reached UBO binding limit");
-                continue;
-            }
-
-            std::vector<uint8_t> dummy(size, 0);
-
-            GLuint uboId = 0;
-            glGenBuffers(1, &uboId);
-            if (0 == uboId)
-            {
-                DuskLogError("Failed to create UBO");
-                continue;
-            }
-
-            glBindBuffer(GL_UNIFORM_BUFFER, uboId);
-            glBufferData(GL_UNIFORM_BUFFER, size, dummy.data(), GL_DYNAMIC_DRAW);
-            glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-            glBindBufferBase(GL_UNIFORM_BUFFER, _AvailableUniformBufferBindings.front(), uboId);
-
-            DuskLogVerbose("Binding UBO %s to %u", name.c_str(), _AvailableUniformBufferBindings.front());
-            _UniformBuffers.emplace(name, UniformBufferRecord{
-                uboId,
-                _AvailableUniformBufferBindings.front(),
-                size,
-            });
-            _AvailableUniformBufferBindings.pop();
-        }
-
-        GLuint blockIndex = glGetUniformBlockIndex(_glId, name.c_str());
-        glUniformBlockBinding(_glId, blockIndex, _UniformBuffers[name].Binding);
+        glGetActiveUniform(_glID, (GLuint)i, sizeof(name), nullptr, &size, &type, name);
+        _uniforms.emplace(name, glGetUniformLocation(_glID, name));
     }
 }
 
@@ -580,16 +438,14 @@ void Shader::CacheAttributes()
 {
     GLint size;
     GLenum type;
-
     GLchar name[256];
-    GLsizei length;
 
     GLint count;
-    glGetProgramiv(_glId, GL_ACTIVE_ATTRIBUTES, &count);
+    glGetProgramiv(_glID, GL_ACTIVE_ATTRIBUTES, &count);
     for (GLint i = 0; i < count; ++i)
     {
-        glGetActiveAttrib(_glId, (GLuint)i, sizeof(name), &length, &size, &type, name);
-        _attributes.emplace(name, glGetAttribLocation(_glId, name));
+        glGetActiveAttrib(_glID, (GLuint)i, sizeof(name), nullptr, &size, &type, name);
+        _attributes.emplace(name, glGetAttribLocation(_glID, name));
     }
 }
 

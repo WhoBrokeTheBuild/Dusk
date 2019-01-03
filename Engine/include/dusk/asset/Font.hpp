@@ -2,12 +2,16 @@
 #define DUSK_FONT_HPP
 
 #include <dusk/Config.hpp>
-
 #include <dusk/asset/Shader.hpp>
+
+#include <memory>
+#include <string>
 #include <vector>
 
 namespace dusk
 {
+
+struct stbtt_fontinfo;
 
 class Font
 {
@@ -20,8 +24,9 @@ public:
 
     unsigned int GetSize() const { return _size; }
 
-    stbtt_fontinfo * GetSTBFontInfo() { return &_stbFontInfo; }
-    const stbtt_fontinfo * GetSTBFontInfo() const { return &_stbFontInfo; }
+    stbtt_fontinfo * GetSTBFontInfo() { return _stbFontInfo.get(); }
+
+    const stbtt_fontinfo * GetSTBFontInfo() const { return _stbFontInfo.get(); }
 
 private:
 
@@ -31,7 +36,7 @@ private:
 
     std::vector<uint8_t> _buffer;
 
-    stbtt_fontinfo _stbFontInfo;
+    std::unique_ptr<stbtt_fontinfo> _stbFontInfo = nullptr;
 
 }; // class Font
 
@@ -62,8 +67,8 @@ public:
 
 private:
 
-    const GLint TEXTURE_ID = 0;
-    const GLint ATTR_ID    = 0;
+    const int TEXTURE_ID     = 0;
+    const int ATTR_ID        = 0;
     const int TEXTURE_WIDTH  = 1024;
     const int TEXTURE_HEIGHT = 1024;
 
@@ -83,9 +88,9 @@ private:
 
     std::shared_ptr<Font> _font;
 
-    GLuint _glTexture;
-    GLuint _glVAO;
-    GLuint _glVBOs[2];
+    int _glTexture;
+    int _glVAO;
+    int _glVBOs[2];
 
 }; // class Text
 

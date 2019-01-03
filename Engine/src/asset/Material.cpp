@@ -7,76 +7,89 @@
 
 namespace dusk {
 
-Material::Material(const Data& data)
-    : _ambient(data.Ambient)
-    , _diffuse(data.Diffuse)
-    , _specular(data.Specular)
-    , _ambientMap(nullptr)
-    , _diffuseMap(nullptr)
-    , _specularMap(nullptr)
-    , _normalMap(nullptr)
-{
-    if (!data.AmbientMap.empty())
-    {
-        _ambientMap.reset(new Texture(data.AmbientMap));
-    }
-    if (!data.DiffuseMap.empty())
-    {
-        _diffuseMap.reset(new Texture(data.DiffuseMap));
-    }
-    if (!data.SpecularMap.empty())
-    {
-        _specularMap.reset(new Texture(data.SpecularMap));
-    }
-    if (!data.NormalMap.empty())
-    {
-        _normalMap.reset(new Texture(data.NormalMap));
-    }
+void Material::Bind(Shader * sp) {
+    sp->Bind();
 
-    _shaderData.Ambient  = _ambient;
-    _shaderData.Diffuse  = _diffuse;
-    _shaderData.Specular = _specular;
+    sp->SetUniform("u_Ambient", Ambient);
+    sp->SetUniform("u_Diffuse", Diffuse);
+    sp->SetUniform("u_Specular", Specular);
+    sp->SetUniform("u_Emission", Emission);
+    sp->SetUniform("u_Roughness", Roughness);
+    sp->SetUniform("u_Metallic", Metallic);
+    sp->SetUniform("u_Shininess", Shininess);
+    sp->SetUniform("u_Dissolve", Dissolve);
+    sp->SetUniform("u_Sheen", Sheen);
+    sp->SetUniform("u_ClearcoatThickness", ClearcoatThickness);
+    sp->SetUniform("u_ClearcoatRoughness", ClearcoatRoughness);
+    sp->SetUniform("u_Anisotropy", Anisotropy);
+    sp->SetUniform("u_AnisotropyRotation", AnisotropyRotation);
 
-    _shaderData.MapFlags = 0;
-    _shaderData.MapFlags |= (_ambientMap && _ambientMap->IsLoaded()   ? AMBIENT_MAP_FLAG : 0);
-    _shaderData.MapFlags |= (_diffuseMap && _diffuseMap->IsLoaded()   ? DIFFUSE_MAP_FLAG : 0);
-    _shaderData.MapFlags |= (_specularMap && _specularMap->IsLoaded() ? SPECULAR_MAP_FLAG : 0);
-    _shaderData.MapFlags |= (_normalMap && _normalMap->IsLoaded()     ? NORMAL_MAP_FLAG : 0);
-}
-
-void Material::Bind(Shader * sp)
-{
-    Shader::SetUniformBufferData("DuskMaterialData", &_shaderData);
-
-    if (_ambientMap && _ambientMap->IsLoaded())
-    {
-        sp->SetUniform("_AmbientMap", TextureID::AMBIENT);
+    unsigned int flags = 0;
+    
+    if (AmbientMap) {
+        flags |= HAS_AMBIENT_MAP;
+        sp->SetUniform("u_AmbientMap", TextureID::AMBIENT);
         glActiveTexture(GL_TEXTURE0 + TextureID::AMBIENT);
-        _ambientMap->Bind();
+        AmbientMap->Bind();
     }
-
-    if (_diffuseMap && _diffuseMap->IsLoaded())
-    {
-        sp->SetUniform("_DiffuseMap", TextureID::DIFFUSE);
+    
+    if (DiffuseMap) {
+        flags |= HAS_DIFFUSE_MAP;
+        sp->SetUniform("u_DiffuseMap", TextureID::DIFFUSE);
         glActiveTexture(GL_TEXTURE0 + TextureID::DIFFUSE);
-        _diffuseMap->Bind();
+        DiffuseMap->Bind();
     }
-
-    if (_specularMap && _specularMap->IsLoaded())
-    {
-        sp->SetUniform("_SpecularMap", TextureID::SPECULAR);
+    
+    if (SpecularMap) {
+        flags |= HAS_SPECULAR_MAP;
+        sp->SetUniform("u_SpecularMap", TextureID::SPECULAR);
         glActiveTexture(GL_TEXTURE0 + TextureID::SPECULAR);
-        _specularMap->Bind();
+        SpecularMap->Bind();
     }
-
-    if (_normalMap && _normalMap->IsLoaded())
-    {
-        sp->SetUniform("_NormalMap", TextureID::NORMAL);
+    
+    if (NormalMap) {
+        flags |= HAS_NORMAL_MAP;
+        sp->SetUniform("u_NormalMap", TextureID::NORMAL);
         glActiveTexture(GL_TEXTURE0 + TextureID::NORMAL);
-        _normalMap->Bind();
+        NormalMap->Bind();
+    }
+    
+    if (AlphaMap) {
+        flags |= HAS_ALPHA_MAP;
+        sp->SetUniform("u_AlphaMap", TextureID::ALPHA);
+        glActiveTexture(GL_TEXTURE0 + TextureID::ALPHA);
+        AlphaMap->Bind();
+    }
+    
+    if (DisplacementMap) {
+        flags |= HAS_DISPLACEMENT_MAP;
+        sp->SetUniform("u_DisplacementMap",TextureID::DISPLACEMENT);
+        glActiveTexture(GL_TEXTURE0 + TextureID::DISPLACEMENT);
+        DisplacementMap->Bind();
+    }
+    
+    if (MetallicRoughnessMap) {
+        flags |= HAS_METALLIC_ROUGHNESS_MAP;
+        sp->SetUniform("u_RoughnessMap", TextureID::METALLIC_ROUGHNESS);
+        glActiveTexture(GL_TEXTURE0 + TextureID::METALLIC_ROUGHNESS);
+        MetallicRoughnessMap->Bind();
+    }
+    
+    if (SheenMap) {
+        flags |= HAS_SHEEN_MAP;
+        sp->SetUniform("u_SheenMap", TextureID::SHEEN);
+        glActiveTexture(GL_TEXTURE0 + TextureID::SHEEN);
+        SheenMap->Bind();
+    }
+    
+    if (EmissiveMap) {
+        flags |= HAS_EMISSIVE_MAP;
+        sp->SetUniform("u_EmissiveMap", TextureID::EMISSIVE);
+        glActiveTexture(GL_TEXTURE0 + TextureID::EMISSIVE);
+        EmissiveMap->Bind();
     }
 
-    glActiveTexture(0);
+    sp->SetUniform("u_TextureFlags", flags);
 }
 
 } // namespace dusk

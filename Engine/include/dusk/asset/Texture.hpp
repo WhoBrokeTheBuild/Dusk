@@ -4,13 +4,6 @@
 #include <dusk/Config.hpp>
 
 #include <string>
-using std::string;
-
-#include <vector>
-using std::vector;
-
-#include <algorithm>
-using std::swap;
 
 namespace dusk {
 
@@ -18,49 +11,68 @@ class Texture
 {
 public:
 
+    struct Options 
+    {
+        Options()
+            : WrapS(GL_REPEAT)
+            , WrapT(GL_REPEAT)
+            , MagFilter(GL_NEAREST)
+            , MinFilter(GL_NEAREST)
+            , Mipmap(true)
+        { }
+
+        GLenum WrapS;
+        GLenum WrapT;
+
+        GLenum MagFilter;
+        GLenum MinFilter;
+
+        bool Mipmap;
+    };
+
     /// Class Boilerplate
 
     DISALLOW_COPY_AND_ASSIGN(Texture)
 
     Texture() = default;
-    Texture(const string& filename)
-    {
-        LoadFromFile(filename);
-    }
 
-    Texture(const glm::uvec2& size, const vector<uint8_t>& pixels, GLenum type = GL_RGBA)
-    {
-        LoadFromData(size, pixels, type);
-    }
+    Texture(const std::string& filename, Options opts = Options());
 
-    Texture(Texture&& rhs)
-    {
-        swap(_loaded, rhs._loaded);
-        swap(_glID, rhs._glID);
-    }
+    Texture(const uint8_t * data, glm::ivec2 size, int comp = 4, Options opts = Options());
 
-    virtual ~Texture()
-    {
-        if (_glID > 0) glDeleteTextures(1, &_glID);
-    }
+    Texture(GLuint&& id, glm::ivec2 size);
+
+    Texture(Texture&& rhs);
+
+    virtual ~Texture();
 
     /// Methods
 
-    bool LoadFromFile(const string& filename);
+    bool LoadFromFile(const std::string& filename, Options opts = Options());
 
-    bool LoadFromData(const glm::uvec2& size, const vector<uint8_t>& pixels, GLenum type = GL_RGBA);
+    bool LoadFromBuffer(const uint8_t * data, glm::ivec2 size, int comp = 4, Options opts = Options());
 
     void Bind();
 
-    bool IsLoaded() const { return _loaded; }
+    bool IsLoaded() const { 
+        return _loaded; 
+    }
+
+    GLuint GetGLID() const { 
+        return _glID; 
+    }
+
+    glm::ivec2 GetSize() const { 
+        return _size; 
+    }
 
 private:
-
-    bool FinishLoad(const glm::uvec2& size, const vector<uint8_t>& pixels, GLenum type);
 
     bool _loaded = false;
 
     GLuint _glID = 0;
+
+    glm::ivec2 _size;
 
 }; // class Texture
 

@@ -5,39 +5,39 @@ in vec4 p_Position;
 in vec4 p_Normal;
 in vec2 p_TexCoord;
 
-in vec4 p_LightDir;
-in vec4 p_ViewDir;
+in vec3 p_LightDir;
+in vec3 p_ViewDir;
 
 out vec4 _Color;
 
 void main() {
-    vec4 normal = normalize(p_Normal);
-    //if (HasNormalMap()) {
-    //    normal = texture(_NormalMap, p_TexCoord);
-    //}
+    vec3 normal = normalize(p_Normal).xyz;
+    if (HasNormalMap()) {
+        normal = normalize(texture(u_NormalMap, p_TexCoord).xyz * 2.0 - 1.0);
+    }
     
-    float alpha = _MaterialData.Dissolve;
-    vec3 diffuse = _MaterialData.Diffuse;
+    float alpha = u_Dissolve;
+    vec3 diffuse = u_Diffuse;
     if (HasDiffuseMap()) {
-        diffuse = texture(_DiffuseMap, p_TexCoord).rgb;
-        alpha = texture(_DiffuseMap, p_TexCoord).a;
+        diffuse = texture(u_DiffuseMap, p_TexCoord).rgb;
+        alpha = texture(u_DiffuseMap, p_TexCoord).a;
     }
 
-    float diff = max(0.0, dot(normal.xyz, p_LightDir.xyz));
+    float diff = max(0.0, dot(normal, p_LightDir));
     diffuse = diff * diffuse;
 
-    vec3 ambient = _MaterialData.Ambient.rgb;
+    vec3 ambient = u_Ambient.rgb;
     if (HasAmbientMap()) {
-        ambient = texture(_AmbientMap, p_TexCoord).rgb;
+        ambient = texture(u_AmbientMap, p_TexCoord).rgb;
     }
     ambient *= 0.1;
 
-    vec3 halfwayDir = normalize(p_LightDir.xyz + p_ViewDir.xyz);
-    float spec = pow(max(0.0, dot(normal.xyz, halfwayDir)), 32);
+    vec3 halfwayDir = normalize(p_LightDir + p_ViewDir);
+    float spec = pow(max(0.0, dot(normal, halfwayDir)), 32.0);
 
-    vec3 specular = _MaterialData.Specular.rgb;
+    vec3 specular = u_Specular.rgb;
     if (HasSpecularMap()) {
-        specular = texture(_SpecularMap, p_TexCoord).rgb;
+        specular = texture(u_SpecularMap, p_TexCoord).rgb;
     }
     specular *= spec;
 

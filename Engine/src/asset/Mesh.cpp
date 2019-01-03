@@ -53,12 +53,12 @@ bool Mesh::LoadFromFile(const std::string& filename)
     for (auto& p : paths) {
         fullPath = p + filename;
 
-        DuskLogVerbose("Checking %s", fullPath.c_str());
+        DuskLogVerbose("Checking %s", fullPath());
         if (binary) {
-            loaded = loader.LoadBinaryFromFile(&model, &err, &warn, fullPath.c_str());
+            loaded = loader.LoadBinaryFromFile(&model, &err, &warn, fullPath());
         }
         else {
-            loaded = loader.LoadASCIIFromFile(&model, &err, &warn, fullPath.c_str());
+            loaded = loader.LoadASCIIFromFile(&model, &err, &warn, fullPath());
         }
 
         if (loaded) break;
@@ -66,12 +66,12 @@ bool Mesh::LoadFromFile(const std::string& filename)
 
     if (!loaded)
     {
-        DuskLogError("Failed to load model, '%s'", filename.c_str());
+        DuskLogError("Failed to load model, '%s'", filename());
         return false;
     }
 
-    DuskLogLoad("Loading Mesh from %s", fullPath.c_str());
-    DuskLogVerbose("Model Generator %s", model.asset.generator.c_str());
+    DuskLogLoad("Loading Mesh from %s", fullPath());
+    DuskLogVerbose("Model Generator %s", model.asset.generator());
 
     std::vector<std::shared_ptr<Texture>> textures;
     for (auto& texture : model.textures) {
@@ -224,7 +224,7 @@ bool Mesh::LoadFromFile(const std::string& filename)
                         accessor.normalized ? GL_TRUE : GL_FALSE, byteStride,
                         (void*)accessor.byteOffset);
                 } else {
-                    DuskLogWarn("Ignoring attribute %s", attrib.first.c_str());
+                    DuskLogWarn("Ignoring attribute %s", attrib.first());
                 }
             }
             

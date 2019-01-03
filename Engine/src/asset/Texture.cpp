@@ -56,7 +56,7 @@ bool Texture::LoadFromFile(const std::string& filename, Options opts /*= Options
     for (auto& p : paths) {
         fullPath = p + filename;
 
-        DuskLogVerbose("Checking %s", fullPath.c_str());
+        DuskLogVerbose("Checking %s", fullPath());
         texture = stbi_load(fullPath.c_str(), &_size.x, &_size.y, &comp, STBI_rgb_alpha);
 
         if (texture) break;
@@ -64,7 +64,7 @@ bool Texture::LoadFromFile(const std::string& filename, Options opts /*= Options
 
     if (!texture)
     {
-        DuskLogError("Failed to load texture '%s'", filename.c_str());
+        DuskLogError("Failed to load texture '%s'", filename());
         return false;
     }
 

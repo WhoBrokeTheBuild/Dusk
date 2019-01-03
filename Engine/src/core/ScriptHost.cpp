@@ -18,14 +18,14 @@ bool ScriptHost::LoadFile(const std::string& filename)
     for (auto& p : paths) {
         fullPath = p + filename;
 
-        DuskLogVerbose("Checking %s", fullPath.c_str());
+        DuskLogVerbose("Checking %s", fullPath);
         file.open(fullPath);
 
         if (file.is_open()) break;
     }
 
     if (!file.is_open()) {
-        fprintf(stderr, "Could not open file '%s'\n", filename.c_str());
+        DuskLogError("Could not open file '%s'", filename);
         return false;
     }
     std::string script((std::istreambuf_iterator<char>(file)),

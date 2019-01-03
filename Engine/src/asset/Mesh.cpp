@@ -137,11 +137,11 @@ bool Mesh::LoadFromFile(const std::string& filename)
         }
 
         for (const auto& val : material.values) {
-            DuskLogVerbose("Material value %s", val.first.c_str());
+            DuskLogVerbose("Material value %s", val.first);
         }
 
 		for (const auto& val : material.additionalValues) {
-			DuskLogVerbose("Material additional value %s", val.first.c_str());
+			DuskLogVerbose("Material additional value %s", val.first);
 		}
 
         _materials.push_back(std::move(mat));
@@ -189,7 +189,7 @@ bool Mesh::LoadFromFile(const std::string& filename)
                 auto& buffer = model.buffers[bufferView.buffer];
                 int byteStride = accessor.ByteStride(bufferView);
 
-				DuskLogVerbose("Attribute %s", attrib.first.c_str());
+				DuskLogVerbose("Attribute %s", attrib.first);
 
 				GLuint vbo;
 				glGenBuffers(1, &vbo);

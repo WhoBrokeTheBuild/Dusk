@@ -4,7 +4,6 @@
 #include <dusk/Config.hpp>
 #include <dusk/core/Util.hpp>
 
-#include <cstdarg> // for va_list
 #include <cstdio> // for printf, vsnprintf
 
 namespace dusk {
@@ -20,7 +19,55 @@ namespace dusk {
         LOG_LOAD,
     };
 
-    static inline void Log(LogLevel level, const char * format, ...)
+    template <class T>
+    static auto LogWrap(const T& v) {
+        return v;
+    }
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+
+    template <> 
+    auto LogWrap<std::string>(const std::string& v) {
+        return v.c_str();
+    }
+
+/* 
+    template <> 
+    auto LogWrap<glm::vec2>(const glm::vec2& v) {
+        return glm::to_string(v).c_str();
+    }
+    
+    template <> 
+    auto LogWrap<glm::vec3>(const glm::vec3& v) {
+        return glm::to_string(v).c_str();
+    }
+    
+    template <> 
+    auto LogWrap<glm::vec4>(const glm::vec4& v) {
+        return glm::to_string(v).c_str();
+    }
+    
+    template <> 
+    auto LogWrap<glm::mat3>(const glm::mat3& v) {
+        return glm::to_string(v).c_str();
+    }
+    
+    template <> 
+    auto LogWrap<glm::mat4>(const glm::mat4& v) {
+        return glm::to_string(v).c_str();
+    }
+    
+    template <> 
+    auto LogWrap<glm::quat>(const glm::quat& v) {
+        return glm::to_string(v).c_str();
+    }
+*/
+    
+#pragma clang diagnostic pop
+
+    template <class ...Args>
+    static inline void Log(LogLevel level, const char * format, Args... args)
     {
         #if defined(WIN32)
 
@@ -97,10 +144,7 @@ namespace dusk {
 
         #endif
 
-        va_list valist;
-        va_start(valist, format);
-        vprintf(format, valist);
-        va_end(valist);
+        printf(format, LogWrap(args)...);
 
         #if defined(WIN32)
         

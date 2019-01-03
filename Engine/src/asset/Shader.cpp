@@ -35,7 +35,7 @@ void Shader::InitializeVersionString()
     _GLSLVersionString.erase(_GLSLVersionString.find('.'), 1);
     _GLSLVersionString = "#version " + _GLSLVersionString + " core";
 
-    DuskLogVerbose("Using GLSL version string '%s'", _GLSLVersionString.c_str());
+    DuskLogVerbose("Using GLSL version string '%s'", _GLSLVersionString);
 }
 
 bool Shader::LoadFromFiles(const std::initializer_list<std::string>& filenames)

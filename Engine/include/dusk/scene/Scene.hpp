@@ -2,24 +2,14 @@
 #define DUSK_SCENE_HPP
 
 #include <dusk/Config.hpp>
-
-#include <dusk/scene/Actor.hpp>
 #include <dusk/core/Context.hpp>
-
-#include <string>
-using std::string;
-
-#include <vector>
-using std::vector;
-
-#include <unordered_map>
-using std::unordered_map;
-
-#include <type_traits>
-using std::is_base_of;
+#include <dusk/scene/Actor.hpp>
 
 #include <memory>
-using std::unique_ptr;
+#include <string>
+#include <type_traits>
+#include <unordered_map>
+#include <vector>
 
 namespace dusk {
 
@@ -41,7 +31,7 @@ public:
 
 private:
 
-    vector<unique_ptr<Actor>> _actors;
+    std::vector<std::unique_ptr<Actor>> _actors;
 
 public:
 

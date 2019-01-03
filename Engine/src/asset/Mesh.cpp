@@ -1,7 +1,7 @@
 #include "dusk/asset/Mesh.hpp"
 
-#include <dusk/core/Log.hpp>
 #include <dusk/core/Benchmark.hpp>
+#include <dusk/core/Log.hpp>
 #include <dusk/scene/Actor.hpp>
 #include <dusk/scene/Camera.hpp>
 
@@ -95,9 +95,9 @@ bool Mesh::LoadFromFile(const std::string& filename)
         auto addIt = addVals.end();
 
         it = vals.find("baseColorFactor");
-        if (it != vals.end()) {
-            auto& arr = it->second.number_array;
-            mat->Diffuse = glm::vec3(arr[0], arr[1], arr[2]);
+        if (it != vals.end() && !it->second.number_array.empty()) {
+            const auto& c = it->second.ColorFactor();
+            mat->Diffuse = glm::vec3(c[0], c[1], c[2]);
         }
         
         it = vals.find("baseColorTexture");
@@ -107,12 +107,12 @@ bool Mesh::LoadFromFile(const std::string& filename)
 
 		it = vals.find("metallicFactor");
 		if (it != vals.end()) {
-			mat->Metallic = (float)it->second.number_value;
+			mat->Metallic = (float)it->second.Factor();
 		}
 
 		it = vals.find("roughnessFactor");
 		if (it != vals.end()) {
-			mat->Roughness= (float)it->second.number_value;
+			mat->Roughness = (float)it->second.Factor();
 		}
 
         it = vals.find("metallicRoughnessTexture");
@@ -125,11 +125,22 @@ bool Mesh::LoadFromFile(const std::string& filename)
             mat->NormalMap = textures[addIt->second.TextureIndex()];
         }
 
-        for (auto& val : material.values) {
+        addIt = addVals.find("emissiveFactor");
+        if (it != vals.end() && !it->second.number_array.empty()) {
+            const auto& c = it->second.ColorFactor();
+            mat->Emissive = glm::vec3(c[0], c[1], c[2]);
+        }
+
+        addIt = addVals.find("emissiveTexture");
+        if (addIt != addVals.end()) {
+            mat->EmissiveMap = textures[addIt->second.TextureIndex()];
+        }
+
+        for (const auto& val : material.values) {
             DuskLogVerbose("Material value %s", val.first.c_str());
         }
 
-		for (auto& val : material.additionalValues) {
+		for (const auto& val : material.additionalValues) {
 			DuskLogVerbose("Material additional value %s", val.first.c_str());
 		}
 

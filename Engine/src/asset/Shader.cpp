@@ -1,14 +1,12 @@
 #include "dusk/asset/Shader.hpp"
 
-#include <dusk/core/Log.hpp>
 #include <dusk/core/Benchmark.hpp>
+#include <dusk/core/Log.hpp>
 
 #include <fstream>
 #include <sstream>
 
 namespace dusk {
-
-std::string Shader::_GLSLVersionString;
 
 Shader::Shader(const std::initializer_list<std::string>& filenames)
 {
@@ -49,7 +47,6 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
 {
     _filenames = filenames;
 
-    const auto& paths = GetAssetPaths();
     GLint linked = GL_FALSE;
     std::vector<GLuint> shaders;
 
@@ -77,7 +74,8 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
     std::string binFilename = "shaders/" + GetBinaryName(filenames);
 
     std::ifstream binFile;
-
+    
+    const auto& paths = GetAssetPaths();
     for (auto& p : paths) {
         std::string fullPath = p + binFilename;
 

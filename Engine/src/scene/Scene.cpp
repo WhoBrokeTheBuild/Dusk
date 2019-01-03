@@ -1,8 +1,8 @@
 #include "dusk/scene/Scene.hpp"
 
 #include <dusk/core/App.hpp>
-#include <dusk/core/Log.hpp>
 #include <dusk/core/Benchmark.hpp>
+#include <dusk/core/Log.hpp>
 
 #include <fstream>
 
@@ -12,19 +12,15 @@ Scene::Scene()
 { }
 
 void Scene::Start()
-{
-}
+{ }
 
 void Scene::Stop()
-{
-}
+{ }
 
 void Scene::Update(UpdateContext& ctx)
-{
-}
+{ }
 
 void Scene::Render(RenderContext& ctx)
-{
-}
+{ }
 
 } // namespace dusk

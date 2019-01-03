@@ -16,14 +16,13 @@ Camera::Camera(float fov /*= 45.0f*/, glm::vec3 up /*= glm::vec3(0, 1, 0)*/, glm
     , _position(0)
     , _forward(1)
     , _up(up)
-{
-}
+{ }
 
 glm::mat4 Camera::GetView()
 {
     if (_viewInvalid)
     {
-        glm::quat qpitch, qyaw, qroll, tmp;
+        glm::quat qpitch, qyaw, tmp;
         glm::vec3 pitchAxis;
 
         pitchAxis = glm::cross(_forward, _up);

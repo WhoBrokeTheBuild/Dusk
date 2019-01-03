@@ -3,10 +3,10 @@
 
 #include <dusk/Config.hpp>
 
+#include <initializer_list>
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include <initializer_list>
 #include <vector>
 
 namespace dusk {
@@ -103,7 +103,7 @@ private:
 
     /// Static Variables
 
-    static std::string _GLSLVersionString;
+    static inline std::string _GLSLVersionString = "";
 
     /// Variables
 

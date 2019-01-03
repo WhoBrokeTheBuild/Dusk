@@ -1,21 +1,13 @@
 #include "dusk/core/ScriptHost.hpp"
 
-#include <fstream>
-
-#include <dusk/core/Log.hpp>
 #include <dusk/core/App.hpp>
 #include <dusk/core/Context.hpp>
+#include <dusk/core/Log.hpp>
 #include <dusk/scene/Scene.hpp>
 
+#include <fstream>
+
 namespace dusk {
-
-ScriptHost::ScriptHost()
-{
-}
-
-ScriptHost::~ScriptHost()
-{
-}
 
 bool ScriptHost::LoadFile(const std::string& filename)
 {
@@ -44,7 +36,7 @@ bool ScriptHost::LoadFile(const std::string& filename)
     return true;
 }
 
-void ScriptHost::Run() {
-}
+void ScriptHost::Run() 
+{ }
 
 } // namespace dusk

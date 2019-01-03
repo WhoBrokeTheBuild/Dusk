@@ -1,9 +1,10 @@
 #include "dusk/asset/Texture.hpp"
 
-#include <dusk/core/Log.hpp>
 #include <dusk/core/Benchmark.hpp>
+#include <dusk/core/Log.hpp>
 
 #include <stb/stb_image.h>
+
 #include <algorithm>
 
 namespace dusk {
@@ -49,8 +50,7 @@ bool Texture::LoadFromFile(const std::string& filename, Options opts /*= Options
     const auto& paths = GetAssetPaths();
 
     int comp;
-    glm::ivec2 size;
-    unsigned char * texture = nullptr;
+    uint8_t * texture = nullptr;
 
     std::string fullPath;
     for (auto& p : paths) {

@@ -2,17 +2,17 @@
 #define DUSK_MESH_HPP
 
 #include <dusk/Config.hpp>
+#include <dusk/asset/Material.hpp>
+#include <dusk/asset/Shader.hpp>
 #include <dusk/core/Context.hpp>
 #include <dusk/core/Util.hpp>
-#include <dusk/asset/Shader.hpp>
-#include <dusk/asset/Material.hpp>
 #include <dusk/scene/IComponent.hpp>
 
+#include <algorithm>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
-#include <algorithm>
-#include <memory>
 
 namespace dusk {
 

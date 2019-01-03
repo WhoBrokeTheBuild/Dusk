@@ -1,9 +1,9 @@
 #include "dusk/core/App.hpp"
 
-#include <dusk/core/Log.hpp>
-#include <dusk/core/Benchmark.hpp>
 #include <dusk/asset/Mesh.hpp>
 #include <dusk/asset/Texture.hpp>
+#include <dusk/core/Benchmark.hpp>
+#include <dusk/core/Log.hpp>
 #include <dusk/scene/Camera.hpp>
 
 #include <fstream>
@@ -11,8 +11,6 @@
 #include <thread>
 
 namespace dusk {
-
-App * App::_Inst = nullptr;
 
 App::App(int argc, char** argv)
 {

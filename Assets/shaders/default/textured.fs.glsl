@@ -16,6 +16,11 @@ void main() {
         normal = normalize(texture(u_NormalMap, p_TexCoord).xyz * 2.0 - 1.0);
     }
     
+    vec3 emissive = u_Emissive.rgb;
+    if (HasEmissiveMap()) {
+        emissive = texture(u_EmissiveMap, p_TexCoord).rgb;
+    }
+
     float alpha = u_Dissolve;
     vec3 diffuse = u_Diffuse;
     if (HasDiffuseMap()) {
@@ -41,5 +46,5 @@ void main() {
     }
     specular *= spec;
 
-    _Color = vec4(diffuse + ambient + specular, alpha);
+    _Color = vec4(emissive + diffuse + ambient + specular, alpha);
 }

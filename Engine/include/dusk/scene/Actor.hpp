@@ -43,8 +43,6 @@ public:
 
 private:
 
-    Scene * _scene;
-
     std::string _id;
 
     glm::mat4 _transform;

@@ -1,8 +1,9 @@
 #include "dusk/asset/Material.hpp"
 
+#include <dusk/asset/Shader.hpp>
 #include <dusk/core/App.hpp>
 #include <dusk/core/Log.hpp>
-#include <dusk/asset/Shader.hpp>
+
 #include <sstream>
 
 namespace dusk {
@@ -13,7 +14,7 @@ void Material::Bind(Shader * sp) {
     sp->SetUniform("u_Ambient", Ambient);
     sp->SetUniform("u_Diffuse", Diffuse);
     sp->SetUniform("u_Specular", Specular);
-    sp->SetUniform("u_Emission", Emission);
+    sp->SetUniform("u_Emissive", Emissive);
     sp->SetUniform("u_Roughness", Roughness);
     sp->SetUniform("u_Metallic", Metallic);
     sp->SetUniform("u_Shininess", Shininess);

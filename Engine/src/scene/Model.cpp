@@ -1,7 +1,7 @@
 #include "dusk/scene/Model.hpp"
 
-#include <dusk/scene/Camera.hpp>
 #include <dusk/core/Log.hpp>
+#include <dusk/scene/Camera.hpp>
 
 namespace dusk {
 

@@ -2,8 +2,8 @@
 #define DUSK_MATERIAL_HPP
 
 #include <dusk/Config.hpp>
-#include <dusk/asset/Texture.hpp>
 #include <dusk/asset/Shader.hpp>
+#include <dusk/asset/Texture.hpp>
 
 #include <memory>
 
@@ -42,7 +42,7 @@ public:
     glm::vec3 Ambient           = glm::vec3(0);
     glm::vec3 Diffuse           = glm::vec3(0);
     glm::vec3 Specular          = glm::vec3(0);
-    glm::vec3 Emission          = glm::vec3(0);
+    glm::vec3 Emissive          = glm::vec3(0);
     
     float Roughness             = 0.0f;
     float Metallic              = 0.0f;

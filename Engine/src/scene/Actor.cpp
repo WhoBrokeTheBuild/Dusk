@@ -1,20 +1,18 @@
 #include "dusk/scene/Actor.hpp"
 
-#include <dusk/core/Log.hpp>
 #include <dusk/core/Benchmark.hpp>
+#include <dusk/core/Log.hpp>
 #include <dusk/scene/Scene.hpp>
 
 namespace dusk {
 
 Actor::Actor(std::string id, Scene * scene)
-    : _scene(scene)
-    , _id(id)
+    : _id(id)
     , _transform(1)
     , _position(0)
     , _rotation(0)
     , _scale(1)
-{
-}
+{ }
 
 void Actor::SetPosition(const glm::vec3& pos)
 {

@@ -2,15 +2,15 @@
 #define DUSK_APP_HPP
 
 #include <dusk/Config.hpp>
+#include <dusk/asset/Shader.hpp>
 #include <dusk/core/Context.hpp>
 #include <dusk/core/ScriptHost.hpp>
-#include <dusk/asset/Shader.hpp>
 #include <dusk/scene/Scene.hpp>
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <memory>
 
 namespace dusk {
 
@@ -75,15 +75,15 @@ protected:
 
 private:
 
-    static App * _Inst;
+    static inline App * _Inst = nullptr;
 
     void CreateWindow();
     void DestroyWindow();
 
     bool _running;
 
-    string _windowTitle = "Dusk";
-    string _startScene = "";
+    std::string _windowTitle = "Dusk";
+    std::string _startScene = "";
 
     float _targetFps = 60.0f;
 

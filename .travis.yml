@@ -1,6 +1,6 @@
 language: cpp
 sudo: false
-dist: trusty
+dist: xenial
 
 notifications:
   slack: c0demonk3ys:gnjXYwuoMOBnffg9h8YnlLyE
@@ -14,22 +14,22 @@ matrix:
       compiler: clang
       addons:
         apt:
-          sources: [ 'llvm-toolchain-trusty-4.0', 'ubuntu-toolchain-r-test', 'kalakris-cmake' ]
-          packages: [ 'clang-4.0', 'libstdc++-6-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
+          sources: [ 'llvm-toolchain-xenial-6.0', 'ubuntu-toolchain-r-test', 'kalakris-cmake' ]
+          packages: [ 'clang-6.0', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
       env: CMAKE_BUILD_TYPE=DEBUG
 
     - os: linux
       compiler: clang
       addons:
         apt:
-          sources: [ 'llvm-toolchain-trusty-4.0', 'ubuntu-toolchain-r-test', 'kalakris-cmake' ]
-          packages: [ 'clang-4.0', 'libstdc++-6-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
+          sources: [ 'llvm-toolchain-xenial-6.0', 'ubuntu-toolchain-r-test', 'kalakris-cmake' ]
+          packages: [ 'clang-6.0', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
       env: CMAKE_BUILD_TYPE=RELEASE
 
 before_install:
   - env
   - export SRC_DIR="`pwd`"
-  - if [ "$CXX" = "clang++" ]; then export CXX="clang++-4.0" CC="clang-4.0"; fi
+  - if [ "$CXX" = "clang++" ]; then export CXX="clang++-6.0" CC="clang-6.0"; fi
 
 script:
   - $CXX --version
@@ -37,5 +37,5 @@ script:
   - mkdir -p "$TRAVIS_BUILD_DIR/build"
   - cd "$TRAVIS_BUILD_DIR/build"
   - pwd
-  - cmake -G "Unix Makefiles" "$SRC_DIR"
+  - cmake -Dstdlib=libstdc++ -G "Unix Makefiles" "$SRC_DIR"
   - make -j

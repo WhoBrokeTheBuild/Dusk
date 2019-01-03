@@ -1,16 +1,18 @@
 #include "dusk/core/Util.hpp"
 
 #include <dusk/core/Log.hpp>
+
+#include <algorithm>
+#include <array>
 #include <iostream>
 #include <memory>
-#include <stdexcept>
-#include <array>
 #include <sstream>
-#include <algorithm>
+#include <stdexcept>
 
 namespace dusk {
 
 std::string _assetPath;
+
 std::vector<std::string> _assetPaths;
 
 void SetAssetPath(const std::string& path)
@@ -118,7 +120,6 @@ std::string GetShaderTypeString(GLuint type)
         return "Geometry";
 
 #ifdef GL_VERSION_4_0
-    // Requires OpenGL 4.0+
     case GL_TESS_CONTROL_SHADER:
         return "Tessellation Control";
 
@@ -126,7 +127,6 @@ std::string GetShaderTypeString(GLuint type)
         return "Tessellation Evaluation";
 #endif // GL_VERSION_4_0
 #ifdef GL_VERSION_4_3
-    // Requires OpenGL 4.3+
     case GL_COMPUTE_SHADER:
         return "Compute";
 #endif // GL_VERSION_4_3
@@ -252,6 +252,8 @@ std::string RunCommand(const std::string& cmd)
     }
 
 #endif // __linux__
+
+    // TODO: Windows
 
     return result;
 }

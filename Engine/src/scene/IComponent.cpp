@@ -6,7 +6,6 @@ namespace dusk {
 
 IComponent::IComponent(Actor * actor)
         : _actor(actor)
-{
-}
+{ }
 
 } // namespace dusk

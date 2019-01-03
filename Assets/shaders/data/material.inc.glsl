@@ -1,7 +1,7 @@
 uniform vec3 u_Ambient;
 uniform vec3 u_Diffuse;
 uniform vec3 u_Specular;
-uniform vec3 u_Emission;
+uniform vec3 u_Emissive;
 
 uniform float u_Roughness;
 uniform float u_Metallic;

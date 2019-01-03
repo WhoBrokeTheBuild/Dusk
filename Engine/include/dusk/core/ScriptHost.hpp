@@ -14,11 +14,8 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(ScriptHost)
 
-    ScriptHost();
-    virtual ~ScriptHost();
-
-    //void Serialize(nlohmann::json& data);
-    //void Deserialize(nlohmann::json& data);
+    ScriptHost() = default;
+    virtual ~ScriptHost() = default;
 
     bool LoadFile(const std::string& filename);
 

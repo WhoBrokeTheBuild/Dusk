@@ -14,7 +14,10 @@ public:
         _model.reset(new dusk::Model());
 		//_model->AddMesh(std::make_shared<dusk::Mesh>("models/SciFiHelmet/SciFiHelmet.gltf"));
 		_model->AddMesh(std::make_shared<dusk::Mesh>("models/DamagedHelmet.glb"));
+		//_model->AddMesh(std::make_shared<dusk::Mesh>("models/BoomBox.glb"));
 		//_model->AddMesh(std::make_shared<dusk::Mesh>("models/WaterBottle.glb"));
+        
+		//_model->AddMesh(std::make_shared<dusk::Mesh>("models/Lantern/Lantern.glb"));
 
         auto app = dusk::App::Inst();
 
@@ -29,7 +32,7 @@ public:
 
     virtual void Update(dusk::UpdateContext& ctx) override
     {
-        _model->SetRotation(glm::vec3(0.0f, (float)ctx.TotalTime * 0.001f, 0.0f));
+        _model->SetRotation(glm::vec3(0.0f, (float)ctx.TotalTime * 0.0005f, 0.0f));
         
         dusk::Scene::Update(ctx);
     }
@@ -54,7 +57,7 @@ int main(int argc, char** argv) {
     dusk::SetAssetPath(DUSK_ASSET_PATH);
     dusk::App app(argc, argv);
 
-    auto shader = std::make_unique<dusk::Shader>(vector<string>({ "shaders/default/textured.vs.glsl", "shaders/default/textured.fs.glsl" }));
+    auto shader = std::make_unique<dusk::Shader>(vector<string>({ "shaders/default/default.vs.glsl", "shaders/default/default.fs.glsl" }));
     auto pShader = shader.get();
     app.AddShader(move(shader));
     app.GetRenderContext().CurrentShader = pShader;

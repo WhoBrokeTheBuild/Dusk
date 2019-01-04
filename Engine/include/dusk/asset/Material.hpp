@@ -15,54 +15,35 @@ public:
 
     enum TextureID : GLint
     {
-        AMBIENT                 = 0,
-        DIFFUSE                 = 1,
-        SPECULAR                = 2,
-        NORMAL                  = 3,
-        ALPHA                   = 4,
-        DISPLACEMENT            = 5,
-        METALLIC_ROUGHNESS      = 6,
-        SHEEN                   = 8,
-        EMISSIVE                = 9,
+        BaseColor = 0,
+        Normal,
+        MetallicRoughness,
+        Emissive,
+        Occlusion,
     };
 
     enum TextureFlags : GLuint 
     {
-        HAS_AMBIENT_MAP				= 1 << 0,
-        HAS_DIFFUSE_MAP				= 1 << 1,
-        HAS_SPECULAR_MAP			= 1 << 2,
-        HAS_NORMAL_MAP				= 1 << 3,
-        HAS_ALPHA_MAP				= 1 << 4,
-        HAS_DISPLACEMENT_MAP		= 1 << 5,
-        HAS_METALLIC_ROUGHNESS_MAP	= 1 << 6,
-        HAS_SHEEN_MAP				= 1 << 7,
-        HAS_EMISSIVE_MAP			= 1 << 8,
+        HasBaseColorMap             = 1 << 0,
+        HasNormalMap                = 1 << 1,
+        HasMetallicRoughnessMap     = 1 << 2,
+        HasEmissiveMap              = 1 << 3,
+        HasOcclusionMap             = 1 << 4,
     };
     
-    glm::vec3 Ambient           = glm::vec3(0);
-    glm::vec3 Diffuse           = glm::vec3(0);
-    glm::vec3 Specular          = glm::vec3(0);
-    glm::vec3 Emissive          = glm::vec3(0);
+    glm::vec4 BaseColorFactor       = glm::vec4(1.0f);
+    glm::vec3 EmissiveFactor        = glm::vec3(1.0f);
     
-    float Roughness             = 0.0f;
-    float Metallic              = 0.0f;
-    float Shininess             = 1.0f;
-    float Dissolve              = 1.0f;
-    float Sheen                 = 0.0f;
-    float ClearcoatThickness    = 0.0f;
-    float ClearcoatRoughness    = 0.0f;
-    float Anisotropy            = 0.0f;
-    float AnisotropyRotation    = 0.0f;
+    float Metallic                  = 1.0f;
+    float Roughness                 = 1.0f;
+    float OcclusionStrength         = 1.0f;
+    float NormalScale               = 1.0f;
     
-    std::shared_ptr<Texture> AmbientMap;
-    std::shared_ptr<Texture> DiffuseMap;
-    std::shared_ptr<Texture> SpecularMap;
+    std::shared_ptr<Texture> BaseColorMap;
     std::shared_ptr<Texture> NormalMap;
-    std::shared_ptr<Texture> AlphaMap;
-    std::shared_ptr<Texture> DisplacementMap;
     std::shared_ptr<Texture> MetallicRoughnessMap;
-    std::shared_ptr<Texture> SheenMap;
     std::shared_ptr<Texture> EmissiveMap;
+    std::shared_ptr<Texture> OcclusionMap;
 
     Material() = default;
 

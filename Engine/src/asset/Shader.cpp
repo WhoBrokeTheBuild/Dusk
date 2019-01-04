@@ -333,44 +333,39 @@ std::string Shader::PreProcess(GLuint type, const std::string& code, const std::
 
     while (std::getline(iss, line))
     {
-        if (line[0] == '#')
+        if (0 == line.compare(0, strlen("#include"), "#include"))
         {
-            if (0 == line.compare(0, strlen("#include"), "#include"))
-            {
-                auto paths = GetAssetPaths();
-                if (!basedir.empty()) {
-                    paths.push_back((basedir.back() == '/' ? basedir : basedir + '/'));
-                }
+            auto paths = GetAssetPaths();
+            if (!basedir.empty()) {
+                paths.push_back((basedir.back() == '/' ? basedir : basedir + '/'));
+            }
 
-                std::string filename = line.substr(strlen("#include") + 1);
+            std::string filename = line.substr(strlen("#include") + 1);
 
-                std::string incFilename;
-                std::ifstream incFile;
-                for (auto& p : paths) {
-                    incFilename = p + filename;
+            std::string incFilename;
+            std::ifstream incFile;
+            for (auto& p : paths) {
+                incFilename = p + filename;
 
-                    DuskLogVerbose("Checking %s", incFilename.c_str());
-                    incFile.open(incFilename);
+                DuskLogVerbose("Checking %s", incFilename.c_str());
+                incFile.open(incFilename);
 
-                    if (incFile.is_open()) break;
-                }
+                if (incFile.is_open()) break;
+            }
 
-                if (!incFile.is_open()) {
-                    DuskLogError("Failed to shader include '%s'", filename.c_str());
-                    continue;
-                }
-
-                std::string incCode((std::istreambuf_iterator<char>(incFile)),
-                                     std::istreambuf_iterator<char>());
-                incFile.close();
-
-                processedCode += PreProcess(type, incCode, GetDirname(incFilename));
-
+            if (!incFile.is_open()) {
+                DuskLogError("Failed to shader include '%s'", filename.c_str());
                 continue;
             }
-        }
 
-        // TODO: Support more preprocessing
+            std::string incCode((std::istreambuf_iterator<char>(incFile)),
+                                    std::istreambuf_iterator<char>());
+            incFile.close();
+
+            processedCode += PreProcess(type, incCode, GetDirname(incFilename));
+
+            continue;
+        }
 
         processedCode += line;
         processedCode += "\n";

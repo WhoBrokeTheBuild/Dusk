@@ -97,12 +97,12 @@ bool Mesh::LoadFromFile(const std::string& filename)
         it = vals.find("baseColorFactor");
         if (it != vals.end() && !it->second.number_array.empty()) {
             const auto& c = it->second.ColorFactor();
-            mat->Diffuse = glm::vec3(c[0], c[1], c[2]);
+            mat->BaseColorFactor = glm::vec4(c[0], c[1], c[2], c[3]);
         }
         
         it = vals.find("baseColorTexture");
         if (it != vals.end()) {
-            mat->DiffuseMap = textures[it->second.TextureIndex()];
+            mat->BaseColorMap = textures[it->second.TextureIndex()];
         }
 
 		it = vals.find("metallicFactor");
@@ -123,17 +123,24 @@ bool Mesh::LoadFromFile(const std::string& filename)
         addIt = addVals.find("normalTexture");
         if (addIt != addVals.end()) {
             mat->NormalMap = textures[addIt->second.TextureIndex()];
+            mat->NormalScale = addIt->second.Factor();
         }
 
         addIt = addVals.find("emissiveFactor");
         if (it != vals.end() && !it->second.number_array.empty()) {
             const auto& c = it->second.ColorFactor();
-            mat->Emissive = glm::vec3(c[0], c[1], c[2]);
+            mat->EmissiveFactor = glm::vec3(c[0], c[1], c[2]);
         }
 
         addIt = addVals.find("emissiveTexture");
         if (addIt != addVals.end()) {
             mat->EmissiveMap = textures[addIt->second.TextureIndex()];
+        }
+
+        addIt = addVals.find("occlusionTexture");
+        if (addIt != addVals.end()) {
+            mat->OcclusionMap = textures[addIt->second.TextureIndex()];
+            mat->OcclusionStrength = addIt->second.Factor();
         }
 
         for (const auto& val : material.values) {
@@ -204,9 +211,15 @@ bool Mesh::LoadFromFile(const std::string& filename)
                 GLint vaa = -1;
                 if (attrib.first.compare("POSITION") == 0) {
                     vaa = AttributeID::POSITION;
-                    
+                    if (accessor.minValues.size() == 3) {
+                        auto& val = accessor.minValues;
+                        _bounds.Min = glm::vec3(val[0], val[1], val[2]);
+                    }
+                    if (accessor.maxValues.size() == 3) {
+                        auto& val = accessor.maxValues;
+                        _bounds.Max = glm::vec3(val[0], val[1], val[2]);
+                    }
                     glm::vec3 * data = (glm::vec3 *)(&buffer.data.at(0) + bufferView.byteOffset);
-                    ComputeBounds(data, bufferView.byteLength / sizeof(glm::vec3));
                 }
                 if (attrib.first.compare("NORMAL") == 0) {
                     vaa = AttributeID::NORMAL;

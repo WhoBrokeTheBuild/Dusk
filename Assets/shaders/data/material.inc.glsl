@@ -1,72 +1,47 @@
-uniform vec3 u_Ambient;
-uniform vec3 u_Diffuse;
-uniform vec3 u_Specular;
-uniform vec3 u_Emissive;
+#ifndef MATERIAL_INC
+#define MATERIAL_INC
 
-uniform float u_Roughness;
+uniform vec4 u_BaseColorFactor;
+
+uniform vec3 u_EmissiveFactor;
+
 uniform float u_Metallic;
-uniform float u_Shininess;
-uniform float u_Dissolve;
-uniform float u_Sheen;
-uniform float u_ClearcoatThickness;
-uniform float u_ClearcoatRoughness;
-uniform float u_Anisotropy;
-uniform float u_AnisotropyRotation;
+uniform float u_Roughness;
+uniform float u_OcclusionStrength;
+uniform float u_NormalScale;
 
 uniform uint u_TextureFlags;
 
-const uint HAS_AMBIENT_MAP				= 1 << 0;
-const uint HAS_DIFFUSE_MAP				= 1 << 1;
-const uint HAS_SPECULAR_MAP				= 1 << 2;
-const uint HAS_NORMAL_MAP				= 1 << 3;
-const uint HAS_ALPHA_MAP				= 1 << 4;
-const uint HAS_DISPLACEMENT_MAP			= 1 << 5;
-const uint HAS_METALLIC_ROUGHNESS_MAP	= 1 << 6;
-const uint HAS_SHEEN_MAP				= 1 << 7;
-const uint HAS_EMISSIVE_MAP				= 1 << 8;
+const uint c_HasBaseColorMap			= 1 << 0;
+const uint c_HasNormalMap			    = 1 << 1;
+const uint c_HasMetallicRoughnessMap	= 1 << 2;
+const uint c_HasEmissiveMap				= 1 << 3;
+const uint c_HasOcclusionMap			= 1 << 4;
 
-uniform sampler2D u_AmbientMap;
-uniform sampler2D u_DiffuseMap;
-uniform sampler2D u_SpecularMap;
+uniform sampler2D u_BaseColorMap;
 uniform sampler2D u_NormalMap;
-uniform sampler2D u_AlphaMap;
-uniform sampler2D u_DisplacementMap;
 uniform sampler2D u_MetallicRoughnessMap;
-uniform sampler2D u_SheenMap;
 uniform sampler2D u_EmissiveMap;
+uniform sampler2D u_OcclusionMap;
 
-bool HasAmbientMap() {
-    return ((u_TextureFlags & HAS_AMBIENT_MAP) > 0u);
-}
-
-bool HasDiffuseMap() {
-    return ((u_TextureFlags & HAS_DIFFUSE_MAP) > 0u);
-}
-
-bool HasSpecularMap() {
-    return ((u_TextureFlags & HAS_SPECULAR_MAP) > 0u);
+bool HasBaseColorMap() {
+    return ((u_TextureFlags & c_HasBaseColorMap) > 0u);
 }
 
 bool HasNormalMap() {
-    return ((u_TextureFlags & HAS_NORMAL_MAP) > 0u);
-}
-
-bool HasAlphaMap() {
-    return ((u_TextureFlags & HAS_ALPHA_MAP) > 0u);
-}
-
-bool HasDisplacementMap() {
-    return ((u_TextureFlags & HAS_DISPLACEMENT_MAP) > 0u);
+    return ((u_TextureFlags & c_HasNormalMap) > 0u);
 }
 
 bool HasMetallicRoughnessMap() {
-    return ((u_TextureFlags & HAS_METALLIC_ROUGHNESS_MAP) > 0u);
-}
-
-bool HasSheenMap() {
-    return ((u_TextureFlags & HAS_SHEEN_MAP) > 0u);
+    return ((u_TextureFlags & c_HasMetallicRoughnessMap) > 0u);
 }
 
 bool HasEmissiveMap() {
-    return ((u_TextureFlags & HAS_EMISSIVE_MAP) > 0u);
+    return ((u_TextureFlags & c_HasEmissiveMap) > 0u);
 }
+
+bool HasOcclusionMap() {
+    return ((u_TextureFlags & c_HasOcclusionMap) > 0u);
+}
+
+#endif // MATERIAL_INC

@@ -72,13 +72,16 @@ void Model::Render(RenderContext& ctx)
     glm::mat4 view = ctx.CurrentCamera->GetView();
     glm::mat4 proj = ctx.CurrentCamera->GetProjection();
     glm::mat4 mvp = proj * view * model;
+    glm::mat4 normal = glm::transpose(glm::inverse(glm::mat3(model)));
 
-    sp->SetUniformMatrix("u_Model", model);
-    sp->SetUniformMatrix("u_View", view);
-    sp->SetUniformMatrix("u_Projection", proj);
-    sp->SetUniformMatrix("u_MVP", mvp);
+    sp->SetUniformMatrix("u_ModelMatrix", model);
+    sp->SetUniformMatrix("u_NormalMatrix", normal);
+    sp->SetUniformMatrix("u_ViewMatrix", view);
+    sp->SetUniformMatrix("u_ProjMatrix", proj);
+    sp->SetUniformMatrix("u_MVPMatrix", mvp);
 
-    sp->SetUniform("u_EyePos", ctx.CurrentCamera->GetPosition());
+    sp->SetUniform("u_Camera", ctx.CurrentCamera->GetPosition());
+    sp->SetUniform("u_LightDirection", glm::vec3(0.0f));
 
     for (auto& mesh : _meshes) {
         mesh->Render(ctx);

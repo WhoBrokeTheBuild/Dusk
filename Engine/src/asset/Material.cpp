@@ -11,83 +11,48 @@ namespace dusk {
 void Material::Bind(Shader * sp) {
     sp->Bind();
 
-    sp->SetUniform("u_Ambient", Ambient);
-    sp->SetUniform("u_Diffuse", Diffuse);
-    sp->SetUniform("u_Specular", Specular);
-    sp->SetUniform("u_Emissive", Emissive);
-    sp->SetUniform("u_Roughness", Roughness);
+    sp->SetUniform("u_BaseColorFactor", BaseColorFactor);
+    sp->SetUniform("u_EmissiveFactor", EmissiveFactor);
     sp->SetUniform("u_Metallic", Metallic);
-    sp->SetUniform("u_Shininess", Shininess);
-    sp->SetUniform("u_Dissolve", Dissolve);
-    sp->SetUniform("u_Sheen", Sheen);
-    sp->SetUniform("u_ClearcoatThickness", ClearcoatThickness);
-    sp->SetUniform("u_ClearcoatRoughness", ClearcoatRoughness);
-    sp->SetUniform("u_Anisotropy", Anisotropy);
-    sp->SetUniform("u_AnisotropyRotation", AnisotropyRotation);
+    sp->SetUniform("u_Roughness", Roughness);
+    sp->SetUniform("u_OcclusionStrength", OcclusionStrength);
+    sp->SetUniform("u_NormalScale", NormalScale);
 
     unsigned int flags = 0;
     
-    if (AmbientMap) {
-        flags |= HAS_AMBIENT_MAP;
-        sp->SetUniform("u_AmbientMap", TextureID::AMBIENT);
-        glActiveTexture(GL_TEXTURE0 + TextureID::AMBIENT);
-        AmbientMap->Bind();
-    }
-    
-    if (DiffuseMap) {
-        flags |= HAS_DIFFUSE_MAP;
-        sp->SetUniform("u_DiffuseMap", TextureID::DIFFUSE);
-        glActiveTexture(GL_TEXTURE0 + TextureID::DIFFUSE);
-        DiffuseMap->Bind();
-    }
-    
-    if (SpecularMap) {
-        flags |= HAS_SPECULAR_MAP;
-        sp->SetUniform("u_SpecularMap", TextureID::SPECULAR);
-        glActiveTexture(GL_TEXTURE0 + TextureID::SPECULAR);
-        SpecularMap->Bind();
+    if (BaseColorMap) {
+        flags |= HasBaseColorMap;
+        sp->SetUniform("u_AmbientMap", TextureID::BaseColor);
+        glActiveTexture(GL_TEXTURE0 + TextureID::BaseColor);
+        BaseColorMap->Bind();
     }
     
     if (NormalMap) {
-        flags |= HAS_NORMAL_MAP;
-        sp->SetUniform("u_NormalMap", TextureID::NORMAL);
-        glActiveTexture(GL_TEXTURE0 + TextureID::NORMAL);
+        flags |= HasNormalMap;
+        sp->SetUniform("u_NormalMap", TextureID::Normal);
+        glActiveTexture(GL_TEXTURE0 + TextureID::Normal);
         NormalMap->Bind();
     }
     
-    if (AlphaMap) {
-        flags |= HAS_ALPHA_MAP;
-        sp->SetUniform("u_AlphaMap", TextureID::ALPHA);
-        glActiveTexture(GL_TEXTURE0 + TextureID::ALPHA);
-        AlphaMap->Bind();
-    }
-    
-    if (DisplacementMap) {
-        flags |= HAS_DISPLACEMENT_MAP;
-        sp->SetUniform("u_DisplacementMap",TextureID::DISPLACEMENT);
-        glActiveTexture(GL_TEXTURE0 + TextureID::DISPLACEMENT);
-        DisplacementMap->Bind();
-    }
-    
     if (MetallicRoughnessMap) {
-        flags |= HAS_METALLIC_ROUGHNESS_MAP;
-        sp->SetUniform("u_RoughnessMap", TextureID::METALLIC_ROUGHNESS);
-        glActiveTexture(GL_TEXTURE0 + TextureID::METALLIC_ROUGHNESS);
+        flags |= HasMetallicRoughnessMap;
+        sp->SetUniform("u_MetallicRoughnessMap", TextureID::MetallicRoughness);
+        glActiveTexture(GL_TEXTURE0 + TextureID::MetallicRoughness);
         MetallicRoughnessMap->Bind();
     }
     
-    if (SheenMap) {
-        flags |= HAS_SHEEN_MAP;
-        sp->SetUniform("u_SheenMap", TextureID::SHEEN);
-        glActiveTexture(GL_TEXTURE0 + TextureID::SHEEN);
-        SheenMap->Bind();
+    if (EmissiveMap) {
+        flags |= HasEmissiveMap;
+        sp->SetUniform("u_EmissiveMap", TextureID::Emissive);
+        glActiveTexture(GL_TEXTURE0 + TextureID::Emissive);
+        EmissiveMap->Bind();
     }
     
-    if (EmissiveMap) {
-        flags |= HAS_EMISSIVE_MAP;
-        sp->SetUniform("u_EmissiveMap", TextureID::EMISSIVE);
-        glActiveTexture(GL_TEXTURE0 + TextureID::EMISSIVE);
-        EmissiveMap->Bind();
+    if (OcclusionMap) {
+        flags |= HasOcclusionMap;
+        sp->SetUniform("u_OcclusionMap", TextureID::Occlusion);
+        glActiveTexture(GL_TEXTURE0 + TextureID::Occlusion);
+        OcclusionMap->Bind();
     }
 
     sp->SetUniform("u_TextureFlags", flags);

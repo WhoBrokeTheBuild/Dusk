@@ -13,8 +13,8 @@ public:
     {
         _model.reset(new dusk::Model());
 		//_model->AddMesh(std::make_shared<dusk::Mesh>("models/SciFiHelmet/SciFiHelmet.gltf"));
-		//_model->AddMesh(std::make_shared<dusk::Mesh>("models/DamagedHelmet.glb"));
-		_model->AddMesh(std::make_shared<dusk::Mesh>("models/WaterBottle.glb"));
+		_model->AddMesh(std::make_shared<dusk::Mesh>("models/DamagedHelmet.glb"));
+		//_model->AddMesh(std::make_shared<dusk::Mesh>("models/WaterBottle.glb"));
 
         auto app = dusk::App::Inst();
 

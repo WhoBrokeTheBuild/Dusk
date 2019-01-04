@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(gdb) HelloWorld",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/Demos/HelloWorld",
+            "MIMode": "gdb",
+            "linux": {
+                "program": "${workspaceFolder}/build/Demos/HelloWorld/HelloWorld"
+            },
+            "windows": {
+                "program": "${workspaceFolder}/build/Demos/HelloWorld/HelloWorld.exe"
+            }
+        }
+    ]
+}

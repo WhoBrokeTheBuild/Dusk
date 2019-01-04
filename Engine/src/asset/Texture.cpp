@@ -53,10 +53,11 @@ bool Texture::LoadFromFile(const std::string& filename, Options opts /*= Options
     uint8_t * texture = nullptr;
 
     std::string fullPath;
-    for (auto& p : paths) {
+    for (auto& p : paths) 
+    {
         fullPath = p + filename;
 
-        DuskLogVerbose("Checking %s", fullPath());
+        DuskLogVerbose("Checking %s", fullPath);
         texture = stbi_load(fullPath.c_str(), &_size.x, &_size.y, &comp, STBI_rgb_alpha);
 
         if (texture) break;
@@ -64,7 +65,7 @@ bool Texture::LoadFromFile(const std::string& filename, Options opts /*= Options
 
     if (!texture)
     {
-        DuskLogError("Failed to load texture '%s'", filename());
+        DuskLogError("Failed to load texture '%s'", filename);
         return false;
     }
 
@@ -99,16 +100,20 @@ bool Texture::LoadFromBuffer(const uint8_t * buffer, glm::ivec2 size, int comp /
     GLint intfmt;
     GLenum fmt;
 
-    switch (comp) {
+    switch (comp) 
+    {
     case 1:
         intfmt = GL_RED;
         fmt = GL_RED;
+        break;
     case 2:
         intfmt = GL_RG;
         fmt = GL_RG;
+        break;
     case 3:
         intfmt = GL_RGB;
         fmt = GL_RGB;
+        break;
     case 4:
     default:
         intfmt = GL_RGBA;

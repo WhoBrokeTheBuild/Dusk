@@ -53,12 +53,12 @@ bool Mesh::LoadFromFile(const std::string& filename)
     for (auto& p : paths) {
         fullPath = p + filename;
 
-        DuskLogVerbose("Checking %s", fullPath());
+        DuskLogVerbose("Checking %s", fullPath);
         if (binary) {
-            loaded = loader.LoadBinaryFromFile(&model, &err, &warn, fullPath());
+            loaded = loader.LoadBinaryFromFile(&model, &err, &warn, fullPath);
         }
         else {
-            loaded = loader.LoadASCIIFromFile(&model, &err, &warn, fullPath());
+            loaded = loader.LoadASCIIFromFile(&model, &err, &warn, fullPath);
         }
 
         if (loaded) break;
@@ -66,12 +66,12 @@ bool Mesh::LoadFromFile(const std::string& filename)
 
     if (!loaded)
     {
-        DuskLogError("Failed to load model, '%s'", filename());
+        DuskLogError("Failed to load model, '%s'", filename);
         return false;
     }
 
-    DuskLogLoad("Loading Mesh from %s", fullPath());
-    DuskLogVerbose("Model Generator %s", model.asset.generator());
+    DuskLogLoad("Loading Mesh from %s", fullPath);
+    DuskLogVerbose("Model Generator %s", model.asset.generator);
 
     std::vector<std::shared_ptr<Texture>> textures;
     for (auto& texture : model.textures) {
@@ -81,7 +81,7 @@ bool Mesh::LoadFromFile(const std::string& filename)
             textures.push_back(std::make_shared<Texture>(image.image.data(), glm::ivec2(image.width, image.height), image.component));
         }
         else {
-            textures.push_back(std::make_shared<Texture>((GLuint)texture.sampler, glm::ivec2(image.width, image.height)));
+            textures.push_back(std::make_shared<Texture>(std::move((GLuint)texture.sampler), glm::ivec2(image.width, image.height)));
         }
     }
 
@@ -224,7 +224,7 @@ bool Mesh::LoadFromFile(const std::string& filename)
                         accessor.normalized ? GL_TRUE : GL_FALSE, byteStride,
                         (void*)accessor.byteOffset);
                 } else {
-                    DuskLogWarn("Ignoring attribute %s", attrib.first());
+                    DuskLogWarn("Ignoring attribute %s", attrib.first);
                 }
             }
             

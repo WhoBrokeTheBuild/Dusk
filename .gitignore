@@ -160,7 +160,6 @@ flatbuffers_common_*.h
 build
 config.h
 #*.bin
-*.vscode
 *.reg
 vgcore.*
 imgui.ini

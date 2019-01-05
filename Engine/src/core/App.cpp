@@ -36,7 +36,6 @@ void App::Reset()
     }
 
     _scenes.clear();
-    _shaders.clear();
 }
 
 void App::Start()
@@ -69,7 +68,7 @@ void App::Start()
 
         while (SDL_PollEvent(&evt))
         {
-            ProcessSdlEvent(&evt);
+            HandleEvent(&evt);
         }
 
         _updateContext.DeltaTime = duration_cast<double_ms>(elapsedTime / frameDelay.count()).count();
@@ -176,7 +175,7 @@ void App::Render()
     }
 }
 
-void App::ProcessSdlEvent(SDL_Event * evt)
+void App::HandleEvent(SDL_Event * evt)
 {
     switch (evt->type)
     {
@@ -208,6 +207,10 @@ void App::ProcessSdlEvent(SDL_Event * evt)
         }
         break;
     }
+
+    if (_activeScene) {
+        _activeScene->HandleEvent(evt);
+    }
 }
 
 void App::CreateWindow()
@@ -237,7 +240,7 @@ void App::CreateWindow()
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 
-    int sdlWindowFlags = GetSdlWindowFlags();
+    int sdlWindowFlags = GetSDLWindowFlags();
     DuskLogVerbose("SDL Window Flags: 0x%08X", sdlWindowFlags);
 
     for (int multisamples = 16; multisamples > 0; multisamples /= 2)
@@ -315,13 +318,6 @@ void App::DestroyWindow()
     _sdlWindow = nullptr;
 
     SDL_Quit();
-}
-
-Shader * App::AddShader(std::unique_ptr<Shader>&& sp)
-{
-    Shader * tmp = sp.get();
-    _shaders.push_back(std::move(sp));
-    return tmp;
 }
 
 Scene * App::AddScene(std::unique_ptr<Scene>&& scene)

@@ -5,7 +5,7 @@
 
 #include <dusk/core/Context.hpp>
 #include <dusk/core/Log.hpp>
-#include <dusk/scene/IComponent.hpp>
+#include <dusk/scene/ActorComponent.hpp>
 
 #include <memory>
 #include <string>
@@ -21,38 +21,70 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Actor)
 
-    Actor(std::string id, Scene * scene);
+    Actor() = default;
+
     virtual ~Actor() = default;
 
-    inline std::string GetId() { return _id; }
+    void SetScene(Scene * scene);
+
+    Scene * GetScene() const { 
+        return _scene;
+    }
+
+    void SetParent(Actor * actor);
+
+    Actor * GetParent() const {
+        return _parent;
+    }
 
     void SetPosition(const glm::vec3& pos);
-    inline glm::vec3 GetPosition() const { return _position; }
 
-    void SetRotation(const glm::vec3& rot);
-    inline glm::vec3 GetRotation() const { return _rotation; }
+    inline glm::vec3 GetPosition() const {
+        return _position;
+    }
+
+    void SetRotation(const glm::quat& rot);
+
+    inline glm::quat GetRotation() const {
+        return _rotation;
+    }
+
+    glm::quat GetTotalRotation() const;
 
     void SetScale(const glm::vec3& scale);
-    inline glm::vec3 GetScale() const { return _scale; }
+
+    inline glm::vec3 GetScale() const { 
+        return _scale; 
+    }
 
     glm::mat4 GetTransform();
 
-    void AddComponent(std::unique_ptr<IComponent>&& ptr);
+    virtual void AddComponent(ActorComponentPtr&& comp);
 
-    std::vector<IComponent *> GetComponents() const;
+    virtual void AddActor(std::unique_ptr<Actor>&& actor);
+
+    virtual void HandleEvent(SDL_Event * evt);
+
+    virtual void Update(UpdateContext& ctx);
+    
+    virtual void Render(RenderContext& ctx);
+
+    virtual void Print(std::string indent);
 
 private:
 
-    std::string _id;
+    Scene * _scene = nullptr;
 
-    glm::mat4 _transform;
-    glm::vec3 _position;
-    glm::vec3 _rotation;
-    glm::vec3 _scale;
+    Actor * _parent = nullptr;
 
-    std::vector<std::unique_ptr<IComponent>> _components;
+    glm::mat4 _transform    = glm::mat4(1.0f);
+    glm::vec3 _position     = glm::vec3(0.0f);
+    glm::quat _rotation     = glm::quat(1.0f, 0.f, 0.f, 0.f);
+    glm::vec3 _scale        = glm::vec3(1.0f);
 
-    std::vector<IComponent *> _rawComponents;
+    std::vector<std::unique_ptr<ActorComponent>> _components = { };
+
+    std::vector<std::unique_ptr<Actor>> _actors = { };
 
 }; // class Actor
 

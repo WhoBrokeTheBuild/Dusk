@@ -19,17 +19,27 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Scene)
 
-    Scene();
+    Scene() = default;
+    
     virtual ~Scene() = default;
 
+    bool LoadFromFile(const std::string& filename);
+
     virtual void Start();
+
     virtual void Stop();
+
+    void AddActor(std::unique_ptr<Actor>&& actor);
+
+    virtual void HandleEvent(SDL_Event * evt);
 
     virtual void Update(UpdateContext& ctx);
 
     virtual void Render(RenderContext& ctx);
 
 private:
+
+    virtual void Print();
 
     std::vector<std::unique_ptr<Actor>> _actors;
 

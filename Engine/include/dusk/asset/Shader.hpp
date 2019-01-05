@@ -11,6 +11,9 @@
 
 namespace dusk {
 
+class Shader;
+typedef std::unique_ptr<Shader> ShaderPtr;
+
 class Shader
 {
 public:

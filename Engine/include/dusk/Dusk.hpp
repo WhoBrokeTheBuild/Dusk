@@ -11,7 +11,6 @@
 #include <dusk/asset/Texture.hpp>
 #include <dusk/scene/Actor.hpp>
 #include <dusk/scene/Camera.hpp>
-#include <dusk/scene/Model.hpp>
 #include <dusk/scene/Scene.hpp>
 
 namespace dusk {

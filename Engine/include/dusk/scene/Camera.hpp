@@ -2,72 +2,100 @@
 #define DUSK_CAMERA_HPP
 
 #include <dusk/Config.hpp>
+#include <dusk/scene/ActorComponent.hpp>
 
 #include <memory>
 
 namespace dusk {
 
-class Camera
+class Camera : public ActorComponent
 {
 public:
+
+    enum Mode {
+        Perspective,
+        Orthographic,
+    };
 
     /// Class Boilerplate
 
     DISALLOW_COPY_AND_ASSIGN(Camera)
 
-    Camera(float fov = 45.0f, glm::vec3 up = glm::vec3(0, 1, 0), glm::vec2 clip = glm::vec2(0.1f, 1000.0f));
+    Camera();
+
     virtual ~Camera() = default;
 
     /// Methods
 
-    glm::mat4 GetView();
-    glm::mat4 GetProjection();
+    glm::mat4 GetView() const;
 
-    void SetFOV(float fov);
-    float GetFOV() const { return _fov; }
+    glm::mat4 GetProjection() const;
+
+    void SetMode(Mode mode);
+
+    Mode GetMode() const {
+        return _mode;
+    }
 
     void SetAspect(float aspect);
-    void SetAspect(float width, float height) { SetAspect(width / height); }
-    void SetAspect(const glm::vec2& size) { SetAspect(size.x / size.y); }
-    float GetAspect() const { return _aspect; }
+
+    void SetAspect(const glm::vec2& size);
+
+    inline float GetAspect() const {
+        return _aspect;
+    }
+
+    void SetViewport(float left, float right, float bottom, float top);
+
+    void SetViewport(const glm::vec4& viewport);
 
     void SetClip(const glm::vec2& clip);
-    void SetClip(float znear, float zfar) { SetClip(glm::vec2(znear, zfar)); };
-    glm::vec2 GetClip() const { return _clip; }
+
+    inline glm::vec2 GetClip() const {
+        return _clip;
+    }
 
     void SetPosition(const glm::vec3& pos);
-    glm::vec3 GetPosition() const { return _position; }
+
+    inline glm::vec3 GetPosition() const {
+        return _position;
+    }
+
+    void SetRotation(const glm::quat& rot);
+
+    inline glm::quat GetRotation() const {
+        return _rotation;
+    }
 
     void SetForward(const glm::vec3& forward);
-    glm::vec3 GetForward() const { return _forward; }
 
-    void SetLookAt(const glm::vec3& lookAt) { SetForward(lookAt - GetPosition()); };
+    void SetLookAt(const glm::vec3& point);
 
-    void SetUp(const glm::vec3& up);
-    glm::vec3 GetUp() const { return _up; }
+    virtual void Update(UpdateContext& ctx) override;
 
-    void ChangePitch(const float& pitch);
-    void ChangeYaw(const float& yaw);
+    virtual void Print(std::string indent) override;
 
 private:
 
-    bool _viewInvalid;
-    bool _projectionInvalid;
+    Mode _mode = Mode::Perspective;
 
-    glm::mat4 _view;
-    glm::mat4 _projection;
+    glm::vec2 _clip = glm::vec2(0.00001f, 10000.f);
 
-    float _fov;
-    float _aspect;
-    glm::vec2 _clip;
+    glm::vec3 _position = glm::vec3(0.f);
 
-    glm::vec3 _position;
-    glm::vec3 _forward;
-    glm::vec3 _up;
+    glm::quat _rotation = glm::quat(1.f, 0.f, 0.f, 0.f);
 
-    float _pitch = 0.0f;
-    float _yaw   = 0.0f;
-    //float _roll   = 0.0f;
+    glm::vec3 _up = glm::vec3(0.f, 1.f, 0.f);
+
+    // Perspective
+
+    float _fov = glm::radians(45.f);
+
+    float _aspect = 16.f / 9.f; // 16:9
+
+    // Orthographic
+    
+    glm::vec4 _viewport = glm::vec4(0.f, 1280.f, 720.f, 0.f);
 
 }; // class Camera
 

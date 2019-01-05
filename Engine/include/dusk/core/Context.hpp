@@ -12,11 +12,13 @@ class Camera;
 struct UpdateContext
 {
     float TargetFPS = 0.0f;
+    
     float CurrentFPS = 0.0f;
 
     float DeltaTime = 0.0f;
 
     double ElapsedTime = 0.0f;
+
     double TotalTime = 0.0f;
 
 };
@@ -24,8 +26,6 @@ struct UpdateContext
 struct RenderContext
 {
     int CurrentPass = 0;
-
-    Shader * CurrentShader = nullptr;
 
     Camera * CurrentCamera = nullptr;
 

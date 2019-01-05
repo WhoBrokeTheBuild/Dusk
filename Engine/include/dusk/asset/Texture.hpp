@@ -4,8 +4,12 @@
 #include <dusk/Config.hpp>
 
 #include <string>
+#include <memory>
 
 namespace dusk {
+
+class Texture;
+typedef std::shared_ptr<Texture> TexturePtr;
 
 class Texture
 {

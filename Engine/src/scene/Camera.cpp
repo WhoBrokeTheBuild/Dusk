@@ -5,100 +5,108 @@
 
 namespace dusk {
 
-Camera::Camera(float fov /*= 45.0f*/, glm::vec3 up /*= glm::vec3(0, 1, 0)*/, glm::vec2 clip /*= glm::vec2(0.1f, 1000.0f)*/)
-    : _viewInvalid(true)
-    , _projectionInvalid(true)
-    , _view(1)
-    , _projection(1)
-    , _fov(fov)
-    , _aspect()
-    , _clip(clip)
-    , _position(0)
-    , _forward(1)
-    , _up(up)
-{ }
-
-glm::mat4 Camera::GetView()
-{
-    if (_viewInvalid)
-    {
-        glm::quat qpitch, qyaw, tmp;
-        glm::vec3 pitchAxis;
-
-        pitchAxis = glm::cross(_forward, _up);
-        qpitch = glm::angleAxis(_pitch, pitchAxis);
-        qyaw = glm::angleAxis(_yaw, _up);
-
-        tmp = glm::cross(qpitch, qyaw);
-        tmp = glm::normalize(tmp);
-
-        _forward = glm::rotate(tmp, _forward);
-
-        _pitch = 0;
-        _yaw = 0;
-
-        _view = glm::lookAt(_position, _position + _forward, _up);
-        _viewInvalid = false;
-    }
-    return _view;
+Camera::Camera()
+{ 
+    const glm::ivec2& size = App::Inst()->GetWindowSize();
+    SetAspect(size);
+    SetViewport(0.f, size.x, size.y, 0.f);
 }
 
-glm::mat4 Camera::GetProjection()
+glm::mat4 Camera::GetView() const
 {
-    if (_projectionInvalid)
-    {
-        _projection = glm::perspective(_fov, _aspect, _clip.x, _clip.y);
-        _projectionInvalid = false;
+    if (_mode == Mode::Perspective) {
+        glm::vec3 position = _position;
+        glm::quat rotation = _rotation;
+        if (GetActor()) {
+            position = glm::vec3(GetActor()->GetTransform() * glm::vec4(position, 1.f));
+            rotation = GetActor()->GetTotalRotation() * rotation;
+        }
+        glm::vec3 forward = glm::rotate(rotation, glm::vec3(0.f, 0.f, -1.f));
+        return glm::lookAt(position, position + forward, _up);
     }
-    return _projection;
+    else if (_mode == Mode::Orthographic) {
+        return glm::mat4(1.f);
+    }
+    
+    return glm::mat4(1.f);
 }
 
-void Camera::SetFOV(float fov)
+glm::mat4 Camera::GetProjection() const
 {
-    _fov = fov;
-    _projectionInvalid = true;
+    if (_mode == Mode::Perspective) {
+        return glm::perspective(_fov, _aspect, _clip.x, _clip.y);
+    }
+    else if (_mode == Mode::Orthographic) {
+        return glm::ortho(_viewport[0], _viewport[1], _viewport[2], _viewport[3], _clip.x, _clip.y);
+    }
+    
+    return glm::mat4(1.f);
+}
+
+void Camera::SetMode(Mode mode) {
+    _mode = mode;
 }
 
 void Camera::SetAspect(float aspect)
 {
     _aspect = aspect;
-    _projectionInvalid = true;
+}
+
+void Camera::SetAspect(const glm::vec2& size)
+{
+    _aspect = size.x / size.y;
+}
+
+void Camera::SetViewport(float left, float right, float bottom, float top)
+{
+    _viewport = glm::vec4(left, right, bottom, top);
+}
+
+void Camera::SetViewport(const glm::vec4& viewport)
+{
+    _viewport = viewport;
 }
 
 void Camera::SetClip(const glm::vec2& clip)
 {
     _clip = clip;
-    _projectionInvalid = true;
 }
 
 void Camera::SetPosition(const glm::vec3& pos)
 {
     _position = pos;
-    _viewInvalid = true;
+}
+
+void Camera::SetRotation(const glm::quat& rot)
+{
+    _rotation = rot;
 }
 
 void Camera::SetForward(const glm::vec3& forward)
 {
-    _forward = glm::normalize(forward);
-    _viewInvalid = true;
+    _rotation = glm::quatLookAt(glm::normalize(forward), _up);
 }
 
-void Camera::SetUp(const glm::vec3& up)
+void Camera::SetLookAt(const glm::vec3& point)
 {
-    _up = up;
-    _viewInvalid = true;
+    SetForward(point - GetPosition());
 }
 
-void Camera::ChangePitch(const float& pitch)
+void Camera::Update(UpdateContext& ctx)
 {
-    _pitch += pitch;
-    _viewInvalid = true;
+
 }
 
-void Camera::ChangeYaw(const float& yaw)
+void Camera::Print(std::string indent)
 {
-    _yaw += yaw;
-    _viewInvalid = true;
+    ActorComponent::Print(indent);
+    DuskLog("%s _mode = %s", indent, (_mode == Mode::Perspective ? "Perspective" : "Orthographic"));
+    DuskLog("%s _fov = %f", indent, _fov);
+    DuskLog("%s _aspect = %f", indent, _aspect);
+    DuskLog("%s _clip = %s", indent, glm::to_string(_clip));
+    DuskLog("%s _position = %s", indent, glm::to_string(_position));
+    DuskLog("%s _rotation = %s", indent, glm::to_string(_rotation));
+    DuskLog("%s _up = %s", indent, glm::to_string(_up));
+    DuskLog("%s _viewport = %s", indent, glm::to_string(_viewport));
 }
-
 } // namespace dusk

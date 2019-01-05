@@ -6,7 +6,7 @@
 #include <dusk/asset/Shader.hpp>
 #include <dusk/core/Context.hpp>
 #include <dusk/core/Util.hpp>
-#include <dusk/scene/IComponent.hpp>
+#include <dusk/scene/ActorComponent.hpp>
 
 #include <algorithm>
 #include <memory>
@@ -16,7 +16,7 @@
 
 namespace dusk {
 
-class Mesh
+class Mesh : public ActorComponent
 {
 public:
 
@@ -29,13 +29,24 @@ public:
         BITANGENT   = 4,
     };
 
+    struct Primitive 
+    {
+        GLuint      VAO;
+        GLenum      Mode;
+        GLsizei     Count;
+        GLenum      Type;
+        GLsizei     Offset;
+        Box         Bounds;
+        std::shared_ptr<Material> Material;
+    };
+
     /// Class Boilerplate
 
     DISALLOW_COPY_AND_ASSIGN(Mesh)
 
     Mesh() = default;
 
-    Mesh(Mesh&& rhs);
+    Mesh(std::vector<Primitive> primitives);
 
     Mesh(const std::string& filename);
 
@@ -43,8 +54,10 @@ public:
 
     bool LoadFromFile(const std::string& filename);
 
+    bool LoadFromData(std::vector<Primitive> primitives);
+
     std::string GetFilename() { 
-        return _filename; 
+        return _filename;
     }
 
     bool IsLoaded() const { 
@@ -55,7 +68,9 @@ public:
         return _bounds; 
     }
 
-    void Render(RenderContext& ctx);
+    virtual void Render(RenderContext& ctx) override;
+
+    virtual void Print(std::string indent) override;
 
 private:
 
@@ -63,23 +78,11 @@ private:
 
     std::string _filename;
 
-    Box _bounds;
-
-    struct Primitive 
-    {
-        GLuint vao;
-        GLenum    mode;
-        GLsizei count;
-        GLenum    type;
-        GLsizei offset;
-        int material;
-    };
-
-    std::vector<std::unique_ptr<Material>> _materials;
+    std::unique_ptr<Shader> _shader;
 
     std::vector<Primitive> _primitives;
 
-    void ComputeBounds(const glm::vec3* data, size_t length);
+    Box _bounds;
     
 };
 

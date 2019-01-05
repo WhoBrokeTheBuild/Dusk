@@ -166,6 +166,9 @@ namespace dusk {
         do { dusk::Log(dusk::LogLevel::LOG_VERBOSE, "[VERB](%s:%d) " M "\n", dusk::GetBasename(__FILE__).c_str(), __LINE__, ##__VA_ARGS__); } while (0)
 #endif
 
+#define DuskLog(M, ...) \
+    do { dusk::Log(dusk::LogLevel::LOG_INFO, M "\n", ##__VA_ARGS__); } while (0)
+
 #define DuskLogInfo(M, ...) \
     do { dusk::Log(dusk::LogLevel::LOG_INFO, "[INFO](%s:%d) " M "\n", dusk::GetBasename(__FILE__).c_str(), __LINE__, ##__VA_ARGS__); } while (0)
 

@@ -12,28 +12,26 @@
 
 namespace dusk {
 
-Mesh::Mesh(Mesh&& rhs)
-{
-    std::swap(_loaded, rhs._loaded);
-    std::swap(_primitives, rhs._primitives);
-}
-
 Mesh::Mesh(const std::string& filename)
 {
     LoadFromFile(filename);
 }
 
+Mesh::Mesh(std::vector<Primitive> primitives)
+{
+    LoadFromData(primitives);
+}
+
 Mesh::~Mesh()
 {
     for (auto& p : _primitives) {
-        glDeleteVertexArrays(1, &p.vao);
+        glDeleteVertexArrays(1, &p.VAO);
     }
 }
 
 bool Mesh::LoadFromFile(const std::string& filename)
 {
     DuskBenchStart();
-
     using namespace tinygltf;
 
     _filename = filename;
@@ -70,6 +68,11 @@ bool Mesh::LoadFromFile(const std::string& filename)
         return false;
     }
 
+    _shader.reset(new Shader({ 
+        "shaders/default/default.vs.glsl", 
+        "shaders/default/default.fs.glsl",
+    }));
+
     DuskLogLoad("Loading Mesh from %s", fullPath);
     DuskLogVerbose("Model Generator %s", model.asset.generator);
 
@@ -85,8 +88,9 @@ bool Mesh::LoadFromFile(const std::string& filename)
         }
     }
 
+    std::vector<std::shared_ptr<Material>> materials;
     for (auto& material : model.materials) {
-        auto mat = std::make_unique<Material>();
+        auto mat = std::make_shared<Material>();
 
         auto& vals = material.values;
         auto it = vals.end();
@@ -151,12 +155,12 @@ bool Mesh::LoadFromFile(const std::string& filename)
 			DuskLogVerbose("Material additional value %s", val.first);
 		}
 
-        _materials.push_back(std::move(mat));
+        materials.push_back(std::move(mat));
     }
 
-    if (_materials.empty()) {
+    if (materials.empty()) {
         DuskLogWarn("No Materials found, adding default");
-        _materials.push_back(std::make_unique<Material>());
+        materials.push_back(std::make_shared<Material>());
     }
 
 	std::vector<GLuint> vbos;
@@ -172,6 +176,8 @@ bool Mesh::LoadFromFile(const std::string& filename)
         for (size_t pInd = 0; pInd < mesh.primitives.size(); ++pInd) {
             auto& primitive = mesh.primitives[pInd];
 			auto& indexAccessor = model.accessors[primitive.indices];
+
+            Box bounds;
 
 			GLuint vao;
 			glGenVertexArrays(1, &vao);
@@ -213,13 +219,12 @@ bool Mesh::LoadFromFile(const std::string& filename)
                     vaa = AttributeID::POSITION;
                     if (accessor.minValues.size() == 3) {
                         auto& val = accessor.minValues;
-                        _bounds.Min = glm::vec3(val[0], val[1], val[2]);
+                        bounds.Min = glm::vec3(val[0], val[1], val[2]);
                     }
                     if (accessor.maxValues.size() == 3) {
                         auto& val = accessor.maxValues;
-                        _bounds.Max = glm::vec3(val[0], val[1], val[2]);
+                        bounds.Max = glm::vec3(val[0], val[1], val[2]);
                     }
-                    glm::vec3 * data = (glm::vec3 *)(&buffer.data.at(0) + bufferView.byteOffset);
                 }
                 if (attrib.first.compare("NORMAL") == 0) {
                     vaa = AttributeID::NORMAL;
@@ -294,7 +299,8 @@ bool Mesh::LoadFromFile(const std::string& filename)
                 (GLsizei)indexAccessor.count,
                 (GLenum)indexAccessor.componentType,
                 (GLsizei)indexAccessor.byteOffset,
-                (primitive.material < 0 ? 0 : primitive.material),
+                bounds,
+                materials[(primitive.material < 0 ? 0 : primitive.material)],
             });
         }
     }
@@ -310,30 +316,59 @@ bool Mesh::LoadFromFile(const std::string& filename)
     return false;
 }
 
+bool Mesh::LoadFromData(std::vector<Primitive> primitives)
+{
+    _shader.reset(new Shader({ 
+        "shaders/default/default.vs.glsl", 
+        "shaders/default/default.fs.glsl",
+    }));
+
+    _primitives.insert(_primitives.end(), primitives.begin(), primitives.end());
+    
+    return true;
+}
 
 void Mesh::Render(RenderContext& ctx)
 {
-    for (auto& p : _primitives) {
-        glBindVertexArray(p.vao);
+    auto actor = GetActor();
+    if (!actor) {
+        return;
+    }
 
-        if (p.material >= 0) {
-            auto& mat = _materials[p.material];
-            mat->Bind(ctx.CurrentShader);
+    _shader->Bind();
+
+    glm::mat4 model = actor->GetTransform();
+    glm::mat4 view = ctx.CurrentCamera->GetView();
+    glm::mat4 proj = ctx.CurrentCamera->GetProjection();
+    glm::mat4 mvp = proj * view * model;
+    glm::mat4 normal = glm::transpose(glm::inverse(glm::mat3(model)));
+
+    _shader->SetUniformMatrix("u_ModelMatrix", model);
+    _shader->SetUniformMatrix("u_NormalMatrix", normal);
+    _shader->SetUniformMatrix("u_ViewMatrix", view);
+    _shader->SetUniformMatrix("u_ProjMatrix", proj);
+    _shader->SetUniformMatrix("u_MVPMatrix", mvp);
+
+    _shader->SetUniform("u_Camera", ctx.CurrentCamera->GetPosition());
+    _shader->SetUniform("u_LightDirection", glm::vec3(0.0f));
+
+    for (auto& p : _primitives) {
+        glBindVertexArray(p.VAO);
+
+        if (p.Material) {
+            p.Material->Bind(_shader.get());
         }
 
-        glDrawElements(p.mode, p.count, p.type, (char*)0 + p.offset);
+        glDrawElements(p.Mode, p.Count, p.Type, (char*)0 + p.Offset);
 
         glBindVertexArray(0);
     }
 }
 
-void Mesh::ComputeBounds(const glm::vec3* data, size_t length)
+void Mesh::Print(std::string indent)
 {
-    for (size_t i = 0; i < length; ++i)
-    {
-        _bounds.Min = glm::min(_bounds.Min, data[i]);
-        _bounds.Max = glm::max(_bounds.Max, data[i]);
-    }
+    ActorComponent::Print(indent);
+    DuskLog("%s _primitives.size = %zu", indent, _primitives.size());
 }
 
 } // namespace dusk

@@ -65,7 +65,7 @@ public:
 
     glm::mat4 GetWorldTransform() const;
 
-    virtual void AddComponent(ActorComponentPtr&& comp);
+    virtual void AddComponent(std::unique_ptr<ActorComponent>&& comp);
 
     virtual void AddActor(std::unique_ptr<Actor>&& actor);
 

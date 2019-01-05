@@ -15,13 +15,8 @@ Camera::Camera()
 glm::mat4 Camera::GetView() const
 {
     if (_mode == Mode::Perspective) {
-        glm::vec3 position = _position;
-        glm::quat rotation = _rotation;
-        if (GetActor()) {
-            position = glm::vec3(GetActor()->GetWorldTransform() * glm::vec4(position, 1.f));
-            rotation = GetActor()->GetWorldRotation() * rotation;
-        }
-        glm::vec3 forward = glm::rotate(rotation, glm::vec3(0.f, 0.f, -1.f));
+        glm::vec3 position = glm::vec3(GetWorldTransform() * glm::vec4(position, 1.f));
+        glm::vec3 forward = glm::rotate(GetWorldRotation(), glm::vec3(0.f, 0.f, -1.f));
         return glm::lookAt(position, position + forward, _up);
     }
     else if (_mode == Mode::Orthographic) {
@@ -72,19 +67,9 @@ void Camera::SetClip(const glm::vec2& clip)
     _clip = clip;
 }
 
-void Camera::SetPosition(const glm::vec3& pos)
-{
-    _position = pos;
-}
-
-void Camera::SetRotation(const glm::quat& rot)
-{
-    _rotation = rot;
-}
-
 void Camera::SetForward(const glm::vec3& forward)
 {
-    _rotation = glm::quatLookAt(glm::normalize(forward), _up);
+    SetRotation(glm::quatLookAt(glm::normalize(forward), _up));
 }
 
 void Camera::SetLookAt(const glm::vec3& point)
@@ -99,13 +84,11 @@ void Camera::Update(UpdateContext& ctx)
 
 void Camera::Print(std::string indent)
 {
-    ActorComponent::Print(indent);
+    Actor::Print(indent);
     DuskLog("%s _mode = %s", indent, (_mode == Mode::Perspective ? "Perspective" : "Orthographic"));
     DuskLog("%s _fov = %f", indent, _fov);
     DuskLog("%s _aspect = %f", indent, _aspect);
     DuskLog("%s _clip = %s", indent, glm::to_string(_clip));
-    DuskLog("%s _position = %s", indent, glm::to_string(_position));
-    DuskLog("%s _rotation = %s", indent, glm::to_string(_rotation));
     DuskLog("%s _up = %s", indent, glm::to_string(_up));
     DuskLog("%s _viewport = %s", indent, glm::to_string(_viewport));
 }

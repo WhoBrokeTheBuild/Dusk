@@ -58,7 +58,7 @@ bool Scene::LoadFromFile(const std::string& filename)
     DuskLogLoad("Loading Scene from [%s]", fullPath);
     DuskLogVerbose("Model Generator [%s]", model.asset.generator);
 
-    std::vector<TexturePtr> textures;
+    std::vector<std::shared_ptr<Texture>> textures;
     for (auto& texture : model.textures) {
         tinygltf::Image &image = model.images[texture.source];
         if (texture.sampler <= 0) {
@@ -151,19 +151,21 @@ bool Scene::LoadFromFile(const std::string& filename)
 
     std::function<std::unique_ptr<Actor>(tinygltf::Node&)> processNode;
     processNode = [&](tinygltf::Node& node) -> std::unique_ptr<Actor> {
-        auto actor = std::make_unique<dusk::Actor>();
-
+        Actor * actor = nullptr;
+        
+        glm::vec3 position = glm::vec3(0.f);
         if (node.translation.size() == 3) {
-            actor->SetPosition(glm::vec3(node.translation[0], node.translation[1], node.translation[2]));
+            position = glm::vec3(node.translation[0], node.translation[1], node.translation[2]);
         }
 
+        glm::quat rotation = glm::quat(1.f, 0.f, 0.f, 0.f);
         if (node.rotation.size() == 4) {
-            auto quat = glm::quat(node.rotation[3], node.rotation[0], node.rotation[1], node.rotation[2]);
-            actor->SetRotation(quat);
+            rotation = glm::quat(node.rotation[3], node.rotation[0], node.rotation[1], node.rotation[2]);
         }
 
+        glm::vec3 scale = glm::vec3(1.f);
         if (node.scale.size() == 3) {
-            actor->SetScale(glm::vec3(node.scale[0], node.scale[1], node.scale[2]));
+            scale = glm::vec3(node.scale[0], node.scale[1], node.scale[2]);
         }
 
         //DuskLogLoad("Node %s", node.name);
@@ -171,8 +173,8 @@ bool Scene::LoadFromFile(const std::string& filename)
 		if (node.camera >= 0) {
             auto& data = model.cameras[node.camera];
             //DuskLogLoad("Camera %s", data.name);
-
-            auto camera = std::make_unique<Camera>();
+            
+            Camera * camera = new Camera();
         
             if (data.type == "perspective") {
                 camera->SetMode(Camera::Mode::Perspective);
@@ -188,18 +190,18 @@ bool Scene::LoadFromFile(const std::string& filename)
                 //}
 
                 if (!defaultCamera) { 
-                    defaultCamera = camera.get();
+                    defaultCamera = camera;
                 }
 
             }
             else if (data.type == "orthographic") {
                 camera->SetMode(Camera::Mode::Orthographic);
             }
-
-            actor->AddComponent(std::move(camera));
 		}
 
 		if (node.mesh >= 0) {
+            actor = new Actor();
+
             auto& mesh = model.meshes[node.mesh];
             //DuskLogLoad("Mesh %s", mesh.name);
 
@@ -335,15 +337,19 @@ bool Scene::LoadFromFile(const std::string& filename)
                 });
             }
 
-            actor->AddComponent(std::make_unique<Mesh>(primitives));
+            //actor->AddComponent(std::make_unique<Mesh>(primitives));
 		}
+
+        if (!actor) {
+            actor = new Actor();
+        }
 
         for (int id : node.children) {
             auto& child = model.nodes[id];
             actor->AddActor(processNode(child));
         }
 
-        return actor;
+        return std::unique_ptr<Actor>(actor);
     };
 
     const auto& scene = model.scenes[model.defaultScene];

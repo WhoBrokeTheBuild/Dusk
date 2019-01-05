@@ -9,9 +9,6 @@ namespace dusk {
 
 class Actor;
 
-class ActorComponent;
-typedef std::unique_ptr<ActorComponent> ActorComponentPtr;
-
 class ActorComponent
 {
 public:

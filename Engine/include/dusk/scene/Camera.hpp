@@ -8,7 +8,7 @@
 
 namespace dusk {
 
-class Camera : public ActorComponent
+class Camera : public Actor
 {
 public:
 
@@ -55,18 +55,6 @@ public:
         return _clip;
     }
 
-    void SetPosition(const glm::vec3& pos);
-
-    inline glm::vec3 GetPosition() const {
-        return _position;
-    }
-
-    void SetRotation(const glm::quat& rot);
-
-    inline glm::quat GetRotation() const {
-        return _rotation;
-    }
-
     void SetForward(const glm::vec3& forward);
 
     void SetLookAt(const glm::vec3& point);
@@ -80,10 +68,6 @@ private:
     Mode _mode = Mode::Perspective;
 
     glm::vec2 _clip = glm::vec2(0.00001f, 10000.f);
-
-    glm::vec3 _position = glm::vec3(0.f);
-
-    glm::quat _rotation = glm::quat(1.f, 0.f, 0.f, 0.f);
 
     glm::vec3 _up = glm::vec3(0.f, 1.f, 0.f);
 

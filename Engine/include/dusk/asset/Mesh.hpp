@@ -16,7 +16,7 @@
 
 namespace dusk {
 
-class Mesh : public ActorComponent
+class Mesh
 {
 public:
 
@@ -25,8 +25,9 @@ public:
         POSITION    = 0,
         NORMAL      = 1,
         TEXCOORD    = 2,
-        TANGENT     = 3,
-        BITANGENT   = 4,
+        COLOR       = 3,
+        TANGENT     = 4,
+        BITANGENT   = 5,
     };
 
     struct Primitive 
@@ -56,8 +57,14 @@ public:
 
     bool LoadFromData(std::vector<Primitive> primitives);
 
-    std::string GetFilename() { 
+    std::string GetFilename() const { 
         return _filename;
+    }
+
+    void SetShader(std::unique_ptr<Shader>&& shader);
+
+    Shader * GetShader() const {
+        return _shader.get();
     }
 
     bool IsLoaded() const { 
@@ -68,9 +75,7 @@ public:
         return _bounds; 
     }
 
-    virtual void Render(RenderContext& ctx) override;
-
-    virtual void Print(std::string indent) override;
+    virtual void Render(RenderContext& ctx, glm::mat4 transform = glm::mat4(1.f));
 
 private:
 

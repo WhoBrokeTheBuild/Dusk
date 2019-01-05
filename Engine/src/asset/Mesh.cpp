@@ -328,16 +328,16 @@ bool Mesh::LoadFromData(std::vector<Primitive> primitives)
     return true;
 }
 
-void Mesh::Render(RenderContext& ctx)
+void Mesh::SetShader(std::unique_ptr<Shader>&& shader)
 {
-    auto actor = GetActor();
-    if (!actor) {
-        return;
-    }
+    _shader = std::move(shader);
+}
 
+void Mesh::Render(RenderContext& ctx, glm::mat4 transform /*= glm::mat4(1.f)*/)
+{
     _shader->Bind();
 
-    glm::mat4 model = actor->GetWorldTransform();
+    glm::mat4 model = transform;
     glm::mat4 view = ctx.CurrentCamera->GetView();
     glm::mat4 proj = ctx.CurrentCamera->GetProjection();
     glm::mat4 mvp = proj * view * model;
@@ -350,6 +350,8 @@ void Mesh::Render(RenderContext& ctx)
     _shader->SetUniformMatrix("u_MVPMatrix", mvp);
 
     _shader->SetUniform("u_Camera", ctx.CurrentCamera->GetPosition());
+    
+    // TODO:
     _shader->SetUniform("u_LightDirection", glm::vec3(0.0f));
 
     for (auto& p : _primitives) {
@@ -363,12 +365,6 @@ void Mesh::Render(RenderContext& ctx)
 
         glBindVertexArray(0);
     }
-}
-
-void Mesh::Print(std::string indent)
-{
-    ActorComponent::Print(indent);
-    DuskLog("%s _primitives.size = %zu", indent, _primitives.size());
 }
 
 } // namespace dusk

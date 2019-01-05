@@ -8,9 +8,6 @@
 
 namespace dusk {
 
-class Texture;
-typedef std::shared_ptr<Texture> TexturePtr;
-
 class Texture
 {
 public:

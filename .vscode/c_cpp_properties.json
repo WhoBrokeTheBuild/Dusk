@@ -3,6 +3,7 @@
         {
             "name": "Linux",
             "includePath": [
+                "${workspaceFolder}/build/Engine/include",
                 "${workspaceFolder}/**"
             ],
             "defines": [],

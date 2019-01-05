@@ -337,7 +337,7 @@ void Mesh::Render(RenderContext& ctx)
 
     _shader->Bind();
 
-    glm::mat4 model = actor->GetTransform();
+    glm::mat4 model = actor->GetWorldTransform();
     glm::mat4 view = ctx.CurrentCamera->GetView();
     glm::mat4 proj = ctx.CurrentCamera->GetProjection();
     glm::mat4 mvp = proj * view * model;

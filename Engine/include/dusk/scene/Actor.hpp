@@ -43,13 +43,15 @@ public:
         return _position;
     }
 
+    glm::vec3 GetWorldPosition() const;
+
     void SetRotation(const glm::quat& rot);
 
     inline glm::quat GetRotation() const {
         return _rotation;
     }
 
-    glm::quat GetTotalRotation() const;
+    glm::quat GetWorldRotation() const;
 
     void SetScale(const glm::vec3& scale);
 
@@ -57,7 +59,11 @@ public:
         return _scale; 
     }
 
-    glm::mat4 GetTransform();
+    glm::vec3 GetWorldScale() const;
+
+    glm::mat4 GetTransform() const;
+
+    glm::mat4 GetWorldTransform() const;
 
     virtual void AddComponent(ActorComponentPtr&& comp);
 
@@ -77,7 +83,6 @@ private:
 
     Actor * _parent = nullptr;
 
-    glm::mat4 _transform    = glm::mat4(1.0f);
     glm::vec3 _position     = glm::vec3(0.0f);
     glm::quat _rotation     = glm::quat(1.0f, 0.f, 0.f, 0.f);
     glm::vec3 _scale        = glm::vec3(1.0f);

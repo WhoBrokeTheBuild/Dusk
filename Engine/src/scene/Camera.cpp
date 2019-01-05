@@ -18,8 +18,8 @@ glm::mat4 Camera::GetView() const
         glm::vec3 position = _position;
         glm::quat rotation = _rotation;
         if (GetActor()) {
-            position = glm::vec3(GetActor()->GetTransform() * glm::vec4(position, 1.f));
-            rotation = GetActor()->GetTotalRotation() * rotation;
+            position = glm::vec3(GetActor()->GetWorldTransform() * glm::vec4(position, 1.f));
+            rotation = GetActor()->GetWorldRotation() * rotation;
         }
         glm::vec3 forward = glm::rotate(rotation, glm::vec3(0.f, 0.f, -1.f));
         return glm::lookAt(position, position + forward, _up);

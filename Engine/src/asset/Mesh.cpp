@@ -126,7 +126,7 @@ bool Mesh::LoadFromFile(const std::string& filename)
         addIt = addVals.find("normalTexture");
         if (addIt != addVals.end()) {
             mat->NormalMap = textures[addIt->second.TextureIndex()];
-            mat->NormalScale = addIt->second.Factor();
+            mat->NormalScale = (float)addIt->second.Factor();
         }
 
         addIt = addVals.find("emissiveFactor");
@@ -142,7 +142,7 @@ bool Mesh::LoadFromFile(const std::string& filename)
         addIt = addVals.find("occlusionTexture");
         if (addIt != addVals.end()) {
             mat->OcclusionMap = textures[addIt->second.TextureIndex()];
-            mat->OcclusionStrength = addIt->second.Factor();
+            mat->OcclusionStrength = (float)addIt->second.Factor();
         }
 
         for (const auto& val : material.values) {
@@ -353,8 +353,8 @@ void Mesh::Render(RenderContext& ctx, glm::mat4 transform /*= glm::mat4(1.f)*/)
     _shader->SetUniform("u_LightDirection", glm::vec3(0.0f));
 
     for (auto& p : _primitives) {
-        if (p.Material) {
-            p.Material->Bind(_shader.get());
+        if (p.Mat) {
+            p.Mat->Bind(_shader.get());
         }
 
         glBindVertexArray(p.VAO);

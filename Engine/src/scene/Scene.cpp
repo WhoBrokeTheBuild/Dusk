@@ -110,7 +110,7 @@ bool Scene::LoadFromFile(const std::string& filename)
         addIt = addVals.find("normalTexture");
         if (addIt != addVals.end()) {
             mat->NormalMap = textures[addIt->second.TextureIndex()];
-            mat->NormalScale = addIt->second.Factor();
+            mat->NormalScale = (float)addIt->second.Factor();
         }
 
         addIt = addVals.find("emissiveFactor");
@@ -126,7 +126,7 @@ bool Scene::LoadFromFile(const std::string& filename)
         addIt = addVals.find("occlusionTexture");
         if (addIt != addVals.end()) {
             mat->OcclusionMap = textures[addIt->second.TextureIndex()];
-            mat->OcclusionStrength = addIt->second.Factor();
+            mat->OcclusionStrength = (float)addIt->second.Factor();
         }
 
         for (const auto& val : material.values) {
@@ -155,17 +155,18 @@ bool Scene::LoadFromFile(const std::string& filename)
         
         glm::vec3 position = glm::vec3(0.f);
         if (node.translation.size() == 3) {
-            position = glm::vec3(node.translation[0], node.translation[1], node.translation[2]);
+            position = glm::make_vec3(node.translation.data());
         }
 
         glm::quat rotation = glm::quat(1.f, 0.f, 0.f, 0.f);
         if (node.rotation.size() == 4) {
-            rotation = glm::quat(node.rotation[3], node.rotation[0], node.rotation[1], node.rotation[2]);
+            glm::vec4 data = glm::make_vec4(node.rotation.data());
+            rotation = glm::quat(data[3], data[0], data[1], data[2]);
         }
 
         glm::vec3 scale = glm::vec3(1.f);
         if (node.scale.size() == 3) {
-            scale = glm::vec3(node.scale[0], node.scale[1], node.scale[2]);
+            scale = glm::make_vec3(node.scale.data());
         }
 
 		if (node.camera >= 0) {

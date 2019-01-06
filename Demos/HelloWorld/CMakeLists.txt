@@ -18,6 +18,21 @@ ADD_EXECUTABLE(
     ${_ASSETS}
 )
 
+TARGET_COMPILE_FEATURES(
+    HelloWorld
+    PRIVATE
+        cxx_std_17
+        cxx_auto_type
+)
+
+TARGET_COMPILE_OPTIONS(
+    HelloWorld 
+    PRIVATE
+        $<$<CXX_COMPILER_ID:GNU>:-Wall -Wno-unknown-pragmas>
+        $<$<CXX_COMPILER_ID:Clang>:-Wall -Wno-unknown-pragmas>
+        $<$<CXX_COMPILER_ID:MSVC>:-wd4068>
+)
+
 TARGET_LINK_LIBRARIES(
     HelloWorld
     Dusk

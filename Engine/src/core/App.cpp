@@ -42,6 +42,7 @@ void App::Start()
 {
     using namespace std::chrono;
     typedef duration<double, std::milli> double_ms;
+    typedef duration<float, std::milli> float_ms;
 
     SDL_ShowWindow(_sdlWindow);
 
@@ -71,7 +72,7 @@ void App::Start()
             HandleEvent(&evt);
         }
 
-        _updateContext.DeltaTime = duration_cast<double_ms>(elapsedTime / frameDelay.count()).count();
+        _updateContext.DeltaTime = duration_cast<float_ms>(elapsedTime / frameDelay.count()).count();
         _updateContext.ElapsedTime = elapsedTime.count();
         _updateContext.TotalTime += elapsedTime.count();
 
@@ -95,7 +96,7 @@ void App::Start()
         fpsElap += elapsedTime;
         if (fpsDelay <= fpsElap)
         {
-            _updateContext.CurrentFPS = (frames / fpsElap.count()) * 1000.0;
+            _updateContext.CurrentFPS = (float)(frames / fpsElap.count()) * 1000.f;
 
             static char buffer[128];
             sprintf(buffer, "%s - %0.2f", _windowTitle.c_str(), _updateContext.CurrentFPS);

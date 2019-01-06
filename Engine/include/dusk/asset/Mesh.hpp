@@ -39,7 +39,7 @@ public:
         GLsizei     Offset;
         Box         Bounds;
         
-        std::shared_ptr<Material> Material;
+        std::shared_ptr<Material> Mat;
     };
 
     /// Class Boilerplate

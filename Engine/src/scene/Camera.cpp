@@ -9,7 +9,7 @@ Camera::Camera()
 { 
     const glm::ivec2& size = App::Inst()->GetWindowSize();
     SetAspect(size);
-    SetViewport(0.f, size.x, size.y, 0.f);
+    SetViewport(0.f, (float)size.x, (float)size.y, 0.f);
 }
 
 glm::mat4 Camera::GetView() const

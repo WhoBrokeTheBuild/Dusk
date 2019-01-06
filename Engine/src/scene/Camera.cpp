@@ -15,9 +15,8 @@ Camera::Camera()
 glm::mat4 Camera::GetView() const
 {
     if (_mode == Mode::Perspective) {
-        glm::vec3 position = glm::vec3(GetWorldTransform() * glm::vec4(position, 1.f));
         glm::vec3 forward = glm::rotate(GetWorldRotation(), glm::vec3(0.f, 0.f, -1.f));
-        return glm::lookAt(position, position + forward, _up);
+        return glm::lookAt(GetWorldPosition(), GetWorldPosition() + forward, _up);
     }
     else if (_mode == Mode::Orthographic) {
         return glm::mat4(1.f);

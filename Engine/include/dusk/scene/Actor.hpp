@@ -87,9 +87,9 @@ private:
     glm::quat _rotation     = glm::quat(1.0f, 0.f, 0.f, 0.f);
     glm::vec3 _scale        = glm::vec3(1.0f);
 
-    std::vector<std::unique_ptr<ActorComponent>> _components = { };
+    std::vector<std::unique_ptr<ActorComponent>> _components;
 
-    std::vector<std::unique_ptr<Actor>> _actors = { };
+    std::vector<std::unique_ptr<Actor>> _actors;
 
 }; // class Actor
 

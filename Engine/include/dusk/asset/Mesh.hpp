@@ -38,6 +38,7 @@ public:
         GLenum      Type;
         GLsizei     Offset;
         Box         Bounds;
+        
         std::shared_ptr<Material> Material;
     };
 

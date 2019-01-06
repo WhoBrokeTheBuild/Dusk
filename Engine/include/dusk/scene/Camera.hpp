@@ -2,7 +2,7 @@
 #define DUSK_CAMERA_HPP
 
 #include <dusk/Config.hpp>
-#include <dusk/scene/ActorComponent.hpp>
+#include <dusk/scene/Actor.hpp>
 
 #include <memory>
 

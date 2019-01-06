@@ -100,8 +100,7 @@ bool Mesh::LoadFromFile(const std::string& filename)
 
         it = vals.find("baseColorFactor");
         if (it != vals.end() && !it->second.number_array.empty()) {
-            const auto& c = it->second.ColorFactor();
-            mat->BaseColorFactor = glm::vec4(c[0], c[1], c[2], c[3]);
+            mat->BaseColorFactor = glm::make_vec4(it->second.ColorFactor().data());
         }
         
         it = vals.find("baseColorTexture");
@@ -132,8 +131,7 @@ bool Mesh::LoadFromFile(const std::string& filename)
 
         addIt = addVals.find("emissiveFactor");
         if (it != vals.end() && !it->second.number_array.empty()) {
-            const auto& c = it->second.ColorFactor();
-            mat->EmissiveFactor = glm::vec3(c[0], c[1], c[2]);
+            mat->EmissiveFactor = glm::make_vec3(it->second.ColorFactor().data());
         }
 
         addIt = addVals.find("emissiveTexture");
@@ -201,8 +199,6 @@ bool Mesh::LoadFromFile(const std::string& filename)
                 auto& bufferView = model.bufferViews[accessor.bufferView];
                 auto& buffer = model.buffers[bufferView.buffer];
                 int byteStride = accessor.ByteStride(bufferView);
-
-				DuskLogVerbose("Attribute %s", attrib.first);
 
 				GLuint vbo;
 				glGenBuffers(1, &vbo);
@@ -311,9 +307,10 @@ bool Mesh::LoadFromFile(const std::string& filename)
 		glDeleteBuffers(1, &vbo);
 	}
 
-    _loaded = true;
     DuskBenchEnd("Mesh::LoadFromFile");
-    return false;
+
+    _loaded = true;
+    return _loaded;
 }
 
 bool Mesh::LoadFromData(std::vector<Primitive> primitives)
@@ -325,6 +322,7 @@ bool Mesh::LoadFromData(std::vector<Primitive> primitives)
 
     _primitives.insert(_primitives.end(), primitives.begin(), primitives.end());
     
+    _loaded = true;
     return true;
 }
 
@@ -355,14 +353,12 @@ void Mesh::Render(RenderContext& ctx, glm::mat4 transform /*= glm::mat4(1.f)*/)
     _shader->SetUniform("u_LightDirection", glm::vec3(0.0f));
 
     for (auto& p : _primitives) {
-        glBindVertexArray(p.VAO);
-
         if (p.Material) {
             p.Material->Bind(_shader.get());
         }
 
+        glBindVertexArray(p.VAO);
         glDrawElements(p.Mode, p.Count, p.Type, (char*)0 + p.Offset);
-
         glBindVertexArray(0);
     }
 }

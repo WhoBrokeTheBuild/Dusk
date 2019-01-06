@@ -38,9 +38,9 @@ std::vector<std::string> GetAssetPaths()
 
             _assetPaths.push_back(path);
         }
+        _assetPaths.push_back("");
+        reverse(_assetPaths.begin(), _assetPaths.end());
     }
-
-    reverse(_assetPaths.begin(), _assetPaths.end());
     return _assetPaths;
 }
 

@@ -2,7 +2,11 @@
 #define DUSK_MODEL_HPP
 
 #include <dusk/Config.hpp>
+#include <dusk/asset/Mesh.hpp>
 #include <dusk/scene/ActorComponent.hpp>
+
+#include <memory>
+#include <vector>
 
 namespace dusk {
 
@@ -10,6 +14,21 @@ class MeshComponent : public ActorComponent
 {
 public:
 
+    MeshComponent() = default;
+
+    MeshComponent(Actor * actor);
+
+    virtual ~MeshComponent() = default;
+
+    virtual void AddMesh(std::unique_ptr<Mesh> mesh);
+    
+    virtual void Render(RenderContext& ctx) override;
+
+    virtual void Print(std::string indent) override;
+
+private:
+
+    std::vector<std::unique_ptr<Mesh>> _meshes;
 
 }; // class Model
 

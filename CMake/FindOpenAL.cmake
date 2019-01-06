@@ -37,14 +37,14 @@ FIND_PATH(
 
 FIND_LIBRARY(
     OpenAL_LIBRARY
-    NAMES OpenAL
+    NAMES OpenAL openal
     PATHS ${OpenAL_ROOT_DIR} ${_OpenAL_PC_INCLUDE_DIRS} 
     PATH_SUFFIXES lib
 )
 
 FIND_LIBRARY(
     OpenAL_LIBRARY SHARED
-    NAMES OpenAL
+    NAMES OpenAL openal
     PATHS ${OpenAL_ROOT_DIR} ${_OpenAL_PC_INCLUDE_DIRS} 
     PATH_SUFFIXES lib
 )

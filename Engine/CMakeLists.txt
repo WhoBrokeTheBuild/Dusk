@@ -73,6 +73,7 @@ TARGET_LINK_LIBRARIES(
     GLM::GLM
     JSON::JSON
     SDL2::SDL2
+    OpenAL::OpenAL
 )
 
 IF(MSVC)

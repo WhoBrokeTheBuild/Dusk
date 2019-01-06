@@ -218,6 +218,14 @@ void App::CreateWindow()
 {
     DuskBenchStart();
 
+    _alDevice = alcOpenDevice(NULL);
+    _alContext = alcCreateContext(_alDevice, NULL);
+    alcMakeContextCurrent(_alContext);
+
+    DuskLogInfo("OpenAL Version %s", alGetString(AL_VERSION));
+    DuskLogInfo("OpenAL Vendor %s", alGetString(AL_VENDOR));
+    DuskLogInfo("OpenAL Renderer %s", alGetString(AL_RENDERER));
+
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
         DuskLogError("Failed to initialize SDL, %s", SDL_GetError());

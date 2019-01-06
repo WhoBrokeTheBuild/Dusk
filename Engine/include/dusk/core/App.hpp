@@ -91,6 +91,10 @@ private:
 
     float _targetFps = 60.0f;
 
+    ALCdevice * _alDevice = nullptr;
+    
+    ALCcontext * _alContext = nullptr;
+
     SDL_Window * _sdlWindow = nullptr;
 
     SDL_GLContext _sdlContext;

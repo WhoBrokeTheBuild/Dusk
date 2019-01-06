@@ -8,7 +8,7 @@ MeshComponent::MeshComponent(Actor * actor)
     : ActorComponent(actor)
 { }
 
-void MeshComponent::AddMesh(std::unique_ptr<Mesh> mesh)
+void MeshComponent::AddMesh(std::shared_ptr<Mesh> mesh)
 {
     _meshes.push_back(std::move(mesh));
 }

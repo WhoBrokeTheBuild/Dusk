@@ -20,7 +20,7 @@ public:
 
     virtual ~MeshComponent() = default;
 
-    virtual void AddMesh(std::unique_ptr<Mesh> mesh);
+    virtual void AddMesh(std::shared_ptr<Mesh> mesh);
     
     virtual void Render(RenderContext& ctx) override;
 
@@ -28,7 +28,7 @@ public:
 
 private:
 
-    std::vector<std::unique_ptr<Mesh>> _meshes;
+    std::vector<std::shared_ptr<Mesh>> _meshes;
 
 }; // class Model
 

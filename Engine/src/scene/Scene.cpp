@@ -335,7 +335,7 @@ bool Scene::LoadFromFile(const std::string& filename)
                 }
 
                 MeshComponent * comp = new MeshComponent();
-                comp->AddMesh(std::make_unique<Mesh>(primitives));
+                comp->AddMesh(std::make_shared<Mesh>(primitives));
                 actor->AddComponent(std::unique_ptr<MeshComponent>(comp));
             }
         }

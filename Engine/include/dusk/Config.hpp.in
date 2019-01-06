@@ -22,6 +22,9 @@
 #include <glad/glad.h>
 #undef CreateWindow
 
+#include <AL/al.h>
+#include <AL/alc.h>
+
 #include <SDL.h>
 
 #define GLM_ENABLE_EXPERIMENTAL

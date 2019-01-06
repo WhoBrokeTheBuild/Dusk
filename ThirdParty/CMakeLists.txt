@@ -69,3 +69,27 @@ IF(NOT SDL2_FOUND)
         TEST_COMMAND        ""
     )
 ENDIF()
+
+# OpenAL
+
+FIND_PACKAGE(OpenAL QUIET)
+
+IF(NOT OpenAL_FOUND)
+    SET(_OpenAL_DIR "${CMAKE_BINARY_DIR}/OpenAL")
+    SET(_OpenAL_SOURCE_DIR "${CMAKE_BINARY_DIR}/OpenAL_src")
+    SET(_OpenAL_BINARY_DIR "${CMAKE_BINARY_DIR}/OpenAL_bin")
+
+    ExternalProject_Add(
+        ThirdParty_OpenAL
+        GIT_REPOSITORY      "https://github.com/kcat/openal-soft.git"
+        GIT_TAG             "v1.19"
+        GIT_SHALLOW         TRUE
+        SOURCE_DIR          "${_OpenAL_SOURCE_DIR}"
+        BINARY_DIR          "${_OpenAL_BINARY_DIR}"
+        CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${_OpenAL_DIR}
+        BUILD_COMMAND       ""
+        INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
+        UPDATE_COMMAND      ""
+        TEST_COMMAND        ""
+    )
+ENDIF()

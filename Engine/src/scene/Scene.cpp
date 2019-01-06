@@ -84,7 +84,7 @@ bool Scene::LoadFromFile(const std::string& filename)
         it = vals.find("baseColorFactor");
         if (it != vals.end() && !it->second.number_array.empty()) {
             const auto& c = it->second.ColorFactor();
-            mat->BaseColorFactor = glm::vec4(c[0], c[1], c[2], c[3]);
+            mat->BaseColorFactor = glm::make_vec4(it->second.ColorFactor().data());
         }
         
         it = vals.find("baseColorTexture");
@@ -115,8 +115,7 @@ bool Scene::LoadFromFile(const std::string& filename)
 
         addIt = addVals.find("emissiveFactor");
         if (it != vals.end() && !it->second.number_array.empty()) {
-            const auto& c = it->second.ColorFactor();
-            mat->EmissiveFactor = glm::vec3(c[0], c[1], c[2]);
+            mat->EmissiveFactor = glm::make_vec3(it->second.ColorFactor().data());
         }
 
         addIt = addVals.find("emissiveTexture");
@@ -371,7 +370,7 @@ bool Scene::LoadFromFile(const std::string& filename)
 
     App::Inst()->GetRenderContext().CurrentCamera = defaultCamera;
 
-    Print();
+    //Print();
 
     DuskBenchEnd("Scene::LoadFromFile");
     return true;

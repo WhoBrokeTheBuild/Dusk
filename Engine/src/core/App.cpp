@@ -186,27 +186,8 @@ void App::HandleEvent(SDL_Event * evt)
     case SDL_QUIT:
         _running = false;
         break;
-    case SDL_KEYDOWN:
-
-        break;
-    case SDL_KEYUP:
-
-        break;
-    case SDL_MOUSEMOTION:
-
-        break;
-    case SDL_MOUSEBUTTONDOWN:
-
-        break;
-    case SDL_MOUSEBUTTONUP:
-
-        break;
-    case SDL_MOUSEWHEEL:
-
-        break;
     case SDL_WINDOWEVENT:
-        if (evt->window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
-        {
+        if (evt->window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
             glViewport(0, 0, evt->window.data1, evt->window.data2);
         }
         break;

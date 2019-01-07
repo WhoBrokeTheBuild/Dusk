@@ -65,6 +65,11 @@ void Camera::SetClip(const glm::vec2& clip)
     _clip = clip;
 }
 
+void Camera::SetUp(const glm::vec3& up)
+{
+    _up = up;
+}
+
 void Camera::SetForward(const glm::vec3& forward)
 {
     SetRotation(glm::quatLookAt(glm::normalize(forward), _up));
@@ -78,6 +83,15 @@ glm::vec3 Camera::GetForward() const
 void Camera::SetLookAt(const glm::vec3& point)
 {
     SetForward(point - GetPosition());
+}
+
+void Camera::HandleEvent(SDL_Event * evt)
+{
+    if (evt->type == SDL_WINDOWEVENT) {
+        if (evt->window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+            SetAspect(glm::vec2(evt->window.data1, evt->window.data2));
+        }
+    }
 }
 
 void Camera::Update(UpdateContext& ctx)

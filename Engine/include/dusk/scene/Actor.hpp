@@ -84,9 +84,11 @@ private:
 
     Actor * _parent = nullptr;
 
-    glm::vec3 _position     = glm::vec3(0.0f);
-    glm::quat _rotation     = glm::quat(1.0f, 0.f, 0.f, 0.f);
-    glm::vec3 _scale        = glm::vec3(1.0f);
+    glm::vec3 _position = glm::vec3(0.0f);
+
+    glm::quat _rotation = glm::quat(1.0f, 0.f, 0.f, 0.f);
+    
+    glm::vec3 _scale = glm::vec3(1.0f);
 
     std::vector<std::unique_ptr<ActorComponent>> _components;
 

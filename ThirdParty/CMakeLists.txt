@@ -87,9 +87,96 @@ IF(NOT OpenAL_FOUND)
         SOURCE_DIR          "${_OpenAL_SOURCE_DIR}"
         BINARY_DIR          "${_OpenAL_BINARY_DIR}"
         CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${_OpenAL_DIR}
+                            -DALSOFT_UTILS=OFF
+                            -DALSOFT_EXAMPLES=OFF
+                            -DALSOFT_TESTS=OFF
         BUILD_COMMAND       ""
         INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
         UPDATE_COMMAND      ""
         TEST_COMMAND        ""
     )
+ENDIF()
+
+# Ogg, Vorbis
+
+FIND_PACKAGE(Ogg QUIET)
+FIND_PACKAGE(Vorbis QUIET)
+
+#IF(NOT Ogg_FOUND OR NOT _Vorbis_FOUND)
+IF(FALSE)
+    SET(_Ogg_DIR "${CMAKE_BINARY_DIR}/Ogg")
+    SET(_Ogg_SOURCE_DIR "${CMAKE_BINARY_DIR}/Ogg_src")
+
+    SET(CONFIGURE_COMMAND "")
+    IF(MSVC) 
+        SET(BUILD_COMMAND ${CMAKE_VS_MSBUILD_COMMAND} win32/VS2015/libogg_dynamic.vcproj /p:OutputPath=${_Ogg_DIR})
+    ELSE()
+        SET(BUILD_COMMAND ./autogen.sh && ./configure --prefix=${_Ogg_DIR} && ${CMAKE_MAKE_PROGRAM} install -l )
+    ENDIF()
+
+    ExternalProject_Add(
+        ThirdParty_Ogg
+        GIT_REPOSITORY      "https://github.com/xiph/ogg.git"
+        GIT_TAG             "v1.3.3"
+        GIT_SHALLOW         TRUE
+        SOURCE_DIR          "${_Ogg_SOURCE_DIR}"
+        BUILD_IN_SOURCE     TRUE
+        CONFIGURE_COMMAND   ${CONFIGURE_COMMAND}
+        BUILD_COMMAND       ""
+        INSTALL_COMMAND     ""
+        UPDATE_COMMAND      ""
+        TEST_COMMAND        ""
+    )
+
+    SET(_Vorbis_DIR "${CMAKE_BINARY_DIR}/Vorbis")
+    SET(_Vorbis_SOURCE_DIR "${CMAKE_BINARY_DIR}/Vorbis_src")
+
+    SET(CONFIGURE_COMMAND "")
+    SET(BUILD_COMMAND "")
+    IF(MSVC)
+        SET(BUILD_COMMAND ${CMAKE_VS_MSBUILD_COMMAND} win32/VS2010/libvorbis_dynamic.vcproj /p:OutputPath=${_Vorbis_DIR})
+    ELSE()
+        SET(CONFIGURE_COMMAND ./autogen.sh && ./configure --with-ogg=${_Ogg_DIR} --prefix=${_Vorbis_DIR} && ${CMAKE_MAKE_PROGRAM} install -l )
+    ENDIF()
+
+    ExternalProject_Add(
+        ThirdParty_Vorbis
+        GIT_REPOSITORY      "https://github.com/xiph/vorbis.git"
+        GIT_TAG             "v1.3.6"
+        GIT_SHALLOW         TRUE
+        SOURCE_DIR          "${_Vorbis_SOURCE_DIR}"
+        BUILD_IN_SOURCE     TRUE
+        CONFIGURE_COMMAND   ${CONFIGURE_COMMAND}
+        BUILD_COMMAND       ""
+        INSTALL_COMMAND     ""
+        UPDATE_COMMAND      ""
+        TEST_COMMAND        ""
+    )
+
+#    SET(_Theora_DIR "${CMAKE_BINARY_DIR}/Theora")
+#    SET(_Theora_SOURCE_DIR "${CMAKE_BINARY_DIR}/Theora_src")
+#
+#    SET(CONFIGURE_COMMAND "")
+#    SET(BUILD_COMMAND "")
+#    IF(MSVC)
+#        SET(BUILD_COMMAND ${CMAKE_VS_MSBUILD_COMMAND} win32/VS2010/libtheora/libtheora_dynamic.vcxproj /p:OutputPath=${_Theora_DIR})
+#    ELSE()
+#        SET(CONFIGURE_COMMAND ./autogen.sh && ./configure --with-ogg=${_Ogg_DIR} --prefix=${_Theora_DIR} && ${CMAKE_MAKE_PROGRAM} install -l )
+#    ENDIF()
+#
+#    MESSAGE("${CONFIGURE_COMMAND}")
+#
+#    ExternalProject_Add(
+#        ThirdParty_Theora
+#        GIT_REPOSITORY      "https://github.com/xiph/theora.git"
+#        GIT_TAG             "v1.2.0alpha1"
+#        GIT_SHALLOW         TRUE
+#        SOURCE_DIR          "${_Theora_SOURCE_DIR}"
+#        BUILD_IN_SOURCE     TRUE
+#        CONFIGURE_COMMAND   ${CONFIGURE_COMMAND}
+#        BUILD_COMMAND       ""
+#        INSTALL_COMMAND     ""
+#        UPDATE_COMMAND      ""
+#        TEST_COMMAND        ""
+#    )
 ENDIF()

@@ -58,6 +58,8 @@ public:
 
     void SetForward(const glm::vec3& forward);
 
+    glm::vec3 GetForward() const;
+
     void SetLookAt(const glm::vec3& point);
 
     virtual void Update(UpdateContext& ctx) override;

@@ -15,8 +15,7 @@ Camera::Camera()
 glm::mat4 Camera::GetView() const
 {
     if (_mode == Mode::Perspective) {
-        glm::vec3 forward = glm::rotate(GetWorldRotation(), glm::vec3(0.f, 0.f, -1.f));
-        return glm::lookAt(GetWorldPosition(), GetWorldPosition() + forward, _up);
+        return glm::lookAt(GetWorldPosition(), GetWorldPosition() + GetForward(), _up);
     }
     else if (_mode == Mode::Orthographic) {
         return glm::mat4(1.f);
@@ -69,6 +68,11 @@ void Camera::SetClip(const glm::vec2& clip)
 void Camera::SetForward(const glm::vec3& forward)
 {
     SetRotation(glm::quatLookAt(glm::normalize(forward), _up));
+}
+
+glm::vec3 Camera::GetForward() const
+{
+    return glm::rotate(GetWorldRotation(), glm::vec3(0.f, 0.f, -1.f));
 }
 
 void Camera::SetLookAt(const glm::vec3& point)

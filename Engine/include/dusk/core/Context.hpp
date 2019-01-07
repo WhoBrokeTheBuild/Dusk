@@ -2,6 +2,7 @@
 #define DUSK_CONTEXT_HPP
 
 #include <dusk/Config.hpp>
+#include <dusk/core/OpenGL.hpp>
 
 namespace dusk
 {
@@ -25,6 +26,8 @@ struct UpdateContext
 
 struct RenderContext
 {
+    int NumPasses = 2;
+    
     int CurrentPass = 0;
 
     Camera * CurrentCamera = nullptr;

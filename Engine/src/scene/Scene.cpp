@@ -4,6 +4,7 @@
 #include <dusk/core/Benchmark.hpp>
 #include <dusk/core/Log.hpp>
 #include <dusk/core/Util.hpp>
+#include <dusk/scene/Axis.hpp>
 #include <dusk/scene/Camera.hpp>
 #include <dusk/scene/MeshComponent.hpp>
 #include <dusk/asset/Mesh.hpp>
@@ -333,10 +334,11 @@ bool Scene::LoadFromFile(const std::string& filename)
                         materials[(primitive.material < 0 ? 0 : primitive.material)],
                     });
                 }
-
-                MeshComponent * comp = new MeshComponent();
+                
+                auto comp = std::make_unique<MeshComponent>();
                 comp->AddMesh(std::make_shared<Mesh>(primitives));
-                actor->AddComponent(std::unique_ptr<MeshComponent>(comp));
+                actor->AddComponent(std::make_unique<Axis>());
+                actor->AddComponent(std::move(comp));
             }
         }
 

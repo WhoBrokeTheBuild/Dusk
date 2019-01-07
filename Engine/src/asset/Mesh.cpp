@@ -12,12 +12,17 @@
 
 namespace dusk {
 
-Mesh::Mesh(const std::string& filename)
+Mesh::Mesh(const std::string& filename, std::unique_ptr<Shader>&& shader /*= nullptr*/)
 {
-    LoadFromFile(filename);
+    LoadFromFile(filename, std::move(shader));
 }
 
-Mesh::Mesh(std::vector<Primitive> primitives)
+Mesh::Mesh(Primitive p, std::unique_ptr<Shader>&& shader /*= nullptr*/)
+{
+    LoadFromData({ p }, std::move(shader));
+}
+
+Mesh::Mesh(std::vector<Primitive> primitives, std::unique_ptr<Shader>&& shader /*= nullptr*/)
 {
     LoadFromData(primitives);
 }
@@ -29,7 +34,7 @@ Mesh::~Mesh()
     }
 }
 
-bool Mesh::LoadFromFile(const std::string& filename)
+bool Mesh::LoadFromFile(const std::string& filename, std::unique_ptr<Shader>&& shader /*= nullptr*/)
 {
     DuskBenchStart();
     using namespace tinygltf;
@@ -68,10 +73,14 @@ bool Mesh::LoadFromFile(const std::string& filename)
         return false;
     }
 
-    _shader.reset(new Shader({ 
-        "shaders/default/default.vs.glsl", 
-        "shaders/default/default.fs.glsl",
-    }));
+    if (shader) {
+        _shader = std::move(shader);
+    } else {
+        _shader.reset(new Shader({ 
+            "shaders/default/default.vs.glsl", 
+            "shaders/default/default.fs.glsl",
+        }));
+    }
 
     DuskLogLoad("Loading Mesh from %s", fullPath);
     DuskLogVerbose("Model Generator %s", model.asset.generator);
@@ -313,12 +322,16 @@ bool Mesh::LoadFromFile(const std::string& filename)
     return _loaded;
 }
 
-bool Mesh::LoadFromData(std::vector<Primitive> primitives)
+bool Mesh::LoadFromData(std::vector<Primitive> primitives, std::unique_ptr<Shader>&& shader /*= nullptr*/)
 {
-    _shader.reset(new Shader({ 
-        "shaders/default/default.vs.glsl", 
-        "shaders/default/default.fs.glsl",
-    }));
+    if (shader) {
+        _shader = std::move(shader);
+    } else {
+        _shader.reset(new Shader({ 
+            "shaders/default/default.vs.glsl", 
+            "shaders/default/default.fs.glsl",
+        }));
+    }
 
     _primitives.insert(_primitives.end(), primitives.begin(), primitives.end());
     
@@ -333,6 +346,10 @@ void Mesh::SetShader(std::unique_ptr<Shader>&& shader)
 
 void Mesh::Render(RenderContext& ctx, glm::mat4 transform /*= glm::mat4(1.f)*/)
 {
+    if (!_shader || !ctx.CurrentCamera) {
+        return;
+    }
+
     _shader->Bind();
 
     glm::mat4 model = transform;

@@ -15,8 +15,6 @@ public:
 
     ActorComponent() = default;
 
-    ActorComponent(Actor * actor);
-
     virtual ~ActorComponent() = default;
 
     void SetActor(Actor * actor);

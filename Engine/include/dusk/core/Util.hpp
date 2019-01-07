@@ -2,6 +2,8 @@
 #define DUSK_UTIL_HPP
 
 #include <dusk/Config.hpp>
+#include <dusk/core/Math.hpp>
+#include <dusk/core/OpenGL.hpp>
 
 #include <string>
 #include <vector>

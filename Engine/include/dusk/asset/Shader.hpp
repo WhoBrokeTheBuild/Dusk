@@ -2,6 +2,8 @@
 #define DUSK_SHADER_HPP
 
 #include <dusk/Config.hpp>
+#include <dusk/core/Math.hpp>
+#include <dusk/core/OpenGL.hpp>
 
 #include <initializer_list>
 #include <memory>
@@ -10,9 +12,6 @@
 #include <vector>
 
 namespace dusk {
-
-class Shader;
-typedef std::unique_ptr<Shader> ShaderPtr;
 
 class Shader
 {

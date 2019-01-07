@@ -84,11 +84,14 @@ void App::Start()
             frameElap = 0ms;
             ++frames;
 
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT);
 
-            _renderContext.CurrentPass = 0;
-
-            Render();
+            for (int pass = 0; pass < _renderContext.NumPasses; ++pass) {
+                _renderContext.CurrentPass = pass;
+                
+                glClear(GL_DEPTH_BUFFER_BIT);
+                Render();
+            }
 
             SDL_GL_SwapWindow(_sdlWindow);
         }
@@ -327,6 +330,9 @@ void App::DestroyWindow()
     _sdlWindow = nullptr;
 
     SDL_Quit();
+
+    alcDestroyContext(_alContext);
+    alcCloseDevice(_alDevice);
 }
 
 Scene * App::AddScene(std::unique_ptr<Scene>&& scene)

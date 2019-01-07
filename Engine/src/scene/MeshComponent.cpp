@@ -4,10 +4,6 @@
 
 namespace dusk {
 
-MeshComponent::MeshComponent(Actor * actor) 
-    : ActorComponent(actor)
-{ }
-
 void MeshComponent::AddMesh(std::shared_ptr<Mesh> mesh)
 {
     _meshes.push_back(std::move(mesh));
@@ -15,6 +11,10 @@ void MeshComponent::AddMesh(std::shared_ptr<Mesh> mesh)
 
 void MeshComponent::Render(RenderContext& ctx) 
 {
+    if (ctx.CurrentPass != 0) {
+        return;
+    }
+
     if (!GetActor()) {
         return;
     }

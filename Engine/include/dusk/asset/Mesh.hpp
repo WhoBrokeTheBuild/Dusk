@@ -5,6 +5,7 @@
 #include <dusk/asset/Material.hpp>
 #include <dusk/asset/Shader.hpp>
 #include <dusk/core/Context.hpp>
+#include <dusk/core/Math.hpp>
 #include <dusk/core/Util.hpp>
 #include <dusk/scene/ActorComponent.hpp>
 
@@ -48,15 +49,17 @@ public:
 
     Mesh() = default;
 
-    Mesh(std::vector<Primitive> primitives);
+    Mesh(Primitive p, std::unique_ptr<Shader>&& shader = nullptr);
 
-    Mesh(const std::string& filename);
+    Mesh(std::vector<Primitive> primitives, std::unique_ptr<Shader>&& shader = nullptr);
+
+    Mesh(const std::string& filename, std::unique_ptr<Shader>&& shader = nullptr);
 
     virtual ~Mesh();
 
-    bool LoadFromFile(const std::string& filename);
+    bool LoadFromFile(const std::string& filename, std::unique_ptr<Shader>&& shader = nullptr);
 
-    bool LoadFromData(std::vector<Primitive> primitives);
+    bool LoadFromData(std::vector<Primitive> primitives, std::unique_ptr<Shader>&& shader = nullptr);
 
     std::string GetFilename() const { 
         return _filename;

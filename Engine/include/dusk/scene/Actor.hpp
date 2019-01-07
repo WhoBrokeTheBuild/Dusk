@@ -5,6 +5,7 @@
 
 #include <dusk/core/Context.hpp>
 #include <dusk/core/Log.hpp>
+#include <dusk/core/Math.hpp>
 #include <dusk/scene/ActorComponent.hpp>
 
 #include <memory>

@@ -2,6 +2,7 @@
 #define DUSK_DEBUG_HPP
 
 #include <dusk/Config.hpp>
+#include <dusk/core/Math.hpp>
 #include <dusk/core/Util.hpp>
 
 #include <cstdio> // for printf, vsnprintf

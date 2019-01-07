@@ -84,7 +84,6 @@ bool Scene::LoadFromFile(const std::string& filename)
 
         it = vals.find("baseColorFactor");
         if (it != vals.end() && !it->second.number_array.empty()) {
-            const auto& c = it->second.ColorFactor();
             mat->BaseColorFactor = glm::make_vec4(it->second.ColorFactor().data());
         }
         
@@ -336,7 +335,7 @@ bool Scene::LoadFromFile(const std::string& filename)
                 }
                 
                 auto comp = std::make_unique<MeshComponent>();
-                comp->AddMesh(std::make_shared<Mesh>(primitives));
+                comp->AddMesh(std::make_unique<Mesh>(primitives));
                 actor->AddComponent(std::make_unique<Axis>());
                 actor->AddComponent(std::move(comp));
             }
@@ -372,8 +371,6 @@ bool Scene::LoadFromFile(const std::string& filename)
     }
 
     App::Inst()->GetRenderContext().CurrentCamera = defaultCamera;
-
-    //Print();
 
     DuskBenchEnd("Scene::LoadFromFile");
     return true;

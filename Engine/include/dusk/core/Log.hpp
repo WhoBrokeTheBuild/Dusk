@@ -148,7 +148,12 @@ namespace dusk {
 
         #endif
 
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Wformat-security"
+        
         printf(format, LogWrap(args)...);
+
+        #pragma clang diagnostic pop
 
         #if defined(WIN32)
         

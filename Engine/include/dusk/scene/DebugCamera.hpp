@@ -16,7 +16,7 @@ public:
 
 private:
 
-    float _moveSpeed = 1.f;
+    float _moveSpeed = 0.8f;
 
     float _zoomSpeed = 0.1f;
 

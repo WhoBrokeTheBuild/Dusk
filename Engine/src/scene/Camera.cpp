@@ -9,20 +9,13 @@ Camera::Camera()
 { 
     const glm::ivec2& size = App::Inst()->GetWindowSize();
     SetAspect(size);
-    SetViewport(0.f, size.x, size.y, 0.f);
+    SetViewport(0.f, (float)size.x, (float)size.y, 0.f);
 }
 
 glm::mat4 Camera::GetView() const
 {
     if (_mode == Mode::Perspective) {
-        glm::vec3 position = _position;
-        glm::quat rotation = _rotation;
-        if (GetActor()) {
-            position = glm::vec3(GetActor()->GetTransform() * glm::vec4(position, 1.f));
-            rotation = GetActor()->GetTotalRotation() * rotation;
-        }
-        glm::vec3 forward = glm::rotate(rotation, glm::vec3(0.f, 0.f, -1.f));
-        return glm::lookAt(position, position + forward, _up);
+        return glm::lookAt(GetWorldPosition(), GetWorldPosition() + GetForward(), _up);
     }
     else if (_mode == Mode::Orthographic) {
         return glm::mat4(1.f);
@@ -72,24 +65,33 @@ void Camera::SetClip(const glm::vec2& clip)
     _clip = clip;
 }
 
-void Camera::SetPosition(const glm::vec3& pos)
+void Camera::SetUp(const glm::vec3& up)
 {
-    _position = pos;
-}
-
-void Camera::SetRotation(const glm::quat& rot)
-{
-    _rotation = rot;
+    _up = up;
 }
 
 void Camera::SetForward(const glm::vec3& forward)
 {
-    _rotation = glm::quatLookAt(glm::normalize(forward), _up);
+    SetRotation(glm::quatLookAt(glm::normalize(forward), _up));
+}
+
+glm::vec3 Camera::GetForward() const
+{
+    return glm::rotate(GetWorldRotation(), glm::vec3(0.f, 0.f, -1.f));
 }
 
 void Camera::SetLookAt(const glm::vec3& point)
 {
     SetForward(point - GetPosition());
+}
+
+void Camera::HandleEvent(SDL_Event * evt)
+{
+    if (evt->type == SDL_WINDOWEVENT) {
+        if (evt->window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+            SetAspect(glm::vec2(evt->window.data1, evt->window.data2));
+        }
+    }
 }
 
 void Camera::Update(UpdateContext& ctx)
@@ -99,13 +101,11 @@ void Camera::Update(UpdateContext& ctx)
 
 void Camera::Print(std::string indent)
 {
-    ActorComponent::Print(indent);
+    Actor::Print(indent);
     DuskLog("%s _mode = %s", indent, (_mode == Mode::Perspective ? "Perspective" : "Orthographic"));
     DuskLog("%s _fov = %f", indent, _fov);
     DuskLog("%s _aspect = %f", indent, _aspect);
     DuskLog("%s _clip = %s", indent, glm::to_string(_clip));
-    DuskLog("%s _position = %s", indent, glm::to_string(_position));
-    DuskLog("%s _rotation = %s", indent, glm::to_string(_rotation));
     DuskLog("%s _up = %s", indent, glm::to_string(_up));
     DuskLog("%s _viewport = %s", indent, glm::to_string(_viewport));
 }

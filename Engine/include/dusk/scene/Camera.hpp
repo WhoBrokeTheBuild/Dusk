@@ -2,13 +2,14 @@
 #define DUSK_CAMERA_HPP
 
 #include <dusk/Config.hpp>
-#include <dusk/scene/ActorComponent.hpp>
+#include <dusk/core/Math.hpp>
+#include <dusk/scene/Actor.hpp>
 
 #include <memory>
 
 namespace dusk {
 
-class Camera : public ActorComponent
+class Camera : public Actor
 {
 public:
 
@@ -26,6 +27,10 @@ public:
     virtual ~Camera() = default;
 
     /// Methods
+
+    glm::vec3 GetWorldUp() const {
+        return glm::vec3(0.f, 1.f, 0.f);
+    }
 
     glm::mat4 GetView() const;
 
@@ -55,21 +60,23 @@ public:
         return _clip;
     }
 
-    void SetPosition(const glm::vec3& pos);
+    void SetUp(const glm::vec3& up);
 
-    inline glm::vec3 GetPosition() const {
-        return _position;
+    glm::vec3 GetUp() const {
+        return _up;
     }
 
-    void SetRotation(const glm::quat& rot);
-
-    inline glm::quat GetRotation() const {
-        return _rotation;
+    glm::vec3 GetRight() const {
+        return glm::normalize(glm::cross(GetForward(), GetUp()));
     }
 
     void SetForward(const glm::vec3& forward);
 
+    glm::vec3 GetForward() const;
+
     void SetLookAt(const glm::vec3& point);
+
+    virtual void HandleEvent(SDL_Event * evt) override;
 
     virtual void Update(UpdateContext& ctx) override;
 
@@ -79,11 +86,7 @@ private:
 
     Mode _mode = Mode::Perspective;
 
-    glm::vec2 _clip = glm::vec2(0.00001f, 10000.f);
-
-    glm::vec3 _position = glm::vec3(0.f);
-
-    glm::quat _rotation = glm::quat(1.f, 0.f, 0.f, 0.f);
+    glm::vec2 _clip = glm::vec2(0.1f, 10000.f);
 
     glm::vec3 _up = glm::vec3(0.f, 1.f, 0.f);
 

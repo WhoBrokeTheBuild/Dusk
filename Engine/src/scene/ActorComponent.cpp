@@ -4,10 +4,6 @@
 
 namespace dusk {
 
-ActorComponent::ActorComponent(Actor * actor)
-    : _actor(actor)
-{ }
-
 void ActorComponent::SetActor(Actor * actor)
 {
     _actor = actor;

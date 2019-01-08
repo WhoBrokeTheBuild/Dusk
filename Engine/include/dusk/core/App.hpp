@@ -2,9 +2,11 @@
 #define DUSK_APP_HPP
 
 #include <dusk/Config.hpp>
-#include <dusk/asset/Shader.hpp>
 #include <dusk/core/Context.hpp>
-#include <dusk/core/ScriptHost.hpp>
+#include <dusk/core/Math.hpp>
+#include <dusk/core/OpenAL.hpp>
+#include <dusk/core/OpenGL.hpp>
+#include <dusk/core/Shader.hpp>
 #include <dusk/scene/Scene.hpp>
 
 #include <memory>
@@ -90,6 +92,10 @@ private:
     std::string _windowTitle = "Dusk";
 
     float _targetFps = 60.0f;
+
+    ALCdevice * _alDevice = nullptr;
+    
+    ALCcontext * _alContext = nullptr;
 
     SDL_Window * _sdlWindow = nullptr;
 

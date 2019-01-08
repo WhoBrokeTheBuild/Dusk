@@ -25,18 +25,25 @@ void Actor::SetPosition(const glm::vec3& pos)
     _position = pos;
 }
 
+glm::vec3 Actor::GetWorldPosition() const
+{
+    if (GetParent()) {
+        return GetParent()->GetWorldPosition() + GetPosition();
+    }
+    return GetPosition();
+}
+
 void Actor::SetRotation(const glm::quat& rot)
 {
     _rotation = rot;
 }
 
-glm::quat Actor::GetTotalRotation() const
+glm::quat Actor::GetWorldRotation() const
 {
-    glm::quat rotation = _rotation;
     if (GetParent()) {
-        rotation = GetParent()->GetRotation() * rotation;
+        return GetParent()->GetWorldRotation() * GetRotation();
     }
-    return rotation;
+    return GetRotation();
 }
 
 void Actor::SetScale(const glm::vec3& scale)
@@ -44,18 +51,29 @@ void Actor::SetScale(const glm::vec3& scale)
     _scale = scale;
 }
 
-glm::mat4 Actor::GetTransform()
-{
-    _transform = glm::mat4(1.0f);
+glm::vec3 Actor::GetWorldScale() const {
     if (GetParent()) {
-        _transform = GetParent()->GetTransform();
+        return GetParent()->GetWorldScale() * GetScale();
     }
+    return GetScale();
+}
 
-    _transform = glm::translate(_transform, _position);
-    _transform *= glm::mat4_cast(_rotation);
-    _transform = glm::scale(_transform, _scale);
+glm::mat4 Actor::GetTransform() const
+{
+    glm::mat4 transform = glm::mat4(1.0f);
+    transform = glm::translate(transform, _position);
+    transform *= glm::mat4_cast(_rotation);
+    transform = glm::scale(transform, _scale);
 
-    return _transform;
+    return transform;
+}
+
+glm::mat4 Actor::GetWorldTransform() const
+{
+    if (GetParent()) {
+        return GetParent()->GetWorldTransform() * GetTransform();
+    }
+    return GetTransform();
 }
 
 void Actor::AddComponent(std::unique_ptr<ActorComponent>&& comp) 

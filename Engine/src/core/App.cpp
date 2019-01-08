@@ -42,6 +42,7 @@ void App::Start()
 {
     using namespace std::chrono;
     typedef duration<double, std::milli> double_ms;
+    typedef duration<float, std::milli> float_ms;
 
     SDL_ShowWindow(_sdlWindow);
 
@@ -71,7 +72,7 @@ void App::Start()
             HandleEvent(&evt);
         }
 
-        _updateContext.DeltaTime = duration_cast<double_ms>(elapsedTime / frameDelay.count()).count();
+        _updateContext.DeltaTime = duration_cast<float_ms>(elapsedTime / frameDelay.count()).count();
         _updateContext.ElapsedTime = elapsedTime.count();
         _updateContext.TotalTime += elapsedTime.count();
 
@@ -83,11 +84,14 @@ void App::Start()
             frameElap = 0ms;
             ++frames;
 
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT);
 
-            _renderContext.CurrentPass = 0;
-
-            Render();
+            for (int pass = 0; pass < _renderContext.NumPasses; ++pass) {
+                _renderContext.CurrentPass = pass;
+                
+                glClear(GL_DEPTH_BUFFER_BIT);
+                Render();
+            }
 
             SDL_GL_SwapWindow(_sdlWindow);
         }
@@ -95,7 +99,7 @@ void App::Start()
         fpsElap += elapsedTime;
         if (fpsDelay <= fpsElap)
         {
-            _updateContext.CurrentFPS = (frames / fpsElap.count()) * 1000.0;
+            _updateContext.CurrentFPS = (float)(frames / fpsElap.count()) * 1000.f;
 
             static char buffer[128];
             sprintf(buffer, "%s - %0.2f", _windowTitle.c_str(), _updateContext.CurrentFPS);
@@ -182,27 +186,8 @@ void App::HandleEvent(SDL_Event * evt)
     case SDL_QUIT:
         _running = false;
         break;
-    case SDL_KEYDOWN:
-
-        break;
-    case SDL_KEYUP:
-
-        break;
-    case SDL_MOUSEMOTION:
-
-        break;
-    case SDL_MOUSEBUTTONDOWN:
-
-        break;
-    case SDL_MOUSEBUTTONUP:
-
-        break;
-    case SDL_MOUSEWHEEL:
-
-        break;
     case SDL_WINDOWEVENT:
-        if (evt->window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
-        {
+        if (evt->window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
             glViewport(0, 0, evt->window.data1, evt->window.data2);
         }
         break;
@@ -216,6 +201,14 @@ void App::HandleEvent(SDL_Event * evt)
 void App::CreateWindow()
 {
     DuskBenchStart();
+
+    _alDevice = alcOpenDevice(NULL);
+    _alContext = alcCreateContext(_alDevice, NULL);
+    alcMakeContextCurrent(_alContext);
+
+    DuskLogInfo("OpenAL Version %s", alGetString(AL_VERSION));
+    DuskLogInfo("OpenAL Vendor %s", alGetString(AL_VENDOR));
+    DuskLogInfo("OpenAL Renderer %s", alGetString(AL_RENDERER));
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
@@ -318,6 +311,9 @@ void App::DestroyWindow()
     _sdlWindow = nullptr;
 
     SDL_Quit();
+
+    alcDestroyContext(_alContext);
+    alcCloseDevice(_alDevice);
 }
 
 Scene * App::AddScene(std::unique_ptr<Scene>&& scene)

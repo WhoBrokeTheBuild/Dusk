@@ -4,21 +4,17 @@
 #include <dusk/core/Context.hpp>
 
 #include <memory>
+#include <string>
 
 namespace dusk {
 
 class Actor;
-
-class ActorComponent;
-typedef std::unique_ptr<ActorComponent> ActorComponentPtr;
 
 class ActorComponent
 {
 public:
 
     ActorComponent() = default;
-
-    ActorComponent(Actor * actor);
 
     virtual ~ActorComponent() = default;
 

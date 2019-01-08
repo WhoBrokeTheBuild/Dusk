@@ -2,9 +2,11 @@
 #define DUSK_MESH_HPP
 
 #include <dusk/Config.hpp>
+#include <dusk/asset/ILoadable.hpp>
 #include <dusk/asset/Material.hpp>
-#include <dusk/asset/Shader.hpp>
 #include <dusk/core/Context.hpp>
+#include <dusk/core/Math.hpp>
+#include <dusk/core/Shader.hpp>
 #include <dusk/core/Util.hpp>
 #include <dusk/scene/ActorComponent.hpp>
 
@@ -16,7 +18,7 @@
 
 namespace dusk {
 
-class Mesh : public ActorComponent
+class Mesh : public ILoadable
 {
 public:
 
@@ -25,8 +27,9 @@ public:
         POSITION    = 0,
         NORMAL      = 1,
         TEXCOORD    = 2,
-        TANGENT     = 3,
-        BITANGENT   = 4,
+        COLOR       = 3,
+        TANGENT     = 4,
+        BITANGENT   = 5,
     };
 
     struct Primitive 
@@ -37,7 +40,8 @@ public:
         GLenum      Type;
         GLsizei     Offset;
         Box         Bounds;
-        std::shared_ptr<Material> Material;
+        
+        std::shared_ptr<Material> Mat;
     };
 
     /// Class Boilerplate
@@ -46,35 +50,35 @@ public:
 
     Mesh() = default;
 
-    Mesh(std::vector<Primitive> primitives);
+    Mesh(Primitive p, std::unique_ptr<Shader>&& shader = nullptr);
 
-    Mesh(const std::string& filename);
+    Mesh(std::vector<Primitive> primitives, std::unique_ptr<Shader>&& shader = nullptr);
+
+    Mesh(const std::string& filename, std::unique_ptr<Shader>&& shader = nullptr);
 
     virtual ~Mesh();
 
-    bool LoadFromFile(const std::string& filename);
+    bool LoadFromFile(const std::string& filename, std::unique_ptr<Shader>&& shader = nullptr);
 
-    bool LoadFromData(std::vector<Primitive> primitives);
+    bool LoadFromData(std::vector<Primitive> primitives, std::unique_ptr<Shader>&& shader = nullptr);
 
-    std::string GetFilename() { 
+    std::string GetFilename() const { 
         return _filename;
     }
 
-    bool IsLoaded() const { 
-        return _loaded; 
+    void SetShader(std::unique_ptr<Shader>&& shader);
+
+    Shader * GetShader() const {
+        return _shader.get();
     }
 
     Box GetBounds() const { 
         return _bounds; 
     }
 
-    virtual void Render(RenderContext& ctx) override;
-
-    virtual void Print(std::string indent) override;
+    virtual void Render(RenderContext& ctx, glm::mat4 transform = glm::mat4(1.f));
 
 private:
-
-    bool _loaded = false;
 
     std::string _filename;
 

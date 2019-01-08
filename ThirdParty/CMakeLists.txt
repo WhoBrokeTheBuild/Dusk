@@ -69,3 +69,151 @@ IF(NOT SDL2_FOUND)
         TEST_COMMAND        ""
     )
 ENDIF()
+
+# OpenAL
+
+FIND_PACKAGE(OpenAL QUIET)
+
+IF(NOT OpenAL_FOUND)
+    SET(_OpenAL_DIR "${CMAKE_BINARY_DIR}/OpenAL")
+    SET(_OpenAL_SOURCE_DIR "${CMAKE_BINARY_DIR}/OpenAL_src")
+    SET(_OpenAL_BINARY_DIR "${CMAKE_BINARY_DIR}/OpenAL_bin")
+
+    ExternalProject_Add(
+        ThirdParty_OpenAL
+        GIT_REPOSITORY      "https://github.com/kcat/openal-soft.git"
+        GIT_TAG             "v1.19"
+        GIT_SHALLOW         TRUE
+        SOURCE_DIR          "${_OpenAL_SOURCE_DIR}"
+        BINARY_DIR          "${_OpenAL_BINARY_DIR}"
+        CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${_OpenAL_DIR}
+                            -DALSOFT_UTILS=OFF
+                            -DALSOFT_EXAMPLES=OFF
+                            -DALSOFT_TESTS=OFF
+        BUILD_COMMAND       ""
+        INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
+        UPDATE_COMMAND      ""
+        TEST_COMMAND        ""
+    )
+ENDIF()
+
+# Ogg, Vorbis, Theora
+
+FIND_PACKAGE(Ogg QUIET)
+
+IF(NOT Ogg_FOUND OR NOT Vorbis_FOUND OR NOT Theora_FOUND)
+    SET(_Ogg_DIR "${CMAKE_BINARY_DIR}/libogg")
+    SET(_Ogg_SOURCE_DIR "${CMAKE_BINARY_DIR}/libogg_src")
+
+    SET(_WITH_OGG --with-ogg=${_Ogg_DIR})
+
+    SET(CONFIGURE_COMMAND1 "")
+    SET(CONFIGURE_COMMAND2 "")
+    SET(CONFIGURE_COMMAND3 "")
+    SET(CONFIGURE_COMMAND4 "")
+    IF(MSVC) 
+        SET(SOLUTION win32/VS2015/libogg_static.sln)
+        SET(CONFIGURE_COMMAND1 ${CMAKE_VS_DEVENV_COMMAND} ${SOLUTION} /Upgrade )
+        SET(CONFIGURE_COMMAND2 ${CMAKE_VS_MSBUILD_COMMAND} ${SOLUTION} /t:libogg_static /clp:ErrorsOnly /p:OutDir=${_Ogg_DIR}/lib/ )
+        SET(CONFIGURE_COMMAND3 ${CMAKE_COMMAND} -E make_directory ${_Ogg_DIR}/include/ogg)
+        SET(CONFIGURE_COMMAND4 ${CMAKE_COMMAND} -E copy include/ogg/ogg.h include/ogg/os_types.h ${_Ogg_DIR}/include/ogg)
+    ELSE()
+        SET(CONFIGURE_COMMAND1 ./autogen.sh )
+        SET(CONFIGURE_COMMAND2 ./configure --prefix=${_Ogg_DIR} )
+        SET(CONFIGURE_COMMAND3 ${CMAKE_MAKE_PROGRAM} install -l )
+    ENDIF()
+
+    ExternalProject_Add(
+        ThirdParty_Ogg
+        GIT_REPOSITORY      "https://github.com/xiph/ogg.git"
+        GIT_TAG             "v1.3.3"
+        GIT_SHALLOW         TRUE
+        SOURCE_DIR          "${_Ogg_SOURCE_DIR}"
+        BUILD_IN_SOURCE     TRUE
+        CONFIGURE_COMMAND   ${CONFIGURE_COMMAND1}
+        COMMAND             ${CONFIGURE_COMMAND2}
+        COMMAND             ${CONFIGURE_COMMAND3}
+        COMMAND             ${CONFIGURE_COMMAND4}
+        BUILD_COMMAND       ""
+        INSTALL_COMMAND     ""
+        UPDATE_COMMAND      ""
+        TEST_COMMAND        ""
+    )
+
+    SET(_Vorbis_DIR "${CMAKE_BINARY_DIR}/libvorbis")
+    SET(_Vorbis_SOURCE_DIR "${CMAKE_BINARY_DIR}/libvorbis_src")
+    
+    SET(_WITH_VORBIS --with-vorbis=${_Vorbis_DIR})
+
+    SET(CONFIGURE_COMMAND1 "")
+    SET(CONFIGURE_COMMAND2 "")
+    SET(CONFIGURE_COMMAND3 "")
+    SET(CONFIGURE_COMMAND4 "")
+    IF(MSVC) 
+        SET(SOLUTION win32/VS2010/vorbis_static.sln)
+        SET(CONFIGURE_COMMAND1 ${CMAKE_VS_DEVENV_COMMAND} ${SOLUTION} /Upgrade )
+        SET(CONFIGURE_COMMAND2 ${CMAKE_VS_MSBUILD_COMMAND} ${SOLUTION} /t:libvorbisfile /clp:ErrorsOnly /p:OutDir=${_Vorbis_DIR}/lib/ )
+        SET(CONFIGURE_COMMAND3 ${CMAKE_COMMAND} -E make_directory ${_Vorbis_DIR}/include/vorbis)
+        SET(CONFIGURE_COMMAND4 ${CMAKE_COMMAND} -E copy include/vorbis/codec.h include/vorbis/vorbisfile.h ${_Vorbis_DIR}/include/vorbis)
+    ELSE()
+        SET(CONFIGURE_COMMAND1 ./autogen.sh )
+        SET(CONFIGURE_COMMAND2 ./configure ${_WITH_OGG} --prefix=${_Vorbis_DIR} )
+        SET(CONFIGURE_COMMAND3 ${CMAKE_MAKE_PROGRAM} install -l )
+    ENDIF()
+
+    ExternalProject_Add(
+        ThirdParty_Vorbis
+        GIT_REPOSITORY      "https://github.com/xiph/vorbis.git"
+        GIT_TAG             "v1.3.6"
+        GIT_SHALLOW         TRUE
+        SOURCE_DIR          "${_Vorbis_SOURCE_DIR}"
+        BUILD_IN_SOURCE     TRUE
+        CONFIGURE_COMMAND   ${CONFIGURE_COMMAND1}
+        COMMAND             ${CONFIGURE_COMMAND2}
+        COMMAND             ${CONFIGURE_COMMAND3}
+        COMMAND             ${CONFIGURE_COMMAND4}
+        BUILD_COMMAND       ""
+        INSTALL_COMMAND     ""
+        UPDATE_COMMAND      ""
+        TEST_COMMAND        ""
+    )
+    
+    ADD_DEPENDENCIES(ThirdParty_Vorbis ThirdParty_Ogg)
+
+    SET(_Theora_DIR "${CMAKE_BINARY_DIR}/libtheora")
+    SET(_Theora_SOURCE_DIR "${CMAKE_BINARY_DIR}/libtheora_src")
+
+    SET(CONFIGURE_COMMAND1 "")
+    SET(CONFIGURE_COMMAND2 "")
+    SET(CONFIGURE_COMMAND3 "")
+    SET(CONFIGURE_COMMAND4 "")
+    IF(MSVC) 
+        SET(SOLUTION win32/VS2010/libtheora_static.sln)
+        SET(CONFIGURE_COMMAND1 ${CMAKE_VS_DEVENV_COMMAND} ${SOLUTION} /Upgrade )
+        SET(CONFIGURE_COMMAND2 ${CMAKE_VS_MSBUILD_COMMAND} ${SOLUTION} /t:libtheora_static /clp:ErrorsOnly /p:OutDir=${_Theora_DIR}/lib/ )
+        SET(CONFIGURE_COMMAND3 ${CMAKE_COMMAND} -E make_directory ${_Theora_DIR}/include/theora)
+        SET(CONFIGURE_COMMAND4 ${CMAKE_COMMAND} -E copy include/theora/codec.h include/theora/theora.h ${_Theora_DIR}/include/theora)
+    ELSE()
+        SET(CONFIGURE_COMMAND1 ./autogen.sh ${_WITH_OGG} ${_WITH_VORBIS} --prefix=${_Theora_DIR} )
+        SET(CONFIGURE_COMMAND2 ${CMAKE_MAKE_PROGRAM} install -l )
+    ENDIF()
+
+    ExternalProject_Add(
+        ThirdParty_Theora
+        GIT_REPOSITORY      "https://github.com/xiph/theora.git"
+        GIT_TAG             "v1.2.0alpha1"
+        GIT_SHALLOW         TRUE
+        SOURCE_DIR          "${_Theora_SOURCE_DIR}"
+        BUILD_IN_SOURCE     TRUE
+        CONFIGURE_COMMAND   ${CONFIGURE_COMMAND1}
+        COMMAND             ${CONFIGURE_COMMAND2}
+        COMMAND             ${CONFIGURE_COMMAND3}
+        COMMAND             ${CONFIGURE_COMMAND4}
+        BUILD_COMMAND       ""
+        INSTALL_COMMAND     ""
+        UPDATE_COMMAND      ""
+        TEST_COMMAND        ""
+    )
+    
+    ADD_DEPENDENCIES(ThirdParty_Theora ThirdParty_Ogg ThirdParty_Vorbis)
+ENDIF()

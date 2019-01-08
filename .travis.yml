@@ -10,7 +10,8 @@ git:
 
 matrix:
   include:
-    - os: linux
+    - name: "GCC Debug (ThirdParty)"
+      os: linux
       compiler: gcc
       addons:
         apt:
@@ -18,15 +19,17 @@ matrix:
           packages: [ 'g++-7', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
       env: CMAKE_BUILD_TYPE=DEBUG
 
-    - os: linux
+    - name: "GCC Release (System)"
+      os: linux
       compiler: gcc
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test', 'kalakris-cmake' ]
-          packages: [ 'g++-7', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
+          packages: [ 'g++-7', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev', 'libsdl2-dev', 'libopenal-dev', 'libogg-dev', 'libvorbis-dev', 'libtheora-dev' ]
       env: CMAKE_BUILD_TYPE=RELEASE
 
-    - os: linux
+    - name: "Clang Debug (ThirdParty)"
+      os: linux
       compiler: clang
       addons:
         apt:
@@ -34,12 +37,13 @@ matrix:
           packages: [ 'clang-6.0', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
       env: CMAKE_BUILD_TYPE=DEBUG
 
-    - os: linux
+    - name: "Clang Release (System)"
+      os: linux
       compiler: clang
       addons:
         apt:
           sources: [ 'llvm-toolchain-xenial-6.0', 'ubuntu-toolchain-r-test', 'kalakris-cmake' ]
-          packages: [ 'clang-6.0', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
+          packages: [ 'clang-6.0', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev', 'libsdl2-dev', 'libopenal-dev', 'libogg-dev', 'libvorbis-dev', 'libtheora-dev' ]
       env: CMAKE_BUILD_TYPE=RELEASE
 
 before_install:

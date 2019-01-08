@@ -25,14 +25,13 @@ Texture::Texture(GLuint&& id, glm::ivec2 size)
     _size = size;
     if (_glID >= 0) 
     {
-        _loaded = true;
+        SetLoaded(true);
         DuskLogLoad("Loaded from existing ID %u", _glID);
     }
 }
 
 Texture::Texture(Texture&& rhs)
 {
-    std::swap(_loaded, rhs._loaded);
     std::swap(_glID, rhs._glID);
 }
 
@@ -53,8 +52,7 @@ bool Texture::LoadFromFile(const std::string& filename, Options opts /*= Options
     uint8_t * texture = nullptr;
 
     std::string fullPath;
-    for (auto& p : paths) 
-    {
+    for (auto& p : paths) {
         fullPath = p + filename;
 
         DuskLogVerbose("Checking %s", fullPath);
@@ -63,36 +61,34 @@ bool Texture::LoadFromFile(const std::string& filename, Options opts /*= Options
         if (texture) break;
     }
 
-    if (!texture)
-    {
+    if (!texture) {
         DuskLogError("Failed to load texture '%s'", filename);
         return false;
     }
 
-    LoadFromBuffer(texture, _size, comp, opts);
+    bool loaded = LoadFromBuffer(texture, _size, comp, opts);
+    if (loaded) {
+        DuskLogLoad("Loaded Texture from '%s", fullPath);
+    }
 
     stbi_image_free(texture);
 
     DuskBenchEnd("Texture::LoadFromFile");
-    return _loaded;
+    return loaded;
 }
 
 bool Texture::LoadFromBuffer(const uint8_t * buffer, glm::ivec2 size, int comp /*= 4*/, Options opts /*= Options()*/)
 {
     DuskBenchStart();
 
-    _loaded = false;
-
-    if (_glID > 0)
-    {
+    if (_glID > 0) {
         glDeleteTextures(1, &_glID);
         _glID = 0;
     }
 
     glGenTextures(1, &_glID);
 
-    if (0 == _glID)
-    {
+    if (0 == _glID) {
         DuskLogError("Failed to create GL Texture");
         return false;
     }
@@ -133,16 +129,16 @@ bool Texture::LoadFromBuffer(const uint8_t * buffer, glm::ivec2 size, int comp /
 
     glTexImage2D(GL_TEXTURE_2D, 0, intfmt, size.x, size.y, 0, fmt, GL_UNSIGNED_BYTE, buffer);
 
-    if (opts.Mipmap)
-    {
+    if (opts.Mipmap) {
         glGenerateMipmap(GL_TEXTURE_2D);
     }
 
     glBindTexture(GL_TEXTURE_2D, 0);
-    _loaded = true;
+    
+    SetLoaded(true);
 
     DuskBenchEnd("Texture::LoadFromBuffer");
-    return _loaded;
+    return true;
 }
 
 void Texture::Bind()

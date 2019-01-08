@@ -2,13 +2,12 @@
 #define DUSK_DEBUG_HPP
 
 #include <dusk/Config.hpp>
+#include <dusk/core/Math.hpp>
 #include <dusk/core/Util.hpp>
 
 #include <cstdio> // for printf, vsnprintf
 
 namespace dusk {
-
-// clang-format off
 
     enum LogLevel {
         LOG_INFO,
@@ -26,6 +25,9 @@ namespace dusk {
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-function"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
 
     template <> 
     auto LogWrap<std::string>(const std::string& v) {
@@ -65,6 +67,8 @@ namespace dusk {
 */
     
 #pragma clang diagnostic pop
+
+#pragma GCC diagnostic pop
 
     template <class ...Args>
     static inline void Log(LogLevel level, const char * format, Args... args)
@@ -144,7 +148,17 @@ namespace dusk {
 
         #endif
 
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Wformat-security"
+
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wformat-security"
+        
         printf(format, LogWrap(args)...);
+
+        #pragma clang diagnostic pop
+
+        #pragma GCC diagnostic pop
 
         #if defined(WIN32)
         
@@ -183,8 +197,6 @@ namespace dusk {
 
 #define DuskLogLoad(M, ...) \
     do { dusk::Log(dusk::LogLevel::LOG_LOAD, "[LOAD](%s:%d) " M "\n", dusk::GetBasename(__FILE__).c_str(), __LINE__, ##__VA_ARGS__); } while (0)
-
-// clang-format on
 
 }
 

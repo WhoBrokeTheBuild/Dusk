@@ -3,6 +3,9 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-function"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+
 #define TINYGLTF_IMPLEMENTATION
 #define TINYGLTF_NO_STB_IMAGE_WRITE
 #include <tiny_gltf.h>
@@ -17,6 +20,8 @@
 #include <stb/stb_truetype.h>
 
 #pragma clang diagnostic pop
+
+#pragma GCC diagnostic pop
 
 namespace dusk {
 

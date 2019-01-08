@@ -2,16 +2,16 @@
 #define DUSK_TEXTURE_HPP
 
 #include <dusk/Config.hpp>
+#include <dusk/asset/ILoadable.hpp>
+#include <dusk/core/Math.hpp>
+#include <dusk/core/OpenGL.hpp>
 
 #include <string>
 #include <memory>
 
 namespace dusk {
 
-class Texture;
-typedef std::shared_ptr<Texture> TexturePtr;
-
-class Texture
+class Texture : public ILoadable
 {
 public:
 
@@ -58,10 +58,6 @@ public:
 
     void Bind();
 
-    bool IsLoaded() const { 
-        return _loaded; 
-    }
-
     GLuint GetGLID() const { 
         return _glID; 
     }
@@ -71,8 +67,6 @@ public:
     }
 
 private:
-
-    bool _loaded = false;
 
     GLuint _glID = 0;
 

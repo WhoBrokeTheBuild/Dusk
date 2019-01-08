@@ -5,6 +5,7 @@
 
 #include <dusk/core/Context.hpp>
 #include <dusk/core/Log.hpp>
+#include <dusk/core/Math.hpp>
 #include <dusk/scene/ActorComponent.hpp>
 
 #include <memory>
@@ -43,13 +44,15 @@ public:
         return _position;
     }
 
+    glm::vec3 GetWorldPosition() const;
+
     void SetRotation(const glm::quat& rot);
 
     inline glm::quat GetRotation() const {
         return _rotation;
     }
 
-    glm::quat GetTotalRotation() const;
+    glm::quat GetWorldRotation() const;
 
     void SetScale(const glm::vec3& scale);
 
@@ -57,9 +60,13 @@ public:
         return _scale; 
     }
 
-    glm::mat4 GetTransform();
+    glm::vec3 GetWorldScale() const;
 
-    virtual void AddComponent(ActorComponentPtr&& comp);
+    glm::mat4 GetTransform() const;
+
+    glm::mat4 GetWorldTransform() const;
+
+    virtual void AddComponent(std::unique_ptr<ActorComponent>&& comp);
 
     virtual void AddActor(std::unique_ptr<Actor>&& actor);
 
@@ -77,14 +84,15 @@ private:
 
     Actor * _parent = nullptr;
 
-    glm::mat4 _transform    = glm::mat4(1.0f);
-    glm::vec3 _position     = glm::vec3(0.0f);
-    glm::quat _rotation     = glm::quat(1.0f, 0.f, 0.f, 0.f);
-    glm::vec3 _scale        = glm::vec3(1.0f);
+    glm::vec3 _position = glm::vec3(0.0f);
 
-    std::vector<std::unique_ptr<ActorComponent>> _components = { };
+    glm::quat _rotation = glm::quat(1.0f, 0.f, 0.f, 0.f);
+    
+    glm::vec3 _scale = glm::vec3(1.0f);
 
-    std::vector<std::unique_ptr<Actor>> _actors = { };
+    std::vector<std::unique_ptr<ActorComponent>> _components;
+
+    std::vector<std::unique_ptr<Actor>> _actors;
 
 }; // class Actor
 

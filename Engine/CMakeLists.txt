@@ -13,6 +13,7 @@ FILE(GLOB_RECURSE
 FILE(GLOB_RECURSE 
     _ENGINE_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h"
 )
 
 FILE(GLOB_RECURSE 
@@ -63,8 +64,9 @@ TARGET_COMPILE_FEATURES(
 TARGET_COMPILE_OPTIONS(
     ${_ENGINE} 
     PRIVATE
-        $<$<CXX_COMPILER_ID:GNU>:-Wall>
-        $<$<CXX_COMPILER_ID:Clang>:-Wall>
+        $<$<CXX_COMPILER_ID:GNU>:-Wall -Wno-unknown-pragmas>
+        $<$<CXX_COMPILER_ID:Clang>:-Wall -Wno-unknown-pragmas>
+        $<$<CXX_COMPILER_ID:MSVC>:-wd4068>
 )
 
 TARGET_LINK_LIBRARIES(
@@ -72,7 +74,18 @@ TARGET_LINK_LIBRARIES(
     GLM::GLM
     JSON::JSON
     SDL2::SDL2
+    OpenAL::OpenAL
+    Ogg::Ogg
+    Ogg::Vorbis
+    Ogg::Theora
 )
+
+IF(MSVC)
+    SET_TARGET_PROPERTIES(
+        ${_ENGINE} PROPERTIES
+        LINK_FLAGS "/NODEFAULTLIB:LIBCMT /NODEFAULTLIB:MSVCRT" 
+    )
+ENDIF()
 
 FOREACH(file IN ITEMS ${_ENGINE_ASSETS})
     FILE(RELATIVE_PATH file_path ${CMAKE_SOURCE_DIR} ${file})
@@ -95,10 +108,3 @@ FOREACH(file IN ITEMS ${_ENGINE_CONFIG_OUT})
     SOURCE_GROUP(${file_path} FILES ${file})
 ENDFOREACH()
 
-
-IF(MSVC)
-    SET_TARGET_PROPERTIES(
-        ${_ENGINE} PROPERTIES
-        LINK_FLAGS "/NODEFAULTLIB:LIBCMT /NODEFAULTLIB:MSVCRT" 
-    )
-ENDIF()

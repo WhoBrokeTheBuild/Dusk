@@ -12,12 +12,17 @@
 
 namespace dusk {
 
-Mesh::Mesh(const std::string& filename)
+Mesh::Mesh(const std::string& filename, std::unique_ptr<Shader>&& shader /*= nullptr*/)
 {
-    LoadFromFile(filename);
+    LoadFromFile(filename, std::move(shader));
 }
 
-Mesh::Mesh(std::vector<Primitive> primitives)
+Mesh::Mesh(Primitive p, std::unique_ptr<Shader>&& shader /*= nullptr*/)
+{
+    LoadFromData({ p }, std::move(shader));
+}
+
+Mesh::Mesh(std::vector<Primitive> primitives, std::unique_ptr<Shader>&& shader /*= nullptr*/)
 {
     LoadFromData(primitives);
 }
@@ -29,7 +34,7 @@ Mesh::~Mesh()
     }
 }
 
-bool Mesh::LoadFromFile(const std::string& filename)
+bool Mesh::LoadFromFile(const std::string& filename, std::unique_ptr<Shader>&& shader /*= nullptr*/)
 {
     DuskBenchStart();
     using namespace tinygltf;
@@ -68,10 +73,14 @@ bool Mesh::LoadFromFile(const std::string& filename)
         return false;
     }
 
-    _shader.reset(new Shader({ 
-        "shaders/default/default.vs.glsl", 
-        "shaders/default/default.fs.glsl",
-    }));
+    if (shader) {
+        _shader = std::move(shader);
+    } else {
+        _shader.reset(new Shader({ 
+            "shaders/default/default.vs.glsl", 
+            "shaders/default/default.fs.glsl",
+        }));
+    }
 
     DuskLogLoad("Loading Mesh from %s", fullPath);
     DuskLogVerbose("Model Generator %s", model.asset.generator);
@@ -100,8 +109,7 @@ bool Mesh::LoadFromFile(const std::string& filename)
 
         it = vals.find("baseColorFactor");
         if (it != vals.end() && !it->second.number_array.empty()) {
-            const auto& c = it->second.ColorFactor();
-            mat->BaseColorFactor = glm::vec4(c[0], c[1], c[2], c[3]);
+            mat->BaseColorFactor = glm::make_vec4(it->second.ColorFactor().data());
         }
         
         it = vals.find("baseColorTexture");
@@ -127,13 +135,12 @@ bool Mesh::LoadFromFile(const std::string& filename)
         addIt = addVals.find("normalTexture");
         if (addIt != addVals.end()) {
             mat->NormalMap = textures[addIt->second.TextureIndex()];
-            mat->NormalScale = addIt->second.Factor();
+            mat->NormalScale = (float)addIt->second.Factor();
         }
 
         addIt = addVals.find("emissiveFactor");
         if (it != vals.end() && !it->second.number_array.empty()) {
-            const auto& c = it->second.ColorFactor();
-            mat->EmissiveFactor = glm::vec3(c[0], c[1], c[2]);
+            mat->EmissiveFactor = glm::make_vec3(it->second.ColorFactor().data());
         }
 
         addIt = addVals.find("emissiveTexture");
@@ -144,7 +151,7 @@ bool Mesh::LoadFromFile(const std::string& filename)
         addIt = addVals.find("occlusionTexture");
         if (addIt != addVals.end()) {
             mat->OcclusionMap = textures[addIt->second.TextureIndex()];
-            mat->OcclusionStrength = addIt->second.Factor();
+            mat->OcclusionStrength = (float)addIt->second.Factor();
         }
 
         for (const auto& val : material.values) {
@@ -201,8 +208,6 @@ bool Mesh::LoadFromFile(const std::string& filename)
                 auto& bufferView = model.bufferViews[accessor.bufferView];
                 auto& buffer = model.buffers[bufferView.buffer];
                 int byteStride = accessor.ByteStride(bufferView);
-
-				DuskLogVerbose("Attribute %s", attrib.first);
 
 				GLuint vbo;
 				glGenBuffers(1, &vbo);
@@ -311,33 +316,44 @@ bool Mesh::LoadFromFile(const std::string& filename)
 		glDeleteBuffers(1, &vbo);
 	}
 
-    _loaded = true;
+    SetLoaded(true);
+
     DuskBenchEnd("Mesh::LoadFromFile");
-    return false;
+    return true;
 }
 
-bool Mesh::LoadFromData(std::vector<Primitive> primitives)
+bool Mesh::LoadFromData(std::vector<Primitive> primitives, std::unique_ptr<Shader>&& shader /*= nullptr*/)
 {
-    _shader.reset(new Shader({ 
-        "shaders/default/default.vs.glsl", 
-        "shaders/default/default.fs.glsl",
-    }));
+    if (shader) {
+        _shader = std::move(shader);
+    } else {
+        _shader.reset(new Shader({ 
+            "shaders/default/default.vs.glsl", 
+            "shaders/default/default.fs.glsl",
+        }));
+    }
 
     _primitives.insert(_primitives.end(), primitives.begin(), primitives.end());
+    
+    SetLoaded(true);
     
     return true;
 }
 
-void Mesh::Render(RenderContext& ctx)
+void Mesh::SetShader(std::unique_ptr<Shader>&& shader)
 {
-    auto actor = GetActor();
-    if (!actor) {
+    _shader = std::move(shader);
+}
+
+void Mesh::Render(RenderContext& ctx, glm::mat4 transform /*= glm::mat4(1.f)*/)
+{
+    if (!_shader || !ctx.CurrentCamera) {
         return;
     }
 
     _shader->Bind();
 
-    glm::mat4 model = actor->GetTransform();
+    glm::mat4 model = transform;
     glm::mat4 view = ctx.CurrentCamera->GetView();
     glm::mat4 proj = ctx.CurrentCamera->GetProjection();
     glm::mat4 mvp = proj * view * model;
@@ -350,25 +366,19 @@ void Mesh::Render(RenderContext& ctx)
     _shader->SetUniformMatrix("u_MVPMatrix", mvp);
 
     _shader->SetUniform("u_Camera", ctx.CurrentCamera->GetPosition());
+    
+    // TODO:
     _shader->SetUniform("u_LightDirection", glm::vec3(0.0f));
 
     for (auto& p : _primitives) {
-        glBindVertexArray(p.VAO);
-
-        if (p.Material) {
-            p.Material->Bind(_shader.get());
+        if (p.Mat) {
+            p.Mat->Bind(_shader.get());
         }
 
+        glBindVertexArray(p.VAO);
         glDrawElements(p.Mode, p.Count, p.Type, (char*)0 + p.Offset);
-
         glBindVertexArray(0);
     }
-}
-
-void Mesh::Print(std::string indent)
-{
-    ActorComponent::Print(indent);
-    DuskLog("%s _primitives.size = %zu", indent, _primitives.size());
 }
 
 } // namespace dusk

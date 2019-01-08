@@ -10,26 +10,6 @@
                           DUSK_VERSION_PATCH)
 #define DUSK_VERSION "@PROJECT_VERSION@-@DUSK_REVISION@"
 
-#ifndef DUSK_MIN_OPENGL_VERSION_MAJOR
-#define DUSK_MIN_OPENGL_VERSION_MAJOR 4
-#endif
-
-#ifndef DUSK_MIN_OPENGL_VERSION_MINOR
-#define DUSK_MIN_OPENGL_VERSION_MINOR 1
-#endif
-
-#define WIN32_LEAN_AND_MEAN
-#include <glad/glad.h>
-#undef CreateWindow
-
-#include <SDL.h>
-
-#define GLM_ENABLE_EXPERIMENTAL
-#define GLM_FORCE_RIGHT_HANDED
-#define GLM_FORCE_RADIANS
-#include <glm/glm.hpp>
-#include <glm/ext.hpp>
-
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
     TypeName(const TypeName&) = delete;   \
     TypeName& operator=(const TypeName&) = delete;

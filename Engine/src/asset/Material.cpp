@@ -1,6 +1,5 @@
 #include "dusk/asset/Material.hpp"
 
-#include <dusk/asset/Shader.hpp>
 #include <dusk/core/App.hpp>
 #include <dusk/core/Log.hpp>
 

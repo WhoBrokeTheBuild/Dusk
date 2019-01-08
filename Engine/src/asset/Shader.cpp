@@ -1,4 +1,4 @@
-#include "dusk/asset/Shader.hpp"
+#include "dusk/core/Shader.hpp"
 
 #include <dusk/core/Benchmark.hpp>
 #include <dusk/core/Log.hpp>
@@ -50,7 +50,7 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
     GLint linked = GL_FALSE;
     std::vector<GLuint> shaders;
 
-    if (_loaded)
+    if (_glID != 0)
     {
         DuskLogWarn("Attempt to load an already loaded shader.");
         return false;
@@ -62,6 +62,8 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
         DuskLogError("Failed to create shader program.");
         return false;
     }
+
+    bool loaded = false;
 
 #if defined(DUSK_ENABLE_BINARY_SHADERS) && defined(GL_VERSION_4_1)
 
@@ -104,14 +106,14 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
         }
         else
         {
-            _loaded = true;
+            loaded = true;
             loadFromBinary = true;
         }
     }
 
 #endif // defined(DUSK_ENABLE_BINARY_SHADERS) && defined(GL_VERSION_4_1)
 
-    if (!_loaded)
+    if (!loaded)
     {
         for (const std::string& filename : filenames)
         {
@@ -140,14 +142,14 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
             }
             else
             {
-                _loaded = true;
+                loaded = true;
             }
         }
     }
 
 #if defined(DUSK_ENABLE_BINARY_SHADERS) && defined(GL_VERSION_4_1)
 
-    if (_loaded && !loadFromBinary)
+    if (loaded && !loadFromBinary)
     {
         GLint length = 0;
         glGetProgramiv(_glID, GL_PROGRAM_BINARY_LENGTH, &length);
@@ -185,7 +187,7 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
 
 #endif // defined(DUSK_ENABLE_BINARY_SHADERS) && defined(GL_VERSION_4_1)
 
-    if (_loaded)
+    if (loaded)
     {
         CacheUniforms();
         CacheAttributes();
@@ -197,7 +199,7 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
         glDeleteShader(shader);
     }
 
-    return _loaded;
+    return loaded;
 }
 
 void Shader::Bind()

@@ -2,10 +2,11 @@
 #define DUSK_SOUND_HPP
 
 #include <dusk/Config.hpp>
+#include <dusk/asset/ILoadable.hpp>
 
 namespace dusk {
 
-class Sound 
+class Sound : public ILoadable
 {
 public:
 

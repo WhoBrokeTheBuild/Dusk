@@ -2,15 +2,15 @@
 #define DUSK_MATERIAL_HPP
 
 #include <dusk/Config.hpp>
-#include <dusk/asset/Shader.hpp>
 #include <dusk/asset/Texture.hpp>
 #include <dusk/core/Math.hpp>
+#include <dusk/core/Shader.hpp>
 
 #include <memory>
 
 namespace dusk {
 
-class Material 
+class Material
 {
 public:
 

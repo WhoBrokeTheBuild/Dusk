@@ -2,11 +2,11 @@
 #define DUSK_APP_HPP
 
 #include <dusk/Config.hpp>
-#include <dusk/asset/Shader.hpp>
 #include <dusk/core/Context.hpp>
 #include <dusk/core/Math.hpp>
 #include <dusk/core/OpenAL.hpp>
 #include <dusk/core/OpenGL.hpp>
+#include <dusk/core/Shader.hpp>
 #include <dusk/scene/Scene.hpp>
 
 #include <memory>

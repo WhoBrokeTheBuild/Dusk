@@ -2,10 +2,11 @@
 #define DUSK_MESH_HPP
 
 #include <dusk/Config.hpp>
+#include <dusk/asset/ILoadable.hpp>
 #include <dusk/asset/Material.hpp>
-#include <dusk/asset/Shader.hpp>
 #include <dusk/core/Context.hpp>
 #include <dusk/core/Math.hpp>
+#include <dusk/core/Shader.hpp>
 #include <dusk/core/Util.hpp>
 #include <dusk/scene/ActorComponent.hpp>
 
@@ -17,7 +18,7 @@
 
 namespace dusk {
 
-class Mesh
+class Mesh : public ILoadable
 {
 public:
 
@@ -71,10 +72,6 @@ public:
         return _shader.get();
     }
 
-    bool IsLoaded() const { 
-        return _loaded; 
-    }
-
     Box GetBounds() const { 
         return _bounds; 
     }
@@ -82,8 +79,6 @@ public:
     virtual void Render(RenderContext& ctx, glm::mat4 transform = glm::mat4(1.f));
 
 private:
-
-    bool _loaded = false;
 
     std::string _filename;
 

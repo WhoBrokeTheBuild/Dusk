@@ -316,10 +316,10 @@ bool Mesh::LoadFromFile(const std::string& filename, std::unique_ptr<Shader>&& s
 		glDeleteBuffers(1, &vbo);
 	}
 
-    DuskBenchEnd("Mesh::LoadFromFile");
+    SetLoaded(true);
 
-    _loaded = true;
-    return _loaded;
+    DuskBenchEnd("Mesh::LoadFromFile");
+    return true;
 }
 
 bool Mesh::LoadFromData(std::vector<Primitive> primitives, std::unique_ptr<Shader>&& shader /*= nullptr*/)
@@ -335,7 +335,8 @@ bool Mesh::LoadFromData(std::vector<Primitive> primitives, std::unique_ptr<Shade
 
     _primitives.insert(_primitives.end(), primitives.begin(), primitives.end());
     
-    _loaded = true;
+    SetLoaded(true);
+    
     return true;
 }
 

@@ -66,13 +66,6 @@ public:
         return _filenames;
     }
 
-    /** Check if the shader has been successfully loaded.
-     * @return True if the shader has successfully loaded.
-     */
-    inline bool IsLoaded() { 
-        return _loaded; 
-    }
-
     /**
      */
     GLuint GetGLID() const { 
@@ -108,8 +101,6 @@ private:
     static inline std::string _GLSLVersionString = "";
 
     /// Variables
-
-    bool _loaded = false;
 
     GLuint _glID = 0;
 

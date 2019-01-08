@@ -15,16 +15,9 @@ int main(int argc, char** argv) {
 
     auto camera = std::make_unique<dusk::DebugCamera>();
     app.GetRenderContext().CurrentCamera = camera.get();
-    camera->SetPosition({ 5.f, 5.f, 5.f });
+    camera->SetPosition({ 20.f, 20.f, 20.f });
     camera->SetLookAt({ 0.f, 0.f, 0.f });
     scene->AddActor(std::move(camera));
-
-    auto actor = std::make_unique<dusk::Actor>();
-    auto sound = std::make_unique<dusk::SoundComponent>();
-    sound->SetSound(std::make_shared<dusk::Sound>("music/commonGround.ogg"));
-    sound->Play();
-    actor->AddComponent(std::move(sound));
-    scene->AddActor(std::move(actor));
 
     app.SetActiveScene(app.AddScene(move(scene)));
 

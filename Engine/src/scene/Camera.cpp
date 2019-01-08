@@ -94,11 +94,6 @@ void Camera::HandleEvent(SDL_Event * evt)
     }
 }
 
-void Camera::Update(UpdateContext& ctx)
-{
-
-}
-
 void Camera::Print(std::string indent)
 {
     Actor::Print(indent);

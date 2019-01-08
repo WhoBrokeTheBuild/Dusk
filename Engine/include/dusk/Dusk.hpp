@@ -16,6 +16,7 @@
 #include <dusk/scene/Axis.hpp>
 #include <dusk/scene/Camera.hpp>
 #include <dusk/scene/DebugCamera.hpp>
+#include <dusk/scene/ListenerComponent.hpp>
 #include <dusk/scene/MeshComponent.hpp>
 #include <dusk/scene/Scene.hpp>
 #include <dusk/scene/SoundComponent.hpp>

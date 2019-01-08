@@ -78,8 +78,6 @@ public:
 
     virtual void HandleEvent(SDL_Event * evt) override;
 
-    virtual void Update(UpdateContext& ctx) override;
-
     virtual void Print(std::string indent) override;
 
 private:

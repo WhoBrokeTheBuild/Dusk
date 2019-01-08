@@ -52,30 +52,23 @@ FIND_PATH(
     PATH_SUFFIXES include
 )
 
-#FIND_PATH(
-#    Ogg_RUNTIME_DIR
-#    NAMES Ogg32.dll
-#    PATHS ${Ogg_ROOT_DIR} ${_Ogg_PC_INCLUDE_DIRS} 
-#    PATH_SUFFIXES bin
-#)
-
 FIND_LIBRARY(
     Ogg_LIBRARY
-    NAMES ogg
+    NAMES ogg libogg_static
     PATHS ${Ogg_ROOT_DIR} ${_Ogg_PC_INCLUDE_DIRS} 
     PATH_SUFFIXES lib
 )
 
 FIND_LIBRARY(
     Vorbis_LIBRARY
-    NAMES vorbisfile
+    NAMES vorbisfile libvorbisfile_static
     PATHS ${Vorbis_ROOT_DIR} ${_Vorbis_PC_INCLUDE_DIRS} 
     PATH_SUFFIXES lib
 )
 
 FIND_LIBRARY(
     Theora_LIBRARY
-    NAMES theora
+    NAMES theora libtheora_static
     PATHS ${Theora_ROOT_DIR} ${_Theora_PC_INCLUDE_DIRS} 
     PATH_SUFFIXES lib
 )

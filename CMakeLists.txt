@@ -68,9 +68,9 @@ IF(BUILD_THIRDPARTY)
     SET(JSON_ROOT_DIR   "${CMAKE_BINARY_DIR}/ThirdParty/json")
     SET(SDL2_ROOT_DIR   "${CMAKE_BINARY_DIR}/ThirdParty/SDL2")
     SET(OpenAL_ROOT_DIR "${CMAKE_BINARY_DIR}/ThirdParty/OpenAL")
-    SET(Ogg_ROOT_DIR "${CMAKE_BINARY_DIR}/ThirdParty/Ogg")
-    SET(Vorbis_ROOT_DIR "${CMAKE_BINARY_DIR}/ThirdParty/Vorbis")
-    SET(Theora_ROOT_DIR "${CMAKE_BINARY_DIR}/ThirdParty/Theora")
+    SET(Ogg_ROOT_DIR    "${CMAKE_BINARY_DIR}/ThirdParty/libogg")
+    SET(Vorbis_ROOT_DIR "${CMAKE_BINARY_DIR}/ThirdParty/libvorbis")
+    SET(Theora_ROOT_DIR "${CMAKE_BINARY_DIR}/ThirdParty/libtheora")
 
     EXECUTE_PROCESS(
         COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" "${CMAKE_SOURCE_DIR}/ThirdParty"

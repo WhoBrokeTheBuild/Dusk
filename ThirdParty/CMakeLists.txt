@@ -101,17 +101,26 @@ ENDIF()
 
 FIND_PACKAGE(Ogg QUIET)
 
-IF(NOT Ogg_FOUND)
-    SET(_Ogg_DIR "${CMAKE_BINARY_DIR}/Ogg")
-    SET(_Ogg_SOURCE_DIR "${CMAKE_BINARY_DIR}/Ogg_src")
+IF(NOT Ogg_FOUND OR NOT Vorbis_FOUND OR NOT Theora_FOUND)
+    SET(_Ogg_DIR "${CMAKE_BINARY_DIR}/libogg")
+    SET(_Ogg_SOURCE_DIR "${CMAKE_BINARY_DIR}/libogg_src")
 
     SET(_WITH_OGG --with-ogg=${_Ogg_DIR})
 
-    SET(CONFIGURE_COMMAND "")
+    SET(CONFIGURE_COMMAND1 "")
+    SET(CONFIGURE_COMMAND2 "")
+    SET(CONFIGURE_COMMAND3 "")
+    SET(CONFIGURE_COMMAND4 "")
     IF(MSVC) 
-        SET(CONFIGURE_COMMAND ${CMAKE_VS_MSBUILD_COMMAND} win32/VS2015/libogg_dynamic.vcproj /p:OutputPath=${_Ogg_DIR})
+        SET(SOLUTION win32/VS2015/libogg_static.sln)
+        SET(CONFIGURE_COMMAND1 ${CMAKE_VS_DEVENV_COMMAND} ${SOLUTION} /Upgrade )
+        SET(CONFIGURE_COMMAND2 ${CMAKE_VS_MSBUILD_COMMAND} ${SOLUTION} /t:libogg_static /clp:ErrorsOnly /p:OutDir=${_Ogg_DIR}/lib/ )
+        SET(CONFIGURE_COMMAND3 ${CMAKE_COMMAND} -E make_directory ${_Ogg_DIR}/include/ogg)
+        SET(CONFIGURE_COMMAND4 ${CMAKE_COMMAND} -E copy include/ogg/ogg.h include/ogg/os_types.h ${_Ogg_DIR}/include/ogg)
     ELSE()
-        SET(CONFIGURE_COMMAND ./autogen.sh && ./configure --prefix=${_Ogg_DIR} && ${CMAKE_MAKE_PROGRAM} install -l )
+        SET(CONFIGURE_COMMAND1 ./autogen.sh )
+        SET(CONFIGURE_COMMAND2 ./configure --prefix=${_Ogg_DIR} )
+        SET(CONFIGURE_COMMAND3 ${CMAKE_MAKE_PROGRAM} install -l )
     ENDIF()
 
     ExternalProject_Add(
@@ -121,25 +130,35 @@ IF(NOT Ogg_FOUND)
         GIT_SHALLOW         TRUE
         SOURCE_DIR          "${_Ogg_SOURCE_DIR}"
         BUILD_IN_SOURCE     TRUE
-        CONFIGURE_COMMAND   ${CONFIGURE_COMMAND}
+        CONFIGURE_COMMAND   ${CONFIGURE_COMMAND1}
+        COMMAND             ${CONFIGURE_COMMAND2}
+        COMMAND             ${CONFIGURE_COMMAND3}
+        COMMAND             ${CONFIGURE_COMMAND4}
         BUILD_COMMAND       ""
         INSTALL_COMMAND     ""
         UPDATE_COMMAND      ""
         TEST_COMMAND        ""
     )
-ENDIF()
 
-IF(NOT Vorbis_FOUND)
-    SET(_Vorbis_DIR "${CMAKE_BINARY_DIR}/Vorbis")
-    SET(_Vorbis_SOURCE_DIR "${CMAKE_BINARY_DIR}/Vorbis_src")
+    SET(_Vorbis_DIR "${CMAKE_BINARY_DIR}/libvorbis")
+    SET(_Vorbis_SOURCE_DIR "${CMAKE_BINARY_DIR}/libvorbis_src")
     
     SET(_WITH_VORBIS --with-vorbis=${_Vorbis_DIR})
 
-    SET(CONFIGURE_COMMAND "")
-    IF(MSVC)
-        SET(CONFIGURE_COMMAND ${CMAKE_VS_MSBUILD_COMMAND} win32/VS2010/libvorbis_dynamic.vcproj /p:OutputPath=${_Vorbis_DIR})
+    SET(CONFIGURE_COMMAND1 "")
+    SET(CONFIGURE_COMMAND2 "")
+    SET(CONFIGURE_COMMAND3 "")
+    SET(CONFIGURE_COMMAND4 "")
+    IF(MSVC) 
+        SET(SOLUTION win32/VS2010/vorbis_static.sln)
+        SET(CONFIGURE_COMMAND1 ${CMAKE_VS_DEVENV_COMMAND} ${SOLUTION} /Upgrade )
+        SET(CONFIGURE_COMMAND2 ${CMAKE_VS_MSBUILD_COMMAND} ${SOLUTION} /t:libvorbisfile /clp:ErrorsOnly /p:OutDir=${_Vorbis_DIR}/lib/ )
+        SET(CONFIGURE_COMMAND3 ${CMAKE_COMMAND} -E make_directory ${_Vorbis_DIR}/include/vorbis)
+        SET(CONFIGURE_COMMAND4 ${CMAKE_COMMAND} -E copy include/vorbis/codec.h include/vorbis/vorbisfile.h ${_Vorbis_DIR}/include/vorbis)
     ELSE()
-        SET(CONFIGURE_COMMAND ./autogen.sh && ./configure ${_WITH_OGG} --prefix=${_Vorbis_DIR} && ${CMAKE_MAKE_PROGRAM} install -l )
+        SET(CONFIGURE_COMMAND1 ./autogen.sh )
+        SET(CONFIGURE_COMMAND2 ./configure ${_WITH_OGG} --prefix=${_Vorbis_DIR} )
+        SET(CONFIGURE_COMMAND3 ${CMAKE_MAKE_PROGRAM} install -l )
     ENDIF()
 
     ExternalProject_Add(
@@ -149,7 +168,10 @@ IF(NOT Vorbis_FOUND)
         GIT_SHALLOW         TRUE
         SOURCE_DIR          "${_Vorbis_SOURCE_DIR}"
         BUILD_IN_SOURCE     TRUE
-        CONFIGURE_COMMAND   ${CONFIGURE_COMMAND}
+        CONFIGURE_COMMAND   ${CONFIGURE_COMMAND1}
+        COMMAND             ${CONFIGURE_COMMAND2}
+        COMMAND             ${CONFIGURE_COMMAND3}
+        COMMAND             ${CONFIGURE_COMMAND4}
         BUILD_COMMAND       ""
         INSTALL_COMMAND     ""
         UPDATE_COMMAND      ""
@@ -157,17 +179,23 @@ IF(NOT Vorbis_FOUND)
     )
     
     ADD_DEPENDENCIES(ThirdParty_Vorbis ThirdParty_Ogg)
-ENDIF()
 
-IF(NOT Theora_FOUND)
-    SET(_Theora_DIR "${CMAKE_BINARY_DIR}/Theora")
-    SET(_Theora_SOURCE_DIR "${CMAKE_BINARY_DIR}/Theora_src")
+    SET(_Theora_DIR "${CMAKE_BINARY_DIR}/libtheora")
+    SET(_Theora_SOURCE_DIR "${CMAKE_BINARY_DIR}/libtheora_src")
 
-    SET(CONFIGURE_COMMAND "")
-    IF(MSVC)
-        SET(CONFIGURE_COMMAND ${CMAKE_VS_MSBUILD_COMMAND} win32/VS2010/libtheora/libtheora_dynamic.vcxproj /p:OutputPath=${_Theora_DIR})
+    SET(CONFIGURE_COMMAND1 "")
+    SET(CONFIGURE_COMMAND2 "")
+    SET(CONFIGURE_COMMAND3 "")
+    SET(CONFIGURE_COMMAND4 "")
+    IF(MSVC) 
+        SET(SOLUTION win32/VS2010/libtheora_static.sln)
+        SET(CONFIGURE_COMMAND1 ${CMAKE_VS_DEVENV_COMMAND} ${SOLUTION} /Upgrade )
+        SET(CONFIGURE_COMMAND2 ${CMAKE_VS_MSBUILD_COMMAND} ${SOLUTION} /t:libtheora_static /clp:ErrorsOnly /p:OutDir=${_Theora_DIR}/lib/ )
+        SET(CONFIGURE_COMMAND3 ${CMAKE_COMMAND} -E make_directory ${_Theora_DIR}/include/theora)
+        SET(CONFIGURE_COMMAND4 ${CMAKE_COMMAND} -E copy include/theora/codec.h include/theora/theora.h ${_Theora_DIR}/include/theora)
     ELSE()
-        SET(CONFIGURE_COMMAND ./autogen.sh ${_WITH_OGG} ${_WITH_VORBIS} --prefix=${_Theora_DIR} --disable-examples && ${CMAKE_MAKE_PROGRAM} install -l )
+        SET(CONFIGURE_COMMAND1 ./autogen.sh ${_WITH_OGG} ${_WITH_VORBIS} --prefix=${_Theora_DIR} )
+        SET(CONFIGURE_COMMAND2 ${CMAKE_MAKE_PROGRAM} install -l )
     ENDIF()
 
     ExternalProject_Add(
@@ -177,7 +205,10 @@ IF(NOT Theora_FOUND)
         GIT_SHALLOW         TRUE
         SOURCE_DIR          "${_Theora_SOURCE_DIR}"
         BUILD_IN_SOURCE     TRUE
-        CONFIGURE_COMMAND   ${CONFIGURE_COMMAND}
+        CONFIGURE_COMMAND   ${CONFIGURE_COMMAND1}
+        COMMAND             ${CONFIGURE_COMMAND2}
+        COMMAND             ${CONFIGURE_COMMAND3}
+        COMMAND             ${CONFIGURE_COMMAND4}
         BUILD_COMMAND       ""
         INSTALL_COMMAND     ""
         UPDATE_COMMAND      ""

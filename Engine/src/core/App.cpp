@@ -202,17 +202,19 @@ void App::CreateWindow()
 {
     DuskBenchStart();
 
-    _alDevice = alcOpenDevice(NULL);
-    _alContext = alcCreateContext(_alDevice, NULL);
-    alcMakeContextCurrent(_alContext);
+    _alDevice = alcOpenDevice(nullptr);
+    _alContext = alcCreateContext(_alDevice, nullptr);
+    if (!alcMakeContextCurrent(_alContext)) {
+        DuskLogError("Failed to initialize OpenAL, %d", alGetError());
+    }
 
+    DuskLogInfo("OpenAL Device %s", alcGetString(_alDevice, ALC_DEVICE_SPECIFIER));
     DuskLogInfo("OpenAL Version %s", alGetString(AL_VERSION));
     DuskLogInfo("OpenAL Vendor %s", alGetString(AL_VENDOR));
     DuskLogInfo("OpenAL Renderer %s", alGetString(AL_RENDERER));
 
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
-    {
-        DuskLogError("Failed to initialize SDL, %s", SDL_GetError());
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        DuskLogError("Failed to initialize SDL, %d", SDL_GetError());
         return;
     }
 
@@ -236,16 +238,16 @@ void App::CreateWindow()
     int sdlWindowFlags = GetSDLWindowFlags();
     DuskLogVerbose("SDL Window Flags: 0x%08X", sdlWindowFlags);
 
-    for (int multisamples = 16; multisamples > 0; multisamples /= 2)
-    {
+    for (int multisamples = 16; multisamples > 0; multisamples /= 2) {
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, multisamples);
 
         _sdlWindow = SDL_CreateWindow(_windowTitle.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, size.x, size.y, sdlWindowFlags);
-        if (_sdlWindow) break;
+        if (_sdlWindow) {
+            break;
+        }
     }
 
-    if (!_sdlWindow)
-    {
+    if (!_sdlWindow) {
         DuskLogError("Failed to create SDL window, %s", SDL_GetError());
         return;
     }
@@ -257,14 +259,12 @@ void App::CreateWindow()
     SDL_FreeSurface(surface);
 
     _sdlContext = SDL_GL_CreateContext(_sdlWindow);
-    if (!_sdlContext)
-    {
+    if (!_sdlContext) {
         DuskLogError("Failed to create OpenGL context, %s", SDL_GetError());
         return;
     }
 
-    if (!gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress))
-    {
+    if (!gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress)) {
         DuskLogError("Failed to initialize OpenGL context");
         return;
     }
@@ -312,6 +312,7 @@ void App::DestroyWindow()
 
     SDL_Quit();
 
+    alcMakeContextCurrent(nullptr);
     alcDestroyContext(_alContext);
     alcCloseDevice(_alDevice);
 }

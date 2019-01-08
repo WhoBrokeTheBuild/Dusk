@@ -6,7 +6,7 @@ namespace dusk {
 
 void MeshComponent::AddMesh(std::shared_ptr<Mesh> mesh)
 {
-    _meshes.push_back(std::move(mesh));
+    _meshes.push_back(mesh);
 }
 
 void MeshComponent::Render(RenderContext& ctx) 

@@ -46,6 +46,13 @@
         "new": "cpp",
         "algorithm": "cpp",
         "thread": "cpp",
-        "deque": "cpp"
+        "deque": "cpp",
+        "atomic": "cpp",
+        "bitset": "cpp",
+        "condition_variable": "cpp",
+        "list": "cpp",
+        "unordered_set": "cpp",
+        "mutex": "cpp",
+        "valarray": "cpp"
     }
 }

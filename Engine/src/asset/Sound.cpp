@@ -15,6 +15,14 @@ Sound::Sound(const std::string& filename)
     LoadFromFile(filename);
 }
 
+Sound::~Sound()
+{
+    if (_alID > 0) {
+        alDeleteBuffers(1, &_alID);
+        _alID = 0;
+    }
+}
+
 bool Sound::LoadFromFile(const std::string& filename)
 {
     DuskBenchStart();
@@ -54,8 +62,33 @@ bool Sound::LoadFromFile(const std::string& filename)
     DuskLogVerbose("Decoded length is %ld samples", (long)ov_pcm_total(&vf, -1));
     DuskLogVerbose("Encoded by %s", ov_comment(&vf, -1)->vendor);
     
+    ALenum format = (vi->channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16);
+    size_t length = (size_t)ov_pcm_total(&vf, -1) * vi->channels * 2;
+    std::vector<uint16_t *> data(length);
 
+    size_t size = 0;
+    size_t offset = 0;
+    size_t sel = 0;
+
+    do {
+        offset += size;
+        size = ov_read(&vf, (char *)data.data() + offset, 4096, 0, 2, 1, (int *)&sel);
+    } while (size > 0);
+
+    if (size < 0) {
+        DuskLogError("Failed to read data from file '%s'", filename);
+    }
+    
+    fclose(fp);
+
+    alGenBuffers(1, &_alID);
+    alBufferData(_alID, format, data.data(), data.size(), vi->rate);
     ov_clear(&vf);
+
+    if (alGetError() != AL_NO_ERROR) {
+        DuskLogError("Failed to upload to OpenAL buffer: %d", alGetError());
+        return false;
+    }
 
 	DuskLogLoad("Loaded Sound from '%s", fullPath);
 

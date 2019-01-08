@@ -3,6 +3,7 @@
 
 #include <dusk/Config.hpp>
 #include <dusk/asset/ILoadable.hpp>
+#include <dusk/core/OpenAL.hpp>
 
 #include <string>
 
@@ -16,11 +17,15 @@ public:
 
     Sound(const std::string& filename);
 
-    virtual ~Sound() = default;
+    virtual ~Sound();
 
     bool LoadFromFile(const std::string& filename);
 
+    ALuint GetALBufferID() const { return _alID; }
+
 private:
+
+    ALuint _alID = 0;
 
 }; // class Sound
 

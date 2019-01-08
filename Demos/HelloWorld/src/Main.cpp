@@ -19,9 +19,14 @@ int main(int argc, char** argv) {
     camera->SetLookAt({ 0.f, 0.f, 0.f });
     scene->AddActor(std::move(camera));
 
-    app.SetActiveScene(app.AddScene(move(scene)));
+    auto actor = std::make_unique<dusk::Actor>();
+    auto sound = std::make_unique<dusk::SoundComponent>();
+    sound->SetSound(std::make_shared<dusk::Sound>("music/commonGround.ogg"));
+    sound->Play();
+    actor->AddComponent(std::move(sound));
+    scene->AddActor(std::move(actor));
 
-    dusk::Sound s("music/nightwalk.ogg");
+    app.SetActiveScene(app.AddScene(move(scene)));
 
     app.Start();
     return 0;

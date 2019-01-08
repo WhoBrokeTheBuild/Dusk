@@ -97,21 +97,21 @@ IF(NOT OpenAL_FOUND)
     )
 ENDIF()
 
-# Ogg, Vorbis
+# Ogg, Vorbis, Theora
 
 FIND_PACKAGE(Ogg QUIET)
-FIND_PACKAGE(Vorbis QUIET)
 
-#IF(NOT Ogg_FOUND OR NOT _Vorbis_FOUND)
-IF(FALSE)
+IF(NOT Ogg_FOUND)
     SET(_Ogg_DIR "${CMAKE_BINARY_DIR}/Ogg")
     SET(_Ogg_SOURCE_DIR "${CMAKE_BINARY_DIR}/Ogg_src")
 
+    SET(_WITH_OGG --with-ogg=${_Ogg_DIR})
+
     SET(CONFIGURE_COMMAND "")
     IF(MSVC) 
-        SET(BUILD_COMMAND ${CMAKE_VS_MSBUILD_COMMAND} win32/VS2015/libogg_dynamic.vcproj /p:OutputPath=${_Ogg_DIR})
+        SET(CONFIGURE_COMMAND ${CMAKE_VS_MSBUILD_COMMAND} win32/VS2015/libogg_dynamic.vcproj /p:OutputPath=${_Ogg_DIR})
     ELSE()
-        SET(BUILD_COMMAND ./autogen.sh && ./configure --prefix=${_Ogg_DIR} && ${CMAKE_MAKE_PROGRAM} install -l )
+        SET(CONFIGURE_COMMAND ./autogen.sh && ./configure --prefix=${_Ogg_DIR} && ${CMAKE_MAKE_PROGRAM} install -l )
     ENDIF()
 
     ExternalProject_Add(
@@ -127,16 +127,19 @@ IF(FALSE)
         UPDATE_COMMAND      ""
         TEST_COMMAND        ""
     )
+ENDIF()
 
+IF(NOT Vorbis_FOUND)
     SET(_Vorbis_DIR "${CMAKE_BINARY_DIR}/Vorbis")
     SET(_Vorbis_SOURCE_DIR "${CMAKE_BINARY_DIR}/Vorbis_src")
+    
+    SET(_WITH_VORBIS --with-vorbis=${_Vorbis_DIR})
 
     SET(CONFIGURE_COMMAND "")
-    SET(BUILD_COMMAND "")
     IF(MSVC)
-        SET(BUILD_COMMAND ${CMAKE_VS_MSBUILD_COMMAND} win32/VS2010/libvorbis_dynamic.vcproj /p:OutputPath=${_Vorbis_DIR})
+        SET(CONFIGURE_COMMAND ${CMAKE_VS_MSBUILD_COMMAND} win32/VS2010/libvorbis_dynamic.vcproj /p:OutputPath=${_Vorbis_DIR})
     ELSE()
-        SET(CONFIGURE_COMMAND ./autogen.sh && ./configure --with-ogg=${_Ogg_DIR} --prefix=${_Vorbis_DIR} && ${CMAKE_MAKE_PROGRAM} install -l )
+        SET(CONFIGURE_COMMAND ./autogen.sh && ./configure ${_WITH_OGG} --prefix=${_Vorbis_DIR} && ${CMAKE_MAKE_PROGRAM} install -l )
     ENDIF()
 
     ExternalProject_Add(
@@ -152,31 +155,34 @@ IF(FALSE)
         UPDATE_COMMAND      ""
         TEST_COMMAND        ""
     )
+    
+    ADD_DEPENDENCIES(ThirdParty_Vorbis ThirdParty_Ogg)
+ENDIF()
 
-#    SET(_Theora_DIR "${CMAKE_BINARY_DIR}/Theora")
-#    SET(_Theora_SOURCE_DIR "${CMAKE_BINARY_DIR}/Theora_src")
-#
-#    SET(CONFIGURE_COMMAND "")
-#    SET(BUILD_COMMAND "")
-#    IF(MSVC)
-#        SET(BUILD_COMMAND ${CMAKE_VS_MSBUILD_COMMAND} win32/VS2010/libtheora/libtheora_dynamic.vcxproj /p:OutputPath=${_Theora_DIR})
-#    ELSE()
-#        SET(CONFIGURE_COMMAND ./autogen.sh && ./configure --with-ogg=${_Ogg_DIR} --prefix=${_Theora_DIR} && ${CMAKE_MAKE_PROGRAM} install -l )
-#    ENDIF()
-#
-#    MESSAGE("${CONFIGURE_COMMAND}")
-#
-#    ExternalProject_Add(
-#        ThirdParty_Theora
-#        GIT_REPOSITORY      "https://github.com/xiph/theora.git"
-#        GIT_TAG             "v1.2.0alpha1"
-#        GIT_SHALLOW         TRUE
-#        SOURCE_DIR          "${_Theora_SOURCE_DIR}"
-#        BUILD_IN_SOURCE     TRUE
-#        CONFIGURE_COMMAND   ${CONFIGURE_COMMAND}
-#        BUILD_COMMAND       ""
-#        INSTALL_COMMAND     ""
-#        UPDATE_COMMAND      ""
-#        TEST_COMMAND        ""
-#    )
+IF(NOT Theora_FOUND)
+    SET(_Theora_DIR "${CMAKE_BINARY_DIR}/Theora")
+    SET(_Theora_SOURCE_DIR "${CMAKE_BINARY_DIR}/Theora_src")
+
+    SET(CONFIGURE_COMMAND "")
+    IF(MSVC)
+        SET(CONFIGURE_COMMAND ${CMAKE_VS_MSBUILD_COMMAND} win32/VS2010/libtheora/libtheora_dynamic.vcxproj /p:OutputPath=${_Theora_DIR})
+    ELSE()
+        SET(CONFIGURE_COMMAND ./autogen.sh ${_WITH_OGG} ${_WITH_VORBIS} --prefix=${_Theora_DIR} --disable-examples && ${CMAKE_MAKE_PROGRAM} install -l )
+    ENDIF()
+
+    ExternalProject_Add(
+        ThirdParty_Theora
+        GIT_REPOSITORY      "https://github.com/xiph/theora.git"
+        GIT_TAG             "v1.2.0alpha1"
+        GIT_SHALLOW         TRUE
+        SOURCE_DIR          "${_Theora_SOURCE_DIR}"
+        BUILD_IN_SOURCE     TRUE
+        CONFIGURE_COMMAND   ${CONFIGURE_COMMAND}
+        BUILD_COMMAND       ""
+        INSTALL_COMMAND     ""
+        UPDATE_COMMAND      ""
+        TEST_COMMAND        ""
+    )
+    
+    ADD_DEPENDENCIES(ThirdParty_Theora ThirdParty_Ogg ThirdParty_Vorbis)
 ENDIF()

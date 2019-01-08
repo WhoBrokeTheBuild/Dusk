@@ -75,6 +75,9 @@ TARGET_LINK_LIBRARIES(
     JSON::JSON
     SDL2::SDL2
     OpenAL::OpenAL
+    Ogg::Ogg
+    Ogg::Vorbis
+    Ogg::Theora
 )
 
 IF(MSVC)

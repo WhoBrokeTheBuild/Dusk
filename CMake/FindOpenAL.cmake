@@ -1,6 +1,6 @@
 # FindOpenAL.cmake
 #
-# Finds the OpenGL Mathematics library
+# Finds the Open Audio Library
 #
 # This will define the following variables
 #
@@ -37,21 +37,10 @@ FIND_PATH(
 
 FIND_LIBRARY(
     OpenAL_LIBRARY
-    NAMES OpenAL openal
+    NAMES OpenAL32 openal
     PATHS ${OpenAL_ROOT_DIR} ${_OpenAL_PC_INCLUDE_DIRS} 
     PATH_SUFFIXES lib
 )
-
-FIND_LIBRARY(
-    OpenAL_LIBRARY SHARED
-    NAMES OpenAL openal
-    PATHS ${OpenAL_ROOT_DIR} ${_OpenAL_PC_INCLUDE_DIRS} 
-    PATH_SUFFIXES lib
-)
-
-IF(OpenAL_MAIN_LIBRARY AND OpenAL_LIBRARY)
-    LIST(APPEND OpenAL_LIBRARY "${OpenAL_MAIN_LIBRARY}")
-ENDIF()
 
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(

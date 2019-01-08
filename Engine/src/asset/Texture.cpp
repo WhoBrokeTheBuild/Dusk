@@ -67,6 +67,9 @@ bool Texture::LoadFromFile(const std::string& filename, Options opts /*= Options
     }
 
     bool loaded = LoadFromBuffer(texture, _size, comp, opts);
+    if (loaded) {
+        DuskLogLoad("Loaded Texture from '%s", fullPath);
+    }
 
     stbi_image_free(texture);
 

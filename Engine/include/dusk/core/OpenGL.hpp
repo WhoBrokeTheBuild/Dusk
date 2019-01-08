@@ -11,7 +11,10 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <glad/glad.h>
+
 #undef CreateWindow
+#undef min
+#undef max
 
 #include <SDL.h>
 

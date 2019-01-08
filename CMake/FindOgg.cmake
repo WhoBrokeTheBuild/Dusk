@@ -6,15 +6,16 @@
 #
 #   Ogg_FOUND
 #   Ogg_INCLUDE_DIR
-#   Ogg_LIBRARIES
+#   Ogg_LIBRARY
 #   Ogg_RUNTIME_DIR
 #   Vorbis_FOUND
 #   Vorbis_INCLUDE_DIR
-#   Vorbis_LIBRARIES
+#   Vorbis_LIBRARY
+#   VorbisFile_LIBRARY
 #   Vorbis_RUNTIME_DIR
 #   Theora_FOUND
 #   Theora_INCLUDE_DIR
-#   Theora_LIBRARIES
+#   Theora_LIBRARY
 #   Theora_RUNTIME_DIR
 #
 # and the following imported targets
@@ -61,6 +62,13 @@ FIND_LIBRARY(
 
 FIND_LIBRARY(
     Vorbis_LIBRARY
+    NAMES vorbis libvorbis_static
+    PATHS ${Vorbis_ROOT_DIR} ${_Vorbis_PC_INCLUDE_DIRS} 
+    PATH_SUFFIXES lib
+)
+
+FIND_LIBRARY(
+    VorbisFile_LIBRARY
     NAMES vorbisfile libvorbisfile_static
     PATHS ${Vorbis_ROOT_DIR} ${_Vorbis_PC_INCLUDE_DIRS} 
     PATH_SUFFIXES lib
@@ -85,6 +93,7 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(
     REQUIRED_VARS 
         Vorbis_INCLUDE_DIR
         Vorbis_LIBRARY 
+        VorbisFile_LIBRARY 
 )
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(
     Theora
@@ -103,7 +112,7 @@ SET_TARGET_PROPERTIES(
 ADD_LIBRARY(Ogg::Vorbis INTERFACE IMPORTED)
 SET_TARGET_PROPERTIES(
     Ogg::Vorbis PROPERTIES
-    INTERFACE_LINK_LIBRARIES "${Vorbis_LIBRARY}"
+    INTERFACE_LINK_LIBRARIES "${Vorbis_LIBRARY};${VorbisFile_LIBRARY}"
     INTERFACE_INCLUDE_DIRECTORIES "${Vorbis_INCLUDE_DIR}"
 )
 

@@ -4,6 +4,7 @@
 #include <dusk/core/Context.hpp>
 
 #include <memory>
+#include <string>
 
 namespace dusk {
 

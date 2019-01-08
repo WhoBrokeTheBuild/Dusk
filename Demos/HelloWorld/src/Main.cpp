@@ -21,6 +21,8 @@ int main(int argc, char** argv) {
 
     app.SetActiveScene(app.AddScene(move(scene)));
 
+    dusk::Sound s("music/nightwalk.ogg");
+
     app.Start();
     return 0;
 }

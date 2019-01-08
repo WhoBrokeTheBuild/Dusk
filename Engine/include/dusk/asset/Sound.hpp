@@ -4,11 +4,21 @@
 #include <dusk/Config.hpp>
 #include <dusk/asset/ILoadable.hpp>
 
+#include <string>
+
 namespace dusk {
 
 class Sound : public ILoadable
 {
 public:
+
+    Sound() = default;
+
+    Sound(const std::string& filename);
+
+    virtual ~Sound() = default;
+
+    bool LoadFromFile(const std::string& filename);
 
 private:
 

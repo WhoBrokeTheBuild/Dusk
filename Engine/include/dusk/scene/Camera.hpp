@@ -28,7 +28,7 @@ public:
 
     /// Methods
 
-    constexpr glm::vec3 GetWorldUp() const {
+    glm::vec3 GetWorldUp() const {
         return glm::vec3(0.f, 1.f, 0.f);
     }
 

@@ -46,6 +46,10 @@ void App::Start()
 
     SDL_ShowWindow(_sdlWindow);
 
+	if (_activeScene) {
+		_activeScene->Start();
+	}
+
     unsigned long frames = 0;
 
     double_ms frameDelay = 1000ms / _targetFps;
@@ -111,6 +115,10 @@ void App::Start()
     }
 
     SDL_HideWindow(_sdlWindow);
+
+	if (_activeScene) {
+		_activeScene->Stop();
+	}
 }
 
 void App::Stop()

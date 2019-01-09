@@ -70,6 +70,10 @@ public:
 
     virtual void AddActor(std::unique_ptr<Actor>&& actor);
 
+    virtual void SceneStart();
+
+    virtual void SceneStop();
+
     virtual void HandleEvent(SDL_Event * evt);
 
     virtual void Update(UpdateContext& ctx);

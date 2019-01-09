@@ -25,6 +25,10 @@ public:
     }
 
     virtual void HandleEvent(SDL_Event * evt) { }
+    
+    virtual void SceneStart() { }
+
+    virtual void SceneStop() { }
 
     virtual void Update(UpdateContext& ctx) { }
     

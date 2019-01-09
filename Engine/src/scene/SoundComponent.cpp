@@ -20,13 +20,35 @@ void SoundComponent::SetSound(std::shared_ptr<Sound> sound)
     alSourcei(_alSource, AL_BUFFER, _sound->GetALBufferID());
 }
 
+void SoundComponent::SceneStart()
+{
+    if (_playing) {
+        alSourcePlay(_alSource);
+    }
+}
+
+void SoundComponent::SceneStop()
+{
+    if (_playing) {
+        alSourcePause(_alSource);
+    }
+}
+
 void SoundComponent::Play()
 {
+    _playing = true;
     alSourcePlay(_alSource);
+}
+
+void SoundComponent::Pause()
+{
+    _playing = false;
+    alSourcePause(_alSource);
 }
 
 void SoundComponent::Stop()
 {
+    _playing = false;
     alSourceStop(_alSource);
 }
 

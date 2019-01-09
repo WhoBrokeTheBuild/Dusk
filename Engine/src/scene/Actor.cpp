@@ -88,6 +88,28 @@ void Actor::AddActor(std::unique_ptr<Actor>&& actor)
     _actors.push_back(std::move(actor));
 }
 
+void Actor::SceneStart()
+{
+    for (auto& comp : _components) {
+        comp->SceneStart();
+    }
+
+    for (auto& actor : _actors) {
+        actor->SceneStart();
+    }
+}
+
+void Actor::SceneStop()
+{
+    for (auto& comp : _components) {
+        comp->SceneStop();
+    }
+
+    for (auto& actor : _actors) {
+        actor->SceneStop();
+    }
+}
+
 void Actor::HandleEvent(SDL_Event * evt)
 {
     for (auto& comp : _components) {

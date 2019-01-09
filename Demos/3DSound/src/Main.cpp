@@ -26,7 +26,6 @@ int main(int argc, char** argv) {
 
         auto soundComp = std::make_unique<dusk::SoundComponent>();
         soundComp->SetSound(std::make_shared<dusk::Sound>("music/commonGround.ogg"));
-        soundComp->Play();
         actor->AddComponent(std::move(soundComp));
 
         scene->AddActor(std::move(actor));
@@ -43,7 +42,6 @@ int main(int argc, char** argv) {
 
         auto soundComp = std::make_unique<dusk::SoundComponent>();
         soundComp->SetSound(std::make_shared<dusk::Sound>("music/nightWalk.ogg"));
-        soundComp->Play();
         actor->AddComponent(std::move(soundComp));
         
         scene->AddActor(std::move(actor));

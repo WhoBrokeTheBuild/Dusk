@@ -377,10 +377,18 @@ bool Scene::LoadFromFile(const std::string& filename)
 }
 
 void Scene::Start()
-{ }
+{
+	for (auto& actor : _actors) {
+		actor->SceneStart();
+	}
+}
 
 void Scene::Stop()
-{ }
+{
+	for (auto& actor : _actors) {
+		actor->SceneStop();
+	}
+}
 
 void Scene::AddActor(std::unique_ptr<Actor>&& actor)
 {

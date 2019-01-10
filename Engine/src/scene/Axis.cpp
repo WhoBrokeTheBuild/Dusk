@@ -79,7 +79,9 @@ void Axis::Render(RenderContext& ctx)
         return;
     }
 
-    _Mesh->Render(ctx, GetActor()->GetWorldTransform());
+    auto transform = GetActor()->GetWorldTransform();
+    transform = glm::scale(transform, 1.f / GetActor()->GetWorldScale());
+    _Mesh->Render(ctx, transform);
 }
 
 } // namespace dusk

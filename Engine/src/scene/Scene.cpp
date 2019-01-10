@@ -172,24 +172,28 @@ bool Scene::LoadFromFile(const std::string& filename)
 		if (node.camera >= 0) {
             Camera * camera = new Camera();
             actor = camera;
+
+            camera->SetPosition(position);
+            camera->SetRotation(rotation);
+            camera->SetScale(scale);
+
+            if (!defaultCamera) { 
+                defaultCamera = camera;
+            }
             
             auto& data = model.cameras[node.camera];
         
             if (data.type == "perspective") {
                 camera->SetMode(Camera::Mode::Perspective);
-                camera->SetClip(glm::vec2(data.perspective.znear, data.perspective.zfar));
 
-                camera->SetPosition(position);
-                camera->SetRotation(rotation);
-                camera->SetScale(scale);
-
-                if (!defaultCamera) { 
-                    defaultCamera = camera;
-                }
-
+                camera->SetClip(data.perspective.znear, data.perspective.zfar);
+                camera->SetFOVY(data.perspective.yfov);
             }
             else if (data.type == "orthographic") {
                 camera->SetMode(Camera::Mode::Orthographic);
+
+                camera->SetClip(data.orthographic.znear, data.orthographic.zfar);
+                camera->SetViewportSize(data.orthographic.xmag, data.orthographic.ymag);
             }
 		}
         else {

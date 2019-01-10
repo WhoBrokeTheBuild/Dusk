@@ -2,6 +2,7 @@
 #include shaders/data/material.inc.glsl
 
 const float c_PI = 3.141592653589793;
+const float c_IOR = 1.0;
 const float c_MinRoughness = 0.04;
 const vec3 c_LightColor = vec3(1.0);
 uniform vec3 c_LightDirection = vec3(0.0, 0.5, 0.5);
@@ -103,7 +104,7 @@ void main() {
         baseColor = SRGBtoLinear(texture2D(u_BaseColorMap, v_UV));
     }
 
-    vec3 f0 = vec3(0.04);
+    vec3 f0 = vec3(((c_IOR - 1.0) * (c_IOR - 1.0)) / ((c_IOR + 1) * (c_IOR + 1)));
     pbr.diffuseColor = baseColor.rgb * (vec3(1.0) - f0);
     pbr.diffuseColor *= 1.0 - pbr.metallic;
     pbr.specularColor = mix(f0, baseColor.rgb, pbr.metallic);

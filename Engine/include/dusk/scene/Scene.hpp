@@ -37,9 +37,9 @@ public:
 
     virtual void Render(RenderContext& ctx);
 
-private:
-
     virtual void Print();
+
+private:
 
     std::vector<std::unique_ptr<Actor>> _actors;
 

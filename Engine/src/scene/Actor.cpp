@@ -64,7 +64,6 @@ glm::mat4 Actor::GetTransform() const
     transform = glm::translate(transform, _position);
     transform *= glm::mat4_cast(_rotation);
     transform = glm::scale(transform, _scale);
-
     return transform;
 }
 

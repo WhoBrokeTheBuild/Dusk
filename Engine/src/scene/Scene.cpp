@@ -186,14 +186,14 @@ bool Scene::LoadFromFile(const std::string& filename)
             if (data.type == "perspective") {
                 camera->SetMode(Camera::Mode::Perspective);
 
-                camera->SetClip(data.perspective.znear, data.perspective.zfar);
-                camera->SetFOVY(data.perspective.yfov);
+                camera->SetClip(glm::vec2(data.perspective.znear, data.perspective.zfar));
+                camera->SetFOVY((float)data.perspective.yfov);
             }
             else if (data.type == "orthographic") {
                 camera->SetMode(Camera::Mode::Orthographic);
 
-                camera->SetClip(data.orthographic.znear, data.orthographic.zfar);
-                camera->SetViewportSize(data.orthographic.xmag, data.orthographic.ymag);
+                camera->SetClip(glm::vec2(data.orthographic.znear, data.orthographic.zfar));
+                camera->SetViewportSize(glm::vec2(data.orthographic.xmag, data.orthographic.ymag));
             }
 		}
         else {

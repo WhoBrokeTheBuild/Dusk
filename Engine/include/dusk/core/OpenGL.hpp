@@ -15,6 +15,8 @@
 #undef CreateWindow
 #undef min
 #undef max
+#undef near
+#undef far
 
 #include <SDL.h>
 

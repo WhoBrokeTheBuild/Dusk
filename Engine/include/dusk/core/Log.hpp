@@ -4,6 +4,7 @@
 #include <dusk/Config.hpp>
 #include <dusk/core/Math.hpp>
 #include <dusk/core/Util.hpp>
+#include <dusk/core/JSON.hpp>
 
 #include <cstdio> // for printf, vsnprintf
 
@@ -32,6 +33,11 @@ namespace dusk {
     template <> 
     auto LogWrap<std::string>(const std::string& v) {
         return v.c_str();
+    }
+    
+    template <> 
+    auto LogWrap<nlohmann::json>(const nlohmann::json& v) {
+        return v.get<std::string>().c_str();
     }
 
 /* 

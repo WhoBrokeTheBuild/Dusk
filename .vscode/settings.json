@@ -53,6 +53,7 @@
         "list": "cpp",
         "unordered_set": "cpp",
         "mutex": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "typeindex": "cpp"
     }
 }

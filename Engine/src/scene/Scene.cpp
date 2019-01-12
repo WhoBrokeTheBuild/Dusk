@@ -23,6 +23,8 @@ bool Scene::LoadFromFile(const std::string& filename)
 {
     DuskBenchStart();
 
+
+    /*
     using namespace tinygltf;
 
     std::string ext = GetExtension(filename);
@@ -114,8 +116,8 @@ bool Scene::LoadFromFile(const std::string& filename)
         }
 
         addIt = addVals.find("emissiveFactor");
-        if (it != vals.end() && !it->second.number_array.empty()) {
-            mat->EmissiveFactor = glm::make_vec3(it->second.ColorFactor().data());
+        if (addIt != vals.end() && !addIt->second.number_array.empty()) {
+            mat->EmissiveFactor = glm::make_vec3(addIt->second.ColorFactor().data());
         }
 
         addIt = addVals.find("emissiveTexture");
@@ -279,7 +281,7 @@ bool Scene::LoadFromFile(const std::string& filename)
                             DuskLogWarn("Ignoring attribute %s", attrib.first);
                         }
                     }
-                    
+                    */
                     /* Bitangent Generation
                     auto& norm = primitive.attributes.find("NORMAL");
                     auto& tang = primitive.attributes.find("TANGENT");
@@ -326,6 +328,7 @@ bool Scene::LoadFromFile(const std::string& filename)
                         }
                     }
                     */
+                    /*
 
                     primitives.push_back({
                         vao,
@@ -375,6 +378,7 @@ bool Scene::LoadFromFile(const std::string& filename)
     }
 
     App::Inst()->GetRenderContext().CurrentCamera = defaultCamera;
+    */
 
     DuskBenchEnd("Scene::LoadFromFile");
     return true;

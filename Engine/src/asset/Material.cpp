@@ -12,8 +12,8 @@ void Material::Bind(Shader * sp) {
 
     sp->SetUniform("u_BaseColorFactor", BaseColorFactor);
     sp->SetUniform("u_EmissiveFactor", EmissiveFactor);
-    sp->SetUniform("u_Metallic", Metallic);
-    sp->SetUniform("u_Roughness", Roughness);
+    sp->SetUniform("u_MetallicFactor", MetallicFactor);
+    sp->SetUniform("u_RoughnessFactor", RoughnessFactor);
     sp->SetUniform("u_OcclusionStrength", OcclusionStrength);
     sp->SetUniform("u_NormalScale", NormalScale);
 
@@ -21,7 +21,7 @@ void Material::Bind(Shader * sp) {
     
     if (BaseColorMap) {
         flags |= HasBaseColorMap;
-        sp->SetUniform("u_AmbientMap", TextureID::BaseColor);
+        sp->SetUniform("u_BaseColorMap", TextureID::BaseColor);
         glActiveTexture(GL_TEXTURE0 + TextureID::BaseColor);
         BaseColorMap->Bind();
     }

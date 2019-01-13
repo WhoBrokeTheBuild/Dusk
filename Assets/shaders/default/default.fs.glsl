@@ -85,8 +85,8 @@ float GetMicrofacetDistribution(PBRInfo pbr) {
 void main() {
     PBRInfo pbr;
 
-    pbr.perceptualRoughness = u_Roughness;
-    pbr.metallic = u_Metallic;
+    pbr.perceptualRoughness = u_RoughnessFactor;
+    pbr.metallic = u_MetallicFactor;
     if (HasMetallicRoughnessMap()) {
         // Unpack Metallic and Roughness values from G and B channels
         vec4 tmp = texture2D(u_MetallicRoughnessMap, v_UV);

@@ -37,6 +37,7 @@ Mesh::~Mesh()
 bool Mesh::LoadFromFile(const std::string& filename, std::unique_ptr<Shader>&& shader /*= nullptr*/)
 {
     DuskBenchStart();
+    /*
     using namespace tinygltf;
 
     _filename = filename;
@@ -250,7 +251,7 @@ bool Mesh::LoadFromFile(const std::string& filename, std::unique_ptr<Shader>&& s
                     DuskLogWarn("Ignoring attribute %s", attrib.first);
                 }
             }
-            
+            /*
             /* Bitangent Generation
 			auto& norm = primitive.attributes.find("NORMAL");
 			auto& tang = primitive.attributes.find("TANGENT");
@@ -297,7 +298,7 @@ bool Mesh::LoadFromFile(const std::string& filename, std::unique_ptr<Shader>&& s
 				}
             }
             */
-
+            /*
             _primitives.push_back({
                 vao,
                 (GLenum)primitive.mode,
@@ -317,7 +318,7 @@ bool Mesh::LoadFromFile(const std::string& filename, std::unique_ptr<Shader>&& s
 	}
 
     SetLoaded(true);
-
+    */
     DuskBenchEnd("Mesh::LoadFromFile");
     return true;
 }

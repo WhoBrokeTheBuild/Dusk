@@ -35,8 +35,8 @@ public:
     glm::vec4 BaseColorFactor       = glm::vec4(1.0f);
     glm::vec3 EmissiveFactor        = glm::vec3(1.0f);
     
-    float Metallic                  = 1.0f;
-    float Roughness                 = 1.0f;
+    float MetallicFactor            = 1.0f;
+    float RoughnessFactor           = 1.0f;
     float OcclusionStrength         = 1.0f;
     float NormalScale               = 1.0f;
     

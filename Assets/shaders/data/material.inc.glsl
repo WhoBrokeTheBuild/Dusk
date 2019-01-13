@@ -5,8 +5,8 @@ uniform vec4 u_BaseColorFactor;
 
 uniform vec3 u_EmissiveFactor;
 
-uniform float u_Metallic;
-uniform float u_Roughness;
+uniform float u_MetallicFactor;
+uniform float u_RoughnessFactor;
 uniform float u_OcclusionStrength;
 uniform float u_NormalScale;
 

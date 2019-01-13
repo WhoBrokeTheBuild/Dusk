@@ -36,7 +36,7 @@ namespace dusk {
     }
     
     template <> 
-    auto LogWrap<nlohmann::json>(const nlohmann::json& v) {
+    auto LogWrap<json>(const json& v) {
         return v.get<std::string>().c_str();
     }
 

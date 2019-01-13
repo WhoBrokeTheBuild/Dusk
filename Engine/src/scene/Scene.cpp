@@ -65,13 +65,10 @@ bool Scene::LoadFromFile(const std::string& filename)
     std::vector<std::shared_ptr<Texture>> textures;
     for (auto& texture : model.textures) {
         tinygltf::Image &image = model.images[texture.source];
-        if (texture.sampler <= 0) {
-			DuskLogVerbose("Loading Texture from buffer (%d, %d, %d)", image.width, image.height, image.component);
-            textures.push_back(std::make_shared<Texture>(image.image.data(), glm::ivec2(image.width, image.height), image.component));
-        }
-        else {
-            textures.push_back(std::make_shared<Texture>(std::move((GLuint)texture.sampler), glm::ivec2(image.width, image.height)));
-        }
+        DuskLogVerbose("Loading Texture from buffer (%d, %d, %d)", image.width, image.height, image.component);
+        textures.push_back(std::make_shared<Texture>(image.image.data(), glm::ivec2(image.width, image.height), image.component));
+
+        //textures.push_back(std::make_shared<Texture>(std::move((GLuint)texture.sampler), glm::ivec2(image.width, image.height)));
     }
 
     std::vector<std::shared_ptr<Material>> materials;

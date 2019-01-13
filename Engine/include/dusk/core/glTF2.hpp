@@ -2,6 +2,8 @@
 #define DUSK_GLTF2_HPP
 
 #include <dusk/Config.hpp>
+#include <dusk/asset/Mesh.hpp>
+#include <dusk/scene/Scene.hpp>
 
 #include <string>
 
@@ -9,9 +11,9 @@ namespace dusk {
 
 namespace glTF2 {
 
-bool LoadSceneFromFile(const std::string& filename);
+bool LoadSceneFromFile(const std::string& filename, Scene * scene);
 
-bool LoadModelFromFile(const std::string& filename);
+std::vector<std::shared_ptr<Mesh>> LoadMeshesFromFile(const std::string& filename);
 
 } // namespace glTF2
 

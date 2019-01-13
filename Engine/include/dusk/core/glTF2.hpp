@@ -6,6 +6,8 @@
 #include <dusk/scene/Scene.hpp>
 
 #include <string>
+#include <vector>
+#include <memory>
 
 namespace dusk {
 

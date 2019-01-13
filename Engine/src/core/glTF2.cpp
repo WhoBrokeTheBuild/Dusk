@@ -14,7 +14,7 @@
 #include <fstream>
 #include <string>
 #include <unordered_map>
-#include <tuple>
+#include <memory>
 
 namespace dusk {
 
@@ -38,7 +38,7 @@ std::vector<std::vector<uint8_t>> loadBuffers(const json& data, const std::strin
 
                     DuskLogVerbose("glTF buffer %zu, %s", byteLength, uri);
 
-                    std::ifstream bufferFile(dir + "/" + uri);
+                    std::ifstream bufferFile(dir + "/" + uri, std::ios::in | std::ios::binary);
                     if (!bufferFile.is_open()) {
                         DuskLogError("Failed to open glTF data file '%s'", uri);
                         continue;
@@ -182,14 +182,14 @@ std::vector<image_t> loadImages(
                         int bufferViewIndex = object.value("bufferView", -1);
                         //const auto& mimeType = object.value("mimeType", "");
 
-                        if (bufferViewIndex < 0 || bufferViewIndex > bufferViews.size()) {
+                        if (bufferViewIndex < 0 || bufferViewIndex > (int)bufferViews.size()) {
                             DuskLogError("Invalid glTF bufferView index %d", bufferViewIndex);
                             continue;
                         }
 
                         const auto& bufferView = bufferViews[bufferViewIndex];
                         
-                        if (bufferView.buffer < 0 || bufferView.buffer > buffers.size()) {
+                        if (bufferView.buffer < 0 || bufferView.buffer >(int)buffers.size()) {
                             DuskLogError("Invalid glTF buffer index %d", bufferView.buffer);
                             continue;
                         }
@@ -303,7 +303,7 @@ std::vector<std::shared_ptr<Material>> loadMaterials(
             int index = value.value("index", -1);
             int texCoord = value.value("texCoord", 0);
 
-            if (index < 0 || index > textures.size()) {
+            if (index < 0 || index >(int)textures.size()) {
                 DuskLogError("Invalid glTF texture index %d", index);
                 return nullptr;
             }
@@ -533,8 +533,7 @@ std::vector<std::shared_ptr<Mesh>> loadMeshes(
     return meshes;
 }
 
-std::tuple<std::vector<std::shared_ptr<Mesh>>, std::vector<std::unique_ptr<Actor>>> 
-loadFromASCII(const std::string& filename)
+bool loadFromASCII(const std::string& filename, std::vector<std::shared_ptr<Mesh>> * outMeshes, std::vector<std::unique_ptr<Actor>> * outActors)
 {
     const auto& paths = GetAssetPaths();
 
@@ -554,7 +553,7 @@ loadFromASCII(const std::string& filename)
     if (!file.is_open())
     {
         DuskLogError("Failed to load glTF, '%s'", filename);
-        return std::make_tuple(std::vector<std::shared_ptr<Mesh>>(), std::vector<std::unique_ptr<Actor>>());
+		return false;
     }
 
     std::string dir = GetDirname(fullPath);
@@ -573,11 +572,11 @@ loadFromASCII(const std::string& filename)
             
             if (version != "2.0") {
                 DuskLogError("only glTF 2.0 is supported");
-                return std::make_tuple(std::vector<std::shared_ptr<Mesh>>(), std::vector<std::unique_ptr<Actor>>());
+				return false;
             }
         } else {
             DuskLogError("glTF missing required asset entry");
-            return std::make_tuple(std::vector<std::shared_ptr<Mesh>>(), std::vector<std::unique_ptr<Actor>>());
+			return false;
         }
     }
 
@@ -608,11 +607,20 @@ loadFromASCII(const std::string& filename)
     const auto& materials = loadMaterials(data, textures);
     const auto& meshes = loadMeshes(data, bufferViews, buffers, accessors, materials);
 
-    return std::make_tuple(meshes, std::vector<std::unique_ptr<Actor>>());
+	if (outActors) {
+		auto actor = std::make_unique<Actor>();
+		auto comp = std::make_unique<MeshComponent>();
+		for (auto& mesh : meshes) {
+			comp->AddMesh(mesh);
+		}
+		actor->AddComponent(std::move(comp));
+		outActors->push_back(std::move(actor));
+	}
+
+	return true;
 }
 
-std::tuple<std::vector<std::shared_ptr<Mesh>>, std::vector<std::unique_ptr<Actor>>> 
-loadFromBinary(const std::string& filename) 
+bool loadFromBinary(const std::string& filename, std::vector<std::shared_ptr<Mesh>> * outMeshes, std::vector<std::unique_ptr<Actor>> * outActors)
 {
     const auto& paths = GetAssetPaths();
 
@@ -632,10 +640,10 @@ loadFromBinary(const std::string& filename)
     if (!file.is_open())
     {
         DuskLogError("Failed to load glTF, '%s'", filename);
-        return std::make_tuple(std::vector<std::shared_ptr<Mesh>>(), std::vector<std::unique_ptr<Actor>>());
+		return false;
     }
 
-    return std::make_tuple(std::vector<std::shared_ptr<Mesh>>(), std::vector<std::unique_ptr<Actor>>());
+	return true;
 }
 
 bool LoadSceneFromFile(const std::string& filename, Scene * scene)
@@ -645,28 +653,28 @@ bool LoadSceneFromFile(const std::string& filename, Scene * scene)
     const std::string& ext = GetExtension(filename);
     bool binary = (ext == "glb");
 
-    const auto& [meshes, actors] = (binary ? loadFromBinary(filename) : loadFromASCII(filename));
+	std::vector<std::unique_ptr<Actor>> actors;
 
-    auto actor = std::make_unique<Actor>();
-    auto comp = std::make_unique<MeshComponent>();
-    for (auto& mesh : meshes) {
-        comp->AddMesh(mesh);
-    }
-    actor->AddComponent(std::move(comp));
-    scene->AddActor(std::move(actor));
+    bool loaded = (binary ? loadFromBinary(filename, nullptr, &actors) : loadFromASCII(filename, nullptr, &actors));
+
+	for (auto&& actor : actors) {
+		scene->AddActor(std::move(actor));
+	}
 
     DuskBenchEnd("glTF2::LoadSceneFromFile");
-    return true;
+	return loaded;
 }
 
-std::vector<std::shared_ptr<Mesh>> LoadMeshFromFile(const std::string& filename)
+std::vector<std::shared_ptr<Mesh>> LoadMeshesFromFile(const std::string& filename)
 {
     DuskBenchStart();
 
     const std::string& ext = GetExtension(filename);
     bool binary = (ext == "glb");
 
-    const auto& [meshes, actors] = (binary ? loadFromBinary(filename) : loadFromASCII(filename));
+	std::vector<std::shared_ptr<Mesh>> meshes;
+
+    bool loaded = (binary ? loadFromBinary(filename, &meshes, nullptr) : loadFromASCII(filename, &meshes, nullptr));
 
     DuskBenchEnd("glTF2::LoadMeshFromFile");
     return meshes;

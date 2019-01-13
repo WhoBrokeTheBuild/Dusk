@@ -81,6 +81,8 @@ bool Texture::LoadFromBuffer(const uint8_t * buffer, glm::ivec2 size, int comp /
 {
     DuskBenchStart();
 
+	_size = size;
+
     if (_glID > 0) {
         glDeleteTextures(1, &_glID);
         _glID = 0;
@@ -127,7 +129,7 @@ bool Texture::LoadFromBuffer(const uint8_t * buffer, glm::ivec2 size, int comp /
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, opts.MagFilter);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, opts.MinFilter);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, intfmt, size.x, size.y, 0, fmt, GL_UNSIGNED_BYTE, buffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, intfmt, _size.x, _size.y, 0, fmt, GL_UNSIGNED_BYTE, buffer);
 
     if (opts.Mipmap) {
         glGenerateMipmap(GL_TEXTURE_2D);

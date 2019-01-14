@@ -104,7 +104,8 @@ void main() {
         baseColor = SRGBtoLinear(texture2D(u_BaseColorMap, v_UV));
     }
 
-    vec3 f0 = vec3(((c_IOR - 1.0) * (c_IOR - 1.0)) / ((c_IOR + 1) * (c_IOR + 1)));
+    //vec3 f0 = vec3(((c_IOR - 1.0) * (c_IOR - 1.0)) / ((c_IOR + 1) * (c_IOR + 1)));
+	vec3 f0 = vec3(0.04);
     pbr.diffuseColor = baseColor.rgb * (vec3(1.0) - f0);
     pbr.diffuseColor *= 1.0 - pbr.metallic;
     pbr.specularColor = mix(f0, baseColor.rgb, pbr.metallic);

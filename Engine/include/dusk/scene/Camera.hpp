@@ -28,14 +28,6 @@ public:
 
     /// Methods
 
-    glm::vec3 GetWorldUp() const {
-        return glm::vec3(0.f, 1.f, 0.f);
-    }
-
-    glm::vec3 GetWorldForward() const {
-        return glm::vec3(0.f, 0.f, -1.f);
-    }
-
     glm::mat4 GetView() const;
 
     glm::mat4 GetProjection() const;
@@ -90,9 +82,7 @@ public:
         return _up;
     }
 
-    glm::vec3 GetRight() const {
-        return glm::normalize(glm::cross(GetForward(), GetUp()));
-    }
+	glm::vec3 GetRight() const;
 
     void SetForward(const glm::vec3& forward);
 

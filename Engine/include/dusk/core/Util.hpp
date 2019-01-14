@@ -14,6 +14,14 @@
 
 namespace dusk {
 
+static glm::vec3 GetWorldUp() {
+	return glm::vec3(0.f, 1.f, 0.f);
+}
+
+static glm::vec3 GetWorldForward() {
+	return glm::vec3(0.f, 0.f, -1.f);
+}
+
 struct Box
 {
 public:

@@ -9,7 +9,8 @@ int main(int argc, char** argv) {
     dusk::App app(argc, argv);
     
     auto scene = std::make_unique<dusk::Scene>();
-    dusk::glTF2::LoadSceneFromFile("models/SciFiHelmet/SciFiHelmet.gltf", scene.get());
+	//dusk::glTF2::LoadSceneFromFile("models/SciFiHelmet/SciFiHelmet.gltf", scene.get());
+	dusk::glTF2::LoadSceneFromFile("models/DamagedHelmet.glb", scene.get());
 
     auto camera = std::make_unique<dusk::DebugCamera>();
     app.GetRenderContext().CurrentCamera = camera.get();

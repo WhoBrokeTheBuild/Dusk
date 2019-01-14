@@ -28,9 +28,10 @@ TARGET_COMPILE_FEATURES(
 TARGET_COMPILE_OPTIONS(
     HelloWorld 
     PRIVATE
-        $<$<CXX_COMPILER_ID:GNU>:-Wall -Wno-unknown-pragmas>
-        $<$<CXX_COMPILER_ID:Clang>:-Wall -Wno-unknown-pragmas>
-        $<$<CXX_COMPILER_ID:MSVC>:-wd4068>
+        # Disable unknown pragmas warning, C++ exceptions
+        $<$<CXX_COMPILER_ID:GNU>:-Wall -Wno-unknown-pragmas -fno-exceptions>
+        $<$<CXX_COMPILER_ID:Clang>:-Wall -Wno-unknown-pragmas -fno-exceptions>
+        $<$<CXX_COMPILER_ID:MSVC>:-wd4068 /EHs-c>
 )
 
 TARGET_LINK_LIBRARIES(
@@ -53,6 +54,22 @@ TARGET_COMPILE_DEFINITIONS(
         DUSK_ASSET_PATH="${DUSK_ASSET_PATH}"
 )
 
+SET_TARGET_PROPERTIES(
+    HelloWorld PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS OFF
+)
+
+IF(MSVC)
+    SET_TARGET_PROPERTIES(
+        HelloWorld PROPERTIES 
+        VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        VS_DEBUGGER_ENVIRONMENT "PATH=%PATH%;${CMAKE_MSVCIDE_RUN_PATH}"
+        LINK_FLAGS "/NODEFAULTLIB:LIBCMT /NODEFAULTLIB:MSVCRT /LTCG /SUBSYSTEM:WINDOWS" 
+    )
+ENDIF()
+
 ADD_CUSTOM_TARGET(
     run-HelloWorld
     COMMAND $<TARGET_FILE:HelloWorld>
@@ -66,12 +83,3 @@ FOREACH(file IN ITEMS ${_SOURCES} ${_ASSETS})
     FILE(TO_NATIVE_PATH ${file_path} file_path)
     SOURCE_GROUP(${file_path} FILES ${file})
 ENDFOREACH()
-
-IF(MSVC)
-    SET_TARGET_PROPERTIES(
-        HelloWorld PROPERTIES 
-        VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        VS_DEBUGGER_ENVIRONMENT "PATH=%PATH%;${CMAKE_MSVCIDE_RUN_PATH}"
-        LINK_FLAGS "/NODEFAULTLIB:LIBCMT /NODEFAULTLIB:MSVCRT" 
-    )
-ENDIF()

@@ -1,6 +1,7 @@
 #ifndef DUSK_JSON_HPP
 #define DUSK_JSON_HPP
 
+#define JSON_NOEXCEPTION
 #include <nlohmann/json.hpp>
 
 namespace dusk {

@@ -49,24 +49,24 @@ TARGET_INCLUDE_DIRECTORIES(
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
     PRIVATE
+        "${CMAKE_CURRENT_BINARY_DIR}/include"
         "${CMAKE_CURRENT_SOURCE_DIR}/include"
         "${CMAKE_CURRENT_SOURCE_DIR}/src"
-        "${CMAKE_CURRENT_BINARY_DIR}/include"
 )
 
 TARGET_COMPILE_FEATURES(
     ${_ENGINE} 
     PRIVATE
         cxx_std_17
-        cxx_auto_type
 )
 
 TARGET_COMPILE_OPTIONS(
     ${_ENGINE} 
     PRIVATE
-        $<$<CXX_COMPILER_ID:GNU>:-Wall -Wno-unknown-pragmas>
-        $<$<CXX_COMPILER_ID:Clang>:-Wall -Wno-unknown-pragmas>
-        $<$<CXX_COMPILER_ID:MSVC>:-wd4068>
+        # Disable unknown pragmas warning, C++ exceptions
+        $<$<CXX_COMPILER_ID:GNU>:-Wall -Wno-unknown-pragmas -fno-exceptions>
+        $<$<CXX_COMPILER_ID:Clang>:-Wall -Wno-unknown-pragmas -fno-exceptions>
+        $<$<CXX_COMPILER_ID:MSVC>:-wd4068 /EHs-c>
 )
 
 TARGET_LINK_LIBRARIES(
@@ -78,6 +78,14 @@ TARGET_LINK_LIBRARIES(
     Ogg::Ogg
     Ogg::Vorbis
     Ogg::Theora
+    Threads::Threads
+)
+
+SET_TARGET_PROPERTIES(
+    ${_ENGINE} PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS OFF
 )
 
 IF(MSVC)

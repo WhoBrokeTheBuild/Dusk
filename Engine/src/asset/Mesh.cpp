@@ -251,7 +251,7 @@ bool Mesh::LoadFromFile(const std::string& filename, std::unique_ptr<Shader>&& s
                     DuskLogWarn("Ignoring attribute %s", attrib.first);
                 }
             }
-            /*
+            */
             /* Bitangent Generation
 			auto& norm = primitive.attributes.find("NORMAL");
 			auto& tang = primitive.attributes.find("TANGENT");

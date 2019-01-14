@@ -14,7 +14,7 @@ Texture::Texture(const std::string& filename, Options opts /*= Options()*/)
     LoadFromFile(filename, opts);
 }
 
-Texture::Texture(const uint8_t * data, glm::ivec2 size, int comp /*= 4*/, Options opts /*= Options()*/)
+Texture::Texture(const std::uint8_t * data, glm::ivec2 size, int comp /*= 4*/, Options opts /*= Options()*/)
 {
     LoadFromBuffer(data, size, comp, opts);
 }
@@ -49,7 +49,7 @@ bool Texture::LoadFromFile(const std::string& filename, Options opts /*= Options
     const auto& paths = GetAssetPaths();
 
     int comp;
-    uint8_t * texture = nullptr;
+    std::uint8_t * texture = nullptr;
 
     std::string fullPath;
     for (auto& p : paths) {
@@ -77,7 +77,7 @@ bool Texture::LoadFromFile(const std::string& filename, Options opts /*= Options
     return loaded;
 }
 
-bool Texture::LoadFromBuffer(const uint8_t * buffer, glm::ivec2 size, int comp /*= 4*/, Options opts /*= Options()*/)
+bool Texture::LoadFromBuffer(const std::uint8_t * buffer, glm::ivec2 size, int comp /*= 4*/, Options opts /*= Options()*/)
 {
     DuskBenchStart();
 

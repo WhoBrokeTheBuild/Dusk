@@ -26,8 +26,8 @@ const uint32_t Magic = 0x46546C67; // glTF
 
 enum class ChunkType : uint32_t 
 {
-	JSON = 0x4E4F534A,
-	BIN  = 0x004E4942,
+	JSON = 0x4E4F534A, // JSON
+	BIN  = 0x004E4942, // BIN
 };
 
 std::vector<std::vector<uint8_t>> loadBuffers(const json& data, const std::string& dir)
@@ -116,11 +116,12 @@ std::vector<bufferView_t> loadBufferViews(const json& data)
 
 struct accessor_t {
     int bufferView;
+    std::string type;
     size_t byteOffset;
     GLenum componentType;
+	bool normalized;
     size_t count;
     // TODO: min, max
-    std::string type;
 };
 
 std::vector<accessor_t> loadAccessors(const json& data)
@@ -135,11 +136,12 @@ std::vector<accessor_t> loadAccessors(const json& data)
                 if (object.is_object()) {
                     accessors.push_back(accessor_t{
                         object.value("bufferView", -1),
+                        object.value("type", ""),
                         object.value<size_t>("byteOffset", 0),
                         object.value<GLenum>("componentType", GL_INVALID_ENUM),
+						object.value<bool>("normalized", false),
                         object.value<size_t>("count", 0),
                         // TODO: min, max
-                        object.value("type", ""),
                     });
                 }
             }
@@ -429,6 +431,7 @@ std::vector<std::shared_ptr<Mesh>> loadMeshes(
 
 								int indices = primitive.value("indices", -1);
 								if (indices < 0) {
+									// TODO: glDrawArrays support
 									DuskLogError("glDrawArrays not supported");
 									continue;
 								}
@@ -495,11 +498,15 @@ std::vector<std::shared_ptr<Mesh>> loadMeshes(
 											}
 
 											if (vaa > -1) {
-												GLenum normalized = accessor.componentType == GL_FLOAT ? GL_FALSE : GL_TRUE;
 												glEnableVertexAttribArray(vaa);
-												glVertexAttribPointer(vaa, size, accessor.componentType, 
-													normalized, byteStride,
-													(void*)accessor.byteOffset);
+												glVertexAttribPointer(
+													vaa, 
+													size,
+													accessor.componentType, 
+													accessor.normalized, 
+													byteStride,
+													(void*)accessor.byteOffset
+												);
 											} else {
 												DuskLogWarn("Ignoring glTF attribute %s", attrib);
 											}
@@ -507,7 +514,6 @@ std::vector<std::shared_ptr<Mesh>> loadMeshes(
 									}
 								}
 
-								GLenum mode = primitive.value<GLenum>("mode", GL_TRIANGLES);
 								int materialIndex = primitive.value("material", -1);
 
 								std::shared_ptr<Material> material;
@@ -517,7 +523,7 @@ std::vector<std::shared_ptr<Mesh>> loadMeshes(
 
 								primitives.push_back({
 									vao,
-									mode,
+									primitive.value<GLenum>("mode", GL_TRIANGLES),
 									(GLsizei)indexAccessor.count,
 									(GLenum)indexAccessor.componentType,
 									(GLsizei)indexAccessor.byteOffset,
@@ -674,6 +680,8 @@ bool LoadSceneFromFile(const std::string& filename, Scene * scene)
 	const auto& materials = loadMaterials(data, textures);
 	const auto& meshes = loadMeshes(data, bufferViews, buffers, accessors, materials);
 
+	// TODO: nodes and scene loading
+
 	auto actor = std::make_unique<Actor>();
 	auto meshComp = std::make_unique<MeshComponent>();
 	for (auto& mesh : meshes) {
@@ -690,6 +698,7 @@ std::vector<std::shared_ptr<Mesh>> LoadMeshesFromFile(const std::string& filenam
 {
     DuskBenchStart();
 
+	// TODO: Support
 
     DuskBenchEnd("glTF2::LoadMeshFromFile");
     return std::vector<std::shared_ptr<Mesh>>();

@@ -89,12 +89,6 @@ std::string GetExtension(std::string path);
 
 std::string RunCommand(const std::string& cmd);
 
-static inline bool IsBase64(unsigned char c) {
-    return (isalnum(c) || (c == '+') || (c == '/'));
-}
-
-std::string Base64Decode(std::string const& encoded);
-
 } // namespace dusk
 
 #endif // DUSK_UTIL_HPP

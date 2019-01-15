@@ -12,19 +12,14 @@
 
 namespace dusk {
 
-Mesh::Mesh(const std::string& filename, std::unique_ptr<Shader>&& shader /*= nullptr*/)
+Mesh::Mesh(const std::string& filename)
 {
-    LoadFromFile(filename, std::move(shader));
+    LoadFromFile(filename);
 }
 
-Mesh::Mesh(Primitive p, std::unique_ptr<Shader>&& shader /*= nullptr*/)
+Mesh::Mesh(std::vector<Primitive>&& primitives)
 {
-    LoadFromData({ p }, std::move(shader));
-}
-
-Mesh::Mesh(std::vector<Primitive> primitives, std::unique_ptr<Shader>&& shader /*= nullptr*/)
-{
-    LoadFromData(primitives);
+    LoadFromData(std::move(primitives));
 }
 
 Mesh::~Mesh()
@@ -34,7 +29,7 @@ Mesh::~Mesh()
     }
 }
 
-bool Mesh::LoadFromFile(const std::string& filename, std::unique_ptr<Shader>&& shader /*= nullptr*/)
+bool Mesh::LoadFromFile(const std::string& filename)
 {
     DuskBenchStart();
     /*
@@ -323,36 +318,53 @@ bool Mesh::LoadFromFile(const std::string& filename, std::unique_ptr<Shader>&& s
     return true;
 }
 
-bool Mesh::LoadFromData(std::vector<Primitive> primitives, std::unique_ptr<Shader>&& shader /*= nullptr*/)
+bool Mesh::LoadFromData(std::vector<Primitive>&& primitives)
 {
-    if (shader) {
-        _shader = std::move(shader);
-    } else {
-        _shader.reset(new Shader({ 
-            "shaders/default/default.vs.glsl", 
-            "shaders/default/default.fs.glsl",
-        }));
+    for (auto& p : primitives) {
+        if (!p.Shader) {
+            std::unordered_map<std::string, std::string> defines;
+            glBindVertexArray(p.VAO);
+
+            std::unordered_map<GLint, std::string> attributes = {
+                { POSITION, "HAS_POSITION", },
+                { NORMAL, "HAS_NORMAL", },
+                { TEXCOORD, "HAS_TEXCOORD", },
+                { COLOR, "HAS_COLOR", },
+                { TANGENT, "HAS_TANGENT", },
+                { BITANGENT, "HAS_BITANGENT", },
+            };
+
+            GLint enabled;
+            for (const auto& [id, def] : attributes) {
+                glGetVertexAttribiv(id, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &enabled);
+                if (enabled) {
+                    defines.emplace(def, "");
+                }
+            }
+
+            glBindVertexArray(0);
+
+            p.Shader.reset(new Shader({ 
+                "shaders/default/default.vs.glsl", 
+                "shaders/default/default.fs.glsl",
+            }, defines));
+        }
     }
 
-    _primitives.insert(_primitives.end(), primitives.begin(), primitives.end());
+    for (auto&& p : primitives) {
+        _primitives.push_back(std::move(p));
+    }
     
     SetLoaded(true);
     
     return true;
 }
 
-void Mesh::SetShader(std::unique_ptr<Shader>&& shader)
-{
-    _shader = std::move(shader);
-}
-
 void Mesh::Render(RenderContext& ctx, glm::mat4 transform /*= glm::mat4(1.f)*/)
 {
-    if (!_shader || !ctx.CurrentCamera) {
+    if (!ctx.CurrentCamera) {
         return;
     }
-
-    _shader->Bind();
 
     glm::mat4 model = transform;
     glm::mat4 view = ctx.CurrentCamera->GetView();
@@ -360,20 +372,22 @@ void Mesh::Render(RenderContext& ctx, glm::mat4 transform /*= glm::mat4(1.f)*/)
     glm::mat4 mvp = proj * view * model;
     glm::mat4 normal = glm::transpose(glm::inverse(glm::mat3(model)));
 
-    _shader->SetUniformMatrix("u_ModelMatrix", model);
-    _shader->SetUniformMatrix("u_NormalMatrix", normal);
-    _shader->SetUniformMatrix("u_ViewMatrix", view);
-    _shader->SetUniformMatrix("u_ProjMatrix", proj);
-    _shader->SetUniformMatrix("u_MVPMatrix", mvp);
-
-    _shader->SetUniform("u_Camera", ctx.CurrentCamera->GetPosition());
-    
-    // TODO:
-    _shader->SetUniform("u_LightDirection", glm::vec3(0.0f));
-
     for (auto& p : _primitives) {
-        if (p.Mat) {
-            p.Mat->Bind(_shader.get());
+        p.Shader->Bind();
+
+        p.Shader->SetUniformMatrix("u_ModelMatrix", model);
+        p.Shader->SetUniformMatrix("u_NormalMatrix", normal);
+        p.Shader->SetUniformMatrix("u_ViewMatrix", view);
+        p.Shader->SetUniformMatrix("u_ProjMatrix", proj);
+        p.Shader->SetUniformMatrix("u_MVPMatrix", mvp);
+
+        p.Shader->SetUniform("u_Camera", ctx.CurrentCamera->GetPosition());
+        
+        // TODO:
+        p.Shader->SetUniform("u_LightDirection", glm::vec3(0.0f));
+
+        if (p.Material) {
+            p.Material->Bind(p.Shader.get());
         }
 
         glBindVertexArray(p.VAO);

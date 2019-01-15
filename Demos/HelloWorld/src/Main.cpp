@@ -18,8 +18,6 @@ int main(int argc, char** argv) {
     camera->SetLookAt({ 0.f, 0.f, 0.f });
     scene->AddActor(std::move(camera));
 
-    scene->Print();
-
     app.SetActiveScene(app.AddScene(std::move(scene)));
 
     app.Start();

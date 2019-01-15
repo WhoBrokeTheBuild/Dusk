@@ -530,11 +530,12 @@ std::vector<std::shared_ptr<Mesh>> loadMeshes(
 									(GLsizei)indexAccessor.byteOffset,
 									Box(),
 									material,
+                                    nullptr,
 								});
 							}
 						}
 
-						meshes.push_back(std::make_shared<Mesh>(primitives));
+						meshes.push_back(std::make_shared<Mesh>(std::move(primitives)));
                     }
                 }
             }

@@ -17,6 +17,12 @@ class Shader
 {
 public:
 
+    using filenames_initializer_t   = std::initializer_list<std::string>;
+    using filenames_vector_t        = std::vector<std::string>;
+    using define_map_t              = std::unordered_map<std::string, std::string>;
+    using uniform_map_t             = std::unordered_map<std::string, GLint>;
+    using attribute_map_t           = std::unordered_map<std::string, GLuint>;
+
     /// Boilerplate
 
     DISALLOW_COPY_AND_ASSIGN(Shader)
@@ -27,11 +33,11 @@ public:
 
     /** Create and load a shader from the given filenames.
      */
-    Shader(const std::initializer_list<std::string>& filenames);
+    Shader(const filenames_initializer_t& filenames, const define_map_t& defines = { });
 
     /** Create and load a shader from the given filenames.
      */
-    Shader(const std::vector<std::string>& filenames);
+    Shader(const filenames_vector_t& filenames, const define_map_t& defines = { });
 
     virtual ~Shader();
 
@@ -45,20 +51,38 @@ public:
      */
     static void InitializeVersionString();
 
+    static define_map_t GetDefaultDefines() {
+        return _DefaultDefines;
+    }
+
+    template <typename T>
+    static void SetDefaultDefine(std::string name, T value) {
+        _DefaultDefines.emplace(name, std::to_string(value));
+    }
+
     /// Methods
 
     /** Load and compile the given shader files, then link the program.
      */
-    virtual bool LoadFromFiles(const std::initializer_list<std::string>& filenames);
+    virtual bool LoadFromFiles(const filenames_initializer_t& filenames, const define_map_t& defines = { });
     
     /** Load and compile the given shader files, then link the program.
      */
-    virtual bool LoadFromFiles(const std::vector<std::string>& filenames);
+    virtual bool LoadFromFiles(const filenames_vector_t& filenames, const define_map_t& defines = { });
 
     /** Bind the shader for use with rendering or update operations.
      * This internally calls glUseProgram()
      */
     void Bind();
+    
+    define_map_t GetDefines() {
+        return _defines;
+    }
+
+    template <typename T>
+    void SetDefine(std::string name, T value) {
+        _defines.emplace(name, std::to_string(value));
+    }
 
     /**
      */
@@ -100,21 +124,25 @@ private:
 
     static inline std::string _GLSLVersionString = "";
 
+    static inline define_map_t _DefaultDefines = { };
+
     /// Variables
 
     GLuint _glID = 0;
 
     std::vector<std::string> _filenames;
 
-    std::unordered_map<std::string, GLint> _uniforms;
+    define_map_t _defines;
 
-    std::unordered_map<std::string, GLuint> _attributes;
+    uniform_map_t _uniforms;
+
+    attribute_map_t _attributes;
 
     /// Methods
 
     /**
      */
-    GLuint LoadShader(const std::string& filename);
+    GLuint LoadShader(const std::string& filename, const define_map_t& defines);
 
     /** Apply preprocessing to a shader's source code.
      * Process all preprocessor definitions in the shader's source code.

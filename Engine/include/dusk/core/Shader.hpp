@@ -75,11 +75,6 @@ public:
         _defines.emplace(name, std::to_string(value));
     }
 
-	template <>
-	void SetDefine<std::string>(std::string name, std::string value) {
-		_defines.emplace(name, "\"" + value + "\"");
-	}
-
     /**
      */
     std::vector<std::string> GetFilenames() const {

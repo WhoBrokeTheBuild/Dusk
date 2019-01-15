@@ -314,8 +314,6 @@ GLuint Shader::LoadShader(const std::string& filename, const define_map_t& defin
     DuskLogLoad("Loading %s shader from '%s'", GetShaderTypeString(type).c_str(), fullPath.c_str());
     code = PreProcess(type, code, GetDirname(fullPath));
     
-    PrintCode(code);
-
     GLint compiled = GL_FALSE;
     GLuint id = glCreateShader(type);
     const char * bufferPtr = code.c_str();

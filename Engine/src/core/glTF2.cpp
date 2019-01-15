@@ -547,6 +547,55 @@ std::vector<std::shared_ptr<Mesh>> loadMeshes(
     return meshes;
 }
 
+std::vector<std::unique_ptr<Actor>> loadNodes(
+    const json& data,
+    const std::vector<std::shared_ptr<Mesh>>& meshes)
+{
+    std::vector<std::unique_ptr<Actor>> actors;
+
+    auto parseVec3 = [](const json& value, glm::vec3 def) -> glm::vec3 {
+        if (value.is_array()) {
+            const auto& v = value.get<std::vector<float>>();
+            return glm::make_vec3(v.data());
+        }
+        return def;
+    };
+
+    auto parseQuat = [](const json& value, glm::vec4 def) -> glm::vec4 {
+        if (value.is_array()) {
+            const auto& v = value.get<std::vector<float>>();
+            return glm::make_vec4(v.data());
+        }
+        return def;
+    };
+
+    auto loadNode = [](const json& data) -> std::unique_ptr<Actor> {
+        Actor * actor = nullptr;
+
+        glm::vec3 position(0.f);
+        glm::quat rotation(1.f, 0.f, 0.f, 0.f);
+        glm::vec3 scale(1.f);
+
+        return std::unique_ptr<Actor>(actor);
+    };
+    
+    const auto it = data.find("nodes");
+    if (it != data.cend()) {
+        const auto& array = it.value();
+        for (const auto& object : array) {
+            if (object.is_object()) {
+                DuskLogVerbose("glTF node %s", object.value("name", ""));
+                auto actor = loadNode(object);
+                if (actor) {
+                    actors.push_back(std::move(actor));
+                }
+            }
+        }
+    }
+
+    return actors;
+}
+
 bool LoadSceneFromFile(const std::string& filename, Scene * scene)
 {
     DuskBenchStart();
@@ -683,6 +732,7 @@ bool LoadSceneFromFile(const std::string& filename, Scene * scene)
 	const auto& textures = loadTextures(data, images, samplers);
 	const auto& materials = loadMaterials(data, textures);
 	const auto& meshes = loadMeshes(data, bufferViews, buffers, accessors, materials);
+	const auto& actors = loadNodes(data, meshes);
 
 	// TODO: nodes and scene loading
 

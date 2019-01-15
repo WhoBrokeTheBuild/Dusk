@@ -119,7 +119,6 @@ bool Texture::LoadFromBuffer(const std::uint8_t * buffer, glm::ivec2 size, int c
     }
 
     glBindTexture(GL_TEXTURE_2D, _glID);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     DuskLogVerbose("Binding texture to ID %u", _glID);
 
@@ -132,7 +131,7 @@ bool Texture::LoadFromBuffer(const std::uint8_t * buffer, glm::ivec2 size, int c
     glTexImage2D(GL_TEXTURE_2D, 0, intfmt, _size.x, _size.y, 0, fmt, GL_UNSIGNED_BYTE, buffer);
 
     if (opts.Mipmap) {
-        glGenerateMipmap(GL_TEXTURE_2D);
+        //glGenerateMipmap(GL_TEXTURE_2D);
     }
 
     glBindTexture(GL_TEXTURE_2D, 0);

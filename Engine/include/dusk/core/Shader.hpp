@@ -51,15 +51,6 @@ public:
      */
     static void InitializeVersionString();
 
-    static define_map_t GetDefaultDefines() {
-        return _DefaultDefines;
-    }
-
-    template <typename T>
-    static void SetDefaultDefine(std::string name, T value) {
-        _DefaultDefines.emplace(name, std::to_string(value));
-    }
-
     /// Methods
 
     /** Load and compile the given shader files, then link the program.
@@ -83,6 +74,11 @@ public:
     void SetDefine(std::string name, T value) {
         _defines.emplace(name, std::to_string(value));
     }
+
+	template <>
+	void SetDefine<std::string>(std::string name, std::string value) {
+		_defines.emplace(name, "\"" + value + "\"");
+	}
 
     /**
      */
@@ -124,15 +120,15 @@ private:
 
     static inline std::string _GLSLVersionString = "";
 
-    static inline define_map_t _DefaultDefines = { };
-
     /// Variables
 
     GLuint _glID = 0;
 
     std::vector<std::string> _filenames;
 
-    define_map_t _defines;
+	define_map_t _defines = {
+		{ "M_PI", std::to_string(M_PI) },
+	};
 
     uniform_map_t _uniforms;
 

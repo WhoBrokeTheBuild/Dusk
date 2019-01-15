@@ -31,7 +31,13 @@ TARGET_COMPILE_OPTIONS(
         # Disable unknown pragmas warning, C++ exceptions
         $<$<CXX_COMPILER_ID:GNU>:-Wall -Wno-unknown-pragmas -fno-exceptions>
         $<$<CXX_COMPILER_ID:Clang>:-Wall -Wno-unknown-pragmas -fno-exceptions>
-        $<$<CXX_COMPILER_ID:MSVC>:-wd4068 /EHs-c>
+        $<$<CXX_COMPILER_ID:MSVC>:/MP /wd4068 /EHsc->
+)
+
+TARGET_COMPILE_DEFINITIONS(
+    HelloWorld 
+    PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
 )
 
 TARGET_LINK_LIBRARIES(
@@ -66,7 +72,7 @@ IF(MSVC)
         HelloWorld PROPERTIES 
         VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         VS_DEBUGGER_ENVIRONMENT "PATH=%PATH%;${CMAKE_MSVCIDE_RUN_PATH}"
-        LINK_FLAGS "/NODEFAULTLIB:LIBCMT /NODEFAULTLIB:MSVCRT /LTCG /SUBSYSTEM:WINDOWS" 
+        LINK_FLAGS "/NODEFAULTLIB:LIBCMT /NODEFAULTLIB:MSVCRT /LTCG"
     )
 ENDIF()
 

@@ -66,7 +66,13 @@ TARGET_COMPILE_OPTIONS(
         # Disable unknown pragmas warning, C++ exceptions
         $<$<CXX_COMPILER_ID:GNU>:-Wall -Wno-unknown-pragmas -fno-exceptions>
         $<$<CXX_COMPILER_ID:Clang>:-Wall -Wno-unknown-pragmas -fno-exceptions>
-        $<$<CXX_COMPILER_ID:MSVC>:-wd4068 /EHs-c>
+        $<$<CXX_COMPILER_ID:MSVC>:/MP /wd4068 /EHsc->
+)
+
+TARGET_COMPILE_DEFINITIONS(
+    ${_ENGINE} 
+    PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
 )
 
 TARGET_LINK_LIBRARIES(

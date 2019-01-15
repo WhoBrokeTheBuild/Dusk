@@ -26,7 +26,7 @@ public:
     {
         POSITION    = 0,
         NORMAL      = 1,
-        TEXCOORD    = 2,
+        UV          = 2,
         COLOR       = 3,
         TANGENT     = 4,
         BITANGENT   = 5,
@@ -41,8 +41,8 @@ public:
         GLsizei     Offset;
         Box         Bounds;
         
-        std::shared_ptr<Material> Material;
-        std::unique_ptr<Shader> Shader;
+        std::shared_ptr<dusk::Material> Material;
+        std::unique_ptr<dusk::Shader> Shader;
     };
 
     /// Class Boilerplate

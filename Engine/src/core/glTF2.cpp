@@ -183,8 +183,9 @@ std::vector<image_t> loadImages(
 							&image.size.x,
 							&image.size.y,
 							&image.components,
-							0)
+							STBI_rgb_alpha)
 						);
+						image.components = STBI_rgb_alpha;
 
 						if (!image.data) {
 							DuskLogError("Failed to load glTF image file '%s'", imageFilename);
@@ -205,8 +206,9 @@ std::vector<image_t> loadImages(
                             &image.size.x, 
                             &image.size.y, 
                             &image.components, 
-                            0)
+                            STBI_rgb_alpha)
                         );
+						image.components = STBI_rgb_alpha;
                     }
                 }
             }
@@ -493,7 +495,7 @@ std::vector<std::shared_ptr<Mesh>> loadMeshes(
 											} else if (attrib == "NORMAL") {
 												vaa = Mesh::AttributeID::NORMAL;
 											} else if (attrib == "TEXCOORD_0") {
-												vaa = Mesh::AttributeID::TEXCOORD;
+												vaa = Mesh::AttributeID::UV;
 											} else if (attrib == "TANGENT") {
 												vaa = Mesh::AttributeID::TANGENT;
 											}

@@ -23,8 +23,6 @@ bool Scene::LoadFromFile(const std::string& filename)
 {
     DuskBenchStart();
 
-
-    /*
     using namespace tinygltf;
 
     std::string ext = GetExtension(filename);
@@ -93,12 +91,12 @@ bool Scene::LoadFromFile(const std::string& filename)
 
 		it = vals.find("metallicFactor");
 		if (it != vals.end()) {
-			mat->Metallic = (float)it->second.Factor();
+			mat->MetallicFactor = (float)it->second.Factor();
 		}
 
 		it = vals.find("roughnessFactor");
 		if (it != vals.end()) {
-			mat->Roughness = (float)it->second.Factor();
+			mat->RoughnessFactor = (float)it->second.Factor();
 		}
 
         it = vals.find("metallicRoughnessTexture");
@@ -109,11 +107,11 @@ bool Scene::LoadFromFile(const std::string& filename)
         addIt = addVals.find("normalTexture");
         if (addIt != addVals.end()) {
             mat->NormalMap = textures[addIt->second.TextureIndex()];
-            mat->NormalScale = (float)addIt->second.Factor();
+            mat->NormalScale = 1.0f;
         }
 
         addIt = addVals.find("emissiveFactor");
-        if (addIt != vals.end() && !addIt->second.number_array.empty()) {
+        if (addIt != addVals.end() && !addIt->second.number_array.empty()) {
             mat->EmissiveFactor = glm::make_vec3(addIt->second.ColorFactor().data());
         }
 
@@ -263,7 +261,7 @@ bool Scene::LoadFromFile(const std::string& filename)
                             vaa = Mesh::AttributeID::NORMAL;
                         }
                         if (attrib.first.compare("TEXCOORD_0") == 0) {
-                            vaa = Mesh::AttributeID::TEXCOORD;
+                            vaa = Mesh::AttributeID::UV;
                         }
                         if (attrib.first.compare("TANGENT") == 0) {
                             vaa = Mesh::AttributeID::TANGENT;
@@ -278,7 +276,7 @@ bool Scene::LoadFromFile(const std::string& filename)
                             DuskLogWarn("Ignoring attribute %s", attrib.first);
                         }
                     }
-                    */
+                    
                     /* Bitangent Generation
                     auto& norm = primitive.attributes.find("NORMAL");
                     auto& tang = primitive.attributes.find("TANGENT");
@@ -325,7 +323,7 @@ bool Scene::LoadFromFile(const std::string& filename)
                         }
                     }
                     */
-                    /*
+                    
 
                     primitives.push_back({
                         vao,
@@ -335,11 +333,12 @@ bool Scene::LoadFromFile(const std::string& filename)
                         (GLsizei)indexAccessor.byteOffset,
                         bounds,
                         materials[(primitive.material < 0 ? 0 : primitive.material)],
+						nullptr,
                     });
                 }
                 
                 auto comp = std::make_unique<MeshComponent>();
-                comp->AddMesh(std::make_unique<Mesh>(primitives));
+                comp->AddMesh(std::make_unique<Mesh>(std::move(primitives)));
                 actor->AddComponent(std::make_unique<Axis>());
                 actor->AddComponent(std::move(comp));
             }
@@ -375,7 +374,7 @@ bool Scene::LoadFromFile(const std::string& filename)
     }
 
     App::Inst()->GetRenderContext().CurrentCamera = defaultCamera;
-    */
+    
 
     DuskBenchEnd("Scene::LoadFromFile");
     return true;

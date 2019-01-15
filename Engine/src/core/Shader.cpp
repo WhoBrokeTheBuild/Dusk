@@ -9,15 +9,13 @@
 namespace dusk {
 
 Shader::Shader(const filenames_initializer_t& filenames, const define_map_t& defines /*= { }*/)
-    : _defines(_DefaultDefines)
 {
-    LoadFromFiles(filenames);
+    LoadFromFiles(filenames, defines);
 }
 
 Shader::Shader(const filenames_vector_t& filenames, const define_map_t& defines /*= { }*/)
-    : _defines(_DefaultDefines)
 {
-    LoadFromFiles(filenames);
+    LoadFromFiles(filenames, defines);
 }
 
 Shader::~Shader()
@@ -42,7 +40,7 @@ void Shader::InitializeVersionString()
 
 bool Shader::LoadFromFiles(const filenames_initializer_t& filenames, const define_map_t& defines /*= { }*/)
 {
-    return LoadFromFiles(std::vector<std::string>(filenames));
+    return LoadFromFiles(std::vector<std::string>(filenames), defines);
 }
 
 bool Shader::LoadFromFiles(const filenames_vector_t& filenames, const define_map_t& defines /*= { }*/)
@@ -52,12 +50,8 @@ bool Shader::LoadFromFiles(const filenames_vector_t& filenames, const define_map
     GLint linked = GL_FALSE;
     std::vector<GLuint> shaders;
 
-    define_map_t combinedDefines = _DefaultDefines;
-    for (const auto& d : _defines) {
-        combinedDefines.insert_or_assign(d.first, d.second);
-    }
     for (const auto& d : defines) {
-        combinedDefines.insert_or_assign(d.first, d.second);
+		_defines.insert_or_assign(d.first, d.second);
     }
     
     if (_glID != 0)
@@ -127,7 +121,7 @@ bool Shader::LoadFromFiles(const filenames_vector_t& filenames, const define_map
     {
         for (const std::string& filename : filenames)
         {
-            GLuint id = LoadShader(filename, combinedDefines);
+            GLuint id = LoadShader(filename, _defines);
             if (0 == id)
             {
                 continue;
@@ -316,10 +310,11 @@ GLuint Shader::LoadShader(const std::string& filename, const define_map_t& defin
     }
     
     code = header + code;
-    PrintCode(code);
 
     DuskLogLoad("Loading %s shader from '%s'", GetShaderTypeString(type).c_str(), fullPath.c_str());
     code = PreProcess(type, code, GetDirname(fullPath));
+    
+    PrintCode(code);
 
     GLint compiled = GL_FALSE;
     GLuint id = glCreateShader(type);

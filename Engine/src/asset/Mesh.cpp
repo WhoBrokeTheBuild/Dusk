@@ -328,7 +328,7 @@ bool Mesh::LoadFromData(std::vector<Primitive>&& primitives)
             std::unordered_map<GLint, std::string> attributes = {
                 { POSITION, "HAS_POSITION", },
                 { NORMAL, "HAS_NORMAL", },
-                { TEXCOORD, "HAS_TEXCOORD", },
+                { UV, "HAS_UV", },
                 { COLOR, "HAS_COLOR", },
                 { TANGENT, "HAS_TANGENT", },
                 { BITANGENT, "HAS_BITANGENT", },
@@ -338,9 +338,16 @@ bool Mesh::LoadFromData(std::vector<Primitive>&& primitives)
             for (const auto& [id, def] : attributes) {
                 glGetVertexAttribiv(id, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &enabled);
                 if (enabled) {
-                    defines.emplace(def, "");
+					defines[def] = std::string();
                 }
             }
+
+			if (p.Material) {
+				const auto& materialDefines = p.Material->GetDefines();
+				for (const auto& [name, value] : materialDefines) {
+					defines[name] = value;
+				}
+			}
 
             glBindVertexArray(0);
 

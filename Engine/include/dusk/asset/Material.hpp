@@ -7,6 +7,8 @@
 #include <dusk/core/Shader.hpp>
 
 #include <memory>
+#include <unordered_map>
+#include <string>
 
 namespace dusk {
 
@@ -16,20 +18,11 @@ public:
 
     enum TextureID : GLint
     {
-        BaseColor = 0,
-        Normal,
-        MetallicRoughness,
-        Emissive,
-        Occlusion,
-    };
-
-    enum TextureFlags : GLuint 
-    {
-        HasBaseColorMap             = 1 << 0,
-        HasNormalMap                = 1 << 1,
-        HasMetallicRoughnessMap     = 1 << 2,
-        HasEmissiveMap              = 1 << 3,
-        HasOcclusionMap             = 1 << 4,
+        BASE_COLOR = 0,
+        NORMAL,
+        METALLIC_ROUGHNESS,
+        EMISSIVE,
+        OCCLUSION,
     };
     
     glm::vec4 BaseColorFactor       = glm::vec4(1.0f);
@@ -45,6 +38,8 @@ public:
     std::shared_ptr<Texture> MetallicRoughnessMap;
     std::shared_ptr<Texture> EmissiveMap;
     std::shared_ptr<Texture> OcclusionMap;
+
+    std::unordered_map<std::string, std::string> GetDefines() const;
 
     Material() = default;
 

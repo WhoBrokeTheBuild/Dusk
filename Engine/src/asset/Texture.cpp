@@ -14,7 +14,7 @@ Texture::Texture(const std::string& filename, Options opts /*= Options()*/)
     LoadFromFile(filename, opts);
 }
 
-Texture::Texture(const uint8_t * data, glm::ivec2 size, int comp /*= 4*/, Options opts /*= Options()*/)
+Texture::Texture(const std::uint8_t * data, glm::ivec2 size, int comp /*= 4*/, Options opts /*= Options()*/)
 {
     LoadFromBuffer(data, size, comp, opts);
 }
@@ -49,7 +49,7 @@ bool Texture::LoadFromFile(const std::string& filename, Options opts /*= Options
     const auto& paths = GetAssetPaths();
 
     int comp;
-    uint8_t * texture = nullptr;
+    std::uint8_t * texture = nullptr;
 
     std::string fullPath;
     for (auto& p : paths) {
@@ -77,9 +77,11 @@ bool Texture::LoadFromFile(const std::string& filename, Options opts /*= Options
     return loaded;
 }
 
-bool Texture::LoadFromBuffer(const uint8_t * buffer, glm::ivec2 size, int comp /*= 4*/, Options opts /*= Options()*/)
+bool Texture::LoadFromBuffer(const std::uint8_t * buffer, glm::ivec2 size, int comp /*= 4*/, Options opts /*= Options()*/)
 {
     DuskBenchStart();
+
+	_size = size;
 
     if (_glID > 0) {
         glDeleteTextures(1, &_glID);
@@ -117,7 +119,6 @@ bool Texture::LoadFromBuffer(const uint8_t * buffer, glm::ivec2 size, int comp /
     }
 
     glBindTexture(GL_TEXTURE_2D, _glID);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     DuskLogVerbose("Binding texture to ID %u", _glID);
 
@@ -127,7 +128,7 @@ bool Texture::LoadFromBuffer(const uint8_t * buffer, glm::ivec2 size, int comp /
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, opts.MagFilter);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, opts.MinFilter);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, intfmt, size.x, size.y, 0, fmt, GL_UNSIGNED_BYTE, buffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, intfmt, _size.x, _size.y, 0, fmt, GL_UNSIGNED_BYTE, buffer);
 
     if (opts.Mipmap) {
         glGenerateMipmap(GL_TEXTURE_2D);

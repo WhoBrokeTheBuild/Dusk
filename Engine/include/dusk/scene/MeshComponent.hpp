@@ -16,6 +16,8 @@ public:
 
     MeshComponent() = default;
 
+    MeshComponent(std::shared_ptr<Mesh> mesh);
+
     virtual ~MeshComponent() = default;
 
     virtual void AddMesh(std::shared_ptr<Mesh> mesh);

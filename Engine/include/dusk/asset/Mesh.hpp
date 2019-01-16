@@ -26,7 +26,7 @@ public:
     {
         POSITION    = 0,
         NORMAL      = 1,
-        TEXCOORD    = 2,
+        UV          = 2,
         COLOR       = 3,
         TANGENT     = 4,
         BITANGENT   = 5,
@@ -41,7 +41,8 @@ public:
         GLsizei     Offset;
         Box         Bounds;
         
-        std::shared_ptr<Material> Mat;
+        std::shared_ptr<dusk::Material> Material;
+        std::unique_ptr<dusk::Shader> Shader;
     };
 
     /// Class Boilerplate
@@ -50,30 +51,28 @@ public:
 
     Mesh() = default;
 
-    Mesh(Primitive p, std::unique_ptr<Shader>&& shader = nullptr);
+    Mesh(Primitive p);
 
-    Mesh(std::vector<Primitive> primitives, std::unique_ptr<Shader>&& shader = nullptr);
+    Mesh(std::vector<Primitive>&& primitives);
 
-    Mesh(const std::string& filename, std::unique_ptr<Shader>&& shader = nullptr);
+    Mesh(const std::string& filename);
 
     virtual ~Mesh();
 
-    bool LoadFromFile(const std::string& filename, std::unique_ptr<Shader>&& shader = nullptr);
+    bool LoadFromFile(const std::string& filename);
 
-    bool LoadFromData(std::vector<Primitive> primitives, std::unique_ptr<Shader>&& shader = nullptr);
+    bool LoadFromData(std::vector<Primitive>&& primitives);
 
     std::string GetFilename() const { 
         return _filename;
     }
 
-    void SetShader(std::unique_ptr<Shader>&& shader);
-
-    Shader * GetShader() const {
-        return _shader.get();
-    }
-
     Box GetBounds() const { 
         return _bounds; 
+    }
+
+    std::vector<Primitive>& GetPrimitives() {
+        return _primitives;
     }
 
     virtual void Render(RenderContext& ctx, glm::mat4 transform = glm::mat4(1.f));
@@ -81,8 +80,6 @@ public:
 private:
 
     std::string _filename;
-
-    std::unique_ptr<Shader> _shader;
 
     std::vector<Primitive> _primitives;
 

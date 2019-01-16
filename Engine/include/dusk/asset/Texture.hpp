@@ -42,7 +42,7 @@ public:
 
     Texture(const std::string& filename, Options opts = Options());
 
-    Texture(const uint8_t * buffer, glm::ivec2 size, int comp = 4, Options opts = Options());
+    Texture(const std::uint8_t * buffer, glm::ivec2 size, int comp = 4, Options opts = Options());
 
     Texture(GLuint&& id, glm::ivec2 size);
 
@@ -54,7 +54,7 @@ public:
 
     bool LoadFromFile(const std::string& filename, Options opts = Options());
 
-    bool LoadFromBuffer(const uint8_t * buffer, glm::ivec2 size, int comp = 4, Options opts = Options());
+    bool LoadFromBuffer(const std::uint8_t * buffer, glm::ivec2 size, int comp = 4, Options opts = Options());
 
     void Bind();
 

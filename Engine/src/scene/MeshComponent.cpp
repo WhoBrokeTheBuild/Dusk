@@ -4,6 +4,11 @@
 
 namespace dusk {
 
+MeshComponent::MeshComponent(std::shared_ptr<Mesh> mesh)
+    : _meshes{ mesh }
+{
+}
+
 void MeshComponent::AddMesh(std::shared_ptr<Mesh> mesh)
 {
     _meshes.push_back(mesh);

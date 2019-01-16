@@ -8,14 +8,14 @@
 
 namespace dusk {
 
-Shader::Shader(const std::initializer_list<std::string>& filenames)
+Shader::Shader(const filenames_initializer_t& filenames, const define_map_t& defines /*= { }*/)
 {
-    LoadFromFiles(filenames);
+    LoadFromFiles(filenames, defines);
 }
 
-Shader::Shader(const std::vector<std::string>& filenames)
+Shader::Shader(const filenames_vector_t& filenames, const define_map_t& defines /*= { }*/)
 {
-    LoadFromFiles(filenames);
+    LoadFromFiles(filenames, defines);
 }
 
 Shader::~Shader()
@@ -38,18 +38,22 @@ void Shader::InitializeVersionString()
     DuskLogVerbose("Using GLSL version string '%s'", _GLSLVersionString);
 }
 
-bool Shader::LoadFromFiles(const std::initializer_list<std::string>& filenames)
+bool Shader::LoadFromFiles(const filenames_initializer_t& filenames, const define_map_t& defines /*= { }*/)
 {
-    return LoadFromFiles(std::vector<std::string>(filenames));
+    return LoadFromFiles(std::vector<std::string>(filenames), defines);
 }
 
-bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
+bool Shader::LoadFromFiles(const filenames_vector_t& filenames, const define_map_t& defines /*= { }*/)
 {
     _filenames = filenames;
 
     GLint linked = GL_FALSE;
     std::vector<GLuint> shaders;
 
+    for (const auto& d : defines) {
+		_defines.insert_or_assign(d.first, d.second);
+    }
+    
     if (_glID != 0)
     {
         DuskLogWarn("Attempt to load an already loaded shader.");
@@ -117,7 +121,7 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
     {
         for (const std::string& filename : filenames)
         {
-            GLuint id = LoadShader(filename);
+            GLuint id = LoadShader(filename, _defines);
             if (0 == id)
             {
                 continue;
@@ -238,7 +242,7 @@ std::string Shader::GetBinaryName(const std::vector<std::string> filenames)
     return ss.str();
 }
 
-GLuint Shader::LoadShader(const std::string& filename)
+GLuint Shader::LoadShader(const std::string& filename, const define_map_t& defines)
 {
     GLuint type = GL_INVALID_ENUM;
     if (filename.find(".vs.glsl") != std::string::npos)
@@ -299,11 +303,17 @@ GLuint Shader::LoadShader(const std::string& filename)
                      std::istreambuf_iterator<char>());
     file.close();
 
-    code = _GLSLVersionString + "\n" + code;
+    std::string header = _GLSLVersionString + "\n";
+
+    for (const auto& d : defines) {
+        header += "#define " + d.first + " " + d.second + "\n";
+    }
+    
+    code = header + code;
 
     DuskLogLoad("Loading %s shader from '%s'", GetShaderTypeString(type).c_str(), fullPath.c_str());
     code = PreProcess(type, code, GetDirname(fullPath));
-
+    
     GLint compiled = GL_FALSE;
     GLuint id = glCreateShader(type);
     const char * bufferPtr = code.c_str();

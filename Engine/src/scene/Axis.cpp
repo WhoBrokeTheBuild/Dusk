@@ -7,7 +7,8 @@ namespace dusk {
 Axis::Axis() 
 {
     if (!_Mesh) {
-        Mesh::Primitive p;
+        std::vector<Mesh::Primitive> tmp(1);
+        auto& p = tmp.back();
 
         glGenVertexArrays(1, &p.VAO);
         glBindVertexArray(p.VAO);
@@ -63,13 +64,12 @@ Axis::Axis()
         p.Count = sizeof(indices) / sizeof(indices[0]);
         p.Type = GL_UNSIGNED_INT;
         p.Offset = 0;
-
-        _Mesh = std::make_shared<Mesh>(p, 
-            std::unique_ptr<Shader>(new Shader({ 
+        p.Shader = std::make_unique<Shader>(std::vector<std::string>{ 
             "shaders/default/axis.vs.glsl", 
             "shaders/default/axis.fs.glsl",
-            }))
-        );
+        });
+
+        _Mesh = std::make_shared<Mesh>(std::move(tmp));
     }
 }
 

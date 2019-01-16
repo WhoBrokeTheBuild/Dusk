@@ -14,6 +14,14 @@
 
 namespace dusk {
 
+inline glm::vec3 GetWorldUp() {
+	return glm::vec3(0.f, 1.f, 0.f);
+}
+
+inline glm::vec3 GetWorldForward() {
+	return glm::vec3(0.f, 0.f, -1.f);
+}
+
 struct Box
 {
 public:
@@ -80,23 +88,6 @@ std::string GetBasename(std::string path);
 std::string GetExtension(std::string path);
 
 std::string RunCommand(const std::string& cmd);
-
-template <typename F>
-struct privDefer {
-    F f;
-    privDefer(F f) : f(f) {}
-    ~privDefer() { f(); }
-};
-
-template <typename F>
-privDefer<F> defer_func(F f) {
-    return privDefer<F>(f);
-}
-
-#define DEFER_1(x, y) x##y
-#define DEFER_2(x, y) DEFER_1(x, y)
-#define DEFER_3(x)    DEFER_2(x, __COUNTER__)
-#define defer(code)   auto DEFER_3(_defer_) = defer_func([&](){code;})
 
 } // namespace dusk
 

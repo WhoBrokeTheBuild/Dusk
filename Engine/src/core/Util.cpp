@@ -238,15 +238,12 @@ std::string RunCommand(const std::string& cmd)
     std::array<char, 128> buffer;
     std::shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
 
-    if (!pipe)
-    {
-        throw std::runtime_error("popen() failed!");
+    if (!pipe) {
+        return "";
     }
 
-    while (!feof(pipe.get()))
-    {
-        if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
-        {
+    while (!feof(pipe.get())) {
+        if (fgets(buffer.data(), 128, pipe.get()) != nullptr) {
             result += buffer.data();
         }
     }

@@ -1,26 +1,33 @@
 #include <dusk/Dusk.hpp>
 
+#include <dusk/core/glTF2.hpp>
+
 #include <memory>
 
 int main(int argc, char** argv) {
     dusk::SetAssetPath(DUSK_ASSET_PATH);
     dusk::App app(argc, argv);
     
-    auto scene = std::make_unique<dusk::Scene>();
-    scene->LoadFromFile("models/TestScene.glb");
-    //scene->LoadFromFile("models/DamagedHelmet.glb");
-    //scene->LoadFromFile("models/SciFiHelmet/SciFiHelmet.gltf");
-    //scene->LoadFromFile("models/BoomBox.glb");
-    //scene->LoadFromFile("models/WaterBottle.glb");
+	auto scene = std::make_unique<dusk::Scene>();
+	scene->LoadFromFile("models/TestScene.glb");
+	//scene->LoadFromFile("models/DamagedHelmet.glb");
+	//scene->LoadFromFile("models/SciFiHelmet/SciFiHelmet.gltf");
+	//scene->LoadFromFile("models/BoomBox.glb");
+	//scene->LoadFromFile("models/WaterBottle.glb");
 
-    auto camera = std::make_unique<dusk::DebugCamera>();
-    app.GetRenderContext().CurrentCamera = camera.get();
-    camera->SetPosition({ 20.f, 20.f, 20.f });
-    camera->SetLookAt({ 0.f, 0.f, 0.f });
-    scene->AddActor(std::move(camera));
+	auto actor = std::make_unique<dusk::Actor>();
+	actor->SetPosition({ -2.f, 0.f, 4.f });
+	actor->AddComponent(std::make_unique<dusk::MeshComponent>(std::make_unique<dusk::Mesh>("models/SciFiHelmet/SciFiHelmet.gltf")));
+	scene->AddActor(std::move(actor));
 
-    app.SetActiveScene(app.AddScene(std::move(scene)));
+	auto camera = std::make_unique<dusk::DebugCamera>();
+	app.GetRenderContext().CurrentCamera = camera.get();
+	camera->SetPosition({ 20.f, 20.f, 20.f });
+	camera->SetLookAt({ 0.f, 0.f, 0.f });
+	scene->AddActor(std::move(camera));
 
-    app.Start();
+	app.SetActiveScene(app.AddScene(std::move(scene)));
+
+	app.Start();
     return 0;
 }

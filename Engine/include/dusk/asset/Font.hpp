@@ -35,7 +35,7 @@ private:
 
     unsigned int _size;
 
-    std::vector<uint8_t> _buffer;
+    std::vector<std::uint8_t> _buffer;
 
     std::unique_ptr<stbtt_fontinfo> _stbFontInfo = nullptr;
 

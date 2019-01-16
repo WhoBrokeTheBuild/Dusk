@@ -2,6 +2,7 @@
 
 #include <dusk/core/App.hpp>
 #include <dusk/core/Log.hpp>
+#include <dusk/core/Util.hpp>
 
 namespace dusk {
 
@@ -108,6 +109,11 @@ void Camera::SetClip(const glm::vec2& clip)
 void Camera::SetUp(const glm::vec3& up)
 {
     _up = up;
+}
+
+glm::vec3 Camera::GetRight() const
+{
+	return glm::normalize(glm::cross(GetForward(), GetUp()));
 }
 
 void Camera::SetForward(const glm::vec3& forward)

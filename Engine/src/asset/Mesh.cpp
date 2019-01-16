@@ -30,13 +30,7 @@ Mesh::~Mesh()
 
 bool Mesh::LoadFromFile(const std::string& filename)
 {
-    DuskBenchStart();
-
-    auto primitives = glTF2::LoadPrimitivesFromFile(filename);
-
-
-    DuskBenchEnd("Mesh::LoadFromFile");
-    return true;
+	return LoadFromData(glTF2::LoadPrimitivesFromFile(filename));
 }
 
 bool Mesh::LoadFromData(std::vector<Primitive>&& primitives)

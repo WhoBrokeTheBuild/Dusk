@@ -15,6 +15,11 @@ int main(int argc, char** argv) {
 	//scene->LoadFromFile("models/BoomBox.glb");
 	//scene->LoadFromFile("models/WaterBottle.glb");
 
+	auto actor = std::make_unique<dusk::Actor>();
+	actor->SetPosition({ -2.f, 0.f, 4.f });
+	actor->AddComponent(std::make_unique<dusk::MeshComponent>(std::make_unique<dusk::Mesh>("models/SciFiHelmet/SciFiHelmet.gltf")));
+	scene->AddActor(std::move(actor));
+
 	auto camera = std::make_unique<dusk::DebugCamera>();
 	app.GetRenderContext().CurrentCamera = camera.get();
 	camera->SetPosition({ 20.f, 20.f, 20.f });

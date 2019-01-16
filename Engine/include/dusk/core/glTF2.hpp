@@ -15,7 +15,7 @@ namespace glTF2 {
 
 std::vector<std::unique_ptr<Actor>> LoadSceneFromFile(const std::string& filename);
 
-std::vector<std::shared_ptr<Mesh>> LoadPrimitivesFromFile(const std::string& filename);
+std::vector<Mesh::Primitive> LoadPrimitivesFromFile(const std::string& filename);
 
 } // namespace glTF2
 

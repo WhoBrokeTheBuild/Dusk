@@ -614,6 +614,33 @@ std::vector<Mesh::Primitive> loadPrimitives(
     return primitives;
 }
 
+std::vector<Mesh::Primitive> loadAllPrimitives(
+	const json& data,
+	const std::vector<bufferView_t>& bufferViews,
+	const std::vector<std::vector<std::uint8_t>>& buffers,
+	const std::vector<accessor_t>& accessors,
+	const std::vector<std::shared_ptr<Material>>& materials)
+{
+	std::vector<Mesh::Primitive> primitives;
+
+	const auto it = data.find("meshes");
+	if (it != data.cend()) {
+		const auto& array = it.value();
+		for (const auto& object : array) {
+			if (object.is_object()) {
+				DuskLogVerbose("glTF mesh %s", object.value("name", ""));
+
+				auto tmp = loadPrimitives(object, bufferViews, buffers, accessors, materials);
+				for (auto&& p : tmp) {
+					primitives.push_back(std::move(p));
+				}
+			}
+		}
+	}
+
+	return primitives;
+}
+
 std::vector<std::shared_ptr<Mesh>> loadMeshes(
     const json& data,
     const std::vector<bufferView_t>& bufferViews, 
@@ -890,10 +917,10 @@ std::vector<std::unique_ptr<Actor>> LoadSceneFromFile(const std::string& filenam
 	auto actors = loadNodes(data, cameras, meshes);
 
     DuskBenchEnd("glTF2::LoadSceneFromFile");
-	return std::vector<std::unique_ptr<Actor>>();
+	return actors;
 }
 
-std::vector<std::shared_ptr<Mesh>> LoadPrimitivesFromFile(const std::string& filename)
+std::vector<Mesh::Primitive> LoadPrimitivesFromFile(const std::string& filename)
 {
     DuskBenchStart();
 
@@ -907,10 +934,10 @@ std::vector<std::shared_ptr<Mesh>> LoadPrimitivesFromFile(const std::string& fil
 	const auto& samplers = loadSamplers(data);
 	const auto& textures = loadTextures(data, images, samplers);
 	const auto& materials = loadMaterials(data, textures);
-	return loadMeshes(data, bufferViews, buffers, accessors, materials);
+	auto primitives = loadAllPrimitives(data, bufferViews, buffers, accessors, materials);
 
     DuskBenchEnd("glTF2::LoadMeshFromFile");
-    return std::vector<std::shared_ptr<Mesh>>();
+    return std::move(primitives);
 }
 
 } // namespace glTF2

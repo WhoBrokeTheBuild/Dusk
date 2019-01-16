@@ -7,6 +7,7 @@
 #include <dusk/asset/Mesh.hpp>
 #include <dusk/asset/Texture.hpp>
 #include <dusk/scene/Actor.hpp>
+#include <dusk/scene/Camera.hpp>
 #include <dusk/scene/MeshComponent.hpp>
 
 #include <stb/stb_image.h>
@@ -30,6 +31,34 @@ enum class ChunkType : std::uint32_t
 	JSON = 0x4E4F534A, // JSON
 	BIN  = 0x004E4942, // BIN
 };
+
+
+glm::vec3 parseVec3(const json& value, glm::vec3 def) 
+{
+    if (value.is_array() && value.size() == 3) {
+        const auto& v = value.get<std::vector<float>>();
+        return glm::make_vec3(v.data());
+    }
+    return def;
+}
+
+glm::vec4 parseVec4(const json& value, glm::vec4 def)
+{
+    if (value.is_array() && value.size() == 4) {
+        const auto& v = value.get<std::vector<float>>();
+        return glm::make_vec4(v.data());
+    }
+    return def;
+}
+
+glm::quat parseQuat(const json& value, glm::quat def) 
+{
+    if (value.is_array() && value.size() == 4) {
+        const auto& v = value.get<std::vector<float>>();
+        return glm::quat(v[3], v[0], v[1], v[2]);
+    }
+    return def;
+}
 
 std::vector<std::vector<std::uint8_t>> loadBuffers(const json& data, const std::string& dir)
 {
@@ -281,27 +310,77 @@ std::vector<std::shared_ptr<Texture>> loadTextures(
     return textures;
 }
 
+struct camera_perspective_t {
+};
+
+struct camera_orthographic_t {
+};
+
+struct camera_t {
+    std::string type;
+
+    // Perspective
+    float aspectRatio;
+    float yfov;
+
+    // Orthographic
+    float xmag;
+    float ymag;
+
+    // Both
+    float zfar;
+    float znear;
+};
+
+std::vector<camera_t> loadCameras(const json& data) 
+{
+    std::vector<camera_t> cameras;
+
+    const auto& it = data.find("cameras");
+    if (it != data.cend()) {
+        if (it.value().is_array()) {
+            const auto& array = it.value();
+            for (const auto& object : array) {
+                if (object.is_object()) {
+                    cameras.push_back(camera_t{
+                        object.value("type", ""),
+                    });
+                    auto& camera = cameras.back();
+
+                    if (camera.type == "perspective") {
+                        auto typeIt = object.find("perspective");
+                        if (typeIt != object.end()) {
+                            auto& perspective = typeIt.value();
+                            camera.aspectRatio = perspective.value("aspectRatio", 0.f);
+                            camera.yfov = perspective.value("yfov", 0.f);
+                            camera.zfar = perspective.value("zfar", 0.f);
+                            camera.znear = perspective.value("znear", 0.f);
+                        }
+                    } else if (camera.type == "orthographic") {
+                        auto typeIt = object.find("orthographic");
+                        if (typeIt != object.end()) {
+                            auto& orthographic = typeIt.value();
+                            camera.xmag = orthographic.value("xmag", 0.f);
+                            camera.ymag = orthographic.value("ymag", 0.f);
+                            camera.zfar = orthographic.value("zfar", 0.f);
+                            camera.znear = orthographic.value("znear", 0.f);
+                        }
+                    } else {
+                        DuskLogWarn("Unknown camera type '%s'", camera.type);
+                    }
+                }
+            }
+        }
+    }
+
+    return cameras;
+}
+
 std::vector<std::shared_ptr<Material>> loadMaterials(
     const json& data, 
     const std::vector<std::shared_ptr<Texture>>& textures)
 {
     std::vector<std::shared_ptr<Material>> materials;
-
-    auto parseVec3 = [](const json& value, glm::vec3 def) -> glm::vec3 {
-        if (value.is_array()) {
-            const auto& v = value.get<std::vector<float>>();
-            return glm::make_vec3(v.data());
-        }
-        return def;
-    };
-
-    auto parseVec4 = [](const json& value, glm::vec4 def) -> glm::vec4 {
-        if (value.is_array()) {
-            const auto& v = value.get<std::vector<float>>();
-            return glm::make_vec4(v.data());
-        }
-        return def;
-    };
 
     auto parseTexture = [&textures](const json& value) -> std::shared_ptr<Texture> {
         if (value.is_object()) {
@@ -343,14 +422,12 @@ std::vector<std::shared_ptr<Material>> loadMaterials(
 
                 valIt = object.find("emissiveFactor");
                 if (valIt != object.end()) {
-                    const auto& value = valIt.value();
-                    material->EmissiveFactor = parseVec3(value, material->EmissiveFactor);
+                    material->EmissiveFactor = parseVec3(valIt.value(), material->EmissiveFactor);
                 }
 
                 valIt = object.find("emissiveTexture");
                 if (valIt != object.end()) {
-                    const auto& value = valIt.value();
-                    material->EmissiveMap = parseTexture(value);
+                    material->EmissiveMap = parseTexture(valIt.value());
                 }
 
                 valIt = object.find("occlusionTexture");
@@ -368,14 +445,12 @@ std::vector<std::shared_ptr<Material>> loadMaterials(
                     if (group.is_object()) {
                         valIt = group.find("baseColorFactor");
                         if (valIt != group.end()) {
-                            const auto& value = valIt.value();
-                            material->BaseColorFactor = parseVec4(value, material->BaseColorFactor);
+                            material->BaseColorFactor = parseVec4(valIt.value(), material->BaseColorFactor);
                         }
 
                         valIt = group.find("baseColorTexture");
                         if (valIt != group.end()) {
-                            const auto& value = valIt.value();
-                            material->BaseColorMap = parseTexture(value);
+                            material->BaseColorMap = parseTexture(valIt.value());
                         }
 
                         valIt = group.find("metallicFactor");
@@ -402,6 +477,143 @@ std::vector<std::shared_ptr<Material>> loadMaterials(
     return materials;
 }
 
+std::vector<Mesh::Primitive> loadPrimitives(
+    const json& data,
+    const std::vector<bufferView_t>& bufferViews, 
+    const std::vector<std::vector<std::uint8_t>>& buffers,
+    const std::vector<accessor_t>& accessors,
+    const std::vector<std::shared_ptr<Material>>& materials)
+{
+    std::vector<Mesh::Primitive> primitives;
+
+    std::shared_ptr<Material> defaultMaterial(new Material());
+    
+	std::vector<GLuint> vbos;
+
+    const auto& primIt = data.find("primitives");
+    if (primIt != data.end()) {
+        const auto& primArray = primIt.value();
+        if (primArray.is_array()) {
+            for (const auto& primitive : primArray) {
+                if (primitive.is_object()) {
+                    GLuint vao;
+                    glGenVertexArrays(1, &vao);
+                    glBindVertexArray(vao);
+
+                    int indices = primitive.value("indices", -1);
+                    if (indices < 0) {
+                        // TODO: glDrawArrays support
+                        DuskLogError("glDrawArrays not supported");
+                        continue;
+                    }
+
+                    const auto& indexAccessor = accessors[indices];
+
+                    {
+                        const auto& bufferView = bufferViews[indexAccessor.bufferView];
+                        const auto& buffer = buffers[bufferView.buffer];
+
+                        GLenum target = (bufferView.target == GL_INVALID_ENUM ? GL_ELEMENT_ARRAY_BUFFER : bufferView.target);
+
+                        GLuint vbo;
+                        glGenBuffers(1, &vbo);
+                        vbos.push_back(vbo);
+
+                        glBindBuffer(target, vbo);
+                        glBufferData(target, bufferView.byteLength,
+                            buffer.data() + bufferView.byteOffset, GL_STATIC_DRAW);
+                    }
+
+                    const auto& attrIt = primitive.find("attributes");
+                    if (attrIt != primitive.end()) {
+                        const auto& attribs = attrIt.value();
+                        if (attribs.is_object()) {
+                            for (const auto& [attrib, accessorIndex] : attribs.items()) {
+                                auto& accessor = accessors[accessorIndex];
+                                auto& bufferView = bufferViews[accessor.bufferView];
+                                auto& buffer = buffers[bufferView.buffer];
+                                int byteStride = bufferView.byteStride;
+
+                                DuskLogVerbose("glTF attribute %s", attrib);
+
+                                GLenum target = (bufferView.target == GL_INVALID_ENUM ? GL_ARRAY_BUFFER : bufferView.target);
+
+                                GLuint vbo;
+                                glGenBuffers(1, &vbo);
+                                vbos.push_back(vbo);
+
+                                glBindBuffer(target, vbo);
+                                glBufferData(target, bufferView.byteLength,
+                                    buffer.data() + bufferView.byteOffset, GL_STATIC_DRAW);
+
+                                GLint size = -1;
+                                if (accessor.type == "SCALAR") {
+                                    size = 1;
+                                } else if (accessor.type == "VEC2") {
+                                    size = 2;
+                                } else if (accessor.type == "VEC3") {
+                                    size = 3;
+                                } else if (accessor.type == "VEC4") {
+                                    size = 4;
+                                }
+
+                                GLint vaa = -1;
+                                if (attrib == "POSITION") {
+                                    vaa = Mesh::AttributeID::POSITION;
+                                } else if (attrib == "NORMAL") {
+                                    vaa = Mesh::AttributeID::NORMAL;
+                                } else if (attrib == "TEXCOORD_0") {
+                                    vaa = Mesh::AttributeID::UV;
+                                } else if (attrib == "TANGENT") {
+                                    vaa = Mesh::AttributeID::TANGENT;
+                                }
+
+                                if (vaa > -1) {
+                                    glEnableVertexAttribArray(vaa);
+                                    glVertexAttribPointer(
+                                        vaa, 
+                                        size,
+                                        accessor.componentType, 
+                                        accessor.normalized, 
+                                        byteStride,
+                                        (void*)accessor.byteOffset
+                                    );
+                                } else {
+                                    DuskLogWarn("Ignoring glTF attribute %s", attrib);
+                                }
+                            }
+                        }
+                    }
+
+                    int materialIndex = primitive.value("material", -1);
+
+                    std::shared_ptr<Material> material;
+                    if (materialIndex >= 0) {
+                        material = materials[materialIndex];
+                    } else {
+                        material = defaultMaterial;
+                    }
+
+                    DuskLogVerbose("Primitive %u", vao);
+
+                    primitives.push_back({
+                        vao,
+                        primitive.value<GLenum>("mode", GL_TRIANGLES),
+                        (GLsizei)indexAccessor.count,
+                        (GLenum)indexAccessor.componentType,
+                        (GLsizei)indexAccessor.byteOffset,
+                        Box(),
+                        material,
+                        nullptr,
+                    });
+                }
+            }
+        }
+    }
+
+    return primitives;
+}
+
 std::vector<std::shared_ptr<Mesh>> loadMeshes(
     const json& data,
     const std::vector<bufferView_t>& bufferViews, 
@@ -410,8 +622,6 @@ std::vector<std::shared_ptr<Mesh>> loadMeshes(
     const std::vector<std::shared_ptr<Material>>& materials)
 {
     std::vector<std::shared_ptr<Mesh>> meshes;
-    
-	std::vector<GLuint> vbos;
 
     const auto it = data.find("meshes");
     if (it != data.cend()) {
@@ -420,126 +630,9 @@ std::vector<std::shared_ptr<Mesh>> loadMeshes(
             if (object.is_object()) {
                 DuskLogVerbose("glTF mesh %s", object.value("name", ""));
 
-                std::vector<Mesh::Primitive> primitives;
-
-                const auto& primIt = object.find("primitives");
-                if (primIt != object.end()) {
-                    const auto& primArray = primIt.value();
-                    if (primArray.is_array()) {
-						for (const auto& primitive : primArray) {
-							if (primitive.is_object()) {
-								GLuint vao;
-								glGenVertexArrays(1, &vao);
-								glBindVertexArray(vao);
-
-								int indices = primitive.value("indices", -1);
-								if (indices < 0) {
-									// TODO: glDrawArrays support
-									DuskLogError("glDrawArrays not supported");
-									continue;
-								}
-
-								const auto& indexAccessor = accessors[indices];
-
-								{
-									const auto& bufferView = bufferViews[indexAccessor.bufferView];
-									const auto& buffer = buffers[bufferView.buffer];
-
-									GLenum target = (bufferView.target == GL_INVALID_ENUM ? GL_ELEMENT_ARRAY_BUFFER : bufferView.target);
-
-									GLuint vbo;
-									glGenBuffers(1, &vbo);
-									vbos.push_back(vbo);
-
-									glBindBuffer(target, vbo);
-									glBufferData(target, bufferView.byteLength,
-										buffer.data() + bufferView.byteOffset, GL_STATIC_DRAW);
-								}
-
-								const auto& attrIt = primitive.find("attributes");
-								if (attrIt != primitive.end()) {
-									const auto& attribs = attrIt.value();
-									if (attribs.is_object()) {
-										for (const auto& [attrib, accessorIndex] : attribs.items()) {
-											auto& accessor = accessors[accessorIndex];
-											auto& bufferView = bufferViews[accessor.bufferView];
-											auto& buffer = buffers[bufferView.buffer];
-											int byteStride = bufferView.byteStride;
-
-											DuskLogVerbose("glTF attribute %s", attrib);
-
-											GLenum target = (bufferView.target == GL_INVALID_ENUM ? GL_ARRAY_BUFFER : bufferView.target);
-
-											GLuint vbo;
-											glGenBuffers(1, &vbo);
-											vbos.push_back(vbo);
-
-											glBindBuffer(target, vbo);
-											glBufferData(target, bufferView.byteLength,
-												buffer.data() + bufferView.byteOffset, GL_STATIC_DRAW);
-
-											GLint size = -1;
-											if (accessor.type == "SCALAR") {
-												size = 1;
-											} else if (accessor.type == "VEC2") {
-												size = 2;
-											} else if (accessor.type == "VEC3") {
-												size = 3;
-											} else if (accessor.type == "VEC4") {
-												size = 4;
-											}
-
-											GLint vaa = -1;
-											if (attrib == "POSITION") {
-												vaa = Mesh::AttributeID::POSITION;
-											} else if (attrib == "NORMAL") {
-												vaa = Mesh::AttributeID::NORMAL;
-											} else if (attrib == "TEXCOORD_0") {
-												vaa = Mesh::AttributeID::UV;
-											} else if (attrib == "TANGENT") {
-												vaa = Mesh::AttributeID::TANGENT;
-											}
-
-											if (vaa > -1) {
-												glEnableVertexAttribArray(vaa);
-												glVertexAttribPointer(
-													vaa, 
-													size,
-													accessor.componentType, 
-													accessor.normalized, 
-													byteStride,
-													(void*)accessor.byteOffset
-												);
-											} else {
-												DuskLogWarn("Ignoring glTF attribute %s", attrib);
-											}
-										}
-									}
-								}
-
-								int materialIndex = primitive.value("material", -1);
-
-								std::shared_ptr<Material> material;
-								if (materialIndex >= 0) {
-									material = materials[materialIndex];
-								}
-
-								primitives.push_back({
-									vao,
-									primitive.value<GLenum>("mode", GL_TRIANGLES),
-									(GLsizei)indexAccessor.count,
-									(GLenum)indexAccessor.componentType,
-									(GLsizei)indexAccessor.byteOffset,
-									Box(),
-									material,
-                                    nullptr,
-								});
-							}
-						}
-
-						meshes.push_back(std::make_shared<Mesh>(std::move(primitives)));
-                    }
-                }
+                meshes.push_back(std::make_shared<Mesh>(
+                    loadPrimitives(object, bufferViews, buffers, accessors, materials)
+                ));
             }
         }
     }
@@ -549,45 +642,97 @@ std::vector<std::shared_ptr<Mesh>> loadMeshes(
 
 std::vector<std::unique_ptr<Actor>> loadNodes(
     const json& data,
+    const std::vector<camera_t>& cameras,
     const std::vector<std::shared_ptr<Mesh>>& meshes)
 {
     std::vector<std::unique_ptr<Actor>> actors;
 
-    auto parseVec3 = [](const json& value, glm::vec3 def) -> glm::vec3 {
-        if (value.is_array()) {
-            const auto& v = value.get<std::vector<float>>();
-            return glm::make_vec3(v.data());
-        }
-        return def;
-    };
-
-    auto parseQuat = [](const json& value, glm::vec4 def) -> glm::vec4 {
-        if (value.is_array()) {
-            const auto& v = value.get<std::vector<float>>();
-            return glm::make_vec4(v.data());
-        }
-        return def;
-    };
-
-    auto loadNode = [](const json& data) -> std::unique_ptr<Actor> {
+    auto loadNode = [cameras,meshes](const json& data) -> std::unique_ptr<Actor> {
         Actor * actor = nullptr;
 
-        glm::vec3 position(0.f);
-        glm::quat rotation(1.f, 0.f, 0.f, 0.f);
-        glm::vec3 scale(1.f);
+        auto it = data.begin();
+
+        int cameraIndex = data.value("camera", -1);
+        if (cameraIndex >= 0) {
+            Camera * camera = new Camera();
+            const auto& c = cameras[cameraIndex];
+            if (c.type == "perspective") {
+                camera->SetMode(Camera::Mode::Perspective);
+
+                // TODO: aspectRatio
+
+                if (c.yfov > 0.f) {
+                    camera->SetFOVY(c.yfov);
+                }
+
+                if (c.znear > 0.f && c.zfar > 0.f) {
+                    camera->SetClip(c.znear, c.zfar);
+                }
+            } else if (c.type == "orthographic") {
+                camera->SetMode(Camera::Mode::Orthographic);
+
+                if (c.xmag > 0.f && c.ymag > 0.f) {
+                    camera->SetViewportSize(c.xmag, c.ymag);
+                }
+
+                if (c.znear > 0.f && c.zfar > 0.f) {
+                    camera->SetClip(c.znear, c.zfar);
+                }
+            }
+            actor = camera;
+        } else {
+            actor = new Actor();
+        }
+
+        int meshIndex = data.value("mesh", -1);
+        if (meshIndex >= 0) {
+            DuskLogVerbose("Adding MeshComponent");
+            actor->AddComponent(std::make_unique<MeshComponent>(meshes[meshIndex]));
+        }
+
+        it = data.find("translation");
+        if (it != data.end()) {
+            actor->SetPosition(parseVec3(it.value(), actor->GetPosition()));
+        }
+
+        it = data.find("rotation");
+        if (it != data.end()) {
+            actor->SetRotation(parseQuat(it.value(), actor->GetRotation()));
+        }
+
+        it = data.find("scale");
+        if (it != data.end()) {
+            actor->SetScale(parseVec3(it.value(), actor->GetScale()));
+        }
 
         return std::unique_ptr<Actor>(actor);
     };
+
+    std::vector<int> sceneNodeIndexes;
     
-    const auto it = data.find("nodes");
-    if (it != data.cend()) {
-        const auto& array = it.value();
-        for (const auto& object : array) {
-            if (object.is_object()) {
-                DuskLogVerbose("glTF node %s", object.value("name", ""));
-                auto actor = loadNode(object);
-                if (actor) {
-                    actors.push_back(std::move(actor));
+    int defaultSceneIndex = data.value("defaultScene", 0);
+    const auto scenesIt = data.find("scenes");
+    if (scenesIt != data.cend()) {
+        const auto& array = scenesIt.value();
+        if (array.is_array()) {
+            const auto& scene = array[defaultSceneIndex];
+            sceneNodeIndexes = scene["nodes"].get<std::vector<int>>();
+        }
+    }
+    
+    const auto nodesIt = data.find("nodes");
+    if (nodesIt != data.cend()) {
+        const auto& array = nodesIt.value();
+        if (array.is_array()) {
+            for (int index : sceneNodeIndexes) {
+                const auto& object = array[index];
+
+                if (object.is_object()) {
+                    DuskLogVerbose("glTF node %s", object.value("name", ""));
+                    auto actor = loadNode(object);
+                    if (actor) {
+                        actors.push_back(std::move(actor));
+                    }
                 }
             }
         }
@@ -596,10 +741,10 @@ std::vector<std::unique_ptr<Actor>> loadNodes(
     return actors;
 }
 
-bool LoadSceneFromFile(const std::string& filename, Scene * scene)
+std::tuple<json, std::vector<std::vector<uint8_t>>, std::string> 
+loadFile(const std::string& filename) 
 {
-    DuskBenchStart();
-	
+    static auto error = std::make_tuple(json(), std::vector<std::vector<uint8_t>>(), "");
 	const auto& paths = GetAssetPaths();
 
 	std::ifstream file;
@@ -617,7 +762,7 @@ bool LoadSceneFromFile(const std::string& filename, Scene * scene)
 
 	if (!file.is_open()) {
 		DuskLogError("Failed to load glTF, '%s'", filename);
-		return false;
+        return error;
 	}
 
 	const auto& dir = GetDirname(fullPath);
@@ -637,13 +782,13 @@ bool LoadSceneFromFile(const std::string& filename, Scene * scene)
 		file.read(reinterpret_cast<char *>(&magic), sizeof(magic));
 		if (magic != Magic) {
 			DuskLogError("Invalid binary glTF file");
-			return false;
+            return error;
 		}
 
 		file.read(reinterpret_cast<char *>(&version), sizeof(version));
 		if (version != 2) {
 			DuskLogError("Invalid binary glTF container version %d", version);
-			return false;
+            return error;
 		}
 
 		file.read(reinterpret_cast<char *>(&length), sizeof(length));
@@ -656,7 +801,7 @@ bool LoadSceneFromFile(const std::string& filename, Scene * scene)
 
 		if ((ChunkType)jsonChunkType != ChunkType::JSON) {
 			DuskLogError("The first chunk of a binary glTF must be JSON, found %08x", jsonChunkType);
-			return false;
+            return error;
 		}
 
 		std::vector<char> jsonChunk(jsonChunkLength + 1);
@@ -672,7 +817,7 @@ bool LoadSceneFromFile(const std::string& filename, Scene * scene)
 
 			if ((ChunkType)dataChunkType != ChunkType::BIN) {
 				DuskLogError("The second chunk of a binary glTF must be BIN, found %08x", dataChunkType);
-				return false;
+                return error;
 			}
 
 			dataChunks.push_back(std::vector<std::uint8_t>(dataChunkLength));
@@ -696,12 +841,12 @@ bool LoadSceneFromFile(const std::string& filename, Scene * scene)
 
 			if (version != "2.0") {
 				DuskLogError("only glTF 2.0 is supported");
-				return false;
+                return error;
 			}
 		}
 		else {
 			DuskLogError("glTF missing required asset entry");
-			return false;
+            return error;
 		}
 	}
 
@@ -723,36 +868,46 @@ bool LoadSceneFromFile(const std::string& filename, Scene * scene)
 		}
 	}
 
+    return std::make_tuple(data, dataChunks, dir);
+}
+
+std::vector<std::unique_ptr<Actor>> LoadSceneFromFile(const std::string& filename)
+{
+    DuskBenchStart();
+
+    const auto& [data, dataChunks, dir] = loadFile(filename);
+	
 	// TODO: Allow other buffers in GLB
-	const auto& buffers = (binary ? dataChunks : loadBuffers(data, dir));
+	const auto& buffers = (dataChunks.empty() ? loadBuffers(data, dir) : dataChunks);
+	const auto& bufferViews = loadBufferViews(data);
+	const auto& accessors = loadAccessors(data);
+	const auto& images = loadImages(data, dir, bufferViews, buffers);
+	const auto& samplers = loadSamplers(data);
+	const auto& textures = loadTextures(data, images, samplers);
+	const auto& cameras = loadCameras(data);
+	const auto& materials = loadMaterials(data, textures);
+	const auto& meshes = loadMeshes(data, bufferViews, buffers, accessors, materials);
+	auto actors = loadNodes(data, cameras, meshes);
+
+    DuskBenchEnd("glTF2::LoadSceneFromFile");
+	return std::vector<std::unique_ptr<Actor>>();
+}
+
+std::vector<std::shared_ptr<Mesh>> LoadPrimitivesFromFile(const std::string& filename)
+{
+    DuskBenchStart();
+
+    const auto& [data, dataChunks, dir] = loadFile(filename);
+	
+	// TODO: Allow other buffers in GLB
+	const auto& buffers = (dataChunks.empty() ? loadBuffers(data, dir) : dataChunks);
 	const auto& bufferViews = loadBufferViews(data);
 	const auto& accessors = loadAccessors(data);
 	const auto& images = loadImages(data, dir, bufferViews, buffers);
 	const auto& samplers = loadSamplers(data);
 	const auto& textures = loadTextures(data, images, samplers);
 	const auto& materials = loadMaterials(data, textures);
-	const auto& meshes = loadMeshes(data, bufferViews, buffers, accessors, materials);
-	const auto& actors = loadNodes(data, meshes);
-
-	// TODO: nodes and scene loading
-
-	auto actor = std::make_unique<Actor>();
-	auto meshComp = std::make_unique<MeshComponent>();
-	for (auto& mesh : meshes) {
-		meshComp->AddMesh(mesh);
-	}
-	actor->AddComponent(std::move(meshComp));
-	scene->AddActor(std::move(actor));
-
-    DuskBenchEnd("glTF2::LoadSceneFromFile");
-	return true;
-}
-
-std::vector<std::shared_ptr<Mesh>> LoadMeshesFromFile(const std::string& filename)
-{
-    DuskBenchStart();
-
-	// TODO: Support
+	return loadMeshes(data, bufferViews, buffers, accessors, materials);
 
     DuskBenchEnd("glTF2::LoadMeshFromFile");
     return std::vector<std::shared_ptr<Mesh>>();

@@ -134,7 +134,7 @@ Do put spaces around the colon in a range-based for loop.
 
 **Right**
 ```cpp
-vector<glm::vec2> sizes;
+std::vector<glm::vec2> sizes;
 for (auto& size : sizes) {
     DuskLog("%s", glm::to_string(size));
 }
@@ -142,7 +142,7 @@ for (auto& size : sizes) {
 
 **Wrong**
 ```cpp
-vector<glm::vec2> sizes;
+std::vector<glm::vec2> sizes;
 for (auto& size: sizes) {
     DuskLog("%s", glm::to_string(size));
 }
@@ -152,16 +152,18 @@ Do not put spaces before commas or semicolons.
 
 **Right**
 ```cpp
-for (int i = 0; i < 10; ++i)
+for (int i = 0; i < 10; ++i) {
     doSomething();
+}
 
 f(a, b);
 ```
 
 **Wrong**
 ```cpp
-for (int i = 0 ; i < 10 ; ++i)
+for (int i = 0 ; i < 10 ; ++i) {
     doSomething();
+}
 
 f(a , b) ;
 ```
@@ -197,7 +199,7 @@ glm::vec2 size {0.f, 10.f};
 
 ## Line Breaking
 
-Every statement gets it's own line.
+Every statement gets its own line.
 
 **Right**
 ```cpp
@@ -220,9 +222,9 @@ An else should go on the same line as the previous end-bracket.
 ```cpp
 if (condition) {
     doSomething();
-} else if(otherCondition) {
+} else if (otherCondition) {
     doSomethingElse();
-}else {
+} else {
     doNothing();
 }
 ```
@@ -232,7 +234,7 @@ if (condition) {
 if (condition) {
     doSomething();
 } 
-else if(otherCondition) {
+else if (otherCondition) {
     doSomethingElse();
 }
 else {
@@ -606,30 +608,6 @@ public:
 }; // class Test
 ```
 
-Use explicit to stop unwatned type conversions.
-
-**Right**
-```cpp
-class Box
-{
-public:
-
-    Box(glm::vec4);
-
-}; // class Box
-```
-
-**Wrong**
-```cpp
-class Vector
-{
-public:
-
-    explicit Vector(int size);
-
-}; // class Box
-```
-
 Constructors should initialize all members either in their declarations, or with initializer syntax. One per line, preceeded by `:` or `,` depending.
 
 **Right**
@@ -650,7 +628,8 @@ private:
     std::string _name;
 
     glm::vec2 _size;
-}
+
+}; // class Test
 ```
 
 **Wrong**
@@ -672,12 +651,15 @@ private:
     std::string _name;
 
     glm::vec2 _size;
-}
+
+}; // class Test
 ```
 
 All destructors of virtual classes must be marked virtual.
 
 When overriding virtual functions, the function declaration must have the `override` or `final` keyword. When `override` or `final` are specified, you should not prefix the function with `virtual`.
+
+Use `explicit` to stop unwatned type conversions.
 
 ## Best Practices
 
@@ -717,7 +699,7 @@ for (auto& actor : actors) {
 // Index is used
 for (size_t i = 0; i < actors.size(); ++i) {
     DuskLogInfo("Updating actor #%zu", i);
-    actor->Update(ctx);
+    actors[i]->Update(ctx);
 }
 ```
 
@@ -759,8 +741,8 @@ std::vector<Actor*> actors;
 #include <dusk/asset/Mesh.hpp>
 #include <dusk/scene/Actor.hpp>
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include <SDL.h>
 ```
@@ -844,7 +826,7 @@ void Socket::send() {
 }
 ```
 
-Prefix resource variables from Third Party libraries with an identifier. (e.g. `_sdlWindow`, `_glVAO`)
+Prefix resource variables from Third Party libraries with an identifier. (e.g. `_sdlWindow`, `_glVAO`).
 
 All header files should use `#ifndef` guards named `DUSK_FILENAME_HPP`, where FILENAME is an all-caps representation of the filename.
 

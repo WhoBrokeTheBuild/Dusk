@@ -4,15 +4,15 @@
 
 The indent size is 4 spaces. Tabs should never be used.
 
-*Right*
-```
+**Right**
+```cpp
 int func() {
     return 0;
 }
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 int func() {
   return 0;
 }
@@ -23,8 +23,8 @@ int func() {
 
 Namespaces should have no indent.
 
-*Right*
-```
+**Right**
+```cpp
 namespace dusk {
 
 namespace glTF2 {
@@ -38,8 +38,8 @@ void func() {
 } // namespace dusk
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 namespace dusk {
     namespace glTF2 {
         void func() {
@@ -51,8 +51,8 @@ namespace dusk {
 
 Case labels should line up with their switch statements. The case statements are indented.
 
-*Right*
-```
+**Right**
+```cpp
 switch (condition) {
 case 0:
 case 1:
@@ -66,8 +66,8 @@ default:
 }
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 switch (condition) {
     case 0:
     case 1:
@@ -82,15 +82,15 @@ switch (condition) {
 
 Boolean expressions that span multiple lines should have their operators on the left side.
 
-*Right*
-```
+**Right**
+```cpp
 return checkFirstCase() 
     || checkSecondCase()
     || (checkThirdCase() && checkEdgeCase());
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 return checkFirstCase() ||
     checkSecondCase() ||
     (checkThirdCase() && checkEdgeCase());
@@ -100,30 +100,30 @@ return checkFirstCase() ||
 
 Do not put spaces around unary operators.
 
-*Right*
-```
+**Right**
+```cpp
 ++i;
 int * j = &i;
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 ++ i;
 int * j = & i;
 ```
 
 Do put spaces around binary and ternary operators.
 
-*Right*
-```
+**Right**
+```cpp
 y = m * x + b;
 f(a, b);
 c = a | b;
 return (condition ? 1 : 0);
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 y = m*x+b;
 f(a,b);
 c = a|b;
@@ -132,16 +132,16 @@ return (condition?1:0);
 
 Do put spaces around the colon in a range-based for loop.
 
-*Right*
-```
+**Right**
+```cpp
 vector<glm::vec2> sizes;
 for (auto& size : sizes) {
     DuskLog("%s", glm::to_string(size));
 }
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 vector<glm::vec2> sizes;
 for (auto& size: sizes) {
     DuskLog("%s", glm::to_string(size));
@@ -150,16 +150,16 @@ for (auto& size: sizes) {
 
 Do not put spaces before commas or semicolons.
 
-*Right*
-```
+**Right**
+```cpp
 for (int i = 0; i < 10; ++i)
     doSomething();
 
 f(a, b);
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 for (int i = 0 ; i < 10 ; ++i)
     doSomething();
 
@@ -168,15 +168,15 @@ f(a , b) ;
 
 Do put spaces between control statements and parenthesis.
 
-*Right*
-```
+**Right**
+```cpp
 if (condition) {
     doSomething();
 }
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 if(condition) {
     doSomething();
 }
@@ -184,13 +184,13 @@ if(condition) {
 
 When brace-initializing an object, do put spaces between the object name, and the concents of the braces.
 
-*Right*
-```
+**Right**
+```cpp
 glm::vec2 size { 0.f, 10.f };
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 glm::vec2 size{ 0.f, 10.f };
 glm::vec2 size {0.f, 10.f};
 ```
@@ -199,8 +199,8 @@ glm::vec2 size {0.f, 10.f};
 
 Every statement gets it's own line.
 
-*Right*
-```
+**Right**
+```cpp
 ++x;
 ++y;
 if (condition) {
@@ -208,16 +208,16 @@ if (condition) {
 }
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 ++x; ++y;
 if (condition) { doSomething(); }
 ```
 
 An else should go on the same line as the previous end-bracket.
 
-*Right*
-```
+**Right**
+```cpp
 if (condition) {
     doSomething();
 } else if(otherCondition) {
@@ -227,8 +227,8 @@ if (condition) {
 }
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 if (condition) {
     doSomething();
 } 
@@ -242,8 +242,8 @@ else {
 
 Namespaces should have one line of padding after opening and before closing.
 
-*Right*
-```
+**Right**
+```cpp
 namespace dusk {
 
 namespace glTF2 {
@@ -255,8 +255,8 @@ void doSomething();
 } // namespace dusk
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 namespace dusk {
 namespace glTF2 {
 void doSomething();
@@ -268,8 +268,8 @@ void doSomething();
 
 Functions, and Classes should have their braces on their own line.
 
-*Right*
-```
+**Right**
+```cpp
 int main()
 {
     return 0;
@@ -281,8 +281,8 @@ class Test
 }; // class Test
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 int main() {
     return 0;
 }
@@ -294,15 +294,15 @@ class Test {
 
 Namespaces should have braces on the same line.
 
-*Right*
-```
+**Right**
+```cpp
 namespace dusk {
 
 } // namespace dusk
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 namespace dusk 
 {
 
@@ -311,8 +311,8 @@ namespace dusk
 
 All control statements must use braces.
 
-*Right*
-```
+**Right**
+```cpp
 if (condition) {
     doSomething();
 } else {
@@ -324,8 +324,8 @@ while (condition) {
 }
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 if (condition)
     doSomething();
 else
@@ -339,14 +339,14 @@ while (condition) doSomething();
 
 Empty control statements must use empty braces.
 
-*Right*
-```
+**Right**
+```cpp
 for (; wait < 100; wait++) { }
 while (condition) { }
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 for (; wait < 100; wait++);
 while (condition);
 ```
@@ -361,8 +361,8 @@ In library-specific code, you should use the boolean defines for that library, e
 
 Tests for true/false, null/non-null, and zero/non-zero should all be done without equality expressions.
 
-*Right*
-```
+**Right**
+```cpp
 if (condition) {
 
 }
@@ -376,8 +376,8 @@ if (!count) {
 }
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 if (condition == true) {
 
 }
@@ -395,15 +395,15 @@ if (count == 0) {
 
 Always append `f` or `.f` to floating point literals. Do not append `.0f`.
 
-*Right*
-```
+**Right**
+```cpp
 const float angle = glm::radians(90.f);
 
 const float pi = 3.14159f;
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 const float angle = glm::radians(90.0f);
 
 const float pi = 3.14159;
@@ -413,15 +413,15 @@ const float pi = 3.14159;
 
 Use CamelCase for classes, and structs. Capitalize all letters of an acronym as appropraite.
 
-*Right*
-```
+**Right**
+```cpp
 struct Data;
 class JSONElement;
 class glTF2;
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 struct data;
 class jsonElement;
 class GLTF2;
@@ -429,8 +429,8 @@ class GLTF2;
 
 Use snakeCase for namespaces. Capitalize all letters of an acronym as appropraite.
 
-*Right*
-```
+**Right**
+```cpp
 namespace dusk {
 
 namespace glTF2 {
@@ -440,8 +440,8 @@ namespace glTF2 {
 } // namespace dusk
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 namespace Dusk {
 
 namespace gltf2 {
@@ -453,16 +453,16 @@ namespace gltf2 {
 
 Use full words, except for common abbreviations and iterators.
 
-*Right*
-```
+**Right**
+```cpp
 size_t length;
 MeshComponent * meshComponent = new MeshComponent();
 for (int i = 0; i 10; ++i) { }
 void parseActors();
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 size_t len, l;
 MeshComponent * comp = new MeshComponent();
 void pActors();
@@ -471,8 +471,8 @@ void parseA();
 
 Private member variables should be perfixed with `_`. Regular member variables should use snakeCase, static member variables should use CamelCase.
 
-*Right*
-```
+**Right**
+```cpp
 class Test
 {
 public:
@@ -488,8 +488,8 @@ private:
 }
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 class Test
 {
 public:
@@ -514,93 +514,58 @@ private:
 
 Prefix boolean variables with a past- or current-tense verbs.
 
-*Right*
-```
+**Right**
+```cpp
 bool isValid;
 bool didSendData;
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 bool valid;
 bool sendData;
 ```
 
 Prefix setters with `Set` and getters with `Get`.
 
-*Right*
-```
+**Right**
+```cpp
 void SetPosition(const glm::vec3& position);
 glm::mat4 GetTransform() const;
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 void Position(const glm::vec3& position);
 glm::mat4 Transform() const;
 ```
 
 Use descriptive verbs in function names.
 
-*Right*
-```
+**Right**
+```cpp
 std::uint8_t * readDataFromFile();
 bool convertToJSON();
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 std::uint8_t * getData();
 bool toJSON();
 ```
 
-## Comments
-
-Classes and Namespaces should end with a comment `// class name` or `// namespace name`.
-
-*Right*
-```
-namespace dusk {
-
-namespace glTF2 {
-
-class Test 
-{
-
-}; // class Test
-
-} // namespace glTF2
-
-} // namespace dusk
-```
-
-*Wrong*
-```
-namespace dusk {
-
-namespace glTF2 {
-
-class Test 
-{
-
-};
-
-}
-
-}
-```
 
 Prefer enums to booleans as parameters, except for setter functions.
 
-*Right*
-```
+**Right**
+```cpp
 loadFromFile("test.txt", AllowNotFound);
 doSomething(something, AllowFooBar);
 setResizable(false);
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 loadFromFile("test.txt", true);
 doSomething(something, false);
 setResizable(NotResizable);
@@ -617,13 +582,13 @@ Prefer const to #define.
 
 Macros that expand like functions should be named in CamelCase.
 
-*Right*
-```
+**Right**
+```cpp
 #define DuskLogInfo(M) PrintLog(M, __LINE__, __FILE__);
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 #define DUSK_LOG_INFO(M) PrintLog(M, __LINE__, __FILE__);
 ```
 
@@ -631,7 +596,7 @@ Macros that expand like functions should be named in CamelCase.
 
 All non-trivial classes should disable the copy constructor and assignment operator, except when desired. Use the macro `DISALLOW_COPY_AND_ASSIGN` from `Config.hpp`.
 
-```
+```cpp
 class Test 
 {
 public:
@@ -643,8 +608,8 @@ public:
 
 Use explicit to stop unwatned type conversions.
 
-*Right*
-```
+**Right**
+```cpp
 class Box
 {
 public:
@@ -654,21 +619,21 @@ public:
 }; // class Box
 ```
 
-*Wrong*
-```
-class Box
+**Wrong**
+```cpp
+class Vector
 {
 public:
 
-    Box(glm::vec4);
+    explicit Vector(int size);
 
 }; // class Box
 ```
 
 Constructors should initialize all members either in their declarations, or with initializer syntax. One per line, preceeded by `:` or `,` depending.
 
-*Right*
-```
+**Right**
+```cpp
 class Test 
 {
 public:
@@ -688,8 +653,8 @@ private:
 }
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 class Test 
 {
 public:
@@ -710,13 +675,16 @@ private:
 }
 ```
 
+All destructors of virtual classes must be marked virtual.
+
+When overriding virtual functions, the function declaration must have the `override` or `final` keyword. When `override` or `final` are specified, you should not prefix the function with `virtual`.
 
 ## Best Practices
 
-Source files should wrap contents in the same namespace as their corresponding header.  Namespaces should end with a comment `// namespace name`.
+Source files should wrap contents in the same namespace as their corresponding header.
 
-*Right*
-```
+**Right**
+```cpp
 #include "header.hpp"
 
 namespace dusk {
@@ -728,8 +696,8 @@ Test::Test() {
 } // namespace dusk
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 #include "header.hpp"
 
 dusk::Test::Test() {
@@ -739,8 +707,8 @@ dusk::Test::Test() {
 
 Use range-based for when index is not needed. Use auto for iterators.
 
-*Right*
-```
+**Right**
+```cpp
 std::vector<std::unique_ptr<Actor>> actors;
 for (auto& actor : actors) {
     actor->Update(ctx);
@@ -753,8 +721,8 @@ for (size_t i = 0; i < actors.size(); ++i) {
 }
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 std::vector<std::unique_ptr<Actor>> actors;
 
 std::vector<std::unique_ptr<Actor>> it = actors.begin();
@@ -770,14 +738,14 @@ for (size_t i = 0; i < actors.size(); ++i) {
 
 All pointers should be written such that the * is spaced from the type and name.
 
-*Right*
-```
+**Right**
+```cpp
 int * x;
 std::vector<Actor *> actors;
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 int* x;
 int *y;
 std::vector<Actor*> actors;
@@ -785,8 +753,8 @@ std::vector<Actor*> actors;
 
 `#include` statements should be grouped into the following categories: Dusk, System, and Third Party. Within those categories they should be alphabetized, except when order is important.
 
-*Right*
-```
+**Right**
+```cpp
 #include <dusk/Config.hpp>
 #include <dusk/asset/Mesh.hpp>
 #include <dusk/scene/Actor.hpp>
@@ -797,8 +765,8 @@ std::vector<Actor*> actors;
 #include <SDL.h>
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 #include <dusk/scene/Actor.hpp>
 #include <dusk/asset/Mesh.hpp>
 #include <dusk/Config.hpp>
@@ -809,16 +777,16 @@ std::vector<Actor*> actors;
 
 Using statements are only allowed inside functions or source files. Do not pollute the global or dusk namespaces.
 
-*Right*
-```
+**Right**
+```cpp
 void doTimeStuff() {
     using std::chrono;
     ...
 }
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 using namespace std::chrono;
 
 void doTimeStuff() {
@@ -828,20 +796,36 @@ void doTimeStuff() {
 
 Omit unnecessary parameter names from function declarations where the size or function name allow you to infer the use.
 
-*Right*
-```
+**Right**
+```cpp
 void SetWidth(int);
 void AddActor(std::unique_ptr<Actor>&&);
 
 void doSomething(int amountToAdd);
 ```
 
-*Wrong*
-```
+**Wrong**
+```cpp
 void SetWidth(int width);
 void AddActor(std::unique_ptr<Actor>&& actor);
 
 void doSomething(int);
+```
+
+Use `auto` when needed, and when helpful. Do not use it to infer basic types like ints or floats.
+
+**Right**
+```cpp
+const auto& actor = GetFirstActor();
+auto it = _array.begin();
+auto mesh = std::make_unique<Mesh>();
+```
+
+**Wrong**
+```cpp
+const std::unique_ptr<Actor>& actor = GetFirstActor();
+std::vector<std::unique_ptr<Mesh>>::iterator it = _array.begin();
+std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>();
 ```
 
 Use `unsigned` instead of `unsigned int`.
@@ -849,6 +833,8 @@ Use `unsigned` instead of `unsigned int`.
 Use `uint8_t *` over `unsigned char *` for binary data.
 
 Avoid `using namespace x`, instead prefix all types with `x::`. (e.g. `std::`, `glm::`). 
+
+All angles will be stored in radians. When storing constants that are better read as degrees, e.g. 90d, store them as `glm::radians(90.f)`.
 
 Use `::` to explicitly request the global scope when referencing C functions with conflicting names:
 
@@ -862,11 +848,40 @@ Prefix resource variables from Third Party libraries with an identifier. (e.g. `
 
 All header files should use `#ifndef` guards named `DUSK_FILENAME_HPP`, where FILENAME is an all-caps representation of the filename.
 
+## Comments
 
-*Right*
-```
+Classes and Namespaces should end with a comment `// class name` or `// namespace name`.
+
+**Right**
+```cpp
+namespace dusk {
+
+namespace glTF2 {
+
+class Test 
+{
+
+}; // class Test
+
+} // namespace glTF2
+
+} // namespace dusk
 ```
 
-*Wrong*
+**Wrong**
+```cpp
+namespace dusk {
+
+namespace glTF2 {
+
+class Test 
+{
+
+};
+
+}
+
+}
 ```
-```
+
+Use `// TODO` or `// FIXME` comments to indicate a section needs a new feature, or is broken respectively.

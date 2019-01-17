@@ -413,7 +413,7 @@ const float pi = 3.14159;
 
 ## Names
 
-Use CamelCase for classes, and structs. Capitalize all letters of an acronym as appropraite.
+Use CamelCase for classes, and structs. Capitalize all letters of an acronym as appropriate.
 
 **Right**
 ```cpp
@@ -429,7 +429,7 @@ class jsonElement;
 class GLTF2;
 ```
 
-Use snakeCase for namespaces. Capitalize all letters of an acronym as appropraite.
+Use snakeCase for namespaces. Capitalize all letters of an acronym as appropriate.
 
 **Right**
 ```cpp
@@ -459,7 +459,7 @@ Use full words, except for common abbreviations and iterators.
 ```cpp
 size_t length;
 MeshComponent * meshComponent = new MeshComponent();
-for (int i = 0; i 10; ++i) { }
+for (int i = 0; i < 10; ++i) { }
 void parseActors();
 ```
 
@@ -471,7 +471,7 @@ void pActors();
 void parseA();
 ```
 
-Private member variables should be perfixed with `_`. Regular member variables should use snakeCase, static member variables should use CamelCase.
+Private member variables should be prefixed with `_`. Regular member variables should use snakeCase, static member variables should use CamelCase.
 
 **Right**
 ```cpp
@@ -514,7 +514,7 @@ private:
 }
 ```
 
-Prefix boolean variables with a past- or current-tense verbs.
+Prefix boolean variables with past- or current-tense verbs.
 
 **Right**
 ```cpp
@@ -659,7 +659,7 @@ All destructors of virtual classes must be marked virtual.
 
 When overriding virtual functions, the function declaration must have the `override` or `final` keyword. When `override` or `final` are specified, you should not prefix the function with `virtual`.
 
-Use `explicit` to stop unwatned type conversions.
+Use `explicit` to stop unwanted type conversions.
 
 ## Best Practices
 

@@ -1,22 +1,16 @@
 #define SET_UNIFORM(BaseType, Type, Suffix)                                                        \
-    void SetUniform(const std::string& name, Type value)                                           \
-    {                                                                                              \
+    void SetUniform(const std::string& name, Type value) {                                         \
         glUniform##Suffix##v(GetUniformLocation(name), 1, (BaseType*)&value);                      \
     }                                                                                              \
-                                                                                                   \
-    void SetUniformArray(const std::string& name, Type value, GLsizei count)                       \
-    {                                                                                              \
+    void SetUniformArray(const std::string& name, Type value, GLsizei count) {                     \
         glUniform##Suffix##v(GetUniformLocation(name), count, (BaseType*)&value);                  \
     }
 
 #define SET_UNIFORM_MATRIX(Type, Suffix)                                                           \
-    void SetUniformMatrix(const std::string& name, Type value)                                     \
-    {                                                                                              \
+    void SetUniformMatrix(const std::string& name, Type value) {                                   \
         glUniformMatrix##Suffix##v(GetUniformLocation(name), 1, GL_FALSE, (float*)&value);         \
     }                                                                                              \
-                                                                                                   \
-    void SetUniformMatrixArray(const std::string& name, Type value, GLsizei count)                 \
-    {                                                                                              \
+    void SetUniformMatrixArray(const std::string& name, Type value, GLsizei count) {               \
         glUniformMatrix##Suffix##v(GetUniformLocation(name), count, GL_FALSE, (float*)&value);     \
     }
 

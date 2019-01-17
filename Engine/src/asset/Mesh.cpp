@@ -7,6 +7,7 @@
 #include <dusk/scene/Camera.hpp>
 
 #include <unordered_map>
+#include <tuple>
 
 namespace dusk {
 

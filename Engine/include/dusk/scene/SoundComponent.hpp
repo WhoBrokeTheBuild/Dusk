@@ -1,8 +1,8 @@
 #ifndef DUSK_SOUND_COMPONENT
 #define DUSK_SOUND_COMPONENT
 
-#include <dusk/Config.hpp>
 #include <dusk/asset/Sound.hpp>
+#include <dusk/core/Macros.hpp>
 #include <dusk/core/OpenAL.hpp>
 #include <dusk/scene/ActorComponent.hpp>
 
@@ -14,11 +14,17 @@ class SoundComponent : public ActorComponent
 {
 public:
 
+    /// Class Boilerplate
+
+    DISALLOW_COPY_AND_ASSIGN(SoundComponent)
+
     SoundComponent();
 
     virtual ~SoundComponent();
 
-    virtual void SetSound(std::shared_ptr<Sound> sound);
+    /// Methods
+
+    virtual void SetSound(std::shared_ptr<Sound>);
 
     virtual void Play();
 
@@ -32,7 +38,7 @@ public:
 
     virtual void SceneStop() override;
 
-    virtual void Update(UpdateContext& ctx) override;
+    virtual void Update(UpdateContext&) override;
 
 private:
 

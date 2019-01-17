@@ -1,10 +1,8 @@
 #ifndef DUSK_ACTOR_HPP
 #define DUSK_ACTOR_HPP
 
-#include <dusk/Config.hpp>
-
 #include <dusk/core/Context.hpp>
-#include <dusk/core/Log.hpp>
+#include <dusk/core/Macros.hpp>
 #include <dusk/core/Math.hpp>
 #include <dusk/scene/ActorComponent.hpp>
 
@@ -20,25 +18,29 @@ class Actor
 {
 public:
 
+    /// Boilerplate
+
     DISALLOW_COPY_AND_ASSIGN(Actor)
 
     Actor() = default;
 
     virtual ~Actor() = default;
 
-    void SetScene(Scene * scene);
+    /// Methods
+
+    void SetScene(Scene *);
 
     Scene * GetScene() const { 
         return _scene;
     }
 
-    void SetParent(Actor * actor);
+    void SetParent(Actor *);
 
     Actor * GetParent() const {
         return _parent;
     }
 
-    void SetPosition(const glm::vec3& pos);
+    void SetPosition(const glm::vec3&);
 
     inline glm::vec3 GetPosition() const {
         return _position;
@@ -46,7 +48,7 @@ public:
 
     glm::vec3 GetWorldPosition() const;
 
-    void SetRotation(const glm::quat& rot);
+    void SetRotation(const glm::quat&);
 
     inline glm::quat GetRotation() const {
         return _rotation;
@@ -54,7 +56,7 @@ public:
 
     glm::quat GetWorldRotation() const;
 
-    void SetScale(const glm::vec3& scale);
+    void SetScale(const glm::vec3&);
 
     inline glm::vec3 GetScale() const { 
         return _scale; 
@@ -66,23 +68,25 @@ public:
 
     glm::mat4 GetWorldTransform() const;
 
-    virtual void AddComponent(std::unique_ptr<ActorComponent>&& comp);
+    virtual void AddComponent(std::unique_ptr<ActorComponent>&&);
 
-    virtual void AddActor(std::unique_ptr<Actor>&& actor);
+    virtual void AddActor(std::unique_ptr<Actor>&&);
 
     virtual void SceneStart();
 
     virtual void SceneStop();
 
-    virtual void HandleEvent(SDL_Event * evt);
+    virtual void HandleEvent(SDL_Event *);
 
-    virtual void Update(UpdateContext& ctx);
+    virtual void Update(UpdateContext&);
     
-    virtual void Render(RenderContext& ctx);
+    virtual void Render(RenderContext&);
 
     virtual void Print(std::string indent);
 
 private:
+
+    /// Variables
 
     Scene * _scene = nullptr;
 

@@ -1,7 +1,7 @@
 #ifndef DUSK_DEBUG_CAMERA_HPP
 #define DUSK_DEBUG_CAMERA_HPP
 
-#include <dusk/Config.hpp>
+#include <dusk/core/Macros.hpp>
 #include <dusk/scene/Camera.hpp>
 
 namespace dusk {
@@ -10,9 +10,19 @@ class DebugCamera : public Camera
 {
 public:
 
-    virtual void HandleEvent(SDL_Event * evt) override;
+    /// Class Boilerplate
 
-    virtual void Update(UpdateContext& ctx) override;
+    DISALLOW_COPY_AND_ASSIGN(DebugCamera)
+
+    DebugCamera() = default;
+
+    virtual ~DebugCamera() = default;
+
+    /// Methods
+
+    void HandleEvent(SDL_Event *) override;
+
+    void Update(UpdateContext&) override;
 
 private:
 

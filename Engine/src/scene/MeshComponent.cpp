@@ -1,5 +1,6 @@
 #include "dusk/scene/MeshComponent.hpp"
 
+#include <dusk/core/Log.hpp>
 #include <dusk/scene/Actor.hpp>
 
 namespace dusk {

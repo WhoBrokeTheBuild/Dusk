@@ -546,13 +546,13 @@ Use descriptive verbs in function names.
 
 **Right**
 ```cpp
-std::uint8_t * readDataFromFile();
+uint8_t * readDataFromFile();
 bool convertToJSON();
 ```
 
 **Wrong**
 ```cpp
-std::uint8_t * getData();
+uint8_t * getData();
 bool toJSON();
 ```
 

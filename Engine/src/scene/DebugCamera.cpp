@@ -1,5 +1,7 @@
 #include "dusk/scene/DebugCamera.hpp"
 
+#include <dusk/core/Util.hpp>
+
 namespace dusk {
 
 void DebugCamera::HandleEvent(SDL_Event * evt)

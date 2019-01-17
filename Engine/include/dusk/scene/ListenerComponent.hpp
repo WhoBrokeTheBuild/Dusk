@@ -1,9 +1,7 @@
 #ifndef DUSK_LISTENER_COMPONENT
 #define DUSK_LISTENER_COMPONENT
 
-#include <dusk/Config.hpp>
-#include <dusk/asset/Sound.hpp>
-#include <dusk/core/OpenAL.hpp>
+#include <dusk/core/Macros.hpp>
 #include <dusk/scene/ActorComponent.hpp>
 
 #include <memory>
@@ -14,11 +12,17 @@ class ListenerComponent : public ActorComponent
 {
 public:
 
+    /// Class Boilerplate
+
+    DISALLOW_COPY_AND_ASSIGN(ListenerComponent)
+
     ListenerComponent() = default;
 
     virtual ~ListenerComponent() = default;
 
-    virtual void Update(UpdateContext& ctx) override;
+    /// Methods
+
+    void Update(UpdateContext&) override;
 
 }; // class ListenerComponent
 

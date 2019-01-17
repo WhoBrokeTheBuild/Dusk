@@ -10,23 +10,23 @@
 #include <dusk/scene/Camera.hpp>
 #include <dusk/scene/MeshComponent.hpp>
 
-#include <stb/stb_image.h>
-
-#include <Base64.h>
-
 #include <cstdint>
 #include <fstream>
 #include <memory>
 #include <string>
 #include <unordered_map>
 
+#include <stb/stb_image.h>
+
+#include <Base64.h>
+
 namespace dusk {
 
 namespace glTF2 {
 
-const std::uint32_t Magic = 0x46546C67; // glTF
+const uint32_t Magic = 0x46546C67; // glTF
 
-enum class ChunkType : std::uint32_t 
+enum class ChunkType : uint32_t 
 {
 	JSON = 0x4E4F534A, // JSON
 	BIN  = 0x004E4942, // BIN
@@ -60,9 +60,9 @@ glm::quat parseQuat(const json& value, glm::quat def)
     return def;
 }
 
-std::vector<std::vector<std::uint8_t>> loadBuffers(const json& data, const std::string& dir)
+std::vector<std::vector<uint8_t>> loadBuffers(const json& data, const std::string& dir)
 {
-    std::vector<std::vector<std::uint8_t>> buffers;
+    std::vector<std::vector<uint8_t>> buffers;
     
     auto it = data.find("buffers");
     if (it != data.end()) {
@@ -85,7 +85,7 @@ std::vector<std::vector<std::uint8_t>> loadBuffers(const json& data, const std::
 							continue;
 						}
 
-						buffers.push_back(std::vector<std::uint8_t>(byteLength));
+						buffers.push_back(std::vector<uint8_t>(byteLength));
 						auto& buffer = buffers.back();
 
 						bufferFile.read(reinterpret_cast<char *>(buffer.data()), byteLength);
@@ -184,14 +184,14 @@ std::vector<accessor_t> loadAccessors(const json& data)
 struct image_t {
     glm::ivec2 size;
     int components;
-    std::unique_ptr<std::uint8_t> data;
+    std::unique_ptr<uint8_t> data;
 };
 
 std::vector<image_t> loadImages(
     const json& data, 
     const std::string& dir, 
     const std::vector<bufferView_t>& bufferViews, 
-    const std::vector<std::vector<std::uint8_t>>& buffers)
+    const std::vector<std::vector<uint8_t>>& buffers)
 {
     std::vector<image_t> images;
 
@@ -480,7 +480,7 @@ std::vector<std::shared_ptr<Material>> loadMaterials(
 std::vector<Mesh::Primitive> loadPrimitives(
     const json& data,
     const std::vector<bufferView_t>& bufferViews, 
-    const std::vector<std::vector<std::uint8_t>>& buffers,
+    const std::vector<std::vector<uint8_t>>& buffers,
     const std::vector<accessor_t>& accessors,
     const std::vector<std::shared_ptr<Material>>& materials)
 {
@@ -617,7 +617,7 @@ std::vector<Mesh::Primitive> loadPrimitives(
 std::vector<Mesh::Primitive> loadAllPrimitives(
 	const json& data,
 	const std::vector<bufferView_t>& bufferViews,
-	const std::vector<std::vector<std::uint8_t>>& buffers,
+	const std::vector<std::vector<uint8_t>>& buffers,
 	const std::vector<accessor_t>& accessors,
 	const std::vector<std::shared_ptr<Material>>& materials)
 {
@@ -644,7 +644,7 @@ std::vector<Mesh::Primitive> loadAllPrimitives(
 std::vector<std::shared_ptr<Mesh>> loadMeshes(
     const json& data,
     const std::vector<bufferView_t>& bufferViews, 
-    const std::vector<std::vector<std::uint8_t>>& buffers,
+    const std::vector<std::vector<uint8_t>>& buffers,
     const std::vector<accessor_t>& accessors,
     const std::vector<std::shared_ptr<Material>>& materials)
 {
@@ -796,13 +796,13 @@ loadFile(const std::string& filename)
 	const auto& ext = GetExtension(filename);
 	bool binary = (ext == "glb");
 
-	std::vector<std::vector<std::uint8_t>> dataChunks;
+	std::vector<std::vector<uint8_t>> dataChunks;
 
 	json data;
 	if (binary) {
-		std::uint32_t magic = 0;
-		std::uint32_t version = 0;
-		std::uint32_t length = 0;
+		uint32_t magic = 0;
+		uint32_t version = 0;
+		uint32_t length = 0;
 
 		// TODO: Endianness
 
@@ -820,8 +820,8 @@ loadFile(const std::string& filename)
 
 		file.read(reinterpret_cast<char *>(&length), sizeof(length));
 
-		std::uint32_t jsonChunkLength = 0;
-		std::uint32_t jsonChunkType = 0;
+		uint32_t jsonChunkLength = 0;
+		uint32_t jsonChunkType = 0;
 
 		file.read(reinterpret_cast<char *>(&jsonChunkLength), sizeof(jsonChunkLength));
 		file.read(reinterpret_cast<char *>(&jsonChunkType), sizeof(jsonChunkType));
@@ -837,8 +837,8 @@ loadFile(const std::string& filename)
 		
 		data = json::parse(jsonChunk.data());
 
-		std::uint32_t dataChunkLength = 0;
-		std::uint32_t dataChunkType = 0;
+		uint32_t dataChunkLength = 0;
+		uint32_t dataChunkType = 0;
 		while (file.read(reinterpret_cast<char *>(&dataChunkLength), sizeof(dataChunkLength))) {
 			file.read(reinterpret_cast<char *>(&dataChunkType), sizeof(dataChunkType));
 
@@ -847,7 +847,7 @@ loadFile(const std::string& filename)
                 return error;
 			}
 
-			dataChunks.push_back(std::vector<std::uint8_t>(dataChunkLength));
+			dataChunks.push_back(std::vector<uint8_t>(dataChunkLength));
 			auto& dataChunk = dataChunks.back();
 
 			file.read(reinterpret_cast<char *>(dataChunk.data()), dataChunkLength);

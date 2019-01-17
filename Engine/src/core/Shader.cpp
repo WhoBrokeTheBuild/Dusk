@@ -8,19 +8,21 @@
 
 namespace dusk {
 
-Shader::Shader(const filenames_initializer_t& filenames, const define_map_t& defines /*= { }*/)
+Shader::Shader(const std::initializer_list<std::string>& filenames, const define_map_t& defines /*= { }*/)
 {
     LoadFromFiles(filenames, defines);
 }
 
-Shader::Shader(const filenames_vector_t& filenames, const define_map_t& defines /*= { }*/)
+Shader::Shader(const std::vector<std::string>& filenames, const define_map_t& defines /*= { }*/)
 {
     LoadFromFiles(filenames, defines);
 }
 
 Shader::~Shader()
 {
-    if (_glID > 0) glDeleteProgram(_glID);
+    if (_glProgram > 0) {
+        glDeleteProgram(_glProgram);
+    }
 }
 
 void Shader::InitializeVersionString()
@@ -38,12 +40,12 @@ void Shader::InitializeVersionString()
     DuskLogVerbose("Using GLSL version string '%s'", _GLSLVersionString);
 }
 
-bool Shader::LoadFromFiles(const filenames_initializer_t& filenames, const define_map_t& defines /*= { }*/)
+bool Shader::LoadFromFiles(const std::initializer_list<std::string>& filenames, const define_map_t& defines /*= { }*/)
 {
     return LoadFromFiles(std::vector<std::string>(filenames), defines);
 }
 
-bool Shader::LoadFromFiles(const filenames_vector_t& filenames, const define_map_t& defines /*= { }*/)
+bool Shader::LoadFromFiles(const std::vector<std::string>& filenames, const define_map_t& defines /*= { }*/)
 {
     _filenames = filenames;
 
@@ -54,14 +56,14 @@ bool Shader::LoadFromFiles(const filenames_vector_t& filenames, const define_map
 		_defines.insert_or_assign(d.first, d.second);
     }
     
-    if (_glID != 0)
+    if (_glProgram != 0)
     {
         DuskLogWarn("Attempt to load an already loaded shader.");
         return false;
     }
 
-    _glID = glCreateProgram();
-    if (0 == _glID)
+    _glProgram = glCreateProgram();
+    if (0 == _glProgram)
     {
         DuskLogError("Failed to create shader program.");
         return false;
@@ -71,9 +73,7 @@ bool Shader::LoadFromFiles(const filenames_vector_t& filenames, const define_map
 
 #if defined(DUSK_ENABLE_BINARY_SHADERS) && defined(GL_VERSION_4_1)
 
-    DuskLogVerbose("Attempting Binary Shader Stuff");
-
-    glProgramParameteri(_glID, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
+    glProgramParameteri(_glProgram, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
 
     bool loadFromBinary = false;
     GLenum binaryFormat = GL_INVALID_ENUM;
@@ -88,11 +88,12 @@ bool Shader::LoadFromFiles(const filenames_vector_t& filenames, const define_map
         DuskLogVerbose("Checking %s", fullPath.c_str());
         binFile.open(fullPath, std::ios::binary);
 
-        if (binFile.is_open()) break;
+        if (binFile.is_open()) {
+            break;
+        }
     }
 
-    if (binFile.is_open())
-    {
+    if (binFile.is_open()) {
         DuskLogLoad("Loading cached binary shader from '%s'.", binFilename.c_str());
 
         binFile.read((char *)&binaryFormat, sizeof(GLenum));
@@ -101,15 +102,12 @@ bool Shader::LoadFromFiles(const filenames_vector_t& filenames, const define_map
                                   std::istreambuf_iterator<char>());
         binFile.close();
 
-        glProgramBinary(_glID, binaryFormat, data.data(), data.size());
-        glGetProgramiv(_glID, GL_LINK_STATUS, &linked);
+        glProgramBinary(_glProgram, binaryFormat, data.data(), data.size());
+        glGetProgramiv(_glProgram, GL_LINK_STATUS, &linked);
 
-        if (!linked)
-        {
+        if (!linked) {
             DuskLogWarn("Failed to load cached binary shader '%s'.", binFilename.c_str());
-        }
-        else
-        {
+        } else {
             loaded = true;
             loadFromBinary = true;
         }
@@ -117,35 +115,26 @@ bool Shader::LoadFromFiles(const filenames_vector_t& filenames, const define_map
 
 #endif // defined(DUSK_ENABLE_BINARY_SHADERS) && defined(GL_VERSION_4_1)
 
-    if (!loaded)
-    {
-        for (const std::string& filename : filenames)
-        {
+    if (!loaded) {
+        for (const std::string& filename : filenames) {
             GLuint id = LoadShader(filename, _defines);
-            if (0 == id)
-            {
+            if (0 == id) {
                 continue;
             }
 
-            glAttachShader(_glID, id);
+            glAttachShader(_glProgram, id);
             shaders.push_back(id);
         }
 
-        if (shaders.size() != filenames.size())
-        {
+        if (shaders.size() != filenames.size()) {
             DuskLogError("One or mode shaders failed to compile.");
-        }
-        else
-        {
-            glLinkProgram(_glID);
-            glGetProgramiv(_glID, GL_LINK_STATUS, &linked);
-            if (linked == GL_FALSE)
-            {
+        } else {
+            glLinkProgram(_glProgram);
+            glGetProgramiv(_glProgram, GL_LINK_STATUS, &linked);
+            if (linked == GL_FALSE) {
                 DuskLogError("Failed to link shader program");
                 PrintProgramLog();
-            }
-            else
-            {
+            } else {
                 loaded = true;
             }
         }
@@ -153,16 +142,14 @@ bool Shader::LoadFromFiles(const filenames_vector_t& filenames, const define_map
 
 #if defined(DUSK_ENABLE_BINARY_SHADERS) && defined(GL_VERSION_4_1)
 
-    if (loaded && !loadFromBinary)
-    {
+    if (loaded && !loadFromBinary) {
         GLint length = 0;
-        glGetProgramiv(_glID, GL_PROGRAM_BINARY_LENGTH, &length);
+        glGetProgramiv(_glProgram, GL_PROGRAM_BINARY_LENGTH, &length);
 
-        if (length > 0)
-        {
+        if (length) {
             std::vector<GLubyte> data(length);
 
-            glGetProgramBinary(_glID, data.size(), nullptr, &binaryFormat, data.data());
+            glGetProgramBinary(_glProgram, data.size(), nullptr, &binaryFormat, data.data());
 
             std::string outBinFilename;
             std::ofstream outBinFile;
@@ -172,15 +159,14 @@ bool Shader::LoadFromFiles(const filenames_vector_t& filenames, const define_map
                 DuskLogVerbose("Checking %s", outBinFilename.c_str());
                 outBinFile.open(outBinFilename, std::ios::binary);
 
-                if (outBinFile.is_open()) break;
+                if (outBinFile.is_open()) {
+                    break;
+                }
             }
 
-            if (!outBinFile.is_open())
-            {
+            if (!outBinFile.is_open()) {
                 DuskLogWarn("Failed to create binary shader file '%s'.", binFilename.c_str());
-            }
-            else
-            {
+            } else {
                 DuskLogVerbose("Saving cached binary shader file '%s'.", outBinFilename.c_str());
                 outBinFile.write((const char *)&binaryFormat, sizeof(GLenum));
                 outBinFile.write((const char *)data.data(), data.size());
@@ -191,15 +177,13 @@ bool Shader::LoadFromFiles(const filenames_vector_t& filenames, const define_map
 
 #endif // defined(DUSK_ENABLE_BINARY_SHADERS) && defined(GL_VERSION_4_1)
 
-    if (loaded)
-    {
+    if (loaded) {
         CacheUniforms();
         CacheAttributes();
     }
 
-    for (GLuint shader : shaders)
-    {
-        glDetachShader(_glID, shader);
+    for (GLuint shader : shaders) {
+        glDetachShader(_glProgram, shader);
         glDeleteShader(shader);
     }
 
@@ -208,20 +192,26 @@ bool Shader::LoadFromFiles(const filenames_vector_t& filenames, const define_map
 
 void Shader::Bind()
 {
-    glUseProgram(_glID);
+    glUseProgram(_glProgram);
 }
 
 GLint Shader::GetAttributeLocation(const std::string& name) const
 {
-    if (_attributes.find(name) == _attributes.end()) return -1;
+    if (_attributes.find(name) == _attributes.end()) {
+        return -1;
+    }
     return _attributes.at(name);
 }
 
 GLint Shader::GetUniformLocation(const std::string& name) const
 {
-    if (_uniforms.find(name) == _uniforms.end()) return -1;
+    if (_uniforms.find(name) == _uniforms.end()) {
+        return -1;
+    }
     return _uniforms.at(name);
 }
+
+#if defined(DUSK_ENABLE_BINARY_SHADERS) && defined(GL_VERSION_4_1)
 
 std::string Shader::GetBinaryName(const std::vector<std::string> filenames)
 {
@@ -241,6 +231,8 @@ std::string Shader::GetBinaryName(const std::vector<std::string> filenames)
     ss << ".glsl.bin";
     return ss.str();
 }
+
+#endif // defined(DUSK_ENABLE_BINARY_SHADERS) && defined(GL_VERSION_4_1)
 
 GLuint Shader::LoadShader(const std::string& filename, const define_map_t& defines)
 {
@@ -393,7 +385,7 @@ void Shader::PrintShaderLog(GLuint id)
 
     if (!glIsShader(id))
     {
-        DuskLogError("Cannot print shader log, %d is not a shader", _glID);
+        DuskLogError("Cannot print shader log, %d is not a shader", _glProgram);
         return;
     }
 
@@ -410,18 +402,18 @@ void Shader::PrintProgramLog()
     std::vector<char> programLog;
     GLint logSize, retSize;
 
-    if (!glIsProgram(_glID))
+    if (!glIsProgram(_glProgram))
     {
-        DuskLogError("Cannot print shader program log, %d is not a shader program", _glID);
+        DuskLogError("Cannot print shader program log, %d is not a shader program", _glProgram);
         return;
     }
 
-    glGetProgramiv(_glID, GL_INFO_LOG_LENGTH, &logSize);
+    glGetProgramiv(_glProgram, GL_INFO_LOG_LENGTH, &logSize);
 
     programLog.resize(logSize);
-    glGetProgramInfoLog(_glID, logSize, &retSize, programLog.data());
+    glGetProgramInfoLog(_glProgram, logSize, &retSize, programLog.data());
 
-    DuskLogInfo("Log for shader program %d:\n%s", _glID, programLog.data());
+    DuskLogInfo("Log for shader program %d:\n%s", _glProgram, programLog.data());
 }
 
 void Shader::CacheUniforms()
@@ -431,11 +423,11 @@ void Shader::CacheUniforms()
     GLchar name[256]; // variable name in GLSL
 
     GLint count;
-    glGetProgramiv(_glID, GL_ACTIVE_UNIFORMS, &count);
+    glGetProgramiv(_glProgram, GL_ACTIVE_UNIFORMS, &count);
     for (GLint i = 0; i < count; ++i)
     {
-        glGetActiveUniform(_glID, (GLuint)i, sizeof(name), nullptr, &size, &type, name);
-        _uniforms.emplace(name, glGetUniformLocation(_glID, name));
+        glGetActiveUniform(_glProgram, (GLuint)i, sizeof(name), nullptr, &size, &type, name);
+        _uniforms.emplace(name, glGetUniformLocation(_glProgram, name));
     }
 }
 
@@ -446,11 +438,11 @@ void Shader::CacheAttributes()
     GLchar name[256];
 
     GLint count;
-    glGetProgramiv(_glID, GL_ACTIVE_ATTRIBUTES, &count);
+    glGetProgramiv(_glProgram, GL_ACTIVE_ATTRIBUTES, &count);
     for (GLint i = 0; i < count; ++i)
     {
-        glGetActiveAttrib(_glID, (GLuint)i, sizeof(name), nullptr, &size, &type, name);
-        _attributes.emplace(name, glGetAttribLocation(_glID, name));
+        glGetActiveAttrib(_glProgram, (GLuint)i, sizeof(name), nullptr, &size, &type, name);
+        _attributes.emplace(name, glGetAttribLocation(_glProgram, name));
     }
 }
 

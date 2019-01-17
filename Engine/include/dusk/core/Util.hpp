@@ -1,16 +1,11 @@
 #ifndef DUSK_UTIL_HPP
 #define DUSK_UTIL_HPP
 
-#include <dusk/Config.hpp>
 #include <dusk/core/Math.hpp>
 #include <dusk/core/OpenGL.hpp>
 
 #include <string>
 #include <vector>
-
-#ifndef DUSK_ASSET_PATH
-#define DUSK_ASSET_PATH "."
-#endif // DUSK_ASSET_PATH
 
 namespace dusk {
 
@@ -58,36 +53,35 @@ public:
 
 };
 
-void SetAssetPath(const std::string& path);
+void SetAssetPath(const std::string&);
 std::string GetAssetPath();
 
 std::vector<std::string> GetAssetPaths();
 
-size_t GetGLTypeSize(GLenum type);
+size_t GetGLTypeSize(GLenum);
 
 /** Get a string representation of the shader type.
  * @param type The shader type, e.g. GL_FRAGMENT_SHADER.
  * @return The string representation of the shader type, e.g. "Fragment"
  */
-std::string GetShaderTypeString(GLuint type);
+std::string GetShaderTypeString(GLuint);
 
-void PrintCode(const std::string& code);
+void PrintCode(const std::string&);
 
-void CleanSlashes(std::string& path);
+void CleanSlashes(std::string&);
 
 std::vector<std::string> StringSplit(const char& sep, const std::string& str);
 std::string StringJoin(const std::string& sep, const std::vector<std::string>& strs);
 
-inline std::string StringJoin(const char& sep, const std::vector<std::string>& strs)
-{
+inline std::string StringJoin(const char& sep, const std::vector<std::string>& strs) {
     return StringJoin(std::string(1, sep), strs);
 }
 
-std::string GetDirname(std::string path);
-std::string GetBasename(std::string path);
-std::string GetExtension(std::string path);
+std::string GetDirname(std::string);
+std::string GetBasename(std::string);
+std::string GetExtension(std::string);
 
-std::string RunCommand(const std::string& cmd);
+std::string RunCommand(const std::string&);
 
 } // namespace dusk
 

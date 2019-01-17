@@ -1,8 +1,8 @@
 #ifndef DUSK_AXIS_HPP
 #define DUSK_AXIS_HPP
 
-#include <dusk/Config.hpp>
 #include <dusk/asset/Mesh.hpp>
+#include <dusk/scene/ActorComponent.hpp>
 
 #include <memory>
 
@@ -14,7 +14,7 @@ public:
 
     Axis();
 
-    virtual void Render(RenderContext& ctx) override;
+    void Render(RenderContext&) override;
 
 private:
 

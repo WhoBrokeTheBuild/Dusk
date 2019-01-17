@@ -1,8 +1,8 @@
 #ifndef DUSK_MODEL_HPP
 #define DUSK_MODEL_HPP
 
-#include <dusk/Config.hpp>
 #include <dusk/asset/Mesh.hpp>
+#include <dusk/core/Macros.hpp>
 #include <dusk/scene/ActorComponent.hpp>
 
 #include <memory>
@@ -14,11 +14,17 @@ class MeshComponent : public ActorComponent
 {
 public:
 
+    /// Class Boilerplate
+
+    DISALLOW_COPY_AND_ASSIGN(MeshComponent)
+
     MeshComponent() = default;
 
     MeshComponent(std::shared_ptr<Mesh> mesh);
 
     virtual ~MeshComponent() = default;
+
+    /// Methods
 
     virtual void AddMesh(std::shared_ptr<Mesh> mesh);
     

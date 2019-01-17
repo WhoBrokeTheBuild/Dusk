@@ -1,16 +1,16 @@
 #ifndef DUSK_MATERIAL_HPP
 #define DUSK_MATERIAL_HPP
 
-#include <dusk/Config.hpp>
 #include <dusk/asset/Texture.hpp>
 #include <dusk/core/Math.hpp>
-#include <dusk/core/Shader.hpp>
 
 #include <memory>
 #include <unordered_map>
 #include <string>
 
 namespace dusk {
+
+class Shader;
 
 class Material
 {
@@ -25,13 +25,13 @@ public:
         OCCLUSION,
     };
     
-    glm::vec4 BaseColorFactor       = glm::vec4(1.0f);
-    glm::vec3 EmissiveFactor        = glm::vec3(1.0f);
+    glm::vec4 BaseColorFactor = glm::vec4(1.0f);
+    glm::vec3 EmissiveFactor  = glm::vec3(1.0f);
     
-    float MetallicFactor            = 1.0f;
-    float RoughnessFactor           = 1.0f;
-    float OcclusionStrength         = 1.0f;
-    float NormalScale               = 1.0f;
+    float MetallicFactor    = 1.0f;
+    float RoughnessFactor   = 1.0f;
+    float OcclusionStrength = 1.0f;
+    float NormalScale       = 1.0f;
     
     std::shared_ptr<Texture> BaseColorMap;
     std::shared_ptr<Texture> NormalMap;
@@ -45,7 +45,7 @@ public:
 
     virtual ~Material() = default;
 
-    void Bind(Shader * sp);
+    void Bind(Shader *);
 
 }; // class Material
 

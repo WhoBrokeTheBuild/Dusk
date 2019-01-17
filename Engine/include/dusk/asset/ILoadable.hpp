@@ -1,7 +1,6 @@
 #ifndef DUSK_ILOADABLE_HPP
 #define DUSK_ILOADABLE_HPP
 
-#include <dusk/Config.hpp>
 #include <algorithm>
 
 namespace dusk {

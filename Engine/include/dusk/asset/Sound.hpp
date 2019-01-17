@@ -1,7 +1,6 @@
 #ifndef DUSK_SOUND_HPP
 #define DUSK_SOUND_HPP
 
-#include <dusk/Config.hpp>
 #include <dusk/asset/ILoadable.hpp>
 #include <dusk/core/OpenAL.hpp>
 
@@ -15,13 +14,15 @@ public:
 
     Sound() = default;
 
-    Sound(const std::string& filename);
+    Sound(const std::string&);
 
     virtual ~Sound();
 
-    bool LoadFromFile(const std::string& filename);
+    bool LoadFromFile(const std::string&);
 
-    ALuint GetALBufferID() const { return _alID; }
+    ALuint GetALBufferID() const {
+        return _alID;
+    }
 
 private:
 

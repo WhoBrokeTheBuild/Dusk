@@ -1,8 +1,8 @@
 #ifndef DUSK_TEXTURE_HPP
 #define DUSK_TEXTURE_HPP
 
-#include <dusk/Config.hpp>
 #include <dusk/asset/ILoadable.hpp>
+#include <dusk/core/Macros.hpp>
 #include <dusk/core/Math.hpp>
 #include <dusk/core/OpenGL.hpp>
 
@@ -40,21 +40,21 @@ public:
 
     Texture() = default;
 
-    Texture(const std::string& filename, Options opts = Options());
+    Texture(const std::string&, Options = Options());
 
-    Texture(const std::uint8_t * buffer, glm::ivec2 size, int comp = 4, Options opts = Options());
+    Texture(const uint8_t *, glm::ivec2, int comp = 4, Options = Options());
 
-    Texture(GLuint&& id, glm::ivec2 size);
+    Texture(GLuint&&, glm::ivec2);
 
-    Texture(Texture&& rhs);
+    Texture(Texture&&);
 
     virtual ~Texture();
 
     /// Methods
 
-    bool LoadFromFile(const std::string& filename, Options opts = Options());
+    bool LoadFromFile(const std::string&, Options = Options());
 
-    bool LoadFromBuffer(const std::uint8_t * buffer, glm::ivec2 size, int comp = 4, Options opts = Options());
+    bool LoadFromBuffer(const uint8_t *, glm::ivec2, int comp = 4, Options = Options());
 
     void Bind();
 

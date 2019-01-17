@@ -1,5 +1,6 @@
 #include "dusk/scene/ListenerComponent.hpp"
 
+#include <dusk/core/OpenAL.hpp>
 #include <dusk/scene/Actor.hpp>
 
 namespace dusk {

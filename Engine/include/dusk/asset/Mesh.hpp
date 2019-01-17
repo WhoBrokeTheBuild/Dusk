@@ -1,14 +1,13 @@
 #ifndef DUSK_MESH_HPP
 #define DUSK_MESH_HPP
 
-#include <dusk/Config.hpp>
 #include <dusk/asset/ILoadable.hpp>
 #include <dusk/asset/Material.hpp>
 #include <dusk/core/Context.hpp>
+#include <dusk/core/Macros.hpp>
 #include <dusk/core/Math.hpp>
 #include <dusk/core/Shader.hpp>
 #include <dusk/core/Util.hpp>
-#include <dusk/scene/ActorComponent.hpp>
 
 #include <algorithm>
 #include <memory>
@@ -53,15 +52,15 @@ public:
 
     Mesh(Primitive p);
 
-    Mesh(std::vector<Primitive>&& primitives);
+    Mesh(std::vector<Primitive>&&);
 
-    Mesh(const std::string& filename);
+    Mesh(const std::string&);
 
     virtual ~Mesh();
 
-    bool LoadFromFile(const std::string& filename);
+    bool LoadFromFile(const std::string&);
 
-    bool LoadFromData(std::vector<Primitive>&& primitives);
+    bool LoadFromData(std::vector<Primitive>&&);
 
     std::string GetFilename() const { 
         return _filename;
@@ -75,7 +74,7 @@ public:
         return _primitives;
     }
 
-    virtual void Render(RenderContext& ctx, glm::mat4 transform = glm::mat4(1.f));
+    virtual void Render(RenderContext&, glm::mat4 transform = glm::mat4(1.f));
 
 private:
 

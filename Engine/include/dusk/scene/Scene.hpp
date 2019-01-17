@@ -1,8 +1,8 @@
 #ifndef DUSK_SCENE_HPP
 #define DUSK_SCENE_HPP
 
-#include <dusk/Config.hpp>
 #include <dusk/core/Context.hpp>
+#include <dusk/core/Macros.hpp>
 #include <dusk/scene/Actor.hpp>
 
 #include <memory>
@@ -17,11 +17,15 @@ class Scene
 {
 public:
 
+    /// Class Boilerplate
+
     DISALLOW_COPY_AND_ASSIGN(Scene)
 
     Scene() = default;
     
     virtual ~Scene() = default;
+
+    /// Methods
 
     bool LoadFromFile(const std::string& filename);
 

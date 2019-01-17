@@ -1,7 +1,7 @@
 #ifndef DUSK_CAMERA_HPP
 #define DUSK_CAMERA_HPP
 
-#include <dusk/Config.hpp>
+#include <dusk/core/Macros.hpp>
 #include <dusk/core/Math.hpp>
 #include <dusk/scene/Actor.hpp>
 
@@ -13,7 +13,8 @@ class Camera : public Actor
 {
 public:
 
-    enum Mode {
+    enum Mode 
+    {
         Perspective,
         Orthographic,
     };
@@ -32,35 +33,35 @@ public:
 
     glm::mat4 GetProjection() const;
 
-    void SetMode(Mode mode);
+    void SetMode(Mode);
 
     Mode GetMode() const {
         return _mode;
     }
 
-    void SetAspect(float aspect);
+    void SetAspect(float);
 
-    void SetAspect(const glm::vec2& size);
+    void SetAspect(const glm::vec2&);
 
     inline float GetAspect() const {
         return _aspect;
     }
 
-    void SetFOVX(float fovx);
+    void SetFOVX(float);
 
-    void SetFOVY(float fovy);
+    void SetFOVY(float);
 
-    void SetViewportScale(float left, float right, float bottom, float top);
+    void SetViewportScale(float, float, float, float);
 
-    void SetViewportScale(const glm::vec4& viewScale);
+    void SetViewportScale(const glm::vec4&);
 
     glm::vec4 GetViewportScale() const {
         return _viewportScale;
     }
 
-    void SetViewportSize(float width, float height);
+    void SetViewportSize(float, float);
 
-    void SetViewportSize(const glm::vec2& viewSize);
+    void SetViewportSize(const glm::vec2&);
 
     glm::vec2 GetViewportSize() const {
         return _viewportSize;
@@ -68,15 +69,15 @@ public:
 
     glm::vec4 GetViewport() const;
 
-    void SetClip(float near, float far);
+    void SetClip(float, float);
 
-    void SetClip(const glm::vec2& clip);
+    void SetClip(const glm::vec2&);
 
     inline glm::vec2 GetClip() const {
         return _clip;
     }
 
-    void SetUp(const glm::vec3& up);
+    void SetUp(const glm::vec3&);
 
     glm::vec3 GetUp() const {
         return _up;
@@ -84,17 +85,17 @@ public:
 
 	glm::vec3 GetRight() const;
 
-    void SetForward(const glm::vec3& forward);
+    void SetForward(const glm::vec3&);
 
     glm::vec3 GetForward() const;
 
-    void SetLookAt(const glm::vec3& point);
+    void SetLookAt(const glm::vec3&);
 
-    void SetAutoResize(bool autoResize);
+    void SetAutoResize(bool);
 
-    virtual void HandleEvent(SDL_Event * evt) override;
+    void HandleEvent(SDL_Event *) override;
 
-    virtual void Print(std::string indent) override;
+    void Print(std::string indent) override;
 
 private:
 

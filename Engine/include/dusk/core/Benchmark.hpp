@@ -1,7 +1,6 @@
 #ifndef DUSK_BENCHMARK_HPP
 #define DUSK_BENCHMARK_HPP
 
-#include <dusk/Config.hpp>
 #include <dusk/core/Log.hpp>
 
 #include <chrono>

@@ -3,9 +3,9 @@
 #include <dusk/core/Benchmark.hpp>
 #include <dusk/core/Log.hpp>
 
-#include <stb/stb_image.h>
-
 #include <algorithm>
+
+#include <stb/stb_image.h>
 
 namespace dusk {
 
@@ -14,9 +14,9 @@ Texture::Texture(const std::string& filename, Options opts /*= Options()*/)
     LoadFromFile(filename, opts);
 }
 
-Texture::Texture(const std::uint8_t * data, glm::ivec2 size, int comp /*= 4*/, Options opts /*= Options()*/)
+Texture::Texture(const uint8_t * buffer, glm::ivec2 size, int comp /*= 4*/, Options opts /*= Options()*/)
 {
-    LoadFromBuffer(data, size, comp, opts);
+    LoadFromBuffer(buffer, size, comp, opts);
 }
 
 Texture::Texture(GLuint&& id, glm::ivec2 size)
@@ -49,73 +49,67 @@ bool Texture::LoadFromFile(const std::string& filename, Options opts /*= Options
     const auto& paths = GetAssetPaths();
 
     int comp;
-    std::uint8_t * texture = nullptr;
+    uint8_t * buffer = nullptr;
 
     std::string fullPath;
     for (auto& p : paths) {
         fullPath = p + filename;
 
         DuskLogVerbose("Checking %s", fullPath);
-        texture = stbi_load(fullPath.c_str(), &_size.x, &_size.y, &comp, STBI_rgb_alpha);
+        buffer = stbi_load(fullPath.c_str(), &_size.x, &_size.y, &comp, STBI_rgb_alpha);
 
-        if (texture) break;
+        if (buffer) {
+            break;
+        }
     }
 
-    if (!texture) {
+    if (!buffer) {
         DuskLogError("Failed to load texture '%s'", filename);
         return false;
     }
 
-    bool loaded = LoadFromBuffer(texture, _size, comp, opts);
+    bool loaded = LoadFromBuffer(buffer, _size, comp, opts);
     if (loaded) {
         DuskLogLoad("Loaded Texture from '%s", fullPath);
     }
 
-    stbi_image_free(texture);
+    stbi_image_free(buffer);
 
     DuskBenchEnd("Texture::LoadFromFile");
     return loaded;
 }
 
-bool Texture::LoadFromBuffer(const std::uint8_t * buffer, glm::ivec2 size, int comp /*= 4*/, Options opts /*= Options()*/)
+bool Texture::LoadFromBuffer(const uint8_t * buffer, glm::ivec2 size, int comp /*= 4*/, Options opts /*= Options()*/)
 {
     DuskBenchStart();
 
 	_size = size;
 
-    if (_glID > 0) {
+    if (_glID) {
         glDeleteTextures(1, &_glID);
         _glID = 0;
     }
 
     glGenTextures(1, &_glID);
 
-    if (0 == _glID) {
+    if (!_glID) {
         DuskLogError("Failed to create GL Texture");
         return false;
     }
 
-    GLint intfmt;
-    GLenum fmt;
+    GLenum fmt = GL_RGBA;
 
     switch (comp) 
     {
     case 1:
-        intfmt = GL_RED;
         fmt = GL_RED;
         break;
     case 2:
-        intfmt = GL_RG;
         fmt = GL_RG;
         break;
     case 3:
-        intfmt = GL_RGB;
         fmt = GL_RGB;
         break;
-    case 4:
-    default:
-        intfmt = GL_RGBA;
-        fmt = GL_RGBA;
     }
 
     glBindTexture(GL_TEXTURE_2D, _glID);
@@ -128,7 +122,7 @@ bool Texture::LoadFromBuffer(const std::uint8_t * buffer, glm::ivec2 size, int c
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, opts.MagFilter);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, opts.MinFilter);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, intfmt, _size.x, _size.y, 0, fmt, GL_UNSIGNED_BYTE, buffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, (GLint)fmt, _size.x, _size.y, 0, fmt, GL_UNSIGNED_BYTE, buffer);
 
     if (opts.Mipmap) {
         glGenerateMipmap(GL_TEXTURE_2D);

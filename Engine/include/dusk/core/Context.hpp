@@ -1,7 +1,6 @@
 #ifndef DUSK_CONTEXT_HPP
 #define DUSK_CONTEXT_HPP
 
-#include <dusk/Config.hpp>
 #include <dusk/core/OpenGL.hpp>
 
 namespace dusk

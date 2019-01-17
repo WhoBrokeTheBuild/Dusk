@@ -1,7 +1,7 @@
 #ifndef DUSK_SHADER_HPP
 #define DUSK_SHADER_HPP
 
-#include <dusk/Config.hpp>
+#include <dusk/core/Macros.hpp>
 #include <dusk/core/Math.hpp>
 #include <dusk/core/OpenGL.hpp>
 
@@ -17,8 +17,6 @@ class Shader
 {
 public:
 
-    using filenames_initializer_t   = std::initializer_list<std::string>;
-    using filenames_vector_t        = std::vector<std::string>;
     using define_map_t              = std::unordered_map<std::string, std::string>;
     using uniform_map_t             = std::unordered_map<std::string, GLint>;
     using attribute_map_t           = std::unordered_map<std::string, GLuint>;
@@ -33,11 +31,11 @@ public:
 
     /** Create and load a shader from the given filenames.
      */
-    Shader(const filenames_initializer_t& filenames, const define_map_t& defines = { });
+    Shader(const std::initializer_list<std::string>&, const define_map_t& = { });
 
     /** Create and load a shader from the given filenames.
      */
-    Shader(const filenames_vector_t& filenames, const define_map_t& defines = { });
+    Shader(const std::vector<std::string>&, const define_map_t& = { });
 
     virtual ~Shader();
 
@@ -55,11 +53,11 @@ public:
 
     /** Load and compile the given shader files, then link the program.
      */
-    virtual bool LoadFromFiles(const filenames_initializer_t& filenames, const define_map_t& defines = { });
+    virtual bool LoadFromFiles(const std::initializer_list<std::string>&, const define_map_t& = { });
     
     /** Load and compile the given shader files, then link the program.
      */
-    virtual bool LoadFromFiles(const filenames_vector_t& filenames, const define_map_t& defines = { });
+    virtual bool LoadFromFiles(const std::vector<std::string>&, const define_map_t& = { });
 
     /** Bind the shader for use with rendering or update operations.
      * This internally calls glUseProgram()
@@ -84,30 +82,34 @@ public:
     /**
      */
     GLuint GetGLID() const { 
-        return _glID; 
+        return _glProgram; 
     }
 
     /** Get the location of an attribute within the shader.
      * @param name The name of the attribute to get the location of.
      * @return The location of the attribute
      */
-    GLint GetAttributeLocation(const std::string& name) const;
+    GLint GetAttributeLocation(const std::string&) const;
 
     /** Get the location of an uniform within the shader.
      * @param name The name of the uniform to get the location of.
      * @return The location of the uniform
      */
-    GLint GetUniformLocation(const std::string& name) const;
+    GLint GetUniformLocation(const std::string&) const;
 
 #include "Shader.inc.hpp"
 
 protected:
+
+#if defined(DUSK_ENABLE_BINARY_SHADERS) && defined(GL_VERSION_4_1)
 
     /** Hash the filenames into a unique identifier for the compiled shader binary.
      * @param filenames The list of filenames to hash.
      * @return The generated filename for the shader binary.
      */
     virtual std::string GetBinaryName(const std::vector<std::string> filenames);
+
+#endif // defined(DUSK_ENABLE_BINARY_SHADERS) && defined(GL_VERSION_4_1)
 
 private:
 
@@ -117,7 +119,7 @@ private:
 
     /// Variables
 
-    GLuint _glID = 0;
+    GLuint _glProgram = 0;
 
     std::vector<std::string> _filenames;
 
@@ -133,7 +135,7 @@ private:
 
     /**
      */
-    GLuint LoadShader(const std::string& filename, const define_map_t& defines);
+    GLuint LoadShader(const std::string&, const define_map_t&);
 
     /** Apply preprocessing to a shader's source code.
      * Process all preprocessor definitions in the shader's source code.
@@ -146,7 +148,7 @@ private:
 
     /** Print the log for a given shader
      */
-    void PrintShaderLog(GLuint id);
+    void PrintShaderLog(GLuint);
 
     /** Print the log for shader program.
      */

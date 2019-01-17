@@ -74,7 +74,7 @@ public:
 		return ret;
 	}
 
-	static std::vector<std::uint8_t> Decode(const std::string& input) {
+	static std::vector<uint8_t> Decode(const std::string& input) {
 		static constexpr unsigned char kDecodingTable[] = {
 			64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
 			64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
@@ -94,7 +94,7 @@ public:
 			64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64
 		};
 
-		std::vector<std::uint8_t> out;
+		std::vector<uint8_t> out;
 
 		size_t in_len = input.size();
 		if (in_len % 4 != 0) return out;
@@ -106,12 +106,12 @@ public:
 		out.resize(out_len);
 
 		for (size_t i = 0, j = 0; i < in_len;) {
-			std::uint32_t a = input[i] == '=' ? 0 & i++ : kDecodingTable[static_cast<int>(input[i++])];
-			std::uint32_t b = input[i] == '=' ? 0 & i++ : kDecodingTable[static_cast<int>(input[i++])];
-			std::uint32_t c = input[i] == '=' ? 0 & i++ : kDecodingTable[static_cast<int>(input[i++])];
-			std::uint32_t d = input[i] == '=' ? 0 & i++ : kDecodingTable[static_cast<int>(input[i++])];
+			uint32_t a = input[i] == '=' ? 0 & i++ : kDecodingTable[static_cast<int>(input[i++])];
+			uint32_t b = input[i] == '=' ? 0 & i++ : kDecodingTable[static_cast<int>(input[i++])];
+			uint32_t c = input[i] == '=' ? 0 & i++ : kDecodingTable[static_cast<int>(input[i++])];
+			uint32_t d = input[i] == '=' ? 0 & i++ : kDecodingTable[static_cast<int>(input[i++])];
 
-			std::uint32_t triple = (a << 3 * 6) + (b << 2 * 6) + (c << 1 * 6) + (d << 0 * 6);
+			uint32_t triple = (a << 3 * 6) + (b << 2 * 6) + (c << 1 * 6) + (d << 0 * 6);
 
 			if (j < out_len) out[j++] = (triple >> 2 * 8) & 0xFF;
 			if (j < out_len) out[j++] = (triple >> 1 * 8) & 0xFF;

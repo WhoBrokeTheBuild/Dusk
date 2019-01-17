@@ -2,6 +2,7 @@
 
 #include <dusk/core/App.hpp>
 #include <dusk/core/Log.hpp>
+#include <dusk/core/Shader.hpp>
 
 #include <sstream>
 
@@ -34,46 +35,46 @@ std::unordered_map<std::string, std::string> Material::GetDefines() const
     return defines;
 }
 
-void Material::Bind(Shader * sp) 
+void Material::Bind(Shader * shader) 
 {
-    sp->Bind();
+    shader->Bind();
 
-    sp->SetUniform("u_BaseColorFactor", BaseColorFactor);
-    sp->SetUniform("u_EmissiveFactor", EmissiveFactor);
-    sp->SetUniform("u_MetallicFactor", MetallicFactor);
-    sp->SetUniform("u_RoughnessFactor", RoughnessFactor);
-    sp->SetUniform("u_OcclusionStrength", OcclusionStrength);
-    sp->SetUniform("u_NormalScale", NormalScale);
+    shader->SetUniform("u_BaseColorFactor", BaseColorFactor);
+    shader->SetUniform("u_EmissiveFactor", EmissiveFactor);
+    shader->SetUniform("u_MetallicFactor", MetallicFactor);
+    shader->SetUniform("u_RoughnessFactor", RoughnessFactor);
+    shader->SetUniform("u_OcclusionStrength", OcclusionStrength);
+    shader->SetUniform("u_NormalScale", NormalScale);
 
     if (BaseColorMap) {
-        sp->SetUniform("u_BaseColorMap", TextureID::BASE_COLOR);
+        shader->SetUniform("u_BaseColorMap", TextureID::BASE_COLOR);
         glActiveTexture(GL_TEXTURE0 + TextureID::BASE_COLOR);
         BaseColorMap->Bind();
     }
     
     if (NormalMap) {
-        sp->SetUniform("u_NormalMap", TextureID::NORMAL);
+        shader->SetUniform("u_NormalMap", TextureID::NORMAL);
         glActiveTexture(GL_TEXTURE0 + TextureID::NORMAL);
         NormalMap->Bind();
     }
     
     if (MetallicRoughnessMap) {
-        sp->SetUniform("u_MetallicRoughnessMap", TextureID::METALLIC_ROUGHNESS);
+        shader->SetUniform("u_MetallicRoughnessMap", TextureID::METALLIC_ROUGHNESS);
         glActiveTexture(GL_TEXTURE0 + TextureID::METALLIC_ROUGHNESS);
         MetallicRoughnessMap->Bind();
     }
     
     if (EmissiveMap) {
-        sp->SetUniform("u_EmissiveMap", TextureID::EMISSIVE);
+        shader->SetUniform("u_EmissiveMap", TextureID::EMISSIVE);
         glActiveTexture(GL_TEXTURE0 + TextureID::EMISSIVE);
         EmissiveMap->Bind();
     }
     
     if (OcclusionMap) {
-        sp->SetUniform("u_OcclusionMap", TextureID::OCCLUSION);
+        shader->SetUniform("u_OcclusionMap", TextureID::OCCLUSION);
         glActiveTexture(GL_TEXTURE0 + TextureID::OCCLUSION);
         OcclusionMap->Bind();
     }
 }
 
-} // namespace dusk
+} // namesace dusk

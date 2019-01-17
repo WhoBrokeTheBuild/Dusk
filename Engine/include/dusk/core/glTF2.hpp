@@ -1,9 +1,8 @@
 #ifndef DUSK_GLTF2_HPP
 #define DUSK_GLTF2_HPP
 
-#include <dusk/Config.hpp>
 #include <dusk/asset/Mesh.hpp>
-#include <dusk/scene/Scene.hpp>
+#include <dusk/scene/Actor.hpp>
 
 #include <string>
 #include <vector>

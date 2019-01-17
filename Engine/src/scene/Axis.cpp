@@ -1,5 +1,6 @@
 #include "dusk/scene/Axis.hpp"
 
+#include <dusk/core/Shader.hpp>
 #include <dusk/scene/Actor.hpp>
 
 namespace dusk {

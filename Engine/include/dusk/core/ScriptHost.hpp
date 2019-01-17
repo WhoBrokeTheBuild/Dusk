@@ -1,10 +1,9 @@
 #ifndef DUSK_SCRIPT_HOST_HPP
 #define DUSK_SCRIPT_HOST_HPP
 
-#include <dusk/Config.hpp>
+#include <dusk/core/Macros.hpp>
 
 #include <string>
-#include <vector>
 
 namespace dusk {
 
@@ -17,7 +16,7 @@ public:
     ScriptHost() = default;
     virtual ~ScriptHost() = default;
 
-    bool LoadFile(const std::string& filename);
+    bool LoadFile(const std::string&);
 
     void Run();
 

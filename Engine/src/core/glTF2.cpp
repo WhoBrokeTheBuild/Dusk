@@ -937,7 +937,7 @@ std::vector<Mesh::Primitive> LoadPrimitivesFromFile(const std::string& filename)
 	auto primitives = loadAllPrimitives(data, bufferViews, buffers, accessors, materials);
 
     DuskBenchEnd("glTF2::LoadMeshFromFile");
-    return std::move(primitives);
+    return primitives;
 }
 
 } // namespace glTF2

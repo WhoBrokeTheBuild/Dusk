@@ -122,3 +122,64 @@ FOREACH(file IN ITEMS ${_ENGINE_CONFIG_OUT})
     SOURCE_GROUP(${file_path} FILES ${file})
 ENDFOREACH()
 
+INSTALL(TARGETS ${_ENGINE}
+    EXPORT DuskTargets
+    INCLUDES DESTINATION include
+    LIBRARY DESTINATION lib
+)
+
+INCLUDE(CMakePackageConfigHelpers)
+
+WRITE_BASIC_PACKAGE_VERSION_FILE(
+    "${CMAKE_BINARY_DIR}/DuskConfigVersion.cmake"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY AnyNewerVersion
+)
+
+INSTALL(EXPORT DuskTargets
+    FILE DuskTargets.cmake
+    NAMESPACE Dusk::
+    DESTINATION lib/cmake/Dusk
+)
+
+CONFIGURE_PACKAGE_CONFIG_FILE(
+    "${CMAKE_SOURCE_DIR}/CMake/DuskConfig.cmake.in"
+    "${CMAKE_BINARY_DIR}/DuskConfig.cmake"
+    INSTALL_DESTINATION lib/cmake/Dusk
+)
+
+INSTALL(EXPORT DuskTargets 
+    DESTINATION lib/cmake/Dusk
+)
+
+INSTALL(FILES 
+    "${CMAKE_BINARY_DIR}/DuskConfigVersion.cmake" 
+    "${CMAKE_BINARY_DIR}/DuskConfig.cmake"
+    DESTINATION lib/cmake/Dusk
+)
+
+INCLUDE(FindPkgConfig)
+
+IF(PKG_CONFIG_FOUND)
+    CONFIGURE_FILE(
+        "${CMAKE_SOURCE_DIR}/CMake/Dusk.pc.in"
+        "${CMAKE_BINARY_DIR}/Dusk.pc"
+        @ONLY
+    )
+
+    INSTALL(FILES
+        "${CMAKE_BINARY_DIR}/Dusk.pc"
+        DESTINATION share/pkgconfig
+    )
+ENDIF()
+
+INSTALL(DIRECTORY
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/"
+    DESTINATION include
+    PATTERN "*.in" EXCLUDE
+)
+
+INSTALL(FILES
+    "${_ENGINE_CONFIG_OUT}"
+    DESTINATION include/dusk/
+)

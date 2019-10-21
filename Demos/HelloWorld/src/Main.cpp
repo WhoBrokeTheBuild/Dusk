@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
 
 	auto actor = std::make_unique<dusk::Actor>();
 	actor->SetPosition({ -2.f, 0.f, 4.f });
-	actor->AddComponent(std::make_unique<dusk::MeshComponent>(std::make_unique<dusk::Mesh>("models/SciFiHelmet/SciFiHelmet.gltf")));
+	actor->AddComponent(std::make_unique<dusk::MeshComponent>(std::make_unique<dusk::Mesh>("models/DamagedHelmet.glb")));
 	scene->AddActor(std::move(actor));
 
 	auto camera = std::make_unique<dusk::DebugCamera>();

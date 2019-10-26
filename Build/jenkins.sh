@@ -17,27 +17,27 @@ cmake --version
 
 VERSION=$(git describe --tags HEAD~1 2>/dev/null)
 if [[ ! -z "$VERSION" ]]; then
-	semverParseInto "$VERSION" MAJOR MINOR PATCH SPECIAL
+    semverParseInto "$VERSION" MAJOR MINOR PATCH SPECIAL
 
-	MESSAGE=$(git log --oneline --format=%B -n1 HEAD | head -n 1)
+    MESSAGE=$(git log --oneline --format=%B -n1 HEAD | head -n 1)
 
     OLD_TAG="v$MAJOR.$MINOR.$PATCH"
-	
-	if [[ $MESSAGE == Release*:* ]]; then
-		((++MAJOR))
-	    MINOR=0
-	    PATCH=0
-	elif [[ $MESSAGE == Feat*:* ]]; then
-		((++MINOR))
-	    PATCH=0
-	elif [[ $MESSAGE == Fix*:* ]]; then
-		((++PATCH))
-	fi
+    
+    if [[ $MESSAGE == Release*:* ]]; then
+        ((++MAJOR))
+        MINOR=0
+        PATCH=0
+    elif [[ $MESSAGE == Feat*:* ]]; then
+        ((++MINOR))
+        PATCH=0
+    elif [[ $MESSAGE == Fix*:* ]]; then
+        ((++PATCH))
+    fi
     
     NEW_TAG="v$MAJOR.$MINOR.$PATCH"
     
     if [ $OLD_TAG != $NEW_TAG ]; then
-    	git tag "$NEW_TAG" 2>/dev/null
+        git tag "$NEW_TAG" 2>/dev/null
     fi
 
     CHANGELOG=$(git log --oneline --format=%B $OLD_TAG..$NEW_TAG | sed -e ':a;N;$!ba;s/\n/\\n/g')
@@ -58,17 +58,17 @@ if [ $OLD_TAG != $NEW_TAG ]; then
 
     cat <<EOF > create_release.json
 {
-  	"tag_name": "$NEW_TAG",
-  	"name": "$NEW_TAG",
-  	"body": "$CHANGELOG",
-  	"draft": false,
-  	"prerelease": false
+      "tag_name": "$NEW_TAG",
+      "name": "$NEW_TAG",
+      "body": "$CHANGELOG",
+      "draft": false,
+      "prerelease": false
 }
 EOF
 
-	UPLOAD_URL=$(curl -u $GITHUB_AUTH \
-    	$GITHUB_API_URL/releases \
-    	-d @create_release.json \
+    UPLOAD_URL=$(curl -u $GITHUB_AUTH \
+        $GITHUB_API_URL/releases \
+        -d @create_release.json \
         | jq -r .upload_url \
         | cut -d'{' -f1)
 

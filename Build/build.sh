@@ -72,7 +72,7 @@ EOF
         | jq -r .upload_url \
         | cut -d'{' -f1)
 
-    DEB=$(ls -1 *.deb)
+    DEB=$(ls -1 '*.deb' 2>/dev/null)
     if [[ ! -z "$DEB" ]]; then
         echo "Uploading $DEB"
         curl -u $GITHUB_AUTH \
@@ -81,7 +81,7 @@ EOF
             -d @$DEB
     fi
 
-    RPM=$(ls -1 *.rpm)
+    RPM=$(ls -1 '*.rpm' 2>/dev/null)
     if [[ ! -z "$RPM" ]]; then
         echo "Uploading $RPM"
         curl -u $GITHUB_AUTH \
@@ -90,7 +90,7 @@ EOF
             -d @$RPM
     fi
 
-    TGZ=$(ls -1 *.tgz)
+    TGZ=$(ls -1 '*.tgz' 2>/dev/null)
     if [[ ! -z "$TGZ" ]]; then
         echo "Uploading $TGZ"
         curl -u $GITHUB_AUTH \

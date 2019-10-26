@@ -138,7 +138,7 @@ ENDIF()
 
 FIND_PROGRAM(
     TAR_EXECUTABLE
-    tgz
+    tar
 )
 
 IF (TAR_EXECUTABLE)

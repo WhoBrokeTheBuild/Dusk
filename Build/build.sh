@@ -40,7 +40,7 @@ if [[ ! -z "$VERSION" ]]; then
     	git tag "$NEW_TAG" 2>/dev/null
     fi
 
-    CHANGELOG=$(git log --oneline $OLD_TAG..$NEW_TAG)
+    CHANGELOG=$(git log --oneline --format=%B $OLD_TAG..$NEW_TAG | sed -e ':a;N;$!ba;s/\n/\\n/g')
 fi
 
 cmake -G "Unix Makefiles" ..

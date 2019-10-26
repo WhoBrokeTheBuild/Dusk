@@ -131,3 +131,65 @@ IF(BUILD_DEMOS)
     ADD_SUBDIRECTORY(Demos/3DSound)
     ADD_SUBDIRECTORY(Demos/Snake)
 ENDIF()
+
+###
+### Packaging
+###
+
+FIND_PROGRAM(
+    TAR_EXECUTABLE
+    tgz
+)
+
+IF (TAR_EXECUTABLE)
+    SET(_PACKAGE "libdusk-${PROJECT_VERSION}")
+
+    FILE(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${_PACKAGE}")
+    
+    ADD_CUSTOM_COMMAND(
+        OUTPUT "${_PACKAGE}.tgz"
+        DEPENDS ${_ENGINE}
+        COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX="" ${CMAKE_SOURCE_DIR}
+        COMMAND ${CMAKE_COMMAND} -E env 
+            DESTDIR="${CMAKE_BINARY_DIR}/${_PACKAGE}" 
+            ${CMAKE_COMMAND} --build . --target install
+        COMMAND ${TAR_EXECUTABLE} -cvzf "${CMAKE_BINARY_DIR}/${_PACKAGE}.tgz" "${CMAKE_BINARY_DIR}/${_PACKAGE}/*"
+    )
+
+    ADD_CUSTOM_TARGET(
+        tgz
+        DEPENDS "${_PACKAGE}.tgz"
+    )
+ENDIF()
+
+FIND_PROGRAM(
+    DPKG_DEB_EXECUTABLE
+    dpkg-deb
+)
+
+IF (DPKG_DEB_EXECUTABLE)
+    SET(_PACKAGE "libdusk-dev_${PROJECT_VERSION}-1")
+
+    FILE(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${_PACKAGE}/DEBIAN")
+
+    CONFIGURE_FILE(
+        "${CMAKE_SOURCE_DIR}/CMake/DEBIAN/control.in"
+        "${CMAKE_BINARY_DIR}/${_PACKAGE}/DEBIAN/control"
+        @ONLY
+    )
+    
+    ADD_CUSTOM_COMMAND(
+        OUTPUT "${_PACKAGE}.deb"
+        DEPENDS ${_ENGINE}
+        COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX="/usr/local" ${CMAKE_SOURCE_DIR}
+        COMMAND ${CMAKE_COMMAND} -E env 
+            DESTDIR="${CMAKE_BINARY_DIR}/${_PACKAGE}" 
+            ${CMAKE_COMMAND} --build . --target install
+        COMMAND ${DPKG_DEB_EXECUTABLE} --build "${CMAKE_BINARY_DIR}/${_PACKAGE}"
+    )
+
+    ADD_CUSTOM_TARGET(
+        deb
+        DEPENDS "${_PACKAGE}.deb"
+    )
+ENDIF()

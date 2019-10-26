@@ -1,0 +1,13 @@
+Package: libdusk-dev
+Version: @PROJECT_VERSION@-1
+Section: base
+Priority: optional
+Architecture: amd64
+Depends: libopenal-dev, 
+ libsdl2-dev, 
+ libogg-dev, 
+ libvorbis-dev, 
+ libtheora-dev, 
+ libglu1-mesa-dev 
+Maintainer: Stephen Lane-Walsh <sdl.slane@gmail.com>
+Description: Dusk Game Engine Development Library

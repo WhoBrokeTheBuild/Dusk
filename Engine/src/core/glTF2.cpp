@@ -28,8 +28,8 @@ const uint32_t Magic = 0x46546C67; // glTF
 
 enum class ChunkType : uint32_t 
 {
-	JSON = 0x4E4F534A, // JSON
-	BIN  = 0x004E4942, // BIN
+    JSON = 0x4E4F534A, // JSON
+    BIN  = 0x004E4942, // BIN
 };
 
 
@@ -73,30 +73,30 @@ std::vector<std::vector<uint8_t>> loadBuffers(const json& data, const std::strin
                     size_t byteLength = object.value<size_t>("byteLength", 0);
                     const auto& uri = object.value("uri", "");
 
-					if (uri.compare(0, strlen("data:"), "data:") == 0) {
-						size_t pivot = uri.find(',');
-						buffers.push_back(macaron::Base64::Decode(uri.substr(pivot + 1)));
-					} else {
-						DuskLogVerbose("glTF buffer %zu, %s", byteLength, uri);
+                    if (uri.compare(0, strlen("data:"), "data:") == 0) {
+                        size_t pivot = uri.find(',');
+                        buffers.push_back(macaron::Base64::Decode(uri.substr(pivot + 1)));
+                    } else {
+                        DuskLogVerbose("glTF buffer %zu, %s", byteLength, uri);
 
-						std::ifstream bufferFile(dir + "/" + uri, std::ios::in | std::ios::binary);
-						if (!bufferFile.is_open()) {
-							DuskLogError("Failed to open glTF data file '%s'", uri);
-							continue;
-						}
+                        std::ifstream bufferFile(dir + "/" + uri, std::ios::in | std::ios::binary);
+                        if (!bufferFile.is_open()) {
+                            DuskLogError("Failed to open glTF data file '%s'", uri);
+                            continue;
+                        }
 
-						buffers.push_back(std::vector<uint8_t>(byteLength));
-						auto& buffer = buffers.back();
+                        buffers.push_back(std::vector<uint8_t>(byteLength));
+                        auto& buffer = buffers.back();
 
-						bufferFile.read(reinterpret_cast<char *>(buffer.data()), byteLength);
-						bufferFile.close();
+                        bufferFile.read(reinterpret_cast<char *>(buffer.data()), byteLength);
+                        bufferFile.close();
 
-						DuskLogLoad("glTF data file '%s'", uri);
+                        DuskLogLoad("glTF data file '%s'", uri);
 
-						if (buffer.size() != byteLength) {
-							DuskLogWarn("Buffer size mismatch %zu != %zu", buffer.size(), byteLength);
-						}
-					}
+                        if (buffer.size() != byteLength) {
+                            DuskLogWarn("Buffer size mismatch %zu != %zu", buffer.size(), byteLength);
+                        }
+                    }
                 }
             }
         }
@@ -149,7 +149,7 @@ struct accessor_t {
     std::string type;
     size_t byteOffset;
     GLenum componentType;
-	bool normalized;
+    bool normalized;
     size_t count;
     // TODO: min, max
 };
@@ -169,7 +169,7 @@ std::vector<accessor_t> loadAccessors(const json& data)
                         object.value("type", ""),
                         object.value<size_t>("byteOffset", 0),
                         object.value<GLenum>("componentType", GL_INVALID_ENUM),
-						object.value<bool>("normalized", false),
+                        object.value<bool>("normalized", false),
                         object.value<size_t>("count", 0),
                         // TODO: min, max
                     });
@@ -206,22 +206,22 @@ std::vector<image_t> loadImages(
 
                     const auto& uri = object.value("uri", "");
                     if (!uri.empty()) {
-						const auto& imageFilename = dir + "/" + uri;
-						image.data.reset(stbi_load(
-							imageFilename.c_str(),
-							&image.size.x,
-							&image.size.y,
-							&image.components,
-							STBI_rgb_alpha)
-						);
-						image.components = STBI_rgb_alpha;
+                        const auto& imageFilename = dir + "/" + uri;
+                        image.data.reset(stbi_load(
+                            imageFilename.c_str(),
+                            &image.size.x,
+                            &image.size.y,
+                            &image.components,
+                            STBI_rgb_alpha)
+                        );
+                        image.components = STBI_rgb_alpha;
 
-						if (!image.data) {
-							DuskLogError("Failed to load glTF image file '%s'", imageFilename);
-							continue;
-						}
+                        if (!image.data) {
+                            DuskLogError("Failed to load glTF image file '%s'", imageFilename);
+                            continue;
+                        }
 
-						DuskLogLoad("glTF image file '%s'", uri);
+                        DuskLogLoad("glTF image file '%s'", uri);
                     } else {
                         int bufferViewIndex = object.value("bufferView", -1);
                         //const auto& mimeType = object.value("mimeType", "");
@@ -237,7 +237,7 @@ std::vector<image_t> loadImages(
                             &image.components, 
                             STBI_rgb_alpha)
                         );
-						image.components = STBI_rgb_alpha;
+                        image.components = STBI_rgb_alpha;
                     }
                 }
             }
@@ -488,7 +488,7 @@ std::vector<Mesh::Primitive> loadPrimitives(
 
     std::shared_ptr<Material> defaultMaterial(new Material());
     
-	std::vector<GLuint> vbos;
+    std::vector<GLuint> vbos;
 
     const auto& primIt = data.find("primitives");
     if (primIt != data.end()) {
@@ -615,30 +615,30 @@ std::vector<Mesh::Primitive> loadPrimitives(
 }
 
 std::vector<Mesh::Primitive> loadAllPrimitives(
-	const json& data,
-	const std::vector<bufferView_t>& bufferViews,
-	const std::vector<std::vector<uint8_t>>& buffers,
-	const std::vector<accessor_t>& accessors,
-	const std::vector<std::shared_ptr<Material>>& materials)
+    const json& data,
+    const std::vector<bufferView_t>& bufferViews,
+    const std::vector<std::vector<uint8_t>>& buffers,
+    const std::vector<accessor_t>& accessors,
+    const std::vector<std::shared_ptr<Material>>& materials)
 {
-	std::vector<Mesh::Primitive> primitives;
+    std::vector<Mesh::Primitive> primitives;
 
-	const auto it = data.find("meshes");
-	if (it != data.cend()) {
-		const auto& array = it.value();
-		for (const auto& object : array) {
-			if (object.is_object()) {
-				DuskLogVerbose("glTF mesh %s", object.value("name", ""));
+    const auto it = data.find("meshes");
+    if (it != data.cend()) {
+        const auto& array = it.value();
+        for (const auto& object : array) {
+            if (object.is_object()) {
+                DuskLogVerbose("glTF mesh %s", object.value("name", ""));
 
-				auto tmp = loadPrimitives(object, bufferViews, buffers, accessors, materials);
-				for (auto&& p : tmp) {
-					primitives.push_back(std::move(p));
-				}
-			}
-		}
-	}
+                auto tmp = loadPrimitives(object, bufferViews, buffers, accessors, materials);
+                for (auto&& p : tmp) {
+                    primitives.push_back(std::move(p));
+                }
+            }
+        }
+    }
 
-	return primitives;
+    return primitives;
 }
 
 std::vector<std::shared_ptr<Mesh>> loadMeshes(
@@ -772,128 +772,128 @@ std::tuple<json, std::vector<std::vector<uint8_t>>, std::string>
 loadFile(const std::string& filename) 
 {
     static auto error = std::make_tuple(json(), std::vector<std::vector<uint8_t>>(), "");
-	const auto& paths = GetAssetPaths();
+    const auto& paths = GetAssetPaths();
 
-	std::ifstream file;
-	std::string fullPath;
-	for (auto& p : paths) {
-		fullPath = p + filename;
+    std::ifstream file;
+    std::string fullPath;
+    for (auto& p : paths) {
+        fullPath = p + filename;
 
-		DuskLogVerbose("Checking %s", fullPath);
+        DuskLogVerbose("Checking %s", fullPath);
 
-		file.open(fullPath.c_str(), std::ios::in | std::ios::binary);
-		if (file.is_open()) {
-			break;
-		}
-	}
+        file.open(fullPath.c_str(), std::ios::in | std::ios::binary);
+        if (file.is_open()) {
+            break;
+        }
+    }
 
-	if (!file.is_open()) {
-		DuskLogError("Failed to load glTF, '%s'", filename);
+    if (!file.is_open()) {
+        DuskLogError("Failed to load glTF, '%s'", filename);
         return error;
-	}
+    }
 
-	const auto& dir = GetDirname(fullPath);
-	const auto& ext = GetExtension(filename);
-	bool binary = (ext == "glb");
+    const auto& dir = GetDirname(fullPath);
+    const auto& ext = GetExtension(filename);
+    bool binary = (ext == "glb");
 
-	std::vector<std::vector<uint8_t>> dataChunks;
+    std::vector<std::vector<uint8_t>> dataChunks;
 
-	json data;
-	if (binary) {
-		uint32_t magic = 0;
-		uint32_t version = 0;
-		uint32_t length = 0;
+    json data;
+    if (binary) {
+        uint32_t magic = 0;
+        uint32_t version = 0;
+        uint32_t length = 0;
 
-		// TODO: Endianness
+        // TODO: Endianness
 
-		file.read(reinterpret_cast<char *>(&magic), sizeof(magic));
-		if (magic != Magic) {
-			DuskLogError("Invalid binary glTF file");
+        file.read(reinterpret_cast<char *>(&magic), sizeof(magic));
+        if (magic != Magic) {
+            DuskLogError("Invalid binary glTF file");
             return error;
-		}
+        }
 
-		file.read(reinterpret_cast<char *>(&version), sizeof(version));
-		if (version != 2) {
-			DuskLogError("Invalid binary glTF container version %d", version);
+        file.read(reinterpret_cast<char *>(&version), sizeof(version));
+        if (version != 2) {
+            DuskLogError("Invalid binary glTF container version %d", version);
             return error;
-		}
+        }
 
-		file.read(reinterpret_cast<char *>(&length), sizeof(length));
+        file.read(reinterpret_cast<char *>(&length), sizeof(length));
 
-		uint32_t jsonChunkLength = 0;
-		uint32_t jsonChunkType = 0;
+        uint32_t jsonChunkLength = 0;
+        uint32_t jsonChunkType = 0;
 
-		file.read(reinterpret_cast<char *>(&jsonChunkLength), sizeof(jsonChunkLength));
-		file.read(reinterpret_cast<char *>(&jsonChunkType), sizeof(jsonChunkType));
+        file.read(reinterpret_cast<char *>(&jsonChunkLength), sizeof(jsonChunkLength));
+        file.read(reinterpret_cast<char *>(&jsonChunkType), sizeof(jsonChunkType));
 
-		if ((ChunkType)jsonChunkType != ChunkType::JSON) {
-			DuskLogError("The first chunk of a binary glTF must be JSON, found %08x", jsonChunkType);
+        if ((ChunkType)jsonChunkType != ChunkType::JSON) {
+            DuskLogError("The first chunk of a binary glTF must be JSON, found %08x", jsonChunkType);
             return error;
-		}
+        }
 
-		std::vector<char> jsonChunk(jsonChunkLength + 1);
-		file.read(jsonChunk.data(), jsonChunkLength);
-		jsonChunk.back() = '\0';
-		
-		data = json::parse(jsonChunk.data());
+        std::vector<char> jsonChunk(jsonChunkLength + 1);
+        file.read(jsonChunk.data(), jsonChunkLength);
+        jsonChunk.back() = '\0';
+        
+        data = json::parse(jsonChunk.data());
 
-		uint32_t dataChunkLength = 0;
-		uint32_t dataChunkType = 0;
-		while (file.read(reinterpret_cast<char *>(&dataChunkLength), sizeof(dataChunkLength))) {
-			file.read(reinterpret_cast<char *>(&dataChunkType), sizeof(dataChunkType));
+        uint32_t dataChunkLength = 0;
+        uint32_t dataChunkType = 0;
+        while (file.read(reinterpret_cast<char *>(&dataChunkLength), sizeof(dataChunkLength))) {
+            file.read(reinterpret_cast<char *>(&dataChunkType), sizeof(dataChunkType));
 
-			if ((ChunkType)dataChunkType != ChunkType::BIN) {
-				DuskLogError("The second chunk of a binary glTF must be BIN, found %08x", dataChunkType);
+            if ((ChunkType)dataChunkType != ChunkType::BIN) {
+                DuskLogError("The second chunk of a binary glTF must be BIN, found %08x", dataChunkType);
                 return error;
-			}
+            }
 
-			dataChunks.push_back(std::vector<uint8_t>(dataChunkLength));
-			auto& dataChunk = dataChunks.back();
+            dataChunks.push_back(std::vector<uint8_t>(dataChunkLength));
+            auto& dataChunk = dataChunks.back();
 
-			file.read(reinterpret_cast<char *>(dataChunk.data()), dataChunkLength);
-		}
+            file.read(reinterpret_cast<char *>(dataChunk.data()), dataChunkLength);
+        }
 
-	} else {
-		file >> data;
-	}
+    } else {
+        file >> data;
+    }
 
-	if (auto it = data.find("asset"); it != data.end()) {
-		const auto& object = it.value();
-		if (object.is_object()) {
+    if (auto it = data.find("asset"); it != data.end()) {
+        const auto& object = it.value();
+        if (object.is_object()) {
 
-			const auto& version = object.value("version", "");
+            const auto& version = object.value("version", "");
 
-			DuskLogVerbose("glTF Generator %s", object.value("generator", ""));
-			DuskLogVerbose("glTF Version %s", object.value("version", ""));
+            DuskLogVerbose("glTF Generator %s", object.value("generator", ""));
+            DuskLogVerbose("glTF Version %s", object.value("version", ""));
 
-			if (version != "2.0") {
-				DuskLogError("only glTF 2.0 is supported");
+            if (version != "2.0") {
+                DuskLogError("only glTF 2.0 is supported");
                 return error;
-			}
-		}
-		else {
-			DuskLogError("glTF missing required asset entry");
+            }
+        }
+        else {
+            DuskLogError("glTF missing required asset entry");
             return error;
-		}
-	}
+        }
+    }
 
-	if (auto it = data.find("extensionsRequired"); it != data.end()) {
-		const auto& array = it.value();
-		if (array.is_array()) {
-			for (const auto& ext : array) {
-				DuskLogError("Missing glTF required extension '%s'", ext);
-			}
-		}
-	}
+    if (auto it = data.find("extensionsRequired"); it != data.end()) {
+        const auto& array = it.value();
+        if (array.is_array()) {
+            for (const auto& ext : array) {
+                DuskLogError("Missing glTF required extension '%s'", ext);
+            }
+        }
+    }
 
-	if (auto it = data.find("extensionsUsed"); it != data.end()) {
-		const auto& array = it.value();
-		if (array.is_array()) {
-			for (const auto& ext : array) {
-				DuskLogWarn("Missing glTF extension '%s'", ext);
-			}
-		}
-	}
+    if (auto it = data.find("extensionsUsed"); it != data.end()) {
+        const auto& array = it.value();
+        if (array.is_array()) {
+            for (const auto& ext : array) {
+                DuskLogWarn("Missing glTF extension '%s'", ext);
+            }
+        }
+    }
 
     return std::make_tuple(data, dataChunks, dir);
 }
@@ -903,21 +903,21 @@ std::vector<std::unique_ptr<Actor>> LoadSceneFromFile(const std::string& filenam
     DuskBenchStart();
 
     const auto& [data, dataChunks, dir] = loadFile(filename);
-	
-	// TODO: Allow other buffers in GLB
-	const auto& buffers = (dataChunks.empty() ? loadBuffers(data, dir) : dataChunks);
-	const auto& bufferViews = loadBufferViews(data);
-	const auto& accessors = loadAccessors(data);
-	const auto& images = loadImages(data, dir, bufferViews, buffers);
-	const auto& samplers = loadSamplers(data);
-	const auto& textures = loadTextures(data, images, samplers);
-	const auto& cameras = loadCameras(data);
-	const auto& materials = loadMaterials(data, textures);
-	const auto& meshes = loadMeshes(data, bufferViews, buffers, accessors, materials);
-	auto actors = loadNodes(data, cameras, meshes);
+    
+    // TODO: Allow other buffers in GLB
+    const auto& buffers = (dataChunks.empty() ? loadBuffers(data, dir) : dataChunks);
+    const auto& bufferViews = loadBufferViews(data);
+    const auto& accessors = loadAccessors(data);
+    const auto& images = loadImages(data, dir, bufferViews, buffers);
+    const auto& samplers = loadSamplers(data);
+    const auto& textures = loadTextures(data, images, samplers);
+    const auto& cameras = loadCameras(data);
+    const auto& materials = loadMaterials(data, textures);
+    const auto& meshes = loadMeshes(data, bufferViews, buffers, accessors, materials);
+    auto actors = loadNodes(data, cameras, meshes);
 
     DuskBenchEnd("glTF2::LoadSceneFromFile");
-	return actors;
+    return actors;
 }
 
 std::vector<Mesh::Primitive> LoadPrimitivesFromFile(const std::string& filename)
@@ -925,16 +925,16 @@ std::vector<Mesh::Primitive> LoadPrimitivesFromFile(const std::string& filename)
     DuskBenchStart();
 
     const auto& [data, dataChunks, dir] = loadFile(filename);
-	
-	// TODO: Allow other buffers in GLB
-	const auto& buffers = (dataChunks.empty() ? loadBuffers(data, dir) : dataChunks);
-	const auto& bufferViews = loadBufferViews(data);
-	const auto& accessors = loadAccessors(data);
-	const auto& images = loadImages(data, dir, bufferViews, buffers);
-	const auto& samplers = loadSamplers(data);
-	const auto& textures = loadTextures(data, images, samplers);
-	const auto& materials = loadMaterials(data, textures);
-	auto primitives = loadAllPrimitives(data, bufferViews, buffers, accessors, materials);
+    
+    // TODO: Allow other buffers in GLB
+    const auto& buffers = (dataChunks.empty() ? loadBuffers(data, dir) : dataChunks);
+    const auto& bufferViews = loadBufferViews(data);
+    const auto& accessors = loadAccessors(data);
+    const auto& images = loadImages(data, dir, bufferViews, buffers);
+    const auto& samplers = loadSamplers(data);
+    const auto& textures = loadTextures(data, images, samplers);
+    const auto& materials = loadMaterials(data, textures);
+    auto primitives = loadAllPrimitives(data, bufferViews, buffers, accessors, materials);
 
     DuskBenchEnd("glTF2::LoadMeshFromFile");
     return primitives;

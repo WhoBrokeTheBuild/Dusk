@@ -113,7 +113,7 @@ void Camera::SetUp(const glm::vec3& up)
 
 glm::vec3 Camera::GetRight() const
 {
-	return glm::normalize(glm::cross(GetForward(), GetUp()));
+    return glm::normalize(glm::cross(GetForward(), GetUp()));
 }
 
 void Camera::SetForward(const glm::vec3& forward)

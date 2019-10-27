@@ -1,11 +1,11 @@
 {
-	"folders": [
+    "folders": [
         {
             "path": "."
         }
     ],
-	"settings": {
-		"files.associations": {
+    "settings": {
+        "files.associations": {
             "initializer_list": "cpp",
             "array": "cpp",
             "cctype": "cpp",
@@ -57,5 +57,5 @@
             "valarray": "cpp",
             "string.h": "c"
         }
-	}
+    }
 }

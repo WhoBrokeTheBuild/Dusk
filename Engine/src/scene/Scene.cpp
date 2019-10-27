@@ -23,7 +23,7 @@ bool Scene::LoadFromFile(const std::string& filename)
 
     auto actors = glTF2::LoadSceneFromFile(filename);
     for (auto& actor : actors) {
-    	AddActor(std::move(actor));
+        AddActor(std::move(actor));
     }
 
     DuskBenchEnd("Scene::LoadFromFile");
@@ -32,16 +32,16 @@ bool Scene::LoadFromFile(const std::string& filename)
 
 void Scene::Start()
 {
-	for (auto& actor : _actors) {
-		actor->SceneStart();
-	}
+    for (auto& actor : _actors) {
+        actor->SceneStart();
+    }
 }
 
 void Scene::Stop()
 {
-	for (auto& actor : _actors) {
-		actor->SceneStop();
-	}
+    for (auto& actor : _actors) {
+        actor->SceneStop();
+    }
 }
 
 void Scene::AddActor(std::unique_ptr<Actor>&& actor)

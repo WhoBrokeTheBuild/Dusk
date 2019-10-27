@@ -46,9 +46,9 @@ void App::Start()
 
     SDL_ShowWindow(_sdlWindow);
 
-	if (_activeScene) {
-		_activeScene->Start();
-	}
+    if (_activeScene) {
+        _activeScene->Start();
+    }
 
     unsigned long frames = 0;
 
@@ -116,9 +116,9 @@ void App::Start()
 
     SDL_HideWindow(_sdlWindow);
 
-	if (_activeScene) {
-		_activeScene->Stop();
-	}
+    if (_activeScene) {
+        _activeScene->Stop();
+    }
 }
 
 void App::Stop()

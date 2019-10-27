@@ -27,7 +27,7 @@ bool Sound::LoadFromFile(const std::string& filename)
 {
     DuskBenchStart();
 
-	const auto& paths = GetAssetPaths();
+    const auto& paths = GetAssetPaths();
 
     FILE * fp = nullptr;
 
@@ -90,7 +90,7 @@ bool Sound::LoadFromFile(const std::string& filename)
         return false;
     }
 
-	DuskLogLoad("Loaded Sound from '%s", fullPath);
+    DuskLogLoad("Loaded Sound from '%s", fullPath);
 
     SetLoaded(true);
 

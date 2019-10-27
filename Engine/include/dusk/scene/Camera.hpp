@@ -83,7 +83,7 @@ public:
         return _up;
     }
 
-	glm::vec3 GetRight() const;
+    glm::vec3 GetRight() const;
 
     void SetForward(const glm::vec3&);
 

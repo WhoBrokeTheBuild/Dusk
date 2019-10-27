@@ -53,7 +53,7 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames, const defi
     std::vector<GLuint> shaders;
 
     for (const auto& d : defines) {
-		_defines.insert_or_assign(d.first, d.second);
+        _defines.insert_or_assign(d.first, d.second);
     }
     
     if (_glProgram != 0)

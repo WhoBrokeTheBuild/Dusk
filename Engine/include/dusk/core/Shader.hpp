@@ -123,9 +123,9 @@ private:
 
     std::vector<std::string> _filenames;
 
-	define_map_t _defines = {
-		{ "M_PI", std::to_string(M_PI) },
-	};
+    define_map_t _defines = {
+        { "M_PI", std::to_string(M_PI) },
+    };
 
     uniform_map_t _uniforms;
 

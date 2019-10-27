@@ -83,7 +83,7 @@ bool Texture::LoadFromBuffer(const uint8_t * buffer, glm::ivec2 size, int comp /
 {
     DuskBenchStart();
 
-	_size = size;
+    _size = size;
 
     if (_glID) {
         glDeleteTextures(1, &_glID);

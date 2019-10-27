@@ -31,7 +31,7 @@ Mesh::~Mesh()
 
 bool Mesh::LoadFromFile(const std::string& filename)
 {
-	return LoadFromData(glTF2::LoadPrimitivesFromFile(filename));
+    return LoadFromData(glTF2::LoadPrimitivesFromFile(filename));
 }
 
 bool Mesh::LoadFromData(std::vector<Primitive>&& primitives)
@@ -54,16 +54,16 @@ bool Mesh::LoadFromData(std::vector<Primitive>&& primitives)
             for (const auto& [id, def] : attributes) {
                 glGetVertexAttribiv(id, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &enabled);
                 if (enabled) {
-					defines[def] = std::string();
+                    defines[def] = std::string();
                 }
             }
 
-			if (p.Material) {
-				const auto& materialDefines = p.Material->GetDefines();
-				for (const auto& [name, value] : materialDefines) {
-					defines[name] = value;
-				}
-			}
+            if (p.Material) {
+                const auto& materialDefines = p.Material->GetDefines();
+                for (const auto& [name, value] : materialDefines) {
+                    defines[name] = value;
+                }
+            }
 
             glBindVertexArray(0);
 

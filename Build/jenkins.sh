@@ -12,6 +12,8 @@ function semverParseInto() {
     eval $5=`echo $1 | sed -e "s#$RE#\4#"`
 }
 
+cd "$(dirname "$0")"
+
 $CXX --version
 cmake --version
 
@@ -72,7 +74,7 @@ EOF
         | jq -r .upload_url \
         | cut -d'{' -f1)
 
-    DEB=$(ls -1 '*.deb' 2>/dev/null)
+    DEB=$(ls -1 *.deb 2>/dev/null)
     if [[ ! -z "$DEB" ]]; then
         echo "Uploading $DEB"
         curl -u $GITHUB_AUTH \
@@ -81,7 +83,7 @@ EOF
             -d @$DEB
     fi
 
-    RPM=$(ls -1 '*.rpm' 2>/dev/null)
+    RPM=$(ls -1 *.rpm 2>/dev/null)
     if [[ ! -z "$RPM" ]]; then
         echo "Uploading $RPM"
         curl -u $GITHUB_AUTH \
@@ -90,7 +92,7 @@ EOF
             -d @$RPM
     fi
 
-    TGZ=$(ls -1 '*.tgz' 2>/dev/null)
+    TGZ=$(ls -1 *.tgz 2>/dev/null)
     if [[ ! -z "$TGZ" ]]; then
         echo "Uploading $TGZ"
         curl -u $GITHUB_AUTH \

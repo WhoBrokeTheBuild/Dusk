@@ -54,7 +54,6 @@ if [ $OLD_TAG != $NEW_TAG ]; then
 fi
 
 GITHUB_API_URL="https://api.github.com/repos/WhoBrokeTheBuild/Dusk"
-GITHUB_AUTH="WhoBrokeTheBuild:$GITHUB_API_TOKEN"
 
 if [ $OLD_TAG != $NEW_TAG ]; then
 

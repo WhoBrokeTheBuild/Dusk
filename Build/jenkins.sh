@@ -46,7 +46,7 @@ if [[ ! -z "$VERSION" ]]; then
 fi
 
 cmake -G "Unix Makefiles" ..
-make -l deb tgz
+make deb tgz
 
 if [ $OLD_TAG != $NEW_TAG ]; then
     echo "Pushing tags"

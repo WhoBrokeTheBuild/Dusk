@@ -13,12 +13,10 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(ScriptHost)
 
-    ScriptHost() = default;
-    virtual ~ScriptHost() = default;
+    ScriptHost();
+    virtual ~ScriptHost();
 
-    bool LoadFile(const std::string&);
-
-    void Run();
+    bool RunFile(const std::string&);
 
 private:
 

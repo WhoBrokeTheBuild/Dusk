@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 function semverParseInto() {
     local RE='[^0-9]*\([0-9]*\)[.]\([0-9]*\)[.]\([0-9]*\)\([0-9A-Za-z-]*\)'
@@ -73,7 +73,7 @@ EOF
         | jq -r .upload_url \
         | cut -d'{' -f1)
 
-    DEB=$(ls -1 *.deb 2>/dev/null)
+    DEB=$(find . -name '*.deb')
     if [[ ! -z "$DEB" ]]; then
         echo "Uploading $DEB"
         curl -u $GITHUB_AUTH \
@@ -82,7 +82,7 @@ EOF
             -d @$DEB
     fi
 
-    RPM=$(ls -1 *.rpm 2>/dev/null)
+    RPM=$(find . -name '*.rpm')
     if [[ ! -z "$RPM" ]]; then
         echo "Uploading $RPM"
         curl -u $GITHUB_AUTH \
@@ -91,7 +91,7 @@ EOF
             -d @$RPM
     fi
 
-    TGZ=$(ls -1 *.tgz 2>/dev/null)
+    TGZ=$(find . -name '*.tgz')
     if [[ ! -z "$TGZ" ]]; then
         echo "Uploading $TGZ"
         curl -u $GITHUB_AUTH \

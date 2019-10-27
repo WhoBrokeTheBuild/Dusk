@@ -78,7 +78,7 @@ namespace dusk {
     template <class ...Args>
     static inline void Log(LogLevel level, const char * format, Args... args)
     {
-        #if defined(WIN32)
+#if defined(WIN32)
 
         static HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -110,7 +110,7 @@ namespace dusk {
 
         SetConsoleTextAttribute(hConsole, color);
 
-        #else 
+#else 
 
         static const char * TERM = getenv("TERM");
         static bool hasColor = (TERM && (
@@ -151,31 +151,31 @@ namespace dusk {
             printf("\033[%dm\033[%dm", fgColor, bgColor);
         }
 
-        #endif
+#endif
 
-        #pragma clang diagnostic push
-        #pragma clang diagnostic ignored "-Wformat-security"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-security"
 
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wformat-security"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-security"
         
         printf(format, LogWrap(args)...);
 
-        #pragma clang diagnostic pop
+#pragma clang diagnostic pop
 
-        #pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
 
-        #if defined(WIN32)
+#if defined(WIN32)
         
         SetConsoleTextAttribute(hConsole, DEFAULT);
 
-        #else
+#else
 
         if (hasColor) {
             printf("\033[%dm\033[%dm", FG_DEFAULT, BG_DEFAULT);
         }
 
-        #endif
+#endif
     }
 
 #ifndef DUSK_ENABLE_VERBOSE_LOGGING

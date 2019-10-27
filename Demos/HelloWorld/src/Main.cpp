@@ -1,12 +1,16 @@
 #include <dusk/Dusk.hpp>
 
 #include <dusk/core/glTF2.hpp>
+#include <dusk/core/Log.hpp>
 
 #include <memory>
 
 int main(int argc, char** argv) {
     dusk::SetAssetPath(DUSK_ASSET_PATH);
     dusk::App app(argc, argv);
+
+    dusk::ScriptHost py;
+    py.RunFile("scripts/Hello.py");
     
     auto scene = std::make_unique<dusk::Scene>();
     scene->LoadFromFile("models/TestScene.glb");

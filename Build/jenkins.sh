@@ -37,10 +37,13 @@ if [[ ! -z "$VERSION" ]]; then
     fi
     
     NEW_TAG="v$MAJOR.$MINOR.$PATCH"
-    
-    if [ $OLD_TAG != $NEW_TAG ]; then
-        git tag "$NEW_TAG" 2>/dev/null
+
+    if [ "$OLD_TAG" != "$NEW_TAG" ]; then
+        echo "Skipping Build: No new version generated"
+        exit 0
     fi
+    
+    git tag "$NEW_TAG" 2>/dev/null
 
     CHANGELOG=$(git log --oneline --format=%B $OLD_TAG..$NEW_TAG | sed -e ':a;N;$!ba;s/\n/\\n/g')
 fi
@@ -48,10 +51,7 @@ fi
 cmake -G "Unix Makefiles" ..
 make -l deb tgz
 
-if [ $OLD_TAG != $NEW_TAG ]; then
-    echo "Pushing tags"
-    git push --tags
-fi
+git push --tags
 
 GITHUB_API_URL="https://api.github.com/repos/WhoBrokeTheBuild/Dusk"
 

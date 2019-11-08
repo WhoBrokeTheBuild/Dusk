@@ -88,6 +88,7 @@ FIND_PACKAGE(Python3 QUIET COMPONENTS Development)
 
 IF(NOT Python3_Development_FOUND)
     SET(_Python3_DIR "${CMAKE_BINARY_DIR}/Python3")
+    SET(_Python3_SOURCE_DIR "${CMAKE_BINARY_DIR}/Python3_src")
 
     SET(_Python3_CONFIGURE_COMMAND "")
     SET(_Python3_BUILD_COMMAND1 "")
@@ -103,16 +104,18 @@ IF(NOT Python3_Development_FOUND)
         SET(_Python3_BUILD_COMMAND1 cmd /c PCbuild\\build.bat -c Debug -t Build -p ${ARCH})
         SET(_Python3_BUILD_COMMAND2 cmd /c PCbuild\\build.bat -c Release -t Build -p ${ARCH})
     ELSE()
-        SET(_Python3_CONFIGURE_COMMAND ./configure --enable-shared)
-        SET(_Python3_BUILD_COMMAND1 make)
+        SET(_Python3_CONFIGURE_COMMAND ./configure --prefix=${_Python3_DIR} --enable-shared --enable-optimizations)
+        SET(_Python3_BUILD_COMMAND1 make -l libpython3.so install)
     ENDIF()
+
+    MESSAGE(STATUS ${CMAKE_INSTALL_PREFIX})
 
     ExternalProject_Add(
         ThirdParty_Python3
         GIT_REPOSITORY      "https://github.com/python/cpython.git"
         GIT_TAG             "3.8"
         GIT_SHALLOW         TRUE
-        SOURCE_DIR          "${_Python3_DIR}"
+        SOURCE_DIR          "${_Python3_SOURCE_DIR}"
         BUILD_IN_SOURCE     TRUE
         CONFIGURE_COMMAND   "${_Python3_CONFIGURE_COMMAND}"
         BUILD_COMMAND       "${_Python3_BUILD_COMMAND1}"

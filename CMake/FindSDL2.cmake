@@ -1,6 +1,6 @@
 # FindSDL2.cmake
 #
-# Finds the OpenGL Mathematics library
+# Finds the Simple Direct Media Library version 2
 #
 # This will define the following variables
 #
@@ -32,7 +32,7 @@ FIND_PATH(
 FIND_PATH(
     SDL2_RUNTIME_DIR
     NAMES SDL2.dll
-    PATHS ${SDL2_ROOT_DIR} ${_SDL_PC_LIBDIR} ${_SDL2_PC_LIBRARY_DIRS} 
+    PATHS ${SDL2_ROOT_DIR} ${_SDL2_PC_LIBDIR} ${_SDL2_PC_LIBRARY_DIRS}
     PATH_SUFFIXES bin
 )
 

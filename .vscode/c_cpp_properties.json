@@ -3,7 +3,7 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/build/Engine/include",
+                "${workspaceFolder}/Build/Engine/include",
                 "${workspaceFolder}/**"
             ],
             "defines": [],
@@ -12,7 +12,7 @@
             "cppStandard": "c++17",
             "intelliSenseMode": "clang-x64",
             "configurationProvider": "vector-of-bool.cmake-tools",
-            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
+            "compileCommands": "${workspaceFolder}/Build/compile_commands.json"
         }
     ],
     "version": 4

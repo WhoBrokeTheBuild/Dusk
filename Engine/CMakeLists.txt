@@ -1,187 +1,132 @@
-SET(_ENGINE "Dusk")
 
-SET(_ENGINE_CONFIG_IN  "${CMAKE_CURRENT_SOURCE_DIR}/include/dusk/Config.hpp.in")
-SET(_ENGINE_CONFIG_OUT "${CMAKE_CURRENT_BINARY_DIR}/include/dusk/Config.hpp")
+###
+### Module Macro definition
+###
 
-CONFIGURE_FILE(${_ENGINE_CONFIG_IN} ${_ENGINE_CONFIG_OUT})
+MACRO(Module target)
+    ADD_LIBRARY(${target} SHARED "")
 
-FILE(GLOB_RECURSE 
-    _ENGINE_ASSETS
-    "${CMAKE_SOURCE_DIR}/Assets/*"
-)
-
-FILE(GLOB_RECURSE 
-    _ENGINE_INCLUDES
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h"
-)
-
-FILE(GLOB_RECURSE 
-    _ENGINE_SOURCES  
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
-)
-
-IF(WIN32)
-    ADD_LIBRARY(
-        ${_ENGINE}
-        ${_ENGINE_INCLUDES}
-        ${_ENGINE_SOURCES}
-        ${_ENGINE_CONFIG_OUT}
-        ${_ENGINE_ASSETS}
+    FILE(
+        GLOB_RECURSE
+        public
+        Public/*.h
+        Public/*.hh
+        Public/*.hpp
+        Public/*.c
+        Public/*.cc
+        Public/*.cpp
     )
-ELSE()
-    ADD_LIBRARY(
-        ${_ENGINE} SHARED 
-        ${_ENGINE_INCLUDES}
-        ${_ENGINE_SOURCES}
-        ${_ENGINE_CONFIG_OUT}
-        ${_ENGINE_ASSETS}
+
+    FILE(
+        GLOB_RECURSE
+        private
+        Private/*.h
+        Private/*.hh
+        Private/*.hpp
+        Private/*.c
+        Private/*.cc
+        Private/*.cpp
     )
-ENDIF()
 
-TARGET_INCLUDE_DIRECTORIES(
-    ${_ENGINE}
-    PUBLIC
-        $<INSTALL_INTERFACE:include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
-    PRIVATE
-        "${CMAKE_CURRENT_BINARY_DIR}/include"
-        "${CMAKE_CURRENT_SOURCE_DIR}/include"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src"
-)
+    TARGET_INCLUDE_DIRECTORIES(
+        ${target}
+        PRIVATE "Private/"
+        PUBLIC "Public/"
+    )
 
-TARGET_COMPILE_FEATURES(
-    ${_ENGINE} 
-    PRIVATE
-        cxx_std_17
-)
+    TARGET_SOURCES(
+        ${target}
+        PRIVATE ${public} ${private}
+    )
 
-TARGET_COMPILE_OPTIONS(
-    ${_ENGINE} 
-    PRIVATE
-        # Disable unknown pragmas warning, C++ exceptions
-        $<$<CXX_COMPILER_ID:GNU>:-Wall -Wno-unknown-pragmas -fno-exceptions>
-        $<$<CXX_COMPILER_ID:Clang>:-Wall -Wno-unknown-pragmas -fno-exceptions>
-        $<$<CXX_COMPILER_ID:MSVC>:/MP /wd4068 /EHsc->
-)
+    TARGET_COMPILE_DEFINITIONS(
+        ${target}
+        PUBLIC
+            # Disable Visual Studio "not secure" warnings
+            $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
+    )
 
-TARGET_COMPILE_DEFINITIONS(
-    ${_ENGINE} 
-    PRIVATE
-        $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
-)
+    TARGET_COMPILE_OPTIONS(
+        ${target}
+        PUBLIC
+            $<$<CXX_COMPILER_ID:MSVC>:/MT>
+            # Disable unknown pragmas warning, C++ exceptions
+            $<$<CXX_COMPILER_ID:GNU>:-Wall -Wno-unknown-pragmas -fno-exceptions>
+            $<$<CXX_COMPILER_ID:Clang>:-Wall -Wno-unknown-pragmas -fno-exceptions>
+            $<$<CXX_COMPILER_ID:MSVC>:/MP /wd4068 /EHsc->
+    )
 
-TARGET_LINK_LIBRARIES(
-    ${_ENGINE}
-    GLM::GLM
-    JSON::JSON
-    SDL2::SDL2
-    Python3::Python
-    OpenAL::OpenAL
-    Ogg::Ogg
-    Ogg::Vorbis
-    Ogg::Theora
-    Threads::Threads
-)
+    TARGET_LINK_OPTIONS(
+        ${target}
+        PUBLIC
+            # Disable Visual Studio default libraries
+            $<$<CXX_COMPILER_ID:MSVC>:/NODEFAULTLIB:MSVCRT /NODEFAULTLIB:LIBCMT>
+    )
 
-SET_TARGET_PROPERTIES(
-    ${_ENGINE} PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED ON
-    CXX_EXTENSIONS OFF
-)
+    TARGET_COMPILE_FEATURES(
+        ${target} 
+        PRIVATE
+            # Enable C++17 features
+            cxx_std_17
+    )
 
-IF(MSVC)
     SET_TARGET_PROPERTIES(
-        ${_ENGINE} PROPERTIES
-        LINK_FLAGS "/NODEFAULTLIB:LIBCMT /NODEFAULTLIB:MSVCRT" 
-    )
-ENDIF()
-
-FOREACH(file IN ITEMS ${_ENGINE_ASSETS})
-    FILE(RELATIVE_PATH file_path ${CMAKE_SOURCE_DIR} ${file})
-    GET_FILENAME_COMPONENT(file_path ${file_path} DIRECTORY)
-    FILE(TO_NATIVE_PATH ${file_path} file_path)
-    SOURCE_GROUP(${file_path} FILES ${file})
-ENDFOREACH()
-
-FOREACH(file IN ITEMS ${_ENGINE_INCLUDES} ${_ENGINE_SOURCES})
-    FILE(RELATIVE_PATH file_path ${CMAKE_CURRENT_SOURCE_DIR} ${file})
-    GET_FILENAME_COMPONENT(file_path ${file_path} DIRECTORY)
-    FILE(TO_NATIVE_PATH ${file_path} file_path)
-    SOURCE_GROUP(${file_path} FILES ${file})
-ENDFOREACH()
-
-FOREACH(file IN ITEMS ${_ENGINE_CONFIG_OUT})
-    FILE(RELATIVE_PATH file_path ${CMAKE_CURRENT_BINARY_DIR} ${file})
-    GET_FILENAME_COMPONENT(file_path ${file_path} DIRECTORY)
-    FILE(TO_NATIVE_PATH ${file_path} file_path)
-    SOURCE_GROUP(${file_path} FILES ${file})
-ENDFOREACH()
-
-INSTALL(TARGETS ${_ENGINE}
-    EXPORT DuskTargets
-    INCLUDES DESTINATION include
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
-
-INCLUDE(CMakePackageConfigHelpers)
-
-WRITE_BASIC_PACKAGE_VERSION_FILE(
-    "${CMAKE_BINARY_DIR}/DuskConfigVersion.cmake"
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY AnyNewerVersion
-)
-
-INSTALL(EXPORT DuskTargets
-    FILE DuskTargets.cmake
-    NAMESPACE Dusk::
-    DESTINATION lib/cmake/Dusk
-)
-
-CONFIGURE_PACKAGE_CONFIG_FILE(
-    "${CMAKE_SOURCE_DIR}/CMake/DuskConfig.cmake.in"
-    "${CMAKE_BINARY_DIR}/DuskConfig.cmake"
-    INSTALL_DESTINATION lib/cmake/Dusk
-)
-
-INSTALL(EXPORT DuskTargets 
-    DESTINATION lib/cmake/Dusk
-)
-
-INSTALL(FILES 
-    "${CMAKE_BINARY_DIR}/DuskConfigVersion.cmake" 
-    "${CMAKE_BINARY_DIR}/DuskConfig.cmake"
-    DESTINATION lib/cmake/Dusk
-)
-
-INCLUDE(FindPkgConfig)
-
-IF(PKG_CONFIG_FOUND)
-    CONFIGURE_FILE(
-        "${CMAKE_SOURCE_DIR}/CMake/Dusk.pc.in"
-        "${CMAKE_BINARY_DIR}/Dusk.pc"
-        @ONLY
+        ${target} PROPERTIES
+            CXX_STANDARD 17
+            CXX_STANDARD_REQUIRED ON
+            CXX_EXTENSIONS OFF
     )
 
-    INSTALL(FILES
-        "${CMAKE_BINARY_DIR}/Dusk.pc"
-        DESTINATION share/pkgconfig
+    FILE(RELATIVE_PATH folder ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+    SET_TARGET_PROPERTIES(
+        ${target}
+        PROPERTIES 
+            FOLDER "${folder}"
     )
-ENDIF()
 
-INSTALL(DIRECTORY
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/"
-    DESTINATION include
-    PATTERN "*.in" EXCLUDE
-)
+    IF(BUILD_TESTS)
+        FILE(GLOB_RECURSE
+            tests
+            "Tests/*Test.cpp"
+        )
 
-INSTALL(FILES
-    "${_ENGINE_CONFIG_OUT}"
-    DESTINATION include/dusk/
-)
+        FOREACH(test_source ${tests})
+            GET_FILENAME_COMPONENT(test_target ${test_source} NAME_WE)
+            
+            ADD_EXECUTABLE(
+                ${test_target}
+                ${test_source}
+            )
+
+            TARGET_LINK_LIBRARIES(
+                ${test_target}
+                PRIVATE
+                    ${target}
+                    GTest::GTest
+                    GTest::Main
+                    $<$<CXX_COMPILER_ID:MSVC>:MSVCRT>
+            )
+
+            SET_TARGET_PROPERTIES(
+                ${test_target}
+                PROPERTIES FOLDER "${folder}/Tests"
+            )
+
+            ADD_TEST(
+                NAME ${test_target}
+                COMMAND ${test_target}
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            )
+        ENDFOREACH()
+    ENDIF()
+ENDMACRO()
+
+###
+### Include Modules
+###
+
+ADD_SUBDIRECTORY(Core)
+
+# Loaders
+
+ADD_SUBDIRECTORY(STBI)

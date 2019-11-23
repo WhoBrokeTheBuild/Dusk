@@ -1,8 +1,19 @@
 import Dusk
 
-Dusk.Info("Info")
-Dusk.Warn("Warn")
-Dusk.Error("Error")
-Dusk.Verbose("Verbose")
-Dusk.Perf("Perf")
-Dusk.Load("Load")
+print("===Thing===")
+t = Dusk.Thing()
+t.SayHello()
+
+class NewThing(Dusk.Thing):
+    def __init__(self):
+        super().__init__()
+        print("NewThing.__init__()")
+
+    def SayHello(self):
+        super().SayHello()
+        print("Goodbye!")
+
+print("===NewThing===")
+
+nt = NewThing()
+nt.SayHello()

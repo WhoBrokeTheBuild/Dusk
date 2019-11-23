@@ -1,18 +1,9 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.12 FATAL_ERROR)
 
-CMAKE_POLICY(SET CMP0048 NEW)
-
-IF(NOT ${CMAKE_VERSION} VERSION_LESS "3.13")
-    CMAKE_POLICY(SET CMP0076 NEW)
-ENDIF()
-
-IF(POLICY CMP0072)
-  CMAKE_POLICY(SET CMP0072 NEW)
-ENDIF()
-
-PROJECT(ThirdParty)
-
 LIST(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_SOURCE_DIR}/../CMake")
+
+# Include CMAKE_POLICY decisions
+INCLUDE(Policies)
 
 INCLUDE(ExternalProject)
 
@@ -54,6 +45,31 @@ IF(NOT JSON_FOUND)
         BUILD_COMMAND       ""
         UPDATE_COMMAND      ""
         INSTALL_COMMAND     ""
+        TEST_COMMAND        ""
+    )
+ENDIF()
+
+# GTest
+
+FIND_PACKAGE(GTest QUIET)
+
+IF(NOT GTEST_FOUND)
+    SET(_GTest_DIR "${CMAKE_BINARY_DIR}/GTest")
+    SET(_GTest_SOURCE_DIR "${CMAKE_BINARY_DIR}/GTest_src")
+    SET(_GTest_BINARY_DIR "${CMAKE_BINARY_DIR}/GTest_bin")
+
+    ExternalProject_Add(
+        ThirdParty_GTest
+        GIT_REPOSITORY      "https://github.com/google/googletest"
+        GIT_TAG             "v1.10.x"
+        GIT_SHALLOW         TRUE
+        SOURCE_DIR          "${_GTest_SOURCE_DIR}"
+        BINARY_DIR          "${_GTest_BINARY_DIR}"
+        CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${_GTest_DIR}
+                            -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+        BUILD_COMMAND       ""
+        INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
+        UPDATE_COMMAND      ""
         TEST_COMMAND        ""
     )
 ENDIF()

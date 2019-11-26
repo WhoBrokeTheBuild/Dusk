@@ -127,6 +127,10 @@ ENDMACRO()
 
 ADD_SUBDIRECTORY(Core)
 
+# Graphics Drivers
+
+ADD_SUBDIRECTORY(OpenGL)
+
 # Loaders
 
 ADD_SUBDIRECTORY(STBI)

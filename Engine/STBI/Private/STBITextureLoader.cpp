@@ -1,7 +1,6 @@
 #include <Dusk/Loaders/STBITextureLoader.hpp>
 
 #include <Dusk/Math.hpp>
-#include <Dusk/Module.hpp>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-function"
@@ -48,15 +47,5 @@ TextureData TextureLoader::Load(const std::string& filename) {
 
     return data;
 }
-
-void ModuleInit() {
-    Dusk::SetTextureLoader(new TextureLoader());
-}
-
-DUSK_MODULE() {
-    .Name = "STBI",
-    .Init = ModuleInit,
-    .Term = nullptr,
-};
 
 }

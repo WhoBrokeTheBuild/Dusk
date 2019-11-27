@@ -116,6 +116,16 @@ void Terminate() {
     FreeModules();
 }
 
+static bool _Running = false;
+
+void SetRunning(bool running) {
+    _Running = running;
+}
+
+bool IsRunning() {
+    return _Running;
+}
+
 void RunScript(const std::string& filename) {
     FILE * file = fopen(filename.c_str(), "rt");
     if (!file) {

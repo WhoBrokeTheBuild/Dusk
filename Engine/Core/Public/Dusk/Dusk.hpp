@@ -12,6 +12,10 @@ void Initialize(int argc, char ** argv);
 
 void Terminate();
 
+void SetRunning(bool running);
+
+bool IsRunning();
+
 void RunScript(const std::string& filename);
 
 }

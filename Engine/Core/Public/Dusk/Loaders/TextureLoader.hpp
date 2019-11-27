@@ -42,7 +42,13 @@ struct TextureData {
 
     // Method to call to free the data
     // Set to nullptr to ignore
-    void (*Free)(void *);
+    void (*FreeFunc)(void *);
+
+    inline void Free() {
+        if (FreeFunc) {
+            FreeFunc((void *)Buffer);
+        }
+    }
 };
 
 class ITextureLoader 

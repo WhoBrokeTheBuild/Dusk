@@ -25,7 +25,7 @@ TextureData TextureLoader::Load(const std::string& filename) {
     data.Buffer = stbi_load(filename.c_str(), &size.x, &size.y, &comp, 0);
     data.Width = size.x;
     data.Height = size.y;
-    data.Free = stbi_image_free;
+    data.FreeFunc = stbi_image_free;
     data.DataType = TextureDataType::UNSIGNED_BYTE;
 
     switch (comp) {

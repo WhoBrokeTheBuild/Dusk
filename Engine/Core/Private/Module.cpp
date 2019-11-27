@@ -11,6 +11,8 @@ std::vector<void *> _Modules;
 bool LoadModule(const std::string& name) {
     void * module = nullptr;
 
+    printf("Loading %s\n", name.c_str());
+
     std::string filename = "../../Build/Engine/" + name + "/libDusk" + name + ".so";
 
     module = dlopen(filename.c_str(), RTLD_GLOBAL | RTLD_NOW);

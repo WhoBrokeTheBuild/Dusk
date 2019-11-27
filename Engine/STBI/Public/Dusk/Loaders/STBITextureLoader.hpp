@@ -11,8 +11,8 @@ public:
 
     TextureData Load(const std::string& filename) override;
 
-};
+}; // class TextureLoader
 
-}
+} // class 
 
 #endif // DUSK_STBI_TEXTURE_LOADER_HPP

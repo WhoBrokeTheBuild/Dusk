@@ -5,6 +5,8 @@ LIST(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_SOURCE_DIR}/../CMake")
 # Include CMAKE_POLICY decisions
 INCLUDE(Policies)
 
+PROJECT(ThirdParty)
+
 INCLUDE(ExternalProject)
 
 # glm

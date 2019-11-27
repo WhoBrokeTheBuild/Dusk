@@ -4,7 +4,11 @@
 namespace Dusk::STBI {
 
 void ModuleInit() {
-    Dusk::SetTextureLoader(new TextureLoader());
+    SetTextureLoader(new TextureLoader());
+}
+
+void ModuleTerm() {
+    SetTextureLoader(nullptr);
 }
 
 DUSK_MODULE() {

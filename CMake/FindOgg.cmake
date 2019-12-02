@@ -95,17 +95,9 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(
     REQUIRED_VARS 
         Ogg_INCLUDE_DIR
         Ogg_LIBRARY 
-)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(
-    Vorbis
-    REQUIRED_VARS 
         Vorbis_INCLUDE_DIR
         Vorbis_LIBRARY 
         VorbisFile_LIBRARY 
-)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(
-    Theora
-    REQUIRED_VARS 
         Theora_INCLUDE_DIR
         Theora_LIBRARY 
 )

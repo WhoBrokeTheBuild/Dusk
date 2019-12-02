@@ -1,7 +1,7 @@
 
 SET(_TARGET DuskCore)
 
-Module(${_TARGET})
+Module(${_TARGET} CORE)
 
 TARGET_LINK_LIBRARIES(
     ${_TARGET}

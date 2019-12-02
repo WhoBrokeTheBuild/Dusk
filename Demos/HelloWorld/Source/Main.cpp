@@ -8,11 +8,11 @@ int main(int argc, char** argv)
 {
     Dusk::Initialize(argc, argv);
 
-    if (!Dusk::LoadModule("STBI")) {
+    if (!Dusk::LoadModule("DuskSTBI")) {
         return 1;
     }
     
-    if (!Dusk::LoadModule("OpenGL")) {
+    if (!Dusk::LoadModule("DuskOpenGL")) {
         return 1;
     }
 

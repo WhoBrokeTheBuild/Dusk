@@ -3,7 +3,7 @@
 ### Module Macro definition
 ###
 
-MACRO(Module target)
+MACRO(Module target prefix)
     ADD_LIBRARY(${target} SHARED "")
 
     FILE(
@@ -36,7 +36,7 @@ MACRO(Module target)
 
     TARGET_SOURCES(
         ${target}
-        PRIVATE ${public} ${private}
+        PRIVATE ${private} ${public}
     )
 
     TARGET_COMPILE_DEFINITIONS(
@@ -44,23 +44,17 @@ MACRO(Module target)
         PUBLIC
             # Disable Visual Studio "not secure" warnings
             $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
+        PRIVATE
+            DUSK_${prefix}_EXPORT
     )
 
     TARGET_COMPILE_OPTIONS(
         ${target}
         PUBLIC
-            $<$<CXX_COMPILER_ID:MSVC>:/MT>
             # Disable unknown pragmas warning, C++ exceptions
             $<$<CXX_COMPILER_ID:GNU>:-Wall -Wno-unknown-pragmas -fno-exceptions>
             $<$<CXX_COMPILER_ID:Clang>:-Wall -Wno-unknown-pragmas -fno-exceptions>
-            $<$<CXX_COMPILER_ID:MSVC>:/MP /wd4068 /EHsc->
-    )
-
-    TARGET_LINK_OPTIONS(
-        ${target}
-        PUBLIC
-            # Disable Visual Studio default libraries
-            $<$<CXX_COMPILER_ID:MSVC>:/NODEFAULTLIB:MSVCRT /NODEFAULTLIB:LIBCMT>
+            $<$<CXX_COMPILER_ID:MSVC>:/MP /wd4068 /EHsc- /GR->
     )
 
     TARGET_COMPILE_FEATURES(
@@ -77,12 +71,32 @@ MACRO(Module target)
             CXX_EXTENSIONS OFF
     )
 
-    FILE(RELATIVE_PATH folder ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+    FILE(RELATIVE_PATH folder ${CMAKE_SOURCE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/..")
     SET_TARGET_PROPERTIES(
         ${target}
         PROPERTIES 
             FOLDER "${folder}"
     )
+
+    IF(MSVC)
+        LIST(APPEND CMAKE_MSVCIDE_RUN_PATH
+            "${CMAKE_CURRENT_BINARY_DIR}/Debug"
+            "${CMAKE_CURRENT_BINARY_DIR}/Release"
+        )
+        SET(CMAKE_MSVCIDE_RUN_PATH ${CMAKE_MSVCIDE_RUN_PATH} PARENT_SCOPE)
+        SET_TARGET_PROPERTIES(
+            ${target} PROPERTIES 
+            VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            VS_DEBUGGER_ENVIRONMENT "PATH=%PATH%;${CMAKE_MSVCIDE_RUN_PATH}"
+        )
+    ENDIF()
+
+    FOREACH(file ${public} ${private})
+        FILE(RELATIVE_PATH file_path ${CMAKE_CURRENT_SOURCE_DIR} ${file})
+        GET_FILENAME_COMPONENT(folder ${file_path} DIRECTORY)
+        FILE(TO_NATIVE_PATH ${folder} folder)
+        SOURCE_GROUP(${folder} FILES ${file})
+    ENDFOREACH()
 
     IF(BUILD_TESTS)
         FILE(GLOB_RECURSE
@@ -134,3 +148,7 @@ ADD_SUBDIRECTORY(OpenGL)
 # Loaders
 
 ADD_SUBDIRECTORY(STBI)
+
+# Update the global CMAKE_MSVCIDE_RUN_PATH to include paths to the
+# module's .dll's
+SET(CMAKE_MSVCIDE_RUN_PATH ${CMAKE_MSVCIDE_RUN_PATH} PARENT_SCOPE)

@@ -37,14 +37,7 @@ MACRO(Demo target)
             # Disable unknown pragmas warning, C++ exceptions
             $<$<CXX_COMPILER_ID:GNU>:-Wall -Wno-unknown-pragmas -fno-exceptions>
             $<$<CXX_COMPILER_ID:Clang>:-Wall -Wno-unknown-pragmas -fno-exceptions>
-            $<$<CXX_COMPILER_ID:MSVC>:/MP /wd4068 /EHsc->
-    )
-
-    TARGET_LINK_OPTIONS(
-        ${target}
-        PUBLIC
-            # Disable Visual Studio default libraries
-            $<$<CXX_COMPILER_ID:MSVC>:/NODEFAULTLIB:MSVCRT /NODEFAULTLIB:LIBCMT>
+            $<$<CXX_COMPILER_ID:MSVC>:/MP /wd4068 /EHsc- /GR->
     )
 
     TARGET_COMPILE_FEATURES(
@@ -61,7 +54,7 @@ MACRO(Demo target)
             CXX_EXTENSIONS OFF
     )
 
-    FILE(RELATIVE_PATH folder ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+    FILE(RELATIVE_PATH folder ${CMAKE_SOURCE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/..")
     SET_TARGET_PROPERTIES(
         ${target}
         PROPERTIES FOLDER "${folder}"
@@ -75,11 +68,18 @@ MACRO(Demo target)
         )
     ENDIF()
 
+    STRING(JOIN ":" LD_LIBRARY_PATH ${CMAKE_MSVCIDE_RUN_PATH})
+
     ADD_CUSTOM_TARGET(
         run-${target}
-        COMMAND $<TARGET_FILE:${target}>
+        COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" $<TARGET_FILE:${target}>
         DEPENDS ${target}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+
+    SET_TARGET_PROPERTIES(
+        run-${target}
+        PROPERTIES FOLDER "Automation"
     )
 
 ENDMACRO()

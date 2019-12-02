@@ -1,6 +1,7 @@
 #ifndef DUSK_GRAPHICS_DRIVER_HPP
 #define DUSK_GRAPHICS_DRIVER_HPP
 
+#include <Dusk/Core.hpp>
 #include <Dusk/Macros.hpp>
 #include <Dusk/Math.hpp>
 
@@ -8,7 +9,7 @@
 
 namespace Dusk {
 
-class IGraphicsDriver
+class DUSK_CORE_API IGraphicsDriver
 {
 public:
 
@@ -32,9 +33,9 @@ public:
 
 }; // class IGraphicsDriver
 
-void SetGraphicsDriver(IGraphicsDriver * driver);
+DUSK_CORE_API void SetGraphicsDriver(IGraphicsDriver * driver);
 
-IGraphicsDriver * GetGraphicsDriver();
+DUSK_CORE_API IGraphicsDriver * GetGraphicsDriver();
 
 } // namespace Dusk
 

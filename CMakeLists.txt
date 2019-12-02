@@ -66,8 +66,17 @@ SET(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT
 
 # Configure Visual Studio exception handling
 IF(MSVC)
+    # Disable Default Exception Handling
     STRING(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+
+    # Disable Basic Runtime Checks
+    STRING(REGEX REPLACE "/RTC(su|[1su])" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS}")
+    STRING(REGEX REPLACE "/RTC(su|[1su])" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS}")
 ENDIF()
+
+# Don't use the install RPATH when building
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 ###
 ### Third Party Dependencies
@@ -129,9 +138,10 @@ FIND_PACKAGE(Threads REQUIRED)
 SET(CMAKE_MSVCIDE_RUN_PATH
     ${SDL2_RUNTIME_DIR}
     ${OpenAL_RUNTIME_DIR}
+    ${Ogg_RUNTIME_DIR}
+    ${Vorbis_RUNTIME_DIR}
+    ${Theora_RUNTIME_DIR}
 )
-
-SET(LD_LIBRARY_PATH "$ENV{LD_LIBRARY_PATH}")
 
 ###
 ### Projects

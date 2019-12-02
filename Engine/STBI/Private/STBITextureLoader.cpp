@@ -17,7 +17,7 @@
 
 namespace Dusk::STBI {
 
-TextureData TextureLoader::Load(const std::string& filename) {
+DUSK_STBI_API TextureData TextureLoader::Load(const std::string& filename) {
     int comp;
     ivec2 size;
     TextureData data;

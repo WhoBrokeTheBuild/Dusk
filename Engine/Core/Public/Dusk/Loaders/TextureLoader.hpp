@@ -1,6 +1,7 @@
 #ifndef DUSK_TEXTURE_LOADER_HPP
 #define DUSK_TEXTURE_LOADER_HPP
 
+#include <Dusk/Core.hpp>
 #include <Dusk/Macros.hpp>
 
 #include <cstdint>
@@ -10,14 +11,14 @@
 
 namespace Dusk {
 
-enum class TextureDataFormat {
+enum class DUSK_CORE_API TextureDataFormat {
     R,
     RG,
     RGB,
     RGBA,
 };
 
-enum class TextureDataType {
+enum class DUSK_CORE_API TextureDataType {
     UNSIGNED_BYTE,
     BYTE,
     UNSIGNED_SHORT,
@@ -26,7 +27,7 @@ enum class TextureDataType {
     INT,
 };
 
-struct TextureData {
+struct DUSK_CORE_API TextureData {
     // Width and Height in pixels
     size_t Width;
     size_t Height;
@@ -51,7 +52,7 @@ struct TextureData {
     }
 };
 
-class ITextureLoader 
+class DUSK_CORE_API ITextureLoader 
 {
 public:
 
@@ -65,9 +66,9 @@ public:
 
 };
 
-void SetTextureLoader(ITextureLoader * loader);
+DUSK_CORE_API void SetTextureLoader(ITextureLoader * loader);
 
-ITextureLoader * GetTextureLoader();
+DUSK_CORE_API ITextureLoader * GetTextureLoader();
 
 }
 

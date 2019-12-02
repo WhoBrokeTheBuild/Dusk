@@ -242,10 +242,10 @@ IF(NOT Ogg_FOUND OR NOT Vorbis_FOUND OR NOT Theora_FOUND)
         GIT_SHALLOW         TRUE
         SOURCE_DIR          "${_Vorbis_SOURCE_DIR}"
         BUILD_IN_SOURCE     TRUE
-        CONFIGURE_COMMAND   ${CONFIGURE_COMMAND1}
-        COMMAND             ${CONFIGURE_COMMAND2}
-        COMMAND             ${CONFIGURE_COMMAND3}
-        COMMAND             ${CONFIGURE_COMMAND4}
+        CONFIGURE_COMMAND   ${_Vorbis_CONFIGURE_COMMAND1}
+        COMMAND             ${_Vorbis_CONFIGURE_COMMAND2}
+        COMMAND             ${_Vorbis_CONFIGURE_COMMAND3}
+        COMMAND             ${_Vorbis_CONFIGURE_COMMAND4}
         BUILD_COMMAND       ""
         INSTALL_COMMAND     ""
         UPDATE_COMMAND      ""

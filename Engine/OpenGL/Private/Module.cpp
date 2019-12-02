@@ -20,9 +20,9 @@ void ModuleTerm() {
 }
 
 DUSK_MODULE() {
-    .Name = "OpenGL",
-    .Init = ModuleInit,
-    .Term = ModuleTerm,
+    "OpenGL",
+    ModuleInit,
+    ModuleTerm,
 };
 
 } // namespace Dusk::OpenGL

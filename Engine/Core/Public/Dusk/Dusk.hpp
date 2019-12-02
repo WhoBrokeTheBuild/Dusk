@@ -1,6 +1,7 @@
 #ifndef DUSK_HPP
 #define DUSK_HPP
 
+#include <Dusk/Core.hpp>
 #include <Dusk/Macros.hpp>
 #include <Dusk/Math.hpp>
 
@@ -8,15 +9,15 @@
 
 namespace Dusk {
 
-void Initialize(int argc, char ** argv);
+DUSK_CORE_API void Initialize(int argc, char ** argv);
 
-void Terminate();
+DUSK_CORE_API  void Terminate();
 
-void SetRunning(bool running);
+DUSK_CORE_API  void SetRunning(bool running);
 
-bool IsRunning();
+DUSK_CORE_API  bool IsRunning();
 
-void RunScript(const std::string& filename);
+DUSK_CORE_API  void RunScript(const std::string& filename);
 
 }
 

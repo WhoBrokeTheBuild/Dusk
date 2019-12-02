@@ -1,22 +1,24 @@
 #ifndef DUSK_MODULE_HPP
 #define DUSK_MODULE_HPP
 
+#include <Dusk/Core.hpp>
+
 #include <string>
 
 namespace Dusk {
 
-struct DuskModule {
+struct DUSK_CORE_API DuskModule {
     const char * Name;
     void (*Init)();
     void (*Term)();
 };
 
-bool LoadModule(const std::string& name);
+DUSK_CORE_API bool LoadModule(const std::string& name);
 
-void FreeModules();
+DUSK_CORE_API void FreeModules();
 
 #define DUSK_MODULE() \
-    extern "C" struct DuskModule _DuskModule = 
+    extern "C" DUSK_API_EXPORT struct DuskModule _DuskModule = 
 
 }
 

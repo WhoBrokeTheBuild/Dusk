@@ -65,22 +65,61 @@ static int Thing_init(PyObject * obj, PyObject * args, PyObject * kwargs) {
 
 static PyTypeObject Thing_type = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    .tp_name        = "Dusk.Thing",
-    .tp_doc         = "Dusk Thing",
-    .tp_basicsize   = sizeof(Thing_data),
-    .tp_itemsize    = 0,
-    .tp_flags       = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-    .tp_new         = Thing_new,
-    .tp_free        = Thing_free,
-    .tp_init        = Thing_init,
-    .tp_methods     = Thing_methods,
+    "Dusk.Thing",                               // tp_name
+    sizeof(Thing_data),                         // tp_basicsize
+    0,                                          // tp_itemsize
+    0,                                          // tp_dealloc
+    0,                                          // tp_print
+    0,                                          // tp_getattr
+    0,                                          // tp_setattr
+    0,                                          // tp_compare
+    0,                                          // tp_repr
+    0,                                          // tp_as_number
+    0,                                          // tp_as_sequence
+    0,                                          // tp_as_mapping
+    0,                                          // tp_hash
+    0,                                          // tp_call
+    0,                                          // tp_str
+    0,                                          // tp_getattro
+    0,                                          // tp_setattro
+    0,                                          // tp_as_buffer
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,   // tp_flags
+    0,                                          // tp_doc
+    0,                                          // tp_traverse
+    0,                                          // tp_clear
+    0,                                          // tp_richcompare
+    0,                                          // tp_weaklistoffset
+    0,                                          // tp_iter
+    0,                                          // tp_iternext
+    Thing_methods,                              // tp_methods
+    0,                                          // tp_members
+    0,                                          // tp_getset
+    0,                                          // tp_base
+    0,                                          // tp_dict
+    0,                                          // tp_descr_get
+    0,                                          // tp_descr_set
+    0,                                          // tp_dictoffset
+    Thing_init,                                 // tp_init
+    0,                                          // tp_alloc
+    Thing_new,                                  // tp_new
+    Thing_free,                                 // tp_free
+    0,                                          // tp_is_gc
+    0,                                          // tp_bases
+    0,                                          // tp_mro
+    0,                                          // tp_cache
+    0,                                          // tp_subclasses
+    0,                                          // tp_weaklist
+#if PYTHON_API_VERSION >= 1012
+    0                                           // tp_del
+#endif
 };
 
 static struct PyModuleDef DuskModule = {
     PyModuleDef_HEAD_INIT,
-    .m_name         = "Dusk",
-    .m_doc          = nullptr,
-    .m_size         = -1,
+    "Dusk",                                     // m_name
+    "Dusk",                                     // m_doc
+    -1,                                         // m_size
+    nullptr,                                    // m_methods
 };
 
 PyMODINIT_FUNC PyInit_Dusk()
@@ -104,13 +143,13 @@ PyMODINIT_FUNC PyInit_Dusk()
     return module;
 }
 
-void Initialize(int argc, char ** argv) {
+DUSK_CORE_API void Initialize(int argc, char ** argv) {
     PyImport_AppendInittab("Dusk", PyInit_Dusk);
     Py_Initialize();
     PyImport_ImportModule("Dusk");
 }
 
-void Terminate() {
+DUSK_CORE_API void Terminate() {
     Py_Finalize();
 
     FreeModules();
@@ -118,15 +157,15 @@ void Terminate() {
 
 static bool _Running = false;
 
-void SetRunning(bool running) {
+DUSK_CORE_API void SetRunning(bool running) {
     _Running = running;
 }
 
-bool IsRunning() {
+DUSK_CORE_API bool IsRunning() {
     return _Running;
 }
 
-void RunScript(const std::string& filename) {
+DUSK_CORE_API void RunScript(const std::string& filename) {
     FILE * file = fopen(filename.c_str(), "rt");
     if (!file) {
         exit(1);

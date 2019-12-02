@@ -12,9 +12,9 @@ void ModuleTerm() {
 }
 
 DUSK_MODULE() {
-    .Name = "STBI",
-    .Init = ModuleInit,
-    .Term = nullptr,
+    "STBI",
+    ModuleInit,
+    nullptr,
 };
 
 }

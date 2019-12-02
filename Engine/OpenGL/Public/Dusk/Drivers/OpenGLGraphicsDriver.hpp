@@ -1,13 +1,14 @@
 #ifndef DUSK_OPENGL_GRAPHICS_DRIVER_HPP
 #define DUSK_OPENGL_GRAPHICS_DRIVER_HPP
 
+#include <Dusk/OpenGL.hpp>
 #include <Dusk/Drivers/GraphicsDriver.hpp>
 
 #include <SDL.h>
 
 namespace Dusk::OpenGL {
 
-class GraphicsDriver : public IGraphicsDriver
+class DUSK_OPENGL_API GraphicsDriver : public IGraphicsDriver
 {
 public:
 

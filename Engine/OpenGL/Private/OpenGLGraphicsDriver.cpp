@@ -1,18 +1,17 @@
 #include <Dusk/Drivers/OpenGLGraphicsDriver.hpp>
 
+#include <Dusk/Config.hpp>
 #include <Dusk/Dusk.hpp>
 
 #include <glad/glad.h>
 
 #undef CreateWindow
-#undef min
-#undef max
 #undef near
 #undef far
 
 namespace Dusk::OpenGL {
 
-GraphicsDriver::GraphicsDriver() {
+DUSK_OPENGL_API GraphicsDriver::GraphicsDriver() {
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
@@ -53,30 +52,30 @@ GraphicsDriver::GraphicsDriver() {
     printf("OpenGL Renderer %s\n", glGetString(GL_RENDERER));
 }
 
-GraphicsDriver::~GraphicsDriver() {
+DUSK_OPENGL_API GraphicsDriver::~GraphicsDriver() {
     SDL_DestroyWindow(_sdlWindow);
 }
 
-void GraphicsDriver::SetTitle(const std::string& title) {
+DUSK_OPENGL_API void GraphicsDriver::SetTitle(const std::string& title) {
     SDL_SetWindowTitle(_sdlWindow, title.c_str());
 }
 
-std::string GraphicsDriver::GetTitle() {
+DUSK_OPENGL_API std::string GraphicsDriver::GetTitle() {
     return SDL_GetWindowTitle(_sdlWindow);
 }
 
-void GraphicsDriver::SetSize(const ivec2& size) {
+DUSK_OPENGL_API void GraphicsDriver::SetSize(const ivec2& size) {
     SDL_SetWindowSize(_sdlWindow, size.x, size.y);
     glViewport(0, 0, size.x, size.y);
 }
 
-ivec2 GraphicsDriver::GetSize() {
+DUSK_OPENGL_API ivec2 GraphicsDriver::GetSize() {
     ivec2 size;
     SDL_GetWindowSize(_sdlWindow, &size.x, &size.y);
     return size;
 }
 
-void GraphicsDriver::ProcessEvents() {
+DUSK_OPENGL_API void GraphicsDriver::ProcessEvents() {
     SDL_Event event;
     while (SDL_PollEvent(&event) > 0) {
         if (event.type == SDL_QUIT) {
@@ -85,7 +84,7 @@ void GraphicsDriver::ProcessEvents() {
     }
 }
 
-void GraphicsDriver::SwapBuffers() {
+DUSK_OPENGL_API void GraphicsDriver::SwapBuffers() {
     glClear(GL_COLOR_BUFFER_BIT);
     SDL_GL_SwapWindow(_sdlWindow);
 }

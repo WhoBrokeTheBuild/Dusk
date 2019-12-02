@@ -1,11 +1,12 @@
 #ifndef DUSK_STBI_TEXTURE_LOADER_HPP
 #define DUSK_STBI_TEXTURE_LOADER_HPP
 
+#include <Dusk/STBI.hpp>
 #include <Dusk/Loaders/TextureLoader.hpp>
 
 namespace Dusk::STBI {
 
-class TextureLoader : public ITextureLoader
+class DUSK_STBI_API TextureLoader : public ITextureLoader
 {
 public:
 

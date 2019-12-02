@@ -1,7 +1,7 @@
 
 SET(_TARGET DuskSTBI)
 
-Module(${_TARGET})
+Module(${_TARGET} STBI)
 
 TARGET_LINK_LIBRARIES(
     ${_TARGET}

@@ -1,7 +1,7 @@
 #include <Dusk/Module.hpp>
 
 #include <Dusk/Log.hpp>
-#include <Dusk/Drivers/OpenGLGraphicsDriver.hpp>
+#include <Dusk/OpenGL/Drivers/GraphicsDriver.hpp>
 
 #include <SDL.h>
 

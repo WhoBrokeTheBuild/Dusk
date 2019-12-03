@@ -1,7 +1,7 @@
 #ifndef DUSK_OPENGL_GRAPHICS_DRIVER_HPP
 #define DUSK_OPENGL_GRAPHICS_DRIVER_HPP
 
-#include <Dusk/OpenGL.hpp>
+#include <Dusk/OpenGL/Config.hpp>
 #include <Dusk/Drivers/GraphicsDriver.hpp>
 
 #include <SDL.h>

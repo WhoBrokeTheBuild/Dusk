@@ -1,7 +1,7 @@
 #ifndef DUSK_TEXTURE_LOADER_HPP
 #define DUSK_TEXTURE_LOADER_HPP
 
-#include <Dusk/Core.hpp>
+#include <Dusk/Config.hpp>
 #include <Dusk/Macros.hpp>
 
 #include <cstdint>
@@ -64,15 +64,15 @@ struct DUSK_CORE_API TextureData
     }
 };
 
-class DUSK_CORE_API ITextureLoader 
+class DUSK_CORE_API ITextureImporter
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(ITextureLoader)
+    DISALLOW_COPY_AND_ASSIGN(ITextureImporter)
 
-    explicit ITextureLoader() = default;
+    explicit ITextureImporter() = default;
 
-    virtual ~ITextureLoader() = default;
+    virtual ~ITextureImporter() = default;
 
     virtual TextureData LoadFromFile(const std::string& filename) = 0;
 
@@ -81,13 +81,16 @@ public:
 };
 
 DUSK_CORE_API
-void SetTextureLoader(const std::string& ext, std::shared_ptr<ITextureLoader> loader);
+void SetTextureImporter(const std::string& ext, std::shared_ptr<ITextureImporter> loader);
 
 DUSK_CORE_API
-ITextureLoader * GetTextureLoader(const std::string& ext);
+ITextureImporter * GetTextureImporter(const std::string& ext);
 
 DUSK_CORE_API
-void FreeTextureLoaders();
+void FreeTextureImporter(const std::string& ext);
+
+DUSK_CORE_API
+void FreeAllTextureImporters();
 
 }
 

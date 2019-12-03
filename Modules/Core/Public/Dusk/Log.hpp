@@ -1,7 +1,7 @@
 #ifndef DUSK_LOG_HPP
 #define DUSK_LOG_HPP
 
-#include <Dusk/Core.hpp>
+#include <Dusk/Config.hpp>
 #include <Dusk/Util.hpp>
 #include <Dusk/JSON.hpp>
 

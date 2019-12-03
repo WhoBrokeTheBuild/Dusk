@@ -1,22 +1,31 @@
 #include <Dusk/Module.hpp>
-#include <Dusk/Loaders/STBITextureLoader.hpp>
+#include <Dusk/STBI/Importers/TextureImporter.hpp>
 
 namespace Dusk::STBI {
 
 void ModuleInit() {
-    auto loader = std::shared_ptr<ITextureLoader>(new TextureLoader());
-    SetTextureLoader("jpg", loader);
-    SetTextureLoader("jpeg", loader);
-    SetTextureLoader("png", loader);
-    SetTextureLoader("tga", loader);
-    SetTextureLoader("bmp", loader);
-    SetTextureLoader("gif", loader);
+    auto importer = std::shared_ptr<ITextureImporter>(new TextureImporter());
+    SetTextureImporter("jpg",  importer);
+    SetTextureImporter("jpeg", importer);
+    SetTextureImporter("png",  importer);
+    SetTextureImporter("tga",  importer);
+    SetTextureImporter("bmp",  importer);
+    SetTextureImporter("gif",  importer);
+}
+
+void ModuleTerm() {
+    FreeTextureImporter("jpg");
+    FreeTextureImporter("jpeg");
+    FreeTextureImporter("png");
+    FreeTextureImporter("tga");
+    FreeTextureImporter("bmp");
+    FreeTextureImporter("gif");
 }
 
 DUSK_MODULE() {
     "STBI",
     ModuleInit,
-    nullptr,
+    ModuleTerm,
 };
 
 }

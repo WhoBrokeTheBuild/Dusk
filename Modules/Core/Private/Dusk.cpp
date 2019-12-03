@@ -2,7 +2,6 @@
 
 #include <Dusk/Log.hpp>
 #include <Dusk/Module.hpp>
-#include <Dusk/Loaders/TextureLoader.hpp>
 
 #include <Python.h>
 #include <frameobject.h>
@@ -162,7 +161,6 @@ DUSK_CORE_API void Initialize(int argc, char ** argv) {
 DUSK_CORE_API void Terminate() {
     Py_Finalize();
 
-    FreeTextureLoaders();
     FreeModules();
 }
 

@@ -13,7 +13,8 @@ int main(int argc, char** argv)
         "DuskAssimp",
         "DuskGLTF2",
         "DuskSTBI",
-        "DuskOpenGL",
+        //"DuskOpenGL",
+        "DuskVulkan",
     })) {
         return 1;
     }

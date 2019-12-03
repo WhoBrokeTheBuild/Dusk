@@ -17,6 +17,11 @@ MACRO(Module target prefix)
         Public/*.cpp
     )
 
+    FILE(GLOB_RECURSE
+        public_in
+        Public/*.in
+    )
+
     FILE(
         GLOB_RECURSE
         private
@@ -28,10 +33,49 @@ MACRO(Module target prefix)
         Private/*.cpp
     )
 
+    FILE(GLOB_RECURSE
+        private_in
+        Private/*.in
+    )
+
+    FOREACH(file ${public_in})
+        STRING(REPLACE 
+            ${CMAKE_CURRENT_SOURCE_DIR}
+            ${CMAKE_CURRENT_BINARY_DIR}
+            file_out
+            ${file}
+        )
+
+        string(REGEX MATCH "^(.*)\\.[^.]*$" file_out ${file_out})
+        set(file_out ${CMAKE_MATCH_1})
+
+        CONFIGURE_FILE(${file} ${file_out})
+        LIST(APPEND public_out ${file_out})
+    ENDFOREACH()
+        
+    FOREACH(file ${private_in})
+        STRING(REPLACE 
+            ${CMAKE_CURRENT_SOURCE_DIR}
+            ${CMAKE_CURRENT_BINARY_DIR}
+            file_out
+            ${file}
+        )
+
+        string(REGEX MATCH "^(.*)\\.[^.]*$" file_out ${file_out})
+        set(file_out ${CMAKE_MATCH_1})
+
+        CONFIGURE_FILE(${file} ${file_out})
+        LIST(APPEND private_out ${file_out})
+    ENDFOREACH()
+
     TARGET_INCLUDE_DIRECTORIES(
         ${target}
-        PRIVATE "Private/"
-        PUBLIC "Public/"
+        PRIVATE 
+            ${CMAKE_CURRENT_BINARY_DIR}/Private
+            ${CMAKE_CURRENT_SOURCE_DIR}/Private
+        PUBLIC 
+            ${CMAKE_CURRENT_BINARY_DIR}/Public
+            ${CMAKE_CURRENT_SOURCE_DIR}/Public
     )
 
     TARGET_SOURCES(

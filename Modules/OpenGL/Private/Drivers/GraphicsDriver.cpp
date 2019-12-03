@@ -3,7 +3,7 @@
 #include <Dusk/Log.hpp>
 #include <Dusk/Dusk.hpp>
 
-#include <glad/glad.h>
+#include <glad/gl.h>
 
 #undef CreateWindow
 #undef near
@@ -13,6 +13,14 @@ namespace Dusk::OpenGL {
 
 DUSK_OPENGL_API
 GraphicsDriver::GraphicsDriver() {
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        DuskLogError("Failed to initialize SDL, %s", SDL_GetError());
+        return;
+    }
+
+    SDL_version version;
+    SDL_GetVersion(&version);
+    DuskLogVerbose("SDL Version: %d.%d.%d", (int)version.major, (int)version.minor, (int)version.patch);
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
@@ -21,7 +29,6 @@ GraphicsDriver::GraphicsDriver() {
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
     _sdlWindow = SDL_CreateWindow("Dusk", 
@@ -42,20 +49,22 @@ GraphicsDriver::GraphicsDriver() {
         return;
     }
 
-    if (!gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress)) {
+    if (!gladLoadGL((GLADloadfunc) SDL_GL_GetProcAddress)) {
         DuskLogError("Failed to initialize OpenGL context");
         return;
     }
     
-    DuskLogVerbose("OpenGL Version %s", glGetString(GL_VERSION));
-    DuskLogVerbose("GLSL Version %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
-    DuskLogVerbose("OpenGL Vendor %s", glGetString(GL_VENDOR));
+    DuskLogVerbose("OpenGL Version %s",  glGetString(GL_VERSION));
+    DuskLogVerbose("GLSL Version %s",    glGetString(GL_SHADING_LANGUAGE_VERSION));
+    DuskLogVerbose("OpenGL Vendor %s",   glGetString(GL_VENDOR));
     DuskLogVerbose("OpenGL Renderer %s", glGetString(GL_RENDERER));
 }
 
 DUSK_OPENGL_API
 GraphicsDriver::~GraphicsDriver() {
+    SDL_GL_DeleteContext(_sdlContext);
     SDL_DestroyWindow(_sdlWindow);
+    SDL_Quit();
 }
 
 DUSK_OPENGL_API

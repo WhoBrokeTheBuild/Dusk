@@ -1,6 +1,7 @@
-#ifndef DUSK_FILESYSTEM_DRIVER_HPP
-#define DUSK_FILESYSTEM_DRIVER_HPP
+#ifndef DUSK_FILESYSTEM_HPP
+#define DUSK_FILESYSTEM_HPP
 
+#include <Dusk/Config.hpp>
 #include <Dusk/Macros.hpp>
 
 #include <cstdlib>
@@ -10,7 +11,7 @@
 
 namespace Dusk {
 
-class IFile
+class DUSK_CORE_API IFile
 {
 public:
 
@@ -72,7 +73,7 @@ public:
 
 }; // class IFile
 
-class IFilesystemDriver
+class DUSK_CORE_API IFilesystem
 {
 public:
 
@@ -84,9 +85,9 @@ public:
         Truncate    = 1 << 4,
     };
 
-    explicit IFilesystemDriver() = default;
+    explicit IFilesystem() = default;
 
-    virtual ~IFilesystemDriver() = default;
+    virtual ~IFilesystem() = default;
 
     virtual IFile Open(const std::string& filename, Mode mode) = 0;
 
@@ -94,4 +95,4 @@ public:
 
 } // namespace Dusk
 
-#endif // DUSK_FILESYSTEM_DRIVER_HPP
+#endif // DUSK_FILESYSTEM_HPP

@@ -20,6 +20,7 @@ namespace Dusk {
 
 std::vector<ModuleHandle> _Modules;
 
+DUSK_CORE_API
 bool LoadModule(const std::string& name)
 {
     ModuleHandle module = nullptr;
@@ -59,6 +60,18 @@ bool LoadModule(const std::string& name)
     return true;
 }
 
+DUSK_CORE_API
+bool LoadModuleArray(const std::initializer_list<std::string>& names)
+{
+    for (const auto& name : names) {
+        if (!LoadModule(name)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+DUSK_CORE_API
 void FreeModules()
 {
     for (auto module : _Modules) {  

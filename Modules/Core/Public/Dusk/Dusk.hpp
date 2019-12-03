@@ -1,7 +1,7 @@
 #ifndef DUSK_HPP
 #define DUSK_HPP
 
-#include <Dusk/Core.hpp>
+#include <Dusk/Config.hpp>
 #include <Dusk/Macros.hpp>
 #include <Dusk/Math.hpp>
 

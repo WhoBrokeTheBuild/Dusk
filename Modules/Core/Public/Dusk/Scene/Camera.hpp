@@ -1,7 +1,7 @@
 #ifndef DUSK_CAMERA_HPP
 #define DUSK_CAMERA_HPP
 
-#include <Dusk/Core.hpp>
+#include <Dusk/Config.hpp>
 #include <Dusk/Math.hpp>
 #include <Dusk/Macros.hpp>
 #include <Dusk/Scene/Actor.hpp>

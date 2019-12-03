@@ -1,4 +1,4 @@
-#include <Dusk/Loaders/STBITextureLoader.hpp>
+#include <Dusk/STBI/Importers/TextureImporter.hpp>
 
 #include <Dusk/Log.hpp>
 #include <Dusk/Math.hpp>
@@ -23,7 +23,7 @@
 namespace Dusk::STBI {
 
 DUSK_STBI_API
-TextureData TextureLoader::LoadFromFile(const std::string& filename) {
+TextureData TextureImporter::LoadFromFile(const std::string& filename) {
     int comp;
     ivec2 size;
     TextureData data;
@@ -55,7 +55,7 @@ TextureData TextureLoader::LoadFromFile(const std::string& filename) {
 }
 
 DUSK_STBI_API
-TextureData TextureLoader::LoadFromMemory(const std::string& filename, uint8_t * data, size_t length) {
+TextureData TextureImporter::LoadFromMemory(const std::string& filename, uint8_t * data, size_t length) {
     return TextureData();
 }
 

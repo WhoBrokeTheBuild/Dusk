@@ -3,22 +3,23 @@
 #include <Dusk/Log.hpp>
 #include <Dusk/Module.hpp>
 #include <Dusk/Drivers/GraphicsDriver.hpp>
-#include <Dusk/Loaders/TextureLoader.hpp>
+#include <Dusk/Importers/TextureImporter.hpp>
 
 int main(int argc, char** argv) 
 {
     Dusk::Initialize(argc, argv);
-
-    if (!Dusk::LoadModule("DuskSTBI")) {
-        return 1;
-    }
     
-    if (!Dusk::LoadModule("DuskOpenGL")) {
+    if (!Dusk::LoadModuleArray({
+        "DuskAssimp",
+        "DuskGLTF2",
+        "DuskSTBI",
+        "DuskOpenGL",
+    })) {
         return 1;
     }
 
     auto gfx = Dusk::GetGraphicsDriver();
-    auto png = Dusk::GetTextureLoader("png");
+    auto png = Dusk::GetTextureImporter("png");
 
     gfx->SetWindowTitle("Hello, World!");
     gfx->SetWindowSize({ 1024, 768 });

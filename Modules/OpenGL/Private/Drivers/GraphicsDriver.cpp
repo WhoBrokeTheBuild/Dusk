@@ -1,6 +1,5 @@
-#include <Dusk/Drivers/OpenGLGraphicsDriver.hpp>
+#include <Dusk/OpenGL/Drivers/GraphicsDriver.hpp>
 
-#include <Dusk/Config.hpp>
 #include <Dusk/Log.hpp>
 #include <Dusk/Dusk.hpp>
 

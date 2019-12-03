@@ -1,10 +1,10 @@
-#include <Dusk/Loaders/STBITextureLoader.hpp>
+#include <Dusk/STBI/Importers/TextureImporter.hpp>
 
 #include <gtest/gtest.h>
 
 using namespace Dusk::STBI;
 
-TEST(STBILoad, JPEG) {
+TEST(STBI, JPEG) {
 
 }
 

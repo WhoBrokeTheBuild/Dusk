@@ -142,18 +142,31 @@ ENDIF()
 
 FIND_PACKAGE(GLM REQUIRED)
 FIND_PACKAGE(JSON REQUIRED)
-FIND_PACKAGE(SDL2 REQUIRED)
 FIND_PACKAGE(Python3 REQUIRED COMPONENTS Development)
-FIND_PACKAGE(OpenAL REQUIRED)
-FIND_PACKAGE(Ogg REQUIRED COMPONENTS Vorbis Theora)
 FIND_PACKAGE(Threads REQUIRED)
 
+FIND_PACKAGE(SDL2 REQUIRED)
+FIND_PACKAGE(OpenAL)
 FIND_PACKAGE(assimp)
+FIND_PACKAGE(Ogg COMPONENTS Vorbis Theora)
 
 IF(BUILD_TESTS)
     FIND_PACKAGE(GTest REQUIRED)
 ENDIF()
 
+# Extract release-specific configuration
+GET_TARGET_PROPERTY(soname   assimp::assimp IMPORTED_SONAME_RELEASE)
+GET_TARGET_PROPERTY(implib   assimp::assimp IMPORTED_IMPLIB_RELEASE)
+GET_TARGET_PROPERTY(location assimp::assimp IMPORTED_LOCATION_RELEASE)
+
+# Set build type agnostic configuration
+SET_TARGET_PROPERTIES(
+    assimp::assimp 
+    PROPERTIES
+        IMPORTED_SONAME     "${soname}"
+        IMPORTED_IMPLIB     "${implib}"
+        IMPORTED_LOCATION   "${location}"
+)
 
 # Allow custom targets in Visual Studio to find .dll files
 SET(RUNTIME_SEARCH_PATH

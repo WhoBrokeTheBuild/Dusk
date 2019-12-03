@@ -1,11 +1,15 @@
 
 SET(_TARGET DuskOpenGL)
 
-Module(${_TARGET} OPENGL)
+IF(TARGET SDL2::SDL2)
+    Module(${_TARGET} OPENGL)
 
-TARGET_LINK_LIBRARIES(
-    ${_TARGET}
-    PUBLIC
-        DuskCore
-        SDL2::SDL2
-)
+    TARGET_LINK_LIBRARIES(
+        ${_TARGET}
+        PUBLIC
+            DuskCore
+            SDL2::SDL2
+    )
+ELSE()
+    MESSAGE(WARNING "Not building ${_TARGET}, missing SDL2::SDL2")
+ENDIF()

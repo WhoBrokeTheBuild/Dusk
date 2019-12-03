@@ -18,14 +18,14 @@ int main(int argc, char** argv)
     }
 
     auto gfx = Dusk::GetGraphicsDriver();
-    auto txld = Dusk::GetTextureLoader();
+    auto png = Dusk::GetTextureLoader("png");
 
-    gfx->SetTitle("Hello, World!");
-    gfx->SetSize({ 1024, 768 });
+    gfx->SetWindowTitle("Hello, World!");
+    gfx->SetWindowSize({ 1024, 768 });
 
     Dusk::RunScript("Assets/scripts/Hello.py");
 
-    auto data = txld->Load("Assets/models/teapot.png");
+    auto data = png->LoadFromFile("Assets/models/teapot.png");
     DuskLogInfo("Dimensions of teapot.png: (%zu, %zu)", data.Width, data.Height);
     data.Free();
 

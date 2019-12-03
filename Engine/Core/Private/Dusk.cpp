@@ -1,5 +1,6 @@
 #include <Dusk/Dusk.hpp>
 
+#include <Dusk/Log.hpp>
 #include <Dusk/Module.hpp>
 
 #include <Python.h>
@@ -14,15 +15,15 @@ class Thing
 public:
 
     inline Thing() {
-        printf("Thing::Thing()\n");
+        DuskLogInfo("Thing::Thing()");
     }
 
     virtual ~Thing() {
-        printf("Thing::~Thing()\n");
+        DuskLogInfo("Thing::~Thing()");
     }
 
     virtual void SayHello() {
-        printf("Hello, World!\n");
+        DuskLogInfo("Hello, World!");
     }
 
 private:

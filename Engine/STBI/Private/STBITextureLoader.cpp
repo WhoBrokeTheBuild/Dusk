@@ -1,5 +1,6 @@
 #include <Dusk/Loaders/STBITextureLoader.hpp>
 
+#include <Dusk/Log.hpp>
 #include <Dusk/Math.hpp>
 
 #pragma clang diagnostic push
@@ -17,7 +18,8 @@
 
 namespace Dusk::STBI {
 
-DUSK_STBI_API TextureData TextureLoader::Load(const std::string& filename) {
+DUSK_STBI_API
+TextureData TextureLoader::Load(const std::string& filename) {
     int comp;
     ivec2 size;
     TextureData data;
@@ -26,7 +28,7 @@ DUSK_STBI_API TextureData TextureLoader::Load(const std::string& filename) {
     data.Width = size.x;
     data.Height = size.y;
     data.FreeFunc = stbi_image_free;
-    data.DataType = TextureDataType::UNSIGNED_BYTE;
+    data.DataType = TextureDataType::UnsignedByte;
 
     switch (comp) {
     case 1:
@@ -42,7 +44,7 @@ DUSK_STBI_API TextureData TextureLoader::Load(const std::string& filename) {
         data.DataFormat = TextureDataFormat::RGBA;
         break;
     default:
-        fprintf(stderr, "Unknown texture data format\n");
+        DuskLogError("Unknown texture data format");
     }
 
     return data;

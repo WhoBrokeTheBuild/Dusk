@@ -11,23 +11,26 @@
 
 namespace Dusk {
 
-enum class DUSK_CORE_API TextureDataFormat {
+enum class DUSK_CORE_API TextureDataFormat 
+{
     R,
     RG,
     RGB,
     RGBA,
 };
 
-enum class DUSK_CORE_API TextureDataType {
-    UNSIGNED_BYTE,
-    BYTE,
-    UNSIGNED_SHORT,
-    SHORT,
-    UNSIGNED_INT,
-    INT,
+enum class DUSK_CORE_API TextureDataType
+{
+    UnsignedByte,
+    Byte,
+    UnsignedShort,
+    Short,
+    UnsignedInt,
+    Int,
 };
 
-struct DUSK_CORE_API TextureData {
+struct DUSK_CORE_API TextureData
+{
     // Width and Height in pixels
     size_t Width;
     size_t Height;

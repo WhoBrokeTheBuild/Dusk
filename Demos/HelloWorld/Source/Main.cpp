@@ -1,5 +1,6 @@
 #include <Dusk/Dusk.hpp>
 
+#include <Dusk/Log.hpp>
 #include <Dusk/Module.hpp>
 #include <Dusk/Drivers/GraphicsDriver.hpp>
 #include <Dusk/Loaders/TextureLoader.hpp>
@@ -25,7 +26,7 @@ int main(int argc, char** argv)
     Dusk::RunScript("Assets/scripts/Hello.py");
 
     auto data = txld->Load("Assets/models/teapot.png");
-    printf("%zu x %zu\n", data.Width, data.Height);
+    DuskLogInfo("Dimensions of teapot.png: (%zu, %zu)", data.Width, data.Height);
     data.Free();
 
     Dusk::SetRunning(true);

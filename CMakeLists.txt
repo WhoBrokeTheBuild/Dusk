@@ -153,10 +153,10 @@ SET(RUNTIME_SEARCH_PATH
 )
 
 ###
-### Projects
+### Modules
 ###
 
-ADD_SUBDIRECTORY(Engine)
+ADD_SUBDIRECTORY(Modules)
 
 ###
 ### Demos

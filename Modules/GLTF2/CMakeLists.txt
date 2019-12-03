@@ -1,0 +1,10 @@
+
+SET(_TARGET DuskGLTF2)
+
+Module(${_TARGET} GLTF2)
+
+TARGET_LINK_LIBRARIES(
+    ${_TARGET}
+    PUBLIC
+        DuskCore
+)

@@ -89,7 +89,7 @@ public:
 
     virtual ~IFilesystem() = default;
 
-    virtual IFile Open(const std::string& filename, Mode mode) = 0;
+    virtual IFile * Open(const std::string& filename, Mode mode) = 0;
 
 }; // class IFilesystem
 

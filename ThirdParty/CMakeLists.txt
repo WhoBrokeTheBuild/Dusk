@@ -15,17 +15,19 @@ FIND_PACKAGE(GLM QUIET)
 
 IF(NOT GLM_FOUND)
     SET(_GLM_DIR "${CMAKE_BINARY_DIR}/glm")
+    SET(_GLM_SOURCE_DIR "${CMAKE_BINARY_DIR}/glm_src")
 
     ExternalProject_Add(
         ThirdParty_glm
         GIT_REPOSITORY      "https://github.com/g-truc/glm.git"
         GIT_TAG             "0.9.9.3"
         GIT_SHALLOW         TRUE
-        SOURCE_DIR          "${_GLM_DIR}"
-        CONFIGURE_COMMAND   ""
+        SOURCE_DIR          "${_GLM_SOURCE_DIR}"
+        CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${_GLM_DIR}
+                            -DGLM_TEST_ENABLE=OFF
         BUILD_COMMAND       ""
         UPDATE_COMMAND      ""
-        INSTALL_COMMAND     ""
+        INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
         TEST_COMMAND        ""
     )
 ENDIF()
@@ -36,17 +38,19 @@ FIND_PACKAGE(JSON QUIET)
 
 IF(NOT JSON_FOUND)
     SET(_JSON_DIR "${CMAKE_BINARY_DIR}/json")
+    SET(_JSON_SOURCE_DIR "${CMAKE_BINARY_DIR}/json_src")
 
     ExternalProject_Add(
         ThirdParty_json
         GIT_REPOSITORY      "https://github.com/nlohmann/json.git"
         GIT_TAG             "master"
         GIT_SHALLOW         TRUE
-        SOURCE_DIR          "${_JSON_DIR}"
-        CONFIGURE_COMMAND   ""
+        SOURCE_DIR          "${_JSON_SOURCE_DIR}"
+        CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${_JSON_DIR}
+                            -DJSON_BuildTests=OFF
         BUILD_COMMAND       ""
         UPDATE_COMMAND      ""
-        INSTALL_COMMAND     ""
+        INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
         TEST_COMMAND        ""
     )
 ENDIF()
@@ -110,9 +114,9 @@ IF(NOT Python3_Development_FOUND)
     SET(_Python3_DIR "${CMAKE_BINARY_DIR}/Python3")
     SET(_Python3_SOURCE_DIR "${CMAKE_BINARY_DIR}/Python3_src")
 
-    SET(_Python3_CONFIGURE_COMMAND "")
-    SET(_Python3_BUILD_COMMAND1 "")
-    SET(_Python3_BUILD_COMMAND2 "")
+    SET(_Python3_INSTALL_COMMAND "")
+    SET(_Python3_INSTALL_COMMAND1 "")
+    SET(_Python3_INSTALL_COMMAND2 "")
 
     IF(WIN32)
         IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -120,12 +124,12 @@ IF(NOT Python3_Development_FOUND)
         ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
             SET(ARCH "Win32")
         ENDIF()
-        SET(_Python3_CONFIGURE_COMMAND "")
-        SET(_Python3_BUILD_COMMAND1 cmd /c PCbuild\\build.bat -c Debug -t Build -p ${ARCH})
-        SET(_Python3_BUILD_COMMAND2 cmd /c PCbuild\\build.bat -c Release -t Build -p ${ARCH})
+        SET(_Python3_INSTALL_COMMAND "")
+        SET(_Python3_INSTALL_COMMAND1 cmd /c PCbuild\\build.bat -c Debug -t Build -p ${ARCH})
+        SET(_Python3_INSTALL_COMMAND2 cmd /c PCbuild\\build.bat -c Release -t Build -p ${ARCH})
     ELSE()
-        SET(_Python3_CONFIGURE_COMMAND ./configure --prefix=${_Python3_DIR} --enable-shared --enable-optimizations)
-        SET(_Python3_BUILD_COMMAND1 make -l libpython3.so install)
+        SET(_Python3_INSTALL_COMMAND ./configure --prefix=${_Python3_DIR} --enable-shared --enable-optimizations)
+        SET(_Python3_INSTALL_COMMAND1 ${CMAKE_MAKE_PROGRAM} -l libpython3.so install)
     ENDIF()
 
     MESSAGE(STATUS ${CMAKE_INSTALL_PREFIX})
@@ -137,11 +141,42 @@ IF(NOT Python3_Development_FOUND)
         GIT_SHALLOW         TRUE
         SOURCE_DIR          "${_Python3_SOURCE_DIR}"
         BUILD_IN_SOURCE     TRUE
-        CONFIGURE_COMMAND   "${_Python3_CONFIGURE_COMMAND}"
-        BUILD_COMMAND       "${_Python3_BUILD_COMMAND1}"
-        COMMAND             "${_Python3_BUILD_COMMAND2}"
+        CONFIGURE_COMMAND   "${_Python3_INSTALL_COMMAND}"
+        BUILD_COMMAND       ""
         UPDATE_COMMAND      ""
-        INSTALL_COMMAND     ""
+        INSTALL_COMMAND     "${_Python3_INSTALL_COMMAND1}"
+        COMMAND             "${_Python3_INSTALL_COMMAND2}"
+        TEST_COMMAND        ""
+    )
+ENDIF()
+
+# Assimp
+
+SET(_assimp_DIR "${CMAKE_BINARY_DIR}/assimp")
+
+MESSAGE(STATUS "${CMAKE_MODULE_PATH}")
+
+FIND_PACKAGE(assimp QUIET PATHS "${_assimp_DIR}/lib/cmake/assimp-5.0")
+
+IF(NOT assimp_FOUND)
+    SET(_assimp_SOURCE_DIR "${CMAKE_BINARY_DIR}/assimp_src")
+    SET(_assimp_BINARY_DIR "${CMAKE_BINARY_DIR}/assimp_bin")
+
+    ExternalProject_Add(
+        ThirdParty_assimp
+        GIT_REPOSITORY      "https://github.com/assimp/assimp.git"
+        GIT_TAG             "master"
+        GIT_SHALLOW         TRUE
+        SOURCE_DIR          "${_assimp_SOURCE_DIR}"
+        BINARY_DIR          "${_assimp_BINARY_DIR}"
+        CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${_assimp_DIR}
+                            -DASSIMP_BUILD_ASSIMP_TOOLS=OFF
+                            -DASSIMP_BUILD_SAMPLES=OFF
+                            -DASSIMP_BUILD_TESTS=OFF
+                            -DBUILD_DOCS=OFF
+        BUILD_COMMAND       ""
+        INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
+        UPDATE_COMMAND      ""
         TEST_COMMAND        ""
     )
 ENDIF()
@@ -183,20 +218,20 @@ IF(NOT Ogg_FOUND)
 
     SET(_WITH_OGG --with-ogg=${_Ogg_DIR})
 
-    SET(_Ogg_CONFIGURE_COMMAND1 "")
-    SET(_Ogg_CONFIGURE_COMMAND2 "")
-    SET(_Ogg_CONFIGURE_COMMAND3 "")
-    SET(_Ogg_CONFIGURE_COMMAND4 "")
+    SET(_Ogg_INSTALL_COMMAND1 "")
+    SET(_Ogg_INSTALL_COMMAND2 "")
+    SET(_Ogg_INSTALL_COMMAND3 "")
+    SET(_Ogg_INSTALL_COMMAND4 "")
     IF(MSVC) 
         SET(SOLUTION win32/VS2015/libogg_static.sln)
-        SET(_Ogg_CONFIGURE_COMMAND1 ${CMAKE_VS_DEVENV_COMMAND} ${SOLUTION} /Upgrade )
-        SET(_Ogg_CONFIGURE_COMMAND2 ${CMAKE_VS_MSBUILD_COMMAND} ${SOLUTION} /t:libogg_static /clp:ErrorsOnly /p:OutDir=${_Ogg_DIR}/lib/ )
-        SET(_Ogg_CONFIGURE_COMMAND3 ${CMAKE_COMMAND} -E make_directory ${_Ogg_DIR}/include/ogg)
-        SET(_Ogg_CONFIGURE_COMMAND4 ${CMAKE_COMMAND} -E copy include/ogg/ogg.h include/ogg/os_types.h ${_Ogg_DIR}/include/ogg)
+        SET(_Ogg_INSTALL_COMMAND1 ${CMAKE_VS_DEVENV_COMMAND} ${SOLUTION} /Upgrade )
+        SET(_Ogg_INSTALL_COMMAND2 ${CMAKE_VS_MSBUILD_COMMAND} ${SOLUTION} /t:libogg_static /clp:ErrorsOnly /p:OutDir=${_Ogg_DIR}/lib/ )
+        SET(_Ogg_INSTALL_COMMAND3 ${CMAKE_COMMAND} -E make_directory ${_Ogg_DIR}/include/ogg)
+        SET(_Ogg_INSTALL_COMMAND4 ${CMAKE_COMMAND} -E copy include/ogg/ogg.h include/ogg/os_types.h ${_Ogg_DIR}/include/ogg)
     ELSE()
-        SET(_Ogg_CONFIGURE_COMMAND1 ./autogen.sh )
-        SET(_Ogg_CONFIGURE_COMMAND2 ./configure --prefix=${_Ogg_DIR} )
-        SET(_Ogg_CONFIGURE_COMMAND3 ${CMAKE_MAKE_PROGRAM} install -l )
+        SET(_Ogg_INSTALL_COMMAND1 ./autogen.sh )
+        SET(_Ogg_INSTALL_COMMAND2 ./configure --prefix=${_Ogg_DIR} )
+        SET(_Ogg_INSTALL_COMMAND3 ${CMAKE_MAKE_PROGRAM} install -l )
     ENDIF()
 
     ExternalProject_Add(
@@ -206,12 +241,12 @@ IF(NOT Ogg_FOUND)
         GIT_SHALLOW         TRUE
         SOURCE_DIR          "${_Ogg_SOURCE_DIR}"
         BUILD_IN_SOURCE     TRUE
-        CONFIGURE_COMMAND   ${_Ogg_CONFIGURE_COMMAND1}
-        COMMAND             ${_Ogg_CONFIGURE_COMMAND2}
-        COMMAND             ${_Ogg_CONFIGURE_COMMAND3}
-        COMMAND             ${_Ogg_CONFIGURE_COMMAND4}
+        CONFIGURE_COMMAND   ""
         BUILD_COMMAND       ""
-        INSTALL_COMMAND     ""
+        INSTALL_COMMAND     ${_Ogg_INSTALL_COMMAND1}
+        COMMAND             ${_Ogg_INSTALL_COMMAND2}
+        COMMAND             ${_Ogg_INSTALL_COMMAND3}
+        COMMAND             ${_Ogg_INSTALL_COMMAND4}
         UPDATE_COMMAND      ""
         TEST_COMMAND        ""
     )
@@ -221,20 +256,20 @@ IF(NOT Ogg_FOUND)
     
     SET(_WITH_VORBIS --with-vorbis=${_Vorbis_DIR})
 
-    SET(_Vorbis_CONFIGURE_COMMAND1 "")
-    SET(_Vorbis_CONFIGURE_COMMAND2 "")
-    SET(_Vorbis_CONFIGURE_COMMAND3 "")
-    SET(_Vorbis_CONFIGURE_COMMAND4 "")
+    SET(_Vorbis_INSTALL_COMMAND1 "")
+    SET(_Vorbis_INSTALL_COMMAND2 "")
+    SET(_Vorbis_INSTALL_COMMAND3 "")
+    SET(_Vorbis_INSTALL_COMMAND4 "")
     IF(MSVC) 
         SET(SOLUTION win32/VS2010/vorbis_static.sln)
-        SET(_Vorbis_CONFIGURE_COMMAND1 ${CMAKE_VS_DEVENV_COMMAND} ${SOLUTION} /Upgrade )
-        SET(_Vorbis_CONFIGURE_COMMAND2 ${CMAKE_VS_MSBUILD_COMMAND} ${SOLUTION} /t:libvorbisfile /clp:ErrorsOnly /p:OutDir=${_Vorbis_DIR}/lib/ )
-        SET(_Vorbis_CONFIGURE_COMMAND3 ${CMAKE_COMMAND} -E make_directory ${_Vorbis_DIR}/include/vorbis)
-        SET(_Vorbis_CONFIGURE_COMMAND4 ${CMAKE_COMMAND} -E copy include/vorbis/codec.h include/vorbis/vorbisfile.h ${_Vorbis_DIR}/include/vorbis)
+        SET(_Vorbis_INSTALL_COMMAND1 ${CMAKE_VS_DEVENV_COMMAND} ${SOLUTION} /Upgrade )
+        SET(_Vorbis_INSTALL_COMMAND2 ${CMAKE_VS_MSBUILD_COMMAND} ${SOLUTION} /t:libvorbisfile /clp:ErrorsOnly /p:OutDir=${_Vorbis_DIR}/lib/ )
+        SET(_Vorbis_INSTALL_COMMAND3 ${CMAKE_COMMAND} -E make_directory ${_Vorbis_DIR}/include/vorbis)
+        SET(_Vorbis_INSTALL_COMMAND4 ${CMAKE_COMMAND} -E copy include/vorbis/codec.h include/vorbis/vorbisfile.h ${_Vorbis_DIR}/include/vorbis)
     ELSE()
-        SET(_Vorbis_CONFIGURE_COMMAND1 ./autogen.sh )
-        SET(_Vorbis_CONFIGURE_COMMAND2 ./configure ${_WITH_OGG} --prefix=${_Vorbis_DIR} )
-        SET(_Vorbis_CONFIGURE_COMMAND3 ${CMAKE_MAKE_PROGRAM} install -l )
+        SET(_Vorbis_INSTALL_COMMAND1 ./autogen.sh )
+        SET(_Vorbis_INSTALL_COMMAND2 ./configure ${_WITH_OGG} --prefix=${_Vorbis_DIR} )
+        SET(_Vorbis_INSTALL_COMMAND3 ${CMAKE_MAKE_PROGRAM} install -l )
     ENDIF()
 
     ExternalProject_Add(
@@ -244,12 +279,12 @@ IF(NOT Ogg_FOUND)
         GIT_SHALLOW         TRUE
         SOURCE_DIR          "${_Vorbis_SOURCE_DIR}"
         BUILD_IN_SOURCE     TRUE
-        CONFIGURE_COMMAND   ${_Vorbis_CONFIGURE_COMMAND1}
-        COMMAND             ${_Vorbis_CONFIGURE_COMMAND2}
-        COMMAND             ${_Vorbis_CONFIGURE_COMMAND3}
-        COMMAND             ${_Vorbis_CONFIGURE_COMMAND4}
+        CONFIGURE_COMMAND   ""
         BUILD_COMMAND       ""
-        INSTALL_COMMAND     ""
+        INSTALL_COMMAND     ${_Vorbis_INSTALL_COMMAND1}
+        COMMAND             ${_Vorbis_INSTALL_COMMAND2}
+        COMMAND             ${_Vorbis_INSTALL_COMMAND3}
+        COMMAND             ${_Vorbis_INSTALL_COMMAND4}
         UPDATE_COMMAND      ""
         TEST_COMMAND        ""
     )
@@ -259,19 +294,19 @@ IF(NOT Ogg_FOUND)
     SET(_Theora_DIR "${CMAKE_BINARY_DIR}/libtheora")
     SET(_Theora_SOURCE_DIR "${CMAKE_BINARY_DIR}/libtheora_src")
 
-    SET(_Theora_CONFIGURE_COMMAND1 "")
-    SET(_Theora_CONFIGURE_COMMAND2 "")
-    SET(_Theora_CONFIGURE_COMMAND3 "")
-    SET(_Theora_CONFIGURE_COMMAND4 "")
+    SET(_Theora_INSTALL_COMMAND1 "")
+    SET(_Theora_INSTALL_COMMAND2 "")
+    SET(_Theora_INSTALL_COMMAND3 "")
+    SET(_Theora_INSTALL_COMMAND4 "")
     IF(MSVC) 
         SET(SOLUTION win32/VS2010/libtheora_static.sln)
-        SET(_Theora_CONFIGURE_COMMAND1 ${CMAKE_VS_DEVENV_COMMAND} ${SOLUTION} /Upgrade )
-        SET(_Theora_CONFIGURE_COMMAND2 ${CMAKE_VS_MSBUILD_COMMAND} ${SOLUTION} /t:libtheora_static /clp:ErrorsOnly /p:OutDir=${_Theora_DIR}/lib/ )
-        SET(_Theora_CONFIGURE_COMMAND3 ${CMAKE_COMMAND} -E make_directory ${_Theora_DIR}/include/theora)
-        SET(_Theora_CONFIGURE_COMMAND4 ${CMAKE_COMMAND} -E copy include/theora/codec.h include/theora/theora.h ${_Theora_DIR}/include/theora)
+        SET(_Theora_INSTALL_COMMAND1 ${CMAKE_VS_DEVENV_COMMAND} ${SOLUTION} /Upgrade )
+        SET(_Theora_INSTALL_COMMAND2 ${CMAKE_VS_MSBUILD_COMMAND} ${SOLUTION} /t:libtheora_static /clp:ErrorsOnly /p:OutDir=${_Theora_DIR}/lib/ )
+        SET(_Theora_INSTALL_COMMAND3 ${CMAKE_COMMAND} -E make_directory ${_Theora_DIR}/include/theora)
+        SET(_Theora_INSTALL_COMMAND4 ${CMAKE_COMMAND} -E copy include/theora/codec.h include/theora/theora.h ${_Theora_DIR}/include/theora)
     ELSE()
-        SET(_Theora_CONFIGURE_COMMAND1 ./autogen.sh ${_WITH_OGG} ${_WITH_VORBIS} --prefix=${_Theora_DIR} )
-        SET(_Theora_CONFIGURE_COMMAND2 ${CMAKE_MAKE_PROGRAM} install -l )
+        SET(_Theora_INSTALL_COMMAND1 ./autogen.sh ${_WITH_OGG} ${_WITH_VORBIS} --prefix=${_Theora_DIR} )
+        SET(_Theora_INSTALL_COMMAND2 ${CMAKE_MAKE_PROGRAM} install -l )
     ENDIF()
 
     ExternalProject_Add(
@@ -281,12 +316,12 @@ IF(NOT Ogg_FOUND)
         GIT_SHALLOW         TRUE
         SOURCE_DIR          "${_Theora_SOURCE_DIR}"
         BUILD_IN_SOURCE     TRUE
-        CONFIGURE_COMMAND   ${_Theora_CONFIGURE_COMMAND1}
-        COMMAND             ${_Theora_CONFIGURE_COMMAND2}
-        COMMAND             ${_Theora_CONFIGURE_COMMAND3}
-        COMMAND             ${_Theora_CONFIGURE_COMMAND4}
+        CONFIGURE_COMMAND   ""
         BUILD_COMMAND       ""
-        INSTALL_COMMAND     ""
+        INSTALL_COMMAND     ${_Theora_INSTALL_COMMAND1}
+        COMMAND             ${_Theora_INSTALL_COMMAND2}
+        COMMAND             ${_Theora_INSTALL_COMMAND3}
+        COMMAND             ${_Theora_INSTALL_COMMAND4}
         UPDATE_COMMAND      ""
         TEST_COMMAND        ""
     )

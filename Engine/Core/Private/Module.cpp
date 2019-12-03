@@ -32,9 +32,10 @@ bool LoadModule(const std::string& name) {
         
         DuskModule * def = (DuskModule *)GetProcAddress(module, "_DuskModule");
     #else
-        module = dlopen(name.c_str(), RTLD_GLOBAL | RTLD_NOW);
+        std::string filename = "lib" + name + ".so";
+        module = dlopen(filename.c_str(), RTLD_GLOBAL | RTLD_NOW);
         if (!module) {
-            fprintf(stderr, "Failed to load %s, %s\n", name.c_str(), dlerror());
+            fprintf(stderr, "Failed to load %s, %s\n", filename.c_str(), dlerror());
             return false;
         }
 

@@ -53,27 +53,29 @@ ENDIF()
 
 # GTest
 
-FIND_PACKAGE(GTest QUIET)
+IF(BUILD_TESTS)
+    FIND_PACKAGE(GTest QUIET)
 
-IF(NOT GTEST_FOUND)
-    SET(_GTest_DIR "${CMAKE_BINARY_DIR}/GTest")
-    SET(_GTest_SOURCE_DIR "${CMAKE_BINARY_DIR}/GTest_src")
-    SET(_GTest_BINARY_DIR "${CMAKE_BINARY_DIR}/GTest_bin")
+    IF(NOT GTEST_FOUND)
+        SET(_GTest_DIR "${CMAKE_BINARY_DIR}/GTest")
+        SET(_GTest_SOURCE_DIR "${CMAKE_BINARY_DIR}/GTest_src")
+        SET(_GTest_BINARY_DIR "${CMAKE_BINARY_DIR}/GTest_bin")
 
-    ExternalProject_Add(
-        ThirdParty_GTest
-        GIT_REPOSITORY      "https://github.com/google/googletest"
-        GIT_TAG             "v1.10.x"
-        GIT_SHALLOW         TRUE
-        SOURCE_DIR          "${_GTest_SOURCE_DIR}"
-        BINARY_DIR          "${_GTest_BINARY_DIR}"
-        CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${_GTest_DIR}
-                            -DCMAKE_POSITION_INDEPENDENT_CODE=ON
-        BUILD_COMMAND       ""
-        INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
-        UPDATE_COMMAND      ""
-        TEST_COMMAND        ""
-    )
+        ExternalProject_Add(
+            ThirdParty_GTest
+            GIT_REPOSITORY      "https://github.com/google/googletest"
+            GIT_TAG             "v1.10.x"
+            GIT_SHALLOW         TRUE
+            SOURCE_DIR          "${_GTest_SOURCE_DIR}"
+            BINARY_DIR          "${_GTest_BINARY_DIR}"
+            CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${_GTest_DIR}
+                                -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+            BUILD_COMMAND       ""
+            INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
+            UPDATE_COMMAND      ""
+            TEST_COMMAND        ""
+        )
+    ENDIF()
 ENDIF()
 
 # SDL2
@@ -173,9 +175,9 @@ ENDIF()
 
 # Ogg, Vorbis, Theora
 
-FIND_PACKAGE(Ogg QUIET)
+FIND_PACKAGE(Ogg QUIET COMPONENTS Vorbis Theora)
 
-IF(NOT Ogg_FOUND OR NOT Vorbis_FOUND OR NOT Theora_FOUND)
+IF(NOT Ogg_FOUND)
     SET(_Ogg_DIR "${CMAKE_BINARY_DIR}/libogg")
     SET(_Ogg_SOURCE_DIR "${CMAKE_BINARY_DIR}/libogg_src")
 

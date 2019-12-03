@@ -1,6 +1,7 @@
 #include <Dusk/Drivers/OpenGLGraphicsDriver.hpp>
 
 #include <Dusk/Config.hpp>
+#include <Dusk/Log.hpp>
 #include <Dusk/Dusk.hpp>
 
 #include <glad/glad.h>
@@ -37,19 +38,19 @@ DUSK_OPENGL_API GraphicsDriver::GraphicsDriver() {
 
     _sdlContext = SDL_GL_CreateContext(_sdlWindow);
     if (!_sdlContext) {
-        fprintf(stderr, "Failed to create OpenGL context, %s\n", SDL_GetError());
+        DuskLogError("Failed to create OpenGL context, %s", SDL_GetError());
         return;
     }
 
     if (!gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress)) {
-        fprintf(stderr, "Failed to initialize OpenGL context\n");
+        DuskLogError("Failed to initialize OpenGL context");
         return;
     }
     
-    printf("OpenGL Version %s\n", glGetString(GL_VERSION));
-    printf("GLSL Version %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-    printf("OpenGL Vendor %s\n", glGetString(GL_VENDOR));
-    printf("OpenGL Renderer %s\n", glGetString(GL_RENDERER));
+    DuskLogVerbose("OpenGL Version %s", glGetString(GL_VERSION));
+    DuskLogVerbose("GLSL Version %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+    DuskLogVerbose("OpenGL Vendor %s", glGetString(GL_VENDOR));
+    DuskLogVerbose("OpenGL Renderer %s", glGetString(GL_RENDERER));
 }
 
 DUSK_OPENGL_API GraphicsDriver::~GraphicsDriver() {

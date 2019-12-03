@@ -1,12 +1,14 @@
 #include <Dusk/Module.hpp>
 
-#include <vector>
+#include <Dusk/Log.hpp>
 
 #if defined(DUSK_OS_WINDOWS)
     #include <Windows.h>
 #else
     #include <dlfcn.h>
 #endif
+
+#include <vector>
 
 namespace Dusk {
     
@@ -18,15 +20,16 @@ namespace Dusk {
 
 std::vector<ModuleHandle> _Modules;
 
-bool LoadModule(const std::string& name) {
+bool LoadModule(const std::string& name)
+{
     ModuleHandle module = nullptr;
 
-    printf("Loading %s\n", name.c_str());
+    DuskLogLoad("Loading %s", name);
 
     #if defined(DUSK_OS_WINDOWS)
         module = LoadLibraryA(name.c_str());
         if (!module) {
-            fprintf(stderr, "Failed to load %s\n", name.c_str());
+            DuskLogError("Failed to load %s", name);
             return false;
         }
         
@@ -35,7 +38,7 @@ bool LoadModule(const std::string& name) {
         std::string filename = "lib" + name + ".so";
         module = dlopen(filename.c_str(), RTLD_GLOBAL | RTLD_NOW);
         if (!module) {
-            fprintf(stderr, "Failed to load %s, %s\n", filename.c_str(), dlerror());
+            DuskLogError("Failed to load %s, %s", filename, dlerror());
             return false;
         }
 
@@ -43,7 +46,7 @@ bool LoadModule(const std::string& name) {
     #endif
 
     if (!def) {
-        fprintf(stderr, "Failed to find _DuskModule symbol\n");
+        DuskLogError("Failed to find _DuskModule symbol");
         return false;
     }
 
@@ -56,7 +59,8 @@ bool LoadModule(const std::string& name) {
     return true;
 }
 
-void FreeModules() {
+void FreeModules()
+{
     for (auto module : _Modules) {  
         #if defined(DUSK_OS_WINDOWS)
             DuskModule * def = (DuskModule *)GetProcAddress(module, "_DuskModule");

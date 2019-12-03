@@ -28,9 +28,8 @@ before_build:
 
 build_script:
   - cmd: cd C:\projects\Dusk
-  - cmd: md build
-  - cmd: cd build
-  - cmd: cmake -G "%CMAKE_GENERATOR_NAME%" ..
+  - cmd: cd Build
+  - cmd: cmake -G -DBUILD_TESTS=ON -DBUILD_DEMOS=ON "%CMAKE_GENERATOR_NAME%" ..
   - cmd: cmake --build .
 
 test: off

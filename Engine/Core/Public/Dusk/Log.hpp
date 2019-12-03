@@ -8,6 +8,10 @@
 #include <string>
 #include <cstdio>
 
+#if !defined(DUSK_OS_WINDOWS)
+    #include <unistd.h>
+#endif
+
 namespace Dusk {
 
 enum class LogLevel 
@@ -82,6 +86,8 @@ static inline void Log(LogLevel level, const char * format, Args... args)
 
     #else
 
+        static bool isTTY = isatty(fileno(stdout));
+
         const short FgDefault = 39;
         const short BgDefault = 49;
 
@@ -110,7 +116,9 @@ static inline void Log(LogLevel level, const char * format, Args... args)
             break;
         }
 
-        printf("\033[%dm\033[%dm", fgColor, bgColor);
+        if (isTTY) {
+            printf("\033[%dm\033[%dm", fgColor, bgColor);
+        }
 
     #endif
 
@@ -129,7 +137,9 @@ static inline void Log(LogLevel level, const char * format, Args... args)
     #if defined(DUSK_OS_WINDOWS)
         SetConsoleTextAttribute(hConsole, DEFAULT);
     #else
-        printf("\033[%dm\033[%dm", FgDefault, BgDefault);
+        if (isTTY) {
+            printf("\033[%dm\033[%dm", FgDefault, BgDefault);
+        }
     #endif
 }
 

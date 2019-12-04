@@ -179,7 +179,6 @@ MACRO(Module target prefix)
                     ${target}
                     GTest::GTest
                     GTest::Main
-                    $<$<CXX_COMPILER_ID:MSVC>:MSVCRT>
             )
 
             SET_TARGET_PROPERTIES(

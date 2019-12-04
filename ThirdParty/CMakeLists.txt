@@ -25,9 +25,7 @@ IF(NOT GLM_FOUND)
         SOURCE_DIR          "${_GLM_SOURCE_DIR}"
         CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${_GLM_DIR}
                             -DGLM_TEST_ENABLE=OFF
-        BUILD_COMMAND       ""
         UPDATE_COMMAND      ""
-        INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
         TEST_COMMAND        ""
     )
 ENDIF()
@@ -48,9 +46,7 @@ IF(NOT JSON_FOUND)
         SOURCE_DIR          "${_JSON_SOURCE_DIR}"
         CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${_JSON_DIR}
                             -DJSON_BuildTests=OFF
-        BUILD_COMMAND       ""
         UPDATE_COMMAND      ""
-        INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
         TEST_COMMAND        ""
     )
 ENDIF()
@@ -74,8 +70,6 @@ IF(BUILD_TESTS)
             BINARY_DIR          "${_GTest_BINARY_DIR}"
             CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${_GTest_DIR}
                                 -DCMAKE_POSITION_INDEPENDENT_CODE=ON
-            BUILD_COMMAND       ""
-            INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
             UPDATE_COMMAND      ""
             TEST_COMMAND        ""
         )
@@ -99,8 +93,6 @@ IF(NOT SDL2_FOUND)
         SOURCE_DIR          "${_SDL2_SOURCE_DIR}"
         BINARY_DIR          "${_SDL2_BINARY_DIR}"
         CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${_SDL2_DIR}
-        BUILD_COMMAND       ""
-        INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
         UPDATE_COMMAND      ""
         TEST_COMMAND        ""
     )
@@ -174,8 +166,6 @@ IF(NOT assimp_FOUND)
                             -DASSIMP_BUILD_SAMPLES=OFF
                             -DASSIMP_BUILD_TESTS=OFF
                             -DBUILD_DOCS=OFF
-        BUILD_COMMAND       ""
-        INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
         UPDATE_COMMAND      ""
         TEST_COMMAND        ""
     )
@@ -201,8 +191,6 @@ IF(NOT OpenAL_FOUND)
                             -DALSOFT_UTILS=OFF
                             -DALSOFT_EXAMPLES=OFF
                             -DALSOFT_TESTS=OFF
-        BUILD_COMMAND       ""
-        INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
         UPDATE_COMMAND      ""
         TEST_COMMAND        ""
     )

@@ -36,48 +36,63 @@ FIND_PACKAGE(PkgConfig QUIET)
 
 PKG_CHECK_MODULES(_Ogg_PC QUIET ogg)
 
-SET(Ogg_INCLUDE_DIR ${_Ogg_PC_INCLUDE_DIRS})
 FIND_PATH(
     Ogg_INCLUDE_DIR
     NAMES ogg/ogg.h
-    PATHS ${Ogg_ROOT_DIR}
-    PATH_SUFFIXES include
+    PATHS 
+        ${Ogg_ROOT_DIR}
+        ${_Ogg_PC_INCLUDE_DIRS}
+    PATH_SUFFIXES 
+        include
+        libogg/include
 )
 
-SET(Ogg_LIBRARY ${_Ogg_PC_LIBRARIES})
 FIND_LIBRARY(
     Ogg_LIBRARY
-    NAMES ogg libogg_static
-    PATHS ${Ogg_ROOT_DIR}
-    PATH_SUFFIXES lib
+    NAMES ogg libogg
+    PATHS 
+        ${Ogg_ROOT_DIR}
+        ${_Ogg_PC_LIBRARY_DIRS}
+    PATH_SUFFIXES 
+        lib
+        libogg/lib
 )
 
 IF(Ogg_FIND_REQUIRED_Vorbis OR Ogg_FIND_REQUIRED_Theora)
     PKG_CHECK_MODULES(_Vorbis_PC QUIET vorbis)
     PKG_CHECK_MODULES(_VorbisFile_PC QUIET vorbisfile)
 
-    SET(Vorbis_INCLUDE_DIR ${_Vorbis_PC_INCLUDE_DIRS})
     FIND_PATH(
         Vorbis_INCLUDE_DIR
         NAMES vorbis/vorbisfile.h
-        PATHS ${Vorbis_ROOT_DIR}
-        PATH_SUFFIXES include
+        PATHS 
+            ${Vorbis_ROOT_DIR}
+            ${_Vorbis_PC_INCLUDE_DIRS}
+        PATH_SUFFIXES 
+            include
+            libvorbis/include
     )
 
-    SET(Vorbis_LIBRARY ${_Vorbis_PC_LIBRARIES})
     FIND_LIBRARY(
         Vorbis_LIBRARY
         NAMES vorbis libvorbis_static
-        PATHS ${Vorbis_ROOT_DIR}
-        PATH_SUFFIXES lib
+        PATHS 
+            ${Vorbis_ROOT_DIR}
+            ${_Vorbis_PC_LIBRARY_DIRS}
+        PATH_SUFFIXES 
+            lib
+            libvorbis/lib
     )
 
-    SET(VorbisFile_LIBRARY ${_VorbisFile_PC_LIBRARIES})
     FIND_LIBRARY(
         VorbisFile_LIBRARY
         NAMES vorbisfile libvorbisfile_static
-        PATHS ${Vorbis_ROOT_DIR}
-        PATH_SUFFIXES lib
+        PATHS 
+            ${Vorbis_ROOT_DIR}
+            ${_VorbisFile_PC_LIBRARY_DIRS}
+        PATH_SUFFIXES 
+            lib
+            libvorbis/lib
     )
 
     IF(Vorbis_INCLUDE_DIR AND Vorbis_LIBRARY AND VorbisFile_LIBRARY)
@@ -88,20 +103,26 @@ ENDIF()
 IF(Ogg_FIND_REQUIRED_Theora)
     PKG_CHECK_MODULES(_Theora_PC QUIET theora)
 
-    SET(Theora_INCLUDE_DIR ${_Theora_PC_INCLUDE_DIRS})
     FIND_PATH(
         Theora_INCLUDE_DIR
         NAMES theora/theora.h
-        PATHS ${Theora_ROOT_DIR}
-        PATH_SUFFIXES include
+        PATHS
+            ${Theora_ROOT_DIR}
+            ${_Theora_PC_INCLUDE_DIRS}
+        PATH_SUFFIXES 
+            include
+            libtheora/include
     )
 
-    SET(Theora_LIBRARY ${_Theora_PC_LIBRARIES})
     FIND_LIBRARY(
         Theora_LIBRARY
         NAMES theora libtheora_static
-        PATHS ${Theora_ROOT_DIR}
-        PATH_SUFFIXES lib
+        PATHS 
+            ${Theora_ROOT_DIR}
+            ${_Theora_PC_LIBRARY_DIRS}
+        PATH_SUFFIXES 
+            lib
+            libtheora/lib
     )
 
     IF(Theora_INCLUDE_DIR AND Theora_LIBRARY)

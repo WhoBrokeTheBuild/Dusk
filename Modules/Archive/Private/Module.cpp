@@ -10,9 +10,9 @@ void ModuleTerm() {
 }
 
 DUSK_MODULE() {
-    .Name = "Archive",
-    .Init = ModuleInit,
-    .Term = ModuleTerm,
+    "Archive",
+    ModuleInit,
+    ModuleTerm,
 };
 
 }

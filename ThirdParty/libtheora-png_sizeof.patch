@@ -1,5 +1,5 @@
---- libtheora-1.1.1/examples/png2theora.c.orig        2009-08-23 03:14:04.000000000 +0900
-+++ libtheora-1.1.1/examples/png2theora.c     2013-07-16 12:40:07.629087870 +0900
+--- libtheora-1.1.1/examples/png2theora.c.orig
++++ libtheora-1.1.1/examples/png2theora.c
 @@ -462,9 +462,9 @@
    png_set_strip_alpha(png_ptr);
  

@@ -8,12 +8,12 @@
 namespace Dusk {
 
 DUSK_CORE_API
-static inline vec3 GetWorldUp() {
+inline vec3 GetWorldUp() {
     return { 0.f, 1.f, 0.f };
 }
 
 DUSK_CORE_API 
-static inline vec3 GetWorldForward() {
+inline vec3 GetWorldForward() {
     return { 0.f, 0.f, -1.f };
 }
 

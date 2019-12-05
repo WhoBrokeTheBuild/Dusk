@@ -10,9 +10,9 @@ void ModuleTerm() {
 }
 
 DUSK_MODULE() {
-    .Name = "DirectX",
-    .Init = ModuleInit,
-    .Term = ModuleTerm,
+    "DirectX",
+    ModuleInit,
+    ModuleTerm,
 };
 
 }

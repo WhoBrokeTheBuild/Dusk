@@ -8,7 +8,9 @@
 #include <string>
 #include <cstdio>
 
-#if !defined(DUSK_OS_WINDOWS)
+#if defined(DUSK_OS_WINDOWS)
+    #include <Windows.h>
+#else
     #include <unistd.h>
 #endif
 
@@ -25,7 +27,7 @@ enum class LogLevel
 };
 
 template <class T>
-static auto LogWrap(const T& v) {
+inline auto LogWrap(const T& v) {
     return v;
 }
 
@@ -36,12 +38,12 @@ static auto LogWrap(const T& v) {
 #pragma GCC diagnostic ignored "-Wunused-function"
 
 template <>
-auto LogWrap<std::string>(const std::string& v) {
+inline auto LogWrap<std::string>(const std::string& v) {
     return v.c_str();
 }
 
 template <>
-auto LogWrap<json>(const json& v) {
+inline auto LogWrap<json>(const json& v) {
     return v.get<std::string>().c_str();
 }
 
@@ -50,11 +52,11 @@ auto LogWrap<json>(const json& v) {
 #pragma GCC diagnostic pop
 
 template <class ...Args>
-static inline void Log(LogLevel level, const char * format, Args... args)
+inline void Log(LogLevel level, const char * format, Args... args)
 {
     #if defined(DUSK_OS_WINDOWS)
 
-        static Handle hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+        static HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
         
         const int Default = 7; // White on Black
 
@@ -63,22 +65,22 @@ static inline void Log(LogLevel level, const char * format, Args... args)
         switch (level)
         {
         case LogLevel::Info:
-            fgColor = 7; // White on Black
+            color = 7; // White on Black
             break;
         case LogLevel::Warn:
-            fgColor = 6; // Yellow on Black
+            color = 6; // Yellow on Black
             break;
         case LogLevel::Error:
-            fgColor = 4; // Red on Black
+            color = 4; // Red on Black
             break;
         case LogLevel::Performance:
-            fgColor = 5; // Magenta on Black
+            color = 5; // Magenta on Black
             break;
         case LogLevel::Verbose:
-            fgColor = 8; // Grey on Black
+            color = 8; // Grey on Black
             break;
         case LogLevel::Load:
-            fgColor = 2; // Green on Black
+            color = 2; // Green on Black
             break;
         }
 
@@ -135,7 +137,7 @@ static inline void Log(LogLevel level, const char * format, Args... args)
 #pragma GCC diagnostic pop
 
     #if defined(DUSK_OS_WINDOWS)
-        SetConsoleTextAttribute(hConsole, DEFAULT);
+        SetConsoleTextAttribute(hConsole, Default);
     #else
         if (isTTY) {
             printf("\033[%dm\033[%dm", FgDefault, BgDefault);

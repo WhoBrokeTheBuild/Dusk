@@ -10,9 +10,9 @@ void ModuleTerm() {
 }
 
 DUSK_MODULE() {
-    .Name = "GLTF2",
-    .Init = ModuleInit,
-    .Term = ModuleTerm,
+    "GLTF2",
+    ModuleInit,
+    ModuleTerm,
 };
 
 }

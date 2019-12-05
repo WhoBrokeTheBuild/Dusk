@@ -13,7 +13,7 @@ PROJECT(ThirdParty)
 SET(glm_ROOT       "${CMAKE_BINARY_DIR}/glm")
 SET(glm_SOURCE_DIR "${CMAKE_BINARY_DIR}/glm_src")
 
-FIND_PACKAGE(glm QUIET)
+FIND_PACKAGE(glm CONFIG QUIET)
 
 IF(NOT glm_FOUND)
     ExternalProject_Add(
@@ -24,8 +24,8 @@ IF(NOT glm_FOUND)
         SOURCE_DIR          "${glm_SOURCE_DIR}"
         CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${glm_ROOT}
                             -DGLM_TEST_ENABLE=OFF
+        BUILD_COMMAND       ""
         UPDATE_COMMAND      ""
-        TEST_COMMAND        ""
     )
 ENDIF()
 
@@ -34,7 +34,7 @@ ENDIF()
 SET(nlohmann_json_ROOT       "${CMAKE_BINARY_DIR}/nlohmann_json")
 SET(nlohmann_json_SOURCE_DIR "${CMAKE_BINARY_DIR}/nlohmann_json_src")
 
-FIND_PACKAGE(nlohmann_json QUIET)
+FIND_PACKAGE(nlohmann_json CONFIG QUIET)
 
 IF(NOT nlohmann_json_FOUND)
     ExternalProject_Add(
@@ -45,8 +45,8 @@ IF(NOT nlohmann_json_FOUND)
         SOURCE_DIR          "${nlohmann_json_SOURCE_DIR}"
         CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${nlohmann_json_ROOT}
                             -DJSON_BuildTests=OFF
+        BUILD_COMMAND       ""
         UPDATE_COMMAND      ""
-        TEST_COMMAND        ""
     )
 ENDIF()
 
@@ -70,8 +70,10 @@ IF(BUILD_TESTS)
             BINARY_DIR          "${GTest_BINARY_DIR}"
             CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${GTest_ROOT}
                                 -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+            BUILD_COMMAND       ""
             UPDATE_COMMAND      ""
             TEST_COMMAND        ""
+            INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
         )
     ENDIF()
 ENDIF()
@@ -82,7 +84,7 @@ SET(SDL2_ROOT       "${CMAKE_BINARY_DIR}/SDL2")
 SET(SDL2_SOURCE_DIR "${CMAKE_BINARY_DIR}/SDL2_src")
 SET(SDL2_BINARY_DIR "${CMAKE_BINARY_DIR}/SDL2_bin")
 
-FIND_PACKAGE(SDL2 QUIET)
+FIND_PACKAGE(SDL2 2.0.6 CONFIG QUIET)
 
 IF(NOT SDL2_FOUND AND NEED_SDL2)
     ExternalProject_Add(
@@ -94,8 +96,10 @@ IF(NOT SDL2_FOUND AND NEED_SDL2)
         BINARY_DIR          "${SDL2_BINARY_DIR}"
         CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${SDL2_ROOT}
                             -DBUILD_SHARED_LIBS=ON
+        BUILD_COMMAND       ""
         UPDATE_COMMAND      ""
         TEST_COMMAND        ""
+        INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
     )
 ENDIF()
 
@@ -104,7 +108,7 @@ ENDIF()
 SET(Python3_ROOT       "${CMAKE_BINARY_DIR}/Python3")
 SET(Python3_SOURCE_DIR "${CMAKE_BINARY_DIR}/Python3_src")
 
-FIND_PACKAGE(Python3 QUIET COMPONENTS Development)
+FIND_PACKAGE(Python3 3.6 QUIET COMPONENTS Development)
 
 IF(NOT Python3_FOUND)
 
@@ -146,7 +150,7 @@ SET(assimp_ROOT       "${CMAKE_BINARY_DIR}/assimp")
 SET(assimp_SOURCE_DIR "${CMAKE_BINARY_DIR}/assimp_src")
 SET(assimp_BINARY_DIR "${CMAKE_BINARY_DIR}/assimp_bin")
 
-FIND_PACKAGE(assimp 5.0 QUIET)
+FIND_PACKAGE(assimp 5.0 CONFIG QUIET)
 
 IF(NOT assimp_FOUND AND NEED_ASSIMP)
     ExternalProject_Add(
@@ -161,8 +165,11 @@ IF(NOT assimp_FOUND AND NEED_ASSIMP)
                             -DASSIMP_BUILD_SAMPLES=OFF
                             -DASSIMP_BUILD_TESTS=OFF
                             -DBUILD_DOCS=OFF
+        BUILD_COMMAND       ""
         UPDATE_COMMAND      ""
         TEST_COMMAND        ""
+        INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
+        COMMAND             ${CMAKE_COMMAND} --build . --target install --config Debug
     )
 ENDIF()
 
@@ -172,7 +179,7 @@ SET(OpenAL_ROOT       "${CMAKE_BINARY_DIR}/OpenAL")
 SET(OpenAL_SOURCE_DIR "${CMAKE_BINARY_DIR}/OpenAL_src")
 SET(OpenAL_BINARY_DIR "${CMAKE_BINARY_DIR}/OpenAL_bin")
 
-FIND_PACKAGE(OpenAL QUIET)
+FIND_PACKAGE(OpenAL CONFIG QUIET)
 
 IF(NOT OpenAL_FOUND AND NEED_OPENAL)
     ExternalProject_Add(
@@ -186,8 +193,10 @@ IF(NOT OpenAL_FOUND AND NEED_OPENAL)
                             -DALSOFT_UTILS=OFF
                             -DALSOFT_EXAMPLES=OFF
                             -DALSOFT_TESTS=OFF
+        BUILD_COMMAND       ""
         UPDATE_COMMAND      ""
         TEST_COMMAND        ""
+        INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
     )
 ENDIF()
 
@@ -212,9 +221,9 @@ IF(NOT Ogg_FOUND AND NEED_OGG)
     SET(_Ogg_INSTALL_COMMAND3 "")
     SET(_Ogg_INSTALL_COMMAND4 "")
     IF(MSVC) 
-        SET(SOLUTION win32/VS2015/libogg_static.sln)
-        SET(_Ogg_INSTALL_COMMAND1 ${CMAKE_VS_DEVENV_COMMAND} ${SOLUTION} /Upgrade )
-        SET(_Ogg_INSTALL_COMMAND2 ${CMAKE_VS_MSBUILD_COMMAND} ${SOLUTION} /t:libogg_static /clp:ErrorsOnly /p:OutDir=${Ogg_ROOT}/lib/ )
+        SET(_Ogg_SOLUTION win32/VS2015/libogg.sln)
+        SET(_Ogg_INSTALL_COMMAND1 ${CMAKE_VS_DEVENV_COMMAND} ${_Ogg_SOLUTION} /Upgrade )
+        SET(_Ogg_INSTALL_COMMAND2 ${CMAKE_VS_MSBUILD_COMMAND} ${_Ogg_SOLUTION} /t:libogg /clp:ErrorsOnly /p:OutDir=${Ogg_ROOT}/lib/ )
         SET(_Ogg_INSTALL_COMMAND3 ${CMAKE_COMMAND} -E make_directory ${Ogg_ROOT}/include/ogg)
         SET(_Ogg_INSTALL_COMMAND4 ${CMAKE_COMMAND} -E copy include/ogg/ogg.h include/ogg/os_types.h ${Ogg_ROOT}/include/ogg)
     ELSE()
@@ -247,9 +256,9 @@ IF(NOT Ogg_FOUND AND NEED_OGG)
     SET(_Vorbis_INSTALL_COMMAND3 "")
     SET(_Vorbis_INSTALL_COMMAND4 "")
     IF(MSVC) 
-        SET(SOLUTION win32/VS2010/vorbis_static.sln)
-        SET(_Vorbis_INSTALL_COMMAND1 ${CMAKE_VS_DEVENV_COMMAND} ${SOLUTION} /Upgrade )
-        SET(_Vorbis_INSTALL_COMMAND2 ${CMAKE_VS_MSBUILD_COMMAND} ${SOLUTION} /t:libvorbisfile /clp:ErrorsOnly /p:OutDir=${Vorbis_ROOT}/lib/ )
+        SET(_Vorbis_SOLUTION win32/VS2010/vorbis_static.sln)
+        SET(_Vorbis_INSTALL_COMMAND1 ${CMAKE_VS_DEVENV_COMMAND} ${_Vorbis_SOLUTION} /Upgrade )
+        SET(_Vorbis_INSTALL_COMMAND2 ${CMAKE_VS_MSBUILD_COMMAND} ${_Vorbis_SOLUTION} /t:libvorbisfile /clp:ErrorsOnly /p:OutDir=${Vorbis_ROOT}/lib/ )
         SET(_Vorbis_INSTALL_COMMAND3 ${CMAKE_COMMAND} -E make_directory ${Vorbis_ROOT}/include/vorbis)
         SET(_Vorbis_INSTALL_COMMAND4 ${CMAKE_COMMAND} -E copy include/vorbis/codec.h include/vorbis/vorbisfile.h ${Vorbis_ROOT}/include/vorbis)
     ELSE()
@@ -277,17 +286,21 @@ IF(NOT Ogg_FOUND AND NEED_OGG)
     
     ADD_DEPENDENCIES(ThirdParty_Vorbis ThirdParty_Ogg)
 
+    SET(_Theora_PATCH ${CMAKE_SOURCE_DIR}/libtheora-png_sizeof.patch)
+
     SET(_Theora_INSTALL_COMMAND1 "")
     SET(_Theora_INSTALL_COMMAND2 "")
     SET(_Theora_INSTALL_COMMAND3 "")
     SET(_Theora_INSTALL_COMMAND4 "")
     IF(MSVC) 
-        SET(SOLUTION win32/VS2010/libtheora_static.sln)
-        SET(_Theora_INSTALL_COMMAND1 ${CMAKE_VS_DEVENV_COMMAND} ${SOLUTION} /Upgrade )
-        SET(_Theora_INSTALL_COMMAND2 ${CMAKE_VS_MSBUILD_COMMAND} ${SOLUTION} /t:libtheora_static /clp:ErrorsOnly /p:OutDir=${Theora_ROOT}/lib/ )
+        SET(_Theora_SOLUTION win32/VS2008/libtheora_static.sln)
+        SET(_Theora_PATCH_COMMAND ${GIT_EXECUTABLE} apply --ignore-space-change --ignore-whitespace -v ${_Theora_PATCH} || ver > nul)
+        SET(_Theora_INSTALL_COMMAND1 ${CMAKE_VS_DEVENV_COMMAND} ${_Theora_SOLUTION} /Upgrade )
+        SET(_Theora_INSTALL_COMMAND2 ${CMAKE_VS_MSBUILD_COMMAND} ${_Theora_SOLUTION} /t:libtheora_static /clp:ErrorsOnly /p:OutDir=${Theora_ROOT}/lib/ )
         SET(_Theora_INSTALL_COMMAND3 ${CMAKE_COMMAND} -E make_directory ${Theora_ROOT}/include/theora)
         SET(_Theora_INSTALL_COMMAND4 ${CMAKE_COMMAND} -E copy include/theora/codec.h include/theora/theora.h ${Theora_ROOT}/include/theora)
     ELSE()
+        SET(_Theora_PATCH_COMMAND patch -p0 --forward < ${_Theora_PATCH} || true)
         SET(_Theora_INSTALL_COMMAND1 ./autogen.sh ${_WITH_OGG} ${_WITH_VORBIS} --prefix=${Theora_ROOT} )
         SET(_Theora_INSTALL_COMMAND2 ${CMAKE_MAKE_PROGRAM} install -l )
     ENDIF()
@@ -307,7 +320,8 @@ IF(NOT Ogg_FOUND AND NEED_OGG)
         COMMAND             ${_Theora_INSTALL_COMMAND4}
         UPDATE_COMMAND      ""
         TEST_COMMAND        ""
-        PATCH_COMMAND       ${GIT_EXECUTABLE} apply ${CMAKE_SOURCE_DIR}/libtheora-png_sizeof.patch
+        PATCH_COMMAND       ${_Theora_PATCH_COMMAND}
+        COMMAND             
     )
     
     ADD_DEPENDENCIES(ThirdParty_Theora ThirdParty_Ogg ThirdParty_Vorbis)

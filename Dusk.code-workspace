@@ -55,7 +55,18 @@
             "algorithm": "cpp",
             "*.tcc": "cpp",
             "valarray": "cpp",
-            "string.h": "c"
+            "string.h": "c",
+            "bitset": "cpp",
+            "regex": "cpp",
+            "atomic": "cpp",
+            "list": "cpp",
+            "unordered_set": "cpp",
+            "iterator": "cpp",
+            "map": "cpp",
+            "memory_resource": "cpp",
+            "random": "cpp",
+            "set": "cpp",
+            "string": "cpp"
         }
     }
 }

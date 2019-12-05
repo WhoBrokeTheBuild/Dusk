@@ -39,11 +39,16 @@ IF(BUILD_TESTS)
     ENABLE_TESTING()
 ENDIF()
 
-OPTION(BUILD_DEMOS "Build Dusk Demo Projects" OFF)
+OPTION(BUILD_DEMOS "Build Dusk Demo Projects" ON)
 
 OPTION(BUILD_THIRDPARTY "Build Dusk ThirdParty Dependencies" ON)
 
 OPTION(BUILD_PACKAGES "Build Dusk Packages" OFF)
+
+OPTION(NEED_SDL2 "" ON)
+OPTION(NEED_OPENAL "" OFF)
+OPTION(NEED_ASSIMP "" OFF)
+OPTION(NEED_OGG "" OFF)
 
 ###
 ### Configuration
@@ -93,19 +98,18 @@ IF(BUILD_THIRDPARTY)
 
     FILE(MAKE_DIRECTORY "${THIRDPARTY_BINARY_DIR}")
 
-    SET(glm_ROOT_DIR            "${THIRDPARTY_BINARY_DIR}/glm/")
-    SET(nlohmann_json_ROOT_DIR  "${THIRDPARTY_BINARY_DIR}/nlohmann_json/")
-    SET(SDL2_ROOT_DIR           "${THIRDPARTY_BINARY_DIR}/SDL2/")
-    SET(Python3_ROOT_DIR        "${THIRDPARTY_BINARY_DIR}/Python3/")
-    SET(OpenAL_ROOT_DIR         "${THIRDPARTY_BINARY_DIR}/OpenAL/")
-    SET(assimp_ROOT_DIR         "${THIRDPARTY_BINARY_DIR}/assimp/")
-    SET(Ogg_ROOT_DIR            "${THIRDPARTY_BINARY_DIR}/libogg/")
-    SET(Vorbis_ROOT_DIR         "${THIRDPARTY_BINARY_DIR}/libvorbis/")
-    SET(Theora_ROOT_DIR         "${THIRDPARTY_BINARY_DIR}/libtheora/")
-
-    IF(BUILD_TESTS)
-        SET(GTEST_ROOT          "${THIRDPARTY_BINARY_DIR}/GTest/")
-    ENDIF()
+    LIST(APPEND CMAKE_PREFIX_PATH
+        "${THIRDPARTY_BINARY_DIR}/glm"
+        "${THIRDPARTY_BINARY_DIR}/nlohmann_json"
+        "${THIRDPARTY_BINARY_DIR}/SDL2"
+        "${THIRDPARTY_BINARY_DIR}/Python3"
+        "${THIRDPARTY_BINARY_DIR}/OpenAL"
+        "${THIRDPARTY_BINARY_DIR}/assimp"
+        "${THIRDPARTY_BINARY_DIR}/libogg"
+        "${THIRDPARTY_BINARY_DIR}/libvorbis"
+        "${THIRDPARTY_BINARY_DIR}/libtheora"
+        "${THIRDPARTY_BINARY_DIR}/GTest"
+    )
 
     # Configure path to cmake config files
 
@@ -113,7 +117,11 @@ IF(BUILD_THIRDPARTY)
         COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" 
             -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
             -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-            -DBUILD_TESTS=${BUILD_TESTS} 
+            -DBUILD_TESTS=${BUILD_TESTS}
+            -DNEED_SDL2=${NEED_SDL2}
+            -DNEED_OPENAL=${NEED_OPENAL}
+            -DNEED_ASSIMP=${NEED_ASSIMP}
+            -DNEED_OGG=${NEED_OGG}
             "${THIRDPARTY_SOURCE_DIR}"
         WORKING_DIRECTORY "${THIRDPARTY_BINARY_DIR}"
         RESULT_VARIABLE result
@@ -140,40 +148,55 @@ IF(BUILD_THIRDPARTY)
     ENDIF()
 ENDIF()
 
-MESSAGE(STATUS "${nlohmann_json_ROOT_DIR}")
-
 FIND_PACKAGE(glm REQUIRED)
-FIND_PACKAGE(nlohmann_json REQUIRED 
-    PATHS "${nlohmann_json_ROOT_DIR}"
-)
+FIND_PACKAGE(nlohmann_json REQUIRED)
 FIND_PACKAGE(Python3 REQUIRED COMPONENTS Development)
 FIND_PACKAGE(Threads REQUIRED)
 
-FIND_PACKAGE(SDL2 REQUIRED)
-FIND_PACKAGE(OpenAL)
-FIND_PACKAGE(assimp 
-    PATHS "${assimp_ROOT_DIR}" 
-    PATH_SUFFIXES "assimp-5.0"
-)
-FIND_PACKAGE(Ogg COMPONENTS Vorbis Theora)
+IF(NEED_SDL2)
+    FIND_PACKAGE(SDL2 REQUIRED)
+ELSE()
+    FIND_PACKAGE(SDL2 QUIET)
+ENDIF()
+
+IF(NEED_OPENAL)
+    FIND_PACKAGE(OpenAL REQUIRED)
+ELSE()
+    FIND_PACKAGE(OpenAL QUIET)
+ENDIF()
+
+IF(NEED_ASSIMP)
+    FIND_PACKAGE(assimp 5.0 REQUIRED)
+ELSE()
+    FIND_PACKAGE(assimp 5.0 QUIET)
+ENDIF()
+
+IF(NEED_OGG)
+    FIND_PACKAGE(Ogg COMPONENTS Vorbis Theora REQUIRED)
+ELSE()
+    FIND_PACKAGE(Ogg COMPONENTS Vorbis Theora QUIET)
+ENDIF()
+
 
 IF(BUILD_TESTS)
     FIND_PACKAGE(GTest REQUIRED)
 ENDIF()
 
-# Extract release-specific configuration
-GET_TARGET_PROPERTY(soname   assimp::assimp IMPORTED_SONAME_RELEASE)
-GET_TARGET_PROPERTY(implib   assimp::assimp IMPORTED_IMPLIB_RELEASE)
-GET_TARGET_PROPERTY(location assimp::assimp IMPORTED_LOCATION_RELEASE)
+IF(TARGET assimp::assimp)
+    # Extract release-specific configuration
+    GET_TARGET_PROPERTY(soname   assimp::assimp IMPORTED_SONAME_RELEASE)
+    GET_TARGET_PROPERTY(implib   assimp::assimp IMPORTED_IMPLIB_RELEASE)
+    GET_TARGET_PROPERTY(location assimp::assimp IMPORTED_LOCATION_RELEASE)
 
-# Set build type agnostic configuration
-SET_TARGET_PROPERTIES(
-    assimp::assimp 
-    PROPERTIES
-        IMPORTED_SONAME     "${soname}"
-        IMPORTED_IMPLIB     "${implib}"
-        IMPORTED_LOCATION   "${location}"
-)
+    # Set build type agnostic configuration
+    SET_TARGET_PROPERTIES(
+        assimp::assimp 
+        PROPERTIES
+            IMPORTED_SONAME     "${soname}"
+            IMPORTED_IMPLIB     "${implib}"
+            IMPORTED_LOCATION   "${location}"
+    )
+ENDIF()
 
 # Allow custom targets in Visual Studio to find .dll files
 SET(RUNTIME_SEARCH_PATH

@@ -105,8 +105,13 @@ ENDIF()
 
 # Python3
 
-SET(Python3_ROOT       "${CMAKE_BINARY_DIR}/Python3")
-SET(Python3_SOURCE_DIR "${CMAKE_BINARY_DIR}/Python3_src")
+IF(WIN32)
+    SET(Python3_ROOT_DIR   "${CMAKE_BINARY_DIR}/Python3")
+    SET(Python3_SOURCE_DIR "${Python3_ROOT_DIR}")
+ELSE()
+    SET(Python3_ROOT_DIR   "${CMAKE_BINARY_DIR}/Python3")
+    SET(Python3_SOURCE_DIR "${CMAKE_BINARY_DIR}/Python3_src")
+ENDIF()
 
 FIND_PACKAGE(Python3 3.6 QUIET COMPONENTS Development)
 
@@ -116,15 +121,9 @@ IF(NOT Python3_FOUND)
     SET(_Python3_INSTALL_COMMAND2 "")
 
     IF(WIN32)
-        IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
-            SET(ARCH "x64")
-        ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
-            SET(ARCH "Win32")
-        ENDIF()
-        SET(_Python3_INSTALL_COMMAND1 cmd /c PCbuild\\build.bat -c Debug -t Build -p ${ARCH})
-        SET(_Python3_INSTALL_COMMAND2 cmd /c PCbuild\\build.bat -c Release -t Build -p ${ARCH})
+        MESSAGE(WARNING "Unable to find Python3, install to continue https://www.python.org/downloads/windows/")
     ELSE()
-        SET(_Python3_INSTALL_COMMAND1 ./configure --prefix=${Python3_ROOT} --enable-shared --enable-optimizations)
+        SET(_Python3_INSTALL_COMMAND1 ./configure --prefix=${Python3_ROOT_DIR} --enable-shared --enable-optimizations)
         SET(_Python3_INSTALL_COMMAND2 ${CMAKE_MAKE_PROGRAM} -l libpython3.so install)
     ENDIF()
 
@@ -138,8 +137,8 @@ IF(NOT Python3_FOUND)
         CONFIGURE_COMMAND   ""
         BUILD_COMMAND       ""
         UPDATE_COMMAND      ""
-        INSTALL_COMMAND     "${_Python3_INSTALL_COMMAND1}"
-        COMMAND             "${_Python3_INSTALL_COMMAND2}"
+        INSTALL_COMMAND     ${_Python3_INSTALL_COMMAND1}
+        COMMAND             ${_Python3_INSTALL_COMMAND2}
         TEST_COMMAND        ""
     )
 ENDIF()

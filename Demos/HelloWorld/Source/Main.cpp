@@ -10,10 +10,10 @@ int main(int argc, char** argv)
     Dusk::Initialize(argc, argv);
     
     if (!Dusk::LoadModuleArray({
-        "DuskAssimp",
+        // "DuskAssimp",
         "DuskGLTF2",
         "DuskSTBI",
-        //"DuskOpenGL",
+        // "DuskOpenGL",
         "DuskVulkan",
     })) {
         return 1;

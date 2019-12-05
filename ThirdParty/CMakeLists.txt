@@ -4,47 +4,48 @@ LIST(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_SOURCE_DIR}/../CMake")
 
 # Include CMAKE_POLICY decisions
 INCLUDE(Policies)
+INCLUDE(ExternalProject)
 
 PROJECT(ThirdParty)
 
-INCLUDE(ExternalProject)
-
 # glm
 
-FIND_PACKAGE(GLM QUIET)
+SET(_glm_DIR "${CMAKE_BINARY_DIR}/glm")
+SET(_glm_SOURCE_DIR "${CMAKE_BINARY_DIR}/glm_src")
 
-IF(NOT GLM_FOUND)
-    SET(_GLM_DIR "${CMAKE_BINARY_DIR}/glm")
-    SET(_GLM_SOURCE_DIR "${CMAKE_BINARY_DIR}/glm_src")
+FIND_PACKAGE(glm QUIET)
 
+IF(NOT glm_FOUND)
     ExternalProject_Add(
         ThirdParty_glm
         GIT_REPOSITORY      "https://github.com/g-truc/glm.git"
         GIT_TAG             "0.9.9.3"
         GIT_SHALLOW         TRUE
-        SOURCE_DIR          "${_GLM_SOURCE_DIR}"
-        CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${_GLM_DIR}
+        SOURCE_DIR          "${_glm_SOURCE_DIR}"
+        CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX="${_glm_DIR}"
                             -DGLM_TEST_ENABLE=OFF
         UPDATE_COMMAND      ""
         TEST_COMMAND        ""
     )
 ENDIF()
 
-# json
+# nlohmann_json
 
-FIND_PACKAGE(JSON QUIET)
+SET(_nlohmann_json_DIR "${CMAKE_BINARY_DIR}/nlohmann_json")
+SET(_nlohmann_json_SOURCE_DIR "${CMAKE_BINARY_DIR}/nlohmann_json_src")
 
-IF(NOT JSON_FOUND)
-    SET(_JSON_DIR "${CMAKE_BINARY_DIR}/json")
-    SET(_JSON_SOURCE_DIR "${CMAKE_BINARY_DIR}/json_src")
+FIND_PACKAGE(nlohmann_json QUIET 
+    PATHS "${_nlohmann_json_DIR}/"
+)
 
+IF(NOT nlohmann_json_FOUND)
     ExternalProject_Add(
-        ThirdParty_json
+        ThirdParty_nlohmann_json
         GIT_REPOSITORY      "https://github.com/nlohmann/json.git"
         GIT_TAG             "master"
         GIT_SHALLOW         TRUE
-        SOURCE_DIR          "${_JSON_SOURCE_DIR}"
-        CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${_JSON_DIR}
+        SOURCE_DIR          "${_nlohmann_json_SOURCE_DIR}"
+        CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${_nlohmann_json_DIR}
                             -DJSON_BuildTests=OFF
         UPDATE_COMMAND      ""
         TEST_COMMAND        ""
@@ -54,12 +55,13 @@ ENDIF()
 # GTest
 
 IF(BUILD_TESTS)
+    SET(_GTest_DIR "${CMAKE_BINARY_DIR}/GTest")
+    SET(_GTest_SOURCE_DIR "${CMAKE_BINARY_DIR}/GTest_src")
+    SET(_GTest_BINARY_DIR "${CMAKE_BINARY_DIR}/GTest_bin")
+
     FIND_PACKAGE(GTest QUIET)
 
     IF(NOT GTEST_FOUND)
-        SET(_GTest_DIR "${CMAKE_BINARY_DIR}/GTest")
-        SET(_GTest_SOURCE_DIR "${CMAKE_BINARY_DIR}/GTest_src")
-        SET(_GTest_BINARY_DIR "${CMAKE_BINARY_DIR}/GTest_bin")
 
         ExternalProject_Add(
             ThirdParty_GTest
@@ -78,12 +80,13 @@ ENDIF()
 
 # SDL2
 
+SET(_SDL2_DIR "${CMAKE_BINARY_DIR}/SDL2")
+SET(_SDL2_SOURCE_DIR "${CMAKE_BINARY_DIR}/SDL2_src")
+SET(_SDL2_BINARY_DIR "${CMAKE_BINARY_DIR}/SDL2_bin")
+
 FIND_PACKAGE(SDL2 QUIET)
 
 IF(NOT SDL2_FOUND)
-    SET(_SDL2_DIR "${CMAKE_BINARY_DIR}/SDL2")
-    SET(_SDL2_SOURCE_DIR "${CMAKE_BINARY_DIR}/SDL2_src")
-    SET(_SDL2_BINARY_DIR "${CMAKE_BINARY_DIR}/SDL2_bin")
 
     ExternalProject_Add(
         ThirdParty_SDL2
@@ -100,13 +103,13 @@ ENDIF()
 
 # Python3
 
+SET(_Python3_DIR "${CMAKE_BINARY_DIR}/Python3")
+SET(_Python3_SOURCE_DIR "${CMAKE_BINARY_DIR}/Python3_src")
+
 FIND_PACKAGE(Python3 QUIET COMPONENTS Development)
 
-IF(NOT Python3_Development_FOUND)
-    SET(_Python3_DIR "${CMAKE_BINARY_DIR}/Python3")
-    SET(_Python3_SOURCE_DIR "${CMAKE_BINARY_DIR}/Python3_src")
+IF(NOT Python3_FOUND)
 
-    SET(_Python3_INSTALL_COMMAND "")
     SET(_Python3_INSTALL_COMMAND1 "")
     SET(_Python3_INSTALL_COMMAND2 "")
 
@@ -116,12 +119,11 @@ IF(NOT Python3_Development_FOUND)
         ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
             SET(ARCH "Win32")
         ENDIF()
-        SET(_Python3_INSTALL_COMMAND "")
         SET(_Python3_INSTALL_COMMAND1 cmd /c PCbuild\\build.bat -c Debug -t Build -p ${ARCH})
         SET(_Python3_INSTALL_COMMAND2 cmd /c PCbuild\\build.bat -c Release -t Build -p ${ARCH})
     ELSE()
-        SET(_Python3_INSTALL_COMMAND ./configure --prefix=${_Python3_DIR} --enable-shared --enable-optimizations)
-        SET(_Python3_INSTALL_COMMAND1 ${CMAKE_MAKE_PROGRAM} -l libpython3.so install)
+        SET(_Python3_INSTALL_COMMAND1 ./configure --prefix=${_Python3_DIR} --enable-shared --enable-optimizations)
+        SET(_Python3_INSTALL_COMMAND2 ${CMAKE_MAKE_PROGRAM} -l libpython3.so install)
     ENDIF()
 
     MESSAGE(STATUS ${CMAKE_INSTALL_PREFIX})
@@ -133,7 +135,7 @@ IF(NOT Python3_Development_FOUND)
         GIT_SHALLOW         TRUE
         SOURCE_DIR          "${_Python3_SOURCE_DIR}"
         BUILD_IN_SOURCE     TRUE
-        CONFIGURE_COMMAND   "${_Python3_INSTALL_COMMAND}"
+        CONFIGURE_COMMAND   ""
         BUILD_COMMAND       ""
         UPDATE_COMMAND      ""
         INSTALL_COMMAND     "${_Python3_INSTALL_COMMAND1}"
@@ -142,17 +144,18 @@ IF(NOT Python3_Development_FOUND)
     )
 ENDIF()
 
-# Assimp
+# assimp
 
 SET(_assimp_DIR "${CMAKE_BINARY_DIR}/assimp")
+SET(_assimp_SOURCE_DIR "${CMAKE_BINARY_DIR}/assimp_src")
+SET(_assimp_BINARY_DIR "${CMAKE_BINARY_DIR}/assimp_bin")
 
-MESSAGE(STATUS "${CMAKE_MODULE_PATH}")
-
-FIND_PACKAGE(assimp QUIET PATHS "${_assimp_DIR}/lib/cmake/assimp-5.0")
+FIND_PACKAGE(assimp QUIET 
+    PATHS "${_assimp_DIR}/" 
+    NAMES "assimp-5.0"
+)
 
 IF(NOT assimp_FOUND)
-    SET(_assimp_SOURCE_DIR "${CMAKE_BINARY_DIR}/assimp_src")
-    SET(_assimp_BINARY_DIR "${CMAKE_BINARY_DIR}/assimp_bin")
 
     ExternalProject_Add(
         ThirdParty_assimp
@@ -173,12 +176,13 @@ ENDIF()
 
 # OpenAL
 
+SET(_OpenAL_DIR "${CMAKE_BINARY_DIR}/OpenAL")
+SET(_OpenAL_SOURCE_DIR "${CMAKE_BINARY_DIR}/OpenAL_src")
+SET(_OpenAL_BINARY_DIR "${CMAKE_BINARY_DIR}/OpenAL_bin")
+
 FIND_PACKAGE(OpenAL QUIET)
 
 IF(NOT OpenAL_FOUND)
-    SET(_OpenAL_DIR "${CMAKE_BINARY_DIR}/OpenAL")
-    SET(_OpenAL_SOURCE_DIR "${CMAKE_BINARY_DIR}/OpenAL_src")
-    SET(_OpenAL_BINARY_DIR "${CMAKE_BINARY_DIR}/OpenAL_bin")
 
     ExternalProject_Add(
         ThirdParty_OpenAL
@@ -198,11 +202,18 @@ ENDIF()
 
 # Ogg, Vorbis, Theora
 
+SET(_Ogg_DIR "${CMAKE_BINARY_DIR}/libogg")
+SET(_Ogg_SOURCE_DIR "${CMAKE_BINARY_DIR}/libogg_src")
+
+SET(_Vorbis_DIR "${CMAKE_BINARY_DIR}/libvorbis")
+SET(_Vorbis_SOURCE_DIR "${CMAKE_BINARY_DIR}/libvorbis_src")
+
+SET(_Theora_DIR "${CMAKE_BINARY_DIR}/libtheora")
+SET(_Theora_SOURCE_DIR "${CMAKE_BINARY_DIR}/libtheora_src")
+
 FIND_PACKAGE(Ogg QUIET COMPONENTS Vorbis Theora)
 
 IF(NOT Ogg_FOUND)
-    SET(_Ogg_DIR "${CMAKE_BINARY_DIR}/libogg")
-    SET(_Ogg_SOURCE_DIR "${CMAKE_BINARY_DIR}/libogg_src")
 
     SET(_WITH_OGG --with-ogg=${_Ogg_DIR})
 
@@ -238,9 +249,6 @@ IF(NOT Ogg_FOUND)
         UPDATE_COMMAND      ""
         TEST_COMMAND        ""
     )
-
-    SET(_Vorbis_DIR "${CMAKE_BINARY_DIR}/libvorbis")
-    SET(_Vorbis_SOURCE_DIR "${CMAKE_BINARY_DIR}/libvorbis_src")
     
     SET(_WITH_VORBIS --with-vorbis=${_Vorbis_DIR})
 
@@ -278,9 +286,6 @@ IF(NOT Ogg_FOUND)
     )
     
     ADD_DEPENDENCIES(ThirdParty_Vorbis ThirdParty_Ogg)
-
-    SET(_Theora_DIR "${CMAKE_BINARY_DIR}/libtheora")
-    SET(_Theora_SOURCE_DIR "${CMAKE_BINARY_DIR}/libtheora_src")
 
     SET(_Theora_INSTALL_COMMAND1 "")
     SET(_Theora_INSTALL_COMMAND2 "")

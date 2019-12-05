@@ -93,21 +93,21 @@ IF(BUILD_THIRDPARTY)
 
     FILE(MAKE_DIRECTORY "${THIRDPARTY_BINARY_DIR}")
 
-    SET(GLM_ROOT_DIR        "${THIRDPARTY_BINARY_DIR}/glm")
-    SET(JSON_ROOT_DIR       "${THIRDPARTY_BINARY_DIR}/json")
-    SET(SDL2_ROOT_DIR       "${THIRDPARTY_BINARY_DIR}/SDL2")
-    SET(Python3_ROOT_DIR    "${THIRDPARTY_BINARY_DIR}/Python3")
-    SET(OpenAL_ROOT_DIR     "${THIRDPARTY_BINARY_DIR}/OpenAL")
-    SET(Ogg_ROOT_DIR        "${THIRDPARTY_BINARY_DIR}/libogg")
-    SET(Vorbis_ROOT_DIR     "${THIRDPARTY_BINARY_DIR}/libvorbis")
-    SET(Theora_ROOT_DIR     "${THIRDPARTY_BINARY_DIR}/libtheora")
+    SET(glm_ROOT_DIR            "${THIRDPARTY_BINARY_DIR}/glm/")
+    SET(nlohmann_json_ROOT_DIR  "${THIRDPARTY_BINARY_DIR}/nlohmann_json/")
+    SET(SDL2_ROOT_DIR           "${THIRDPARTY_BINARY_DIR}/SDL2/")
+    SET(Python3_ROOT_DIR        "${THIRDPARTY_BINARY_DIR}/Python3/")
+    SET(OpenAL_ROOT_DIR         "${THIRDPARTY_BINARY_DIR}/OpenAL/")
+    SET(assimp_ROOT_DIR         "${THIRDPARTY_BINARY_DIR}/assimp/")
+    SET(Ogg_ROOT_DIR            "${THIRDPARTY_BINARY_DIR}/libogg/")
+    SET(Vorbis_ROOT_DIR         "${THIRDPARTY_BINARY_DIR}/libvorbis/")
+    SET(Theora_ROOT_DIR         "${THIRDPARTY_BINARY_DIR}/libtheora/")
 
     IF(BUILD_TESTS)
-        SET(GTEST_ROOT      "${THIRDPARTY_BINARY_DIR}/GTest")
+        SET(GTEST_ROOT          "${THIRDPARTY_BINARY_DIR}/GTest/")
     ENDIF()
 
-    # Configure path to assimp-config.cmake
-    SET(assimp_DIR "${THIRDPARTY_BINARY_DIR}/assimp/lib/cmake/assimp-5.0")
+    # Configure path to cmake config files
 
     EXECUTE_PROCESS(
         COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" 
@@ -140,14 +140,21 @@ IF(BUILD_THIRDPARTY)
     ENDIF()
 ENDIF()
 
-FIND_PACKAGE(GLM REQUIRED)
-FIND_PACKAGE(JSON REQUIRED)
+MESSAGE(STATUS "${nlohmann_json_ROOT_DIR}")
+
+FIND_PACKAGE(glm REQUIRED)
+FIND_PACKAGE(nlohmann_json REQUIRED 
+    PATHS "${nlohmann_json_ROOT_DIR}"
+)
 FIND_PACKAGE(Python3 REQUIRED COMPONENTS Development)
 FIND_PACKAGE(Threads REQUIRED)
 
 FIND_PACKAGE(SDL2 REQUIRED)
 FIND_PACKAGE(OpenAL)
-FIND_PACKAGE(assimp)
+FIND_PACKAGE(assimp 
+    PATHS "${assimp_ROOT_DIR}" 
+    PATH_SUFFIXES "assimp-5.0"
+)
 FIND_PACKAGE(Ogg COMPONENTS Vorbis Theora)
 
 IF(BUILD_TESTS)

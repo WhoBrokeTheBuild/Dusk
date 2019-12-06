@@ -15,34 +15,52 @@ PROJECT(Dusk)
 ### Options
 ###
 
-OPTION(VERBOSE_LOGGING "Build Dusk with Verbose Logging enabled"    OFF)
+OPTION(VERBOSE_LOGGING "Build Dusk with Verbose Logging enabled"            OFF)
 IF(VERBOSE_LOGGING)
     ADD_DEFINITIONS(-DDUSK_ENABLE_VERBOSE_LOGGING)
 ENDIF()
 
-OPTION(BINARY_SHADERS "Build Dusk with Binary Shader support"       OFF)
+OPTION(BINARY_SHADERS "Build Dusk with Binary Shader support"               OFF)
 IF(BINARY_SHADERS)
     ADD_DEFINITIONS(-DDUSK_ENABLE_BINARY_SHADERS)
 ENDIF()
 
-OPTION(BUILD_TESTS      "Build Tests"                               OFF)
+OPTION(BUILD_TESTS      "Build Tests"                                       OFF)
 IF(BUILD_TESTS)
     ENABLE_TESTING()
 ENDIF()
 
-OPTION(BUILD_DEMOS      "Build Demo Projects"                       ON)
-OPTION(BUILD_THIRDPARTY "Build Missing ThirdParty Dependencies"     ON)
-OPTION(BUILD_PACKAGES   "Build Packages"                            OFF)
+OPTION(BUILD_DEMOS      "Build Demo Projects"                               ON)
+OPTION(BUILD_THIRDPARTY "Build Missing ThirdParty Dependencies"             ON)
+OPTION(BUILD_PACKAGES   "Build Packages"                                    OFF)
 
 # Optional Modules
 
-OPTION(NEED_OpenGL      "Require the OpenGL Module"                 ON)
-OPTION(NEED_DirectX     "Require the DirectX Module (Windows Only)" OFF)
-OPTION(NEED_Vulkan      "Require the Vulkan Module"                 OFF)
-OPTION(NEED_OpenAL      "Require the OpenAL Module"                 OFF)
-OPTION(NEED_Assimp      "Require the Assimp Module"                 OFF)
-OPTION(NEED_Archive     "Require the Archive Module"                OFF)
-OPTION(NEED_OGG         "Require the Ogg Module"                    OFF)
+OPTION(NEED_MODULE_OpenGL      "Require the OpenGL Module"                  ON)
+OPTION(NEED_MODULE_DirectX     "Require the DirectX Module (Windows Only)"  OFF)
+OPTION(NEED_MODULE_Vulkan      "Require the Vulkan Module"                  OFF)
+OPTION(NEED_MODULE_OpenAL      "Require the OpenAL Module"                  OFF)
+OPTION(NEED_MODULE_Assimp      "Require the Assimp Module"                  OFF)
+OPTION(NEED_MODULE_Archive     "Require the Archive Module"                 OFF)
+
+IF(NEED_MODULE_OpenGL OR NEED_MODULE_Vulkan)
+    SET(NEED_SDL2 TRUE)
+ENDIF()
+
+IF(NEED_MODULE_OpenAL)
+    SET(NEED_OpenAL TRUE)
+ENDIF()
+
+IF(NEED_MODULE_Assimp)
+    SET(NEED_assimp TRUE)
+ENDIF()
+
+IF(NEED_MODULE_Archive)
+ENDIF()
+
+IF(BUILD_TESTS)
+    SET(NEED_GTest TRUE)
+ENDIF()
 
 ###
 ### Configuration
@@ -68,22 +86,23 @@ ENDIF()
 ###
 
 IF(BUILD_THIRDPARTY)
-    SET(THIRDPARTY_SOURCE_DIR "${CMAKE_SOURCE_DIR}/ThirdParty")
-    SET(THIRDPARTY_BINARY_DIR "${CMAKE_BINARY_DIR}/ThirdParty")
+    SET(THIRDPARTY_SOURCE_DIR ${CMAKE_SOURCE_DIR}/ThirdParty)
+    SET(THIRDPARTY_BINARY_DIR ${CMAKE_BINARY_DIR}/ThirdParty)
 
-    FILE(MAKE_DIRECTORY "${THIRDPARTY_BINARY_DIR}")
+    FILE(MAKE_DIRECTORY ${THIRDPARTY_BINARY_DIR})
+
+    SET(glm_ROOT            ${THIRDPARTY_BINARY_DIR}/glm)
+    SET(nlohmann_json_ROOT  ${THIRDPARTY_BINARY_DIR}/nlohmann_json)
+    SET(SDL2_ROOT           ${THIRDPARTY_BINARY_DIR}/SDL2)
+    SET(OpenAL_ROOT         ${THIRDPARTY_BINARY_DIR}/OpenAL)
+    SET(assimp_ROOT         ${THIRDPARTY_BINARY_DIR}/assimp)
 
     LIST(APPEND CMAKE_PREFIX_PATH
-        "${THIRDPARTY_BINARY_DIR}/glm"
-        "${THIRDPARTY_BINARY_DIR}/nlohmann_json"
-        "${THIRDPARTY_BINARY_DIR}/SDL2"
-        "${THIRDPARTY_BINARY_DIR}/Python3"
-        "${THIRDPARTY_BINARY_DIR}/OpenAL"
-        "${THIRDPARTY_BINARY_DIR}/assimp"
-        "${THIRDPARTY_BINARY_DIR}/libogg"
-        "${THIRDPARTY_BINARY_DIR}/libvorbis"
-        "${THIRDPARTY_BINARY_DIR}/libtheora"
-        "${THIRDPARTY_BINARY_DIR}/GTest"
+        ${THIRDPARTY_BINARY_DIR}/Python3
+        ${THIRDPARTY_BINARY_DIR}/libogg
+        ${THIRDPARTY_BINARY_DIR}/libvorbis
+        ${THIRDPARTY_BINARY_DIR}/libtheora
+        ${THIRDPARTY_BINARY_DIR}/GTest
     )
 
     # Configure path to cmake config files
@@ -92,68 +111,62 @@ IF(BUILD_THIRDPARTY)
         COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" 
             -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
             -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-            -DBUILD_TESTS=${BUILD_TESTS}
             -DNEED_SDL2=${NEED_SDL2}
-            -DNEED_OPENAL=${NEED_OPENAL}
-            -DNEED_ASSIMP=${NEED_ASSIMP}
-            -DNEED_OGG=${NEED_OGG}
+            -DNEED_OpenAL=${NEED_OpenAL}
+            -DNEED_assimp=${NEED_assimp}
+            -DNEED_GTest=${NEED_GTest}
             "${THIRDPARTY_SOURCE_DIR}"
-        WORKING_DIRECTORY "${THIRDPARTY_BINARY_DIR}"
-        RESULT_VARIABLE result
+        WORKING_DIRECTORY ${THIRDPARTY_BINARY_DIR}
+        RESULT_VARIABLE _result
     )
-    IF(result)
-        MESSAGE("${result}")
+    IF(_result)
+        MESSAGE("${_result}")
         MESSAGE(FATAL_ERROR "Failed to configure ThirdParty projects")
     ENDIF()
 
-    SET(BUILD_COMMAND ${CMAKE_COMMAND} --build . )
-    IF("${CMAKE_GENERATOR}" STREQUAL "Unix Makefiles")
-        SET(BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} -l )
+    SET(_ThirdParty_BUILD_COMMAND ${CMAKE_COMMAND} --build . )
+    IF(CMAKE_GENERATOR STREQUAL "Unix Makefiles")
+        SET(_ThirdParty_BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} -l )
     ENDIF()
 
     EXECUTE_PROCESS(
-        COMMAND ${BUILD_COMMAND}
-        WORKING_DIRECTORY "${THIRDPARTY_BINARY_DIR}"
-        RESULT_VARIABLE result
+        COMMAND ${_ThirdParty_BUILD_COMMAND}
+        WORKING_DIRECTORY ${THIRDPARTY_BINARY_DIR}
+        RESULT_VARIABLE _result
     )
 
-    IF(result)
-        MESSAGE("${result}")
+    IF(_result)
+        MESSAGE("${_result}")
         MESSAGE(FATAL_ERROR "Failed to build ThirdParty projects")
     ENDIF()
 ENDIF()
 
 FIND_PACKAGE(glm CONFIG REQUIRED)
 FIND_PACKAGE(nlohmann_json CONFIG REQUIRED)
-FIND_PACKAGE(Python3 3.6 REQUIRED COMPONENTS Development)
+FIND_PACKAGE(Python3 3.6 COMPONENTS Development REQUIRED)
 FIND_PACKAGE(Threads REQUIRED)
 
-IF(NEED_SDL2)
-    FIND_PACKAGE(SDL2 2.0.6 CONFIG REQUIRED)
-ELSE()
-    FIND_PACKAGE(SDL2 2.0.6 CONFIG QUIET)
+FIND_PACKAGE(SDL2 2.0.6 CONFIG)
+IF(NEED_SDL2 AND NOT SDL2_FOUND)
+    MESSAGE(SEND_ERROR "NEED_SDL2 is set, but SDL2 could not be found.")
 ENDIF()
 
-IF(NEED_OPENAL)
-    FIND_PACKAGE(OpenAL CONFIG REQUIRED)
-ELSE()
-    FIND_PACKAGE(OpenAL CONFIG QUIET)
+FIND_PACKAGE(OpenAL CONFIG)
+IF(NEED_OpenAL AND NOT OpenAL_FOUND)
+    MESSAGE(SEND_ERROR "NEED_OpenAL is set, but OpenAL could not be found.")
 ENDIF()
 
-IF(NEED_ASSIMP)
-    FIND_PACKAGE(assimp CONFIG 5.0 REQUIRED)
-ELSE()
-    FIND_PACKAGE(assimp CONFIG 5.0 QUIET)
+FIND_PACKAGE(assimp 5.0 CONFIG)
+IF(NEED_assimp AND NOT assimp_FOUND)
+    MESSAGE(SEND_ERROR "NEED_assimp is set, but assimp could not be found.")
 ENDIF()
 
-IF(NEED_OGG)
-    FIND_PACKAGE(Ogg COMPONENTS Vorbis Theora REQUIRED)
-ELSE()
-    FIND_PACKAGE(Ogg COMPONENTS Vorbis Theora QUIET)
+FIND_PACKAGE(Ogg COMPONENTS Vorbis Theora)
+IF(NEED_Ogg AND NOT Ogg_FOUND)
+    MESSAGE(SEND_ERROR "NEED_Ogg is set, but Ogg could not be found.")
 ENDIF()
 
-
-IF(BUILD_TESTS)
+IF(NEED_GTest)
     FIND_PACKAGE(GTest REQUIRED)
 ENDIF()
 

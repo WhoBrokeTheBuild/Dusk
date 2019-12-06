@@ -3,7 +3,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.12 FATAL_ERROR)
 # Allow for custom CMake modules
 LIST(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_SOURCE_DIR}/CMake")
 
-# Include CMAKE_POLICY decisions
 INCLUDE(Policies)
 
 ###
@@ -16,74 +15,50 @@ PROJECT(Dusk)
 ### Options
 ###
 
-OPTION(
-    VERBOSE_LOGGING 
-    "Build Dusk with Verbose Logging enabled" 
-    OFF
-)
+OPTION(VERBOSE_LOGGING "Build Dusk with Verbose Logging enabled"    OFF)
 IF(VERBOSE_LOGGING)
     ADD_DEFINITIONS(-DDUSK_ENABLE_VERBOSE_LOGGING)
 ENDIF()
 
-OPTION(
-    BINARY_SHADERS 
-    "Build Dusk with Binary Shader support" 
-    OFF
-)
+OPTION(BINARY_SHADERS "Build Dusk with Binary Shader support"       OFF)
 IF(BINARY_SHADERS)
     ADD_DEFINITIONS(-DDUSK_ENABLE_BINARY_SHADERS)
 ENDIF()
 
-OPTION(BUILD_TESTS "Build Tests" OFF)
+OPTION(BUILD_TESTS      "Build Tests"                               OFF)
 IF(BUILD_TESTS)
     ENABLE_TESTING()
 ENDIF()
 
-OPTION(BUILD_DEMOS "Build Dusk Demo Projects" ON)
+OPTION(BUILD_DEMOS      "Build Demo Projects"                       ON)
+OPTION(BUILD_THIRDPARTY "Build Missing ThirdParty Dependencies"     ON)
+OPTION(BUILD_PACKAGES   "Build Packages"                            OFF)
 
-OPTION(BUILD_THIRDPARTY "Build Dusk ThirdParty Dependencies" ON)
+# Optional Modules
 
-OPTION(BUILD_PACKAGES "Build Dusk Packages" OFF)
-
-OPTION(NEED_SDL2 "" ON)
-OPTION(NEED_OPENAL "" OFF)
-OPTION(NEED_ASSIMP "" OFF)
-OPTION(NEED_OGG "" OFF)
+OPTION(NEED_OpenGL      "Require the OpenGL Module"                 ON)
+OPTION(NEED_DirectX     "Require the DirectX Module (Windows Only)" OFF)
+OPTION(NEED_Vulkan      "Require the Vulkan Module"                 OFF)
+OPTION(NEED_OpenAL      "Require the OpenAL Module"                 OFF)
+OPTION(NEED_Assimp      "Require the Assimp Module"                 OFF)
+OPTION(NEED_Archive     "Require the Archive Module"                OFF)
+OPTION(NEED_OGG         "Require the Ogg Module"                    OFF)
 
 ###
 ### Configuration
 ###
 
+INCLUDE(Compiler)
+INCLUDE(Version)
+
 # Allow for custom organization of files in VisualStudio
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
-
-# Get git hash
-INCLUDE(GetGitRevisionDescription)
-GET_GIT_HEAD_REVISION(GIT_REFSPEC PROJECT_VERSION_GIT_HASH)
-STRING(SUBSTRING "${PROJECT_VERSION_GIT_HASH}" 0 8 PROJECT_VERSION_GIT_HASH)
-
-# Parse version from git tags
-GIT_DESCRIBE(VERSION --tags)
-STRING(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" PROJECT_VERSION_MAJOR "${VERSION}")
-STRING(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" PROJECT_VERSION_MINOR "${VERSION}")
-STRING(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" PROJECT_VERSION_PATCH "${VERSION}")
-SET(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
-
-# Configure Visual Studio exception handling
-IF(MSVC)
-    # Disable Default Exception Handling
-    STRING(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-
-    # Disable Basic Runtime Checks
-    STRING(REGEX REPLACE "/RTC(su|[1su])" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS}")
-    STRING(REGEX REPLACE "/RTC(su|[1su])" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS}")
-ENDIF()
 
 # Don't use the install RPATH when building
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
-# Limit Visual Studio Configuration Types
+# Limit Configuration Types
 IF(CMAKE_CONFIGURATION_TYPES)
     SET(CMAKE_CONFIGURATION_TYPES Debug Release)
 ENDIF()
@@ -226,61 +201,5 @@ ENDIF()
 ###
 
 IF(BUILD_PACKAGES)
-    FIND_PROGRAM(
-        TAR_EXECUTABLE
-        tar
-    )
-
-    IF(TAR_EXECUTABLE)
-        SET(_PACKAGE "libdusk-${PROJECT_VERSION}")
-
-        FILE(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${_PACKAGE}")
-
-        ADD_CUSTOM_COMMAND(
-            OUTPUT "${_PACKAGE}.tgz"
-            DEPENDS ${_ENGINE}
-            COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX="" ${CMAKE_SOURCE_DIR}
-            COMMAND ${CMAKE_COMMAND} -E env
-                DESTDIR="${CMAKE_BINARY_DIR}/${_PACKAGE}"
-                ${CMAKE_COMMAND} --build . --target install
-            COMMAND ${TAR_EXECUTABLE} -cvzf "${CMAKE_BINARY_DIR}/${_PACKAGE}.tgz" "${CMAKE_BINARY_DIR}/${_PACKAGE}/*"
-        )
-
-        ADD_CUSTOM_TARGET(
-            tgz
-            DEPENDS "${_PACKAGE}.tgz"
-        )
-    ENDIF()
-
-    FIND_PROGRAM(
-        DPKG_DEB_EXECUTABLE
-        dpkg-deb
-    )
-
-    IF(DPKG_DEB_EXECUTABLE)
-        SET(_PACKAGE "libdusk-dev_${PROJECT_VERSION}-1")
-
-        FILE(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${_PACKAGE}/DEBIAN")
-
-        CONFIGURE_FILE(
-            "${CMAKE_SOURCE_DIR}/CMake/DEBIAN/control.in"
-            "${CMAKE_BINARY_DIR}/${_PACKAGE}/DEBIAN/control"
-            @ONLY
-        )
-
-        ADD_CUSTOM_COMMAND(
-            OUTPUT "${_PACKAGE}.deb"
-            DEPENDS ${_ENGINE}
-            COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX="/usr/local" ${CMAKE_SOURCE_DIR}
-            COMMAND ${CMAKE_COMMAND} -E env
-                DESTDIR="${CMAKE_BINARY_DIR}/${_PACKAGE}"
-                ${CMAKE_COMMAND} --build . --target install
-            COMMAND ${DPKG_DEB_EXECUTABLE} --build "${CMAKE_BINARY_DIR}/${_PACKAGE}"
-        )
-
-        ADD_CUSTOM_TARGET(
-            deb
-            DEPENDS "${_PACKAGE}.deb"
-        )
-    ENDIF()
+    ADD_SUBDIRECTORY(Packages)
 ENDIF()

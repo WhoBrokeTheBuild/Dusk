@@ -2,7 +2,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.12 FATAL_ERROR)
 
 LIST(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_SOURCE_DIR}/../CMake")
 
-# Include CMAKE_POLICY decisions
 INCLUDE(Policies)
 INCLUDE(ExternalProject)
 
@@ -60,7 +59,6 @@ IF(BUILD_TESTS)
     FIND_PACKAGE(GTest QUIET)
 
     IF(NOT GTEST_FOUND)
-
         ExternalProject_Add(
             ThirdParty_GTest
             GIT_REPOSITORY      "https://github.com/google/googletest"
@@ -116,7 +114,6 @@ ENDIF()
 FIND_PACKAGE(Python3 3.6 QUIET COMPONENTS Development)
 
 IF(NOT Python3_FOUND)
-
     SET(_Python3_INSTALL_COMMAND1 "")
     SET(_Python3_INSTALL_COMMAND2 "")
 

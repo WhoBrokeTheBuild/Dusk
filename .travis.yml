@@ -6,7 +6,7 @@ notifications:
   slack: c0demonk3ys:gnjXYwuoMOBnffg9h8YnlLyE
 
 git:
-  depth: 5
+  depth: 50
 
 matrix:
   include:

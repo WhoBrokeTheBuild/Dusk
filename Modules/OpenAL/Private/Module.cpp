@@ -10,9 +10,9 @@ void ModuleTerm() {
 }
 
 DUSK_MODULE() {
-    .Name = "OpenAL",
-    .Init = ModuleInit,
-    .Term = ModuleTerm,
+    "OpenAL",
+    ModuleInit,
+    ModuleTerm,
 };
 
 }

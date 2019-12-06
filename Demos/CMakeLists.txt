@@ -53,6 +53,11 @@ MACRO(Demo target)
             CXX_STANDARD_REQUIRED ON
             CXX_EXTENSIONS OFF
     )
+    
+    INSTALL(FILES 
+        $<TARGET_FILE:${target}>
+        DESTINATION bin
+    )
 
     FILE(RELATIVE_PATH folder ${CMAKE_SOURCE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/..")
     SET_TARGET_PROPERTIES(
@@ -81,7 +86,6 @@ MACRO(Demo target)
         run-${target}
         PROPERTIES FOLDER "Automation"
     )
-
 ENDMACRO()
 
 # Include Demos

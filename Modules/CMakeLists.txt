@@ -5,6 +5,9 @@
 
 MACRO(Module target prefix)
     ADD_LIBRARY(${target} SHARED "")
+    
+    LIST(APPEND MODULE_TARGETS ${target})
+    SET(MODULE_TARGETS ${MODULE_TARGETS} PARENT_SCOPE)
 
     FILE(
         GLOB_RECURSE
@@ -67,15 +70,16 @@ MACRO(Module target prefix)
         CONFIGURE_FILE(${file} ${file_out})
         LIST(APPEND private_out ${file_out})
     ENDFOREACH()
-
+    
     TARGET_INCLUDE_DIRECTORIES(
         ${target}
-        PRIVATE 
+        PUBLIC
+            $<INSTALL_INTERFACE:include>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Public>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/Public>
+        PRIVATE
             ${CMAKE_CURRENT_BINARY_DIR}/Private
             ${CMAKE_CURRENT_SOURCE_DIR}/Private
-        PUBLIC 
-            ${CMAKE_CURRENT_BINARY_DIR}/Public
-            ${CMAKE_CURRENT_SOURCE_DIR}/Public
     )
 
     TARGET_SOURCES(
@@ -113,6 +117,20 @@ MACRO(Module target prefix)
             CXX_STANDARD 17
             CXX_STANDARD_REQUIRED ON
             CXX_EXTENSIONS OFF
+    )
+    
+    INSTALL(
+        DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Public/
+        DESTINATION include
+        PATTERN "*.in" EXCLUDE
+    )
+
+    FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Public)
+
+    INSTALL(
+        DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Public/
+        DESTINATION include
+        PATTERN "*.in" EXCLUDE
     )
 
     FILE(RELATIVE_PATH folder ${CMAKE_SOURCE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/..")
@@ -220,3 +238,61 @@ ADD_SUBDIRECTORY(STBI)
 # Update the global RUNTIME_SEARCH_PATH to include paths to the
 # module's .dll's
 SET(RUNTIME_SEARCH_PATH ${RUNTIME_SEARCH_PATH} PARENT_SCOPE)
+
+###
+### Install Configuration
+###
+
+INSTALL(
+    TARGETS ${MODULE_TARGETS}
+    EXPORT DuskTargets
+    INCLUDES DESTINATION include
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
+)
+
+INCLUDE(CMakePackageConfigHelpers)
+
+WRITE_BASIC_PACKAGE_VERSION_FILE(
+    "${CMAKE_BINARY_DIR}/DuskConfigVersion.cmake"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY AnyNewerVersion
+)
+
+INSTALL(EXPORT DuskTargets
+    FILE DuskTargets.cmake
+    NAMESPACE Dusk::
+    DESTINATION lib/cmake/Dusk
+)
+
+CONFIGURE_PACKAGE_CONFIG_FILE(
+    "${CMAKE_SOURCE_DIR}/CMake/DuskConfig.cmake.in"
+    "${CMAKE_BINARY_DIR}/DuskConfig.cmake"
+    INSTALL_DESTINATION lib/cmake/Dusk
+)
+
+INSTALL(EXPORT DuskTargets 
+    DESTINATION lib/cmake/Dusk
+)
+
+INSTALL(FILES 
+    "${CMAKE_BINARY_DIR}/DuskConfigVersion.cmake" 
+    "${CMAKE_BINARY_DIR}/DuskConfig.cmake"
+    DESTINATION lib/cmake/Dusk
+)
+
+FIND_PACKAGE(PkgConfig QUIET)
+
+IF(PKG_CONFIG_FOUND)
+    CONFIGURE_FILE(
+        "${CMAKE_SOURCE_DIR}/CMake/Dusk.pc.in"
+        "${CMAKE_BINARY_DIR}/Dusk.pc"
+        @ONLY
+    )
+
+    INSTALL(FILES
+        "${CMAKE_BINARY_DIR}/Dusk.pc"
+        DESTINATION share/pkgconfig
+    )
+ENDIF()

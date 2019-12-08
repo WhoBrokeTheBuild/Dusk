@@ -74,12 +74,7 @@ SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Don't use the install RPATH when building
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-
-# Limit Configuration Types
-IF(CMAKE_CONFIGURATION_TYPES)
-    SET(CMAKE_CONFIGURATION_TYPES Debug Release)
-ENDIF()
+SET(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 
 ###
 ### Third Party Dependencies
@@ -91,12 +86,14 @@ IF(BUILD_THIRDPARTY)
 
     FILE(MAKE_DIRECTORY ${THIRDPARTY_BINARY_DIR})
 
+    # Set _ROOT variables for config-based packages
     SET(glm_ROOT            ${THIRDPARTY_BINARY_DIR}/glm)
     SET(nlohmann_json_ROOT  ${THIRDPARTY_BINARY_DIR}/nlohmann_json)
     SET(SDL2_ROOT           ${THIRDPARTY_BINARY_DIR}/SDL2)
     SET(OpenAL_ROOT         ${THIRDPARTY_BINARY_DIR}/OpenAL)
     SET(assimp_ROOT         ${THIRDPARTY_BINARY_DIR}/assimp)
 
+    # Set CMAKE_PREFIX_PATH for find-based packages
     LIST(APPEND CMAKE_PREFIX_PATH
         ${THIRDPARTY_BINARY_DIR}/Python3
         ${THIRDPARTY_BINARY_DIR}/libogg
@@ -115,7 +112,7 @@ IF(BUILD_THIRDPARTY)
             -DNEED_OpenAL=${NEED_OpenAL}
             -DNEED_assimp=${NEED_assimp}
             -DNEED_GTest=${NEED_GTest}
-            "${THIRDPARTY_SOURCE_DIR}"
+            ${THIRDPARTY_SOURCE_DIR}
         WORKING_DIRECTORY ${THIRDPARTY_BINARY_DIR}
         RESULT_VARIABLE _result
     )
@@ -124,13 +121,13 @@ IF(BUILD_THIRDPARTY)
         MESSAGE(FATAL_ERROR "Failed to configure ThirdParty projects")
     ENDIF()
 
-    SET(_ThirdParty_BUILD_COMMAND ${CMAKE_COMMAND} --build . )
+    SET(_THIRDPARTY_BUILD_COMMAND ${CMAKE_COMMAND} --build . )
     IF(CMAKE_GENERATOR STREQUAL "Unix Makefiles")
-        SET(_ThirdParty_BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} -l )
+        SET(_THIRDPARTY_BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} -l )
     ENDIF()
 
     EXECUTE_PROCESS(
-        COMMAND ${_ThirdParty_BUILD_COMMAND}
+        COMMAND ${_THIRDPARTY_BUILD_COMMAND}
         WORKING_DIRECTORY ${THIRDPARTY_BINARY_DIR}
         RESULT_VARIABLE _result
     )
@@ -170,19 +167,34 @@ IF(NEED_GTest)
     FIND_PACKAGE(GTest REQUIRED)
 ENDIF()
 
+IF(TARGET SDL2::SDL2)
+    GET_TARGET_PROPERTY(_location SDL2::SDL2 IMPORTED_LOCATION_RELEASE)
+    GET_FILENAME_COMPONENT(SDL2_RUNTIME_DIR ${_location} DIRECTORY)
+ENDIF()
+
+IF(TARGET OpenAL::OpenAL)
+    GET_TARGET_PROPERTY(_location OpenAL::OpenAL IMPORTED_LOCATION_RELEASE)
+    GET_FILENAME_COMPONENT(OpenAL_RUNTIME_DIR ${_location} DIRECTORY)
+ENDIF()
+
 IF(TARGET assimp::assimp)
     # Extract release-specific configuration
     GET_TARGET_PROPERTY(soname   assimp::assimp IMPORTED_SONAME_RELEASE)
     GET_TARGET_PROPERTY(implib   assimp::assimp IMPORTED_IMPLIB_RELEASE)
-    GET_TARGET_PROPERTY(location assimp::assimp IMPORTED_LOCATION_RELEASE)
+    GET_TARGET_PROPERTY(_location assimp::assimp IMPORTED_LOCATION_RELEASE)
 
-    # Set build type agnostic configuration
+    GET_FILENAME_COMPONENT(assimp_RUNTIME_DIR ${_location} DIRECTORY)
+
+    # Set build type agnostic configuration for assimp
     SET_TARGET_PROPERTIES(
         assimp::assimp 
         PROPERTIES
-            IMPORTED_SONAME     "${soname}"
-            IMPORTED_IMPLIB     "${implib}"
-            IMPORTED_LOCATION   "${location}"
+            IMPORTED_SONAME         ${_soname}
+            IMPORTED_IMPLIB         ${_implib}
+            IMPORTED_LOCATION       ${_location}
+            IMPORTED_SONAME_DEBUG   ${_soname}
+            IMPORTED_IMPLIB_DEBUG   ${_implib}
+            IMPORTED_LOCATION_DEBUG ${_location}
     )
 ENDIF()
 
@@ -190,6 +202,11 @@ ENDIF()
 SET(RUNTIME_SEARCH_PATH
     ${SDL2_RUNTIME_DIR}
     ${OpenAL_RUNTIME_DIR}
+    ${Python3_RUNTIME_DIR}
+    ${Ogg_RUNTIME_DIR}
+    ${Vorbis_RUNTIME_DIR}
+    ${Theora_RUNTIME_DIR}
+    ${assimp_RUNTIME_DIR}
 )
 
 ###
@@ -203,7 +220,7 @@ ADD_SUBDIRECTORY(Modules)
 ###
 
 # Allow custom targets to find .dlls
-SET(CMAKE_MSVC_RUN_PATH "${RUNTIME_SEARCH_PATH}")
+SET(CMAKE_MSVCIDE_RUN_PATH ${RUNTIME_SEARCH_PATH})
 
 IF(BUILD_DEMOS)
     ADD_SUBDIRECTORY(Demos)

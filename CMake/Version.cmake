@@ -8,9 +8,21 @@ STRING(SUBSTRING "${PROJECT_VERSION_GIT_HASH}" 0 8 PROJECT_VERSION_GIT_HASH)
 # Parse version from git tags
 GIT_DESCRIBE(VERSION --tags)
 IF(VERSION)
-    STRING(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" PROJECT_VERSION_MAJOR "${VERSION}")
-    STRING(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" PROJECT_VERSION_MINOR "${VERSION}")
-    STRING(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" PROJECT_VERSION_PATCH "${VERSION}")
+    STRING(REGEX REPLACE 
+        "^v([0-9]+)\\..*" "\\1"
+        PROJECT_VERSION_MAJOR
+        "${VERSION}"
+    )
+    STRING(REGEX REPLACE 
+        "^v[0-9]+\\.([0-9]+).*" "\\1"
+        PROJECT_VERSION_MINOR
+        "${VERSION}"
+    )
+    STRING(REGEX REPLACE 
+        "^v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1"
+        PROJECT_VERSION_PATCH
+        "${VERSION}"
+    )
     SET(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 
     MESSAGE(STATUS "Dusk Version ${PROJECT_VERSION}")

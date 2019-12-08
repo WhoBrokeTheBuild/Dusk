@@ -12,9 +12,9 @@ void ModuleTerm() {
 }
 
 DUSK_MODULE() {
-    .Name = "Assimp",
-    .Init = ModuleInit,
-    .Term = ModuleTerm,
+    "Assimp",
+    ModuleInit,
+    ModuleTerm,
 };
 
 }

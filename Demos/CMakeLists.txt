@@ -48,7 +48,8 @@ MACRO(Demo target)
     )
 
     SET_TARGET_PROPERTIES(
-        ${target} PROPERTIES
+        ${target} 
+        PROPERTIES
             CXX_STANDARD 17
             CXX_STANDARD_REQUIRED ON
             CXX_EXTENSIONS OFF
@@ -62,32 +63,37 @@ MACRO(Demo target)
     FILE(RELATIVE_PATH folder ${CMAKE_SOURCE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/..")
     SET_TARGET_PROPERTIES(
         ${target}
-        PROPERTIES FOLDER "${folder}"
+        PROPERTIES
+            FOLDER "${folder}"
     )
 
     IF(MSVC)
         SET_TARGET_PROPERTIES(
-            ${target} PROPERTIES 
-            VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-            VS_DEBUGGER_ENVIRONMENT "PATH=%PATH%;${RUNTIME_SEARCH_PATH}"
+            ${target}
+            PROPERTIES 
+                VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                VS_DEBUGGER_ENVIRONMENT "PATH=%PATH%;${RUNTIME_SEARCH_PATH}"
+        )
+    ELSE()
+        STRING(JOIN ":" LD_LIBRARY_PATH ${RUNTIME_SEARCH_PATH})
+
+        ADD_CUSTOM_TARGET(
+            run-${target}
+            COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" $<TARGET_FILE:${target}>
+            DEPENDS ${target}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        )
+
+        SET_TARGET_PROPERTIES(
+            run-${target}
+            PROPERTIES 
+                FOLDER "Automation"
         )
     ENDIF()
-
-    STRING(JOIN ":" LD_LIBRARY_PATH ${RUNTIME_SEARCH_PATH})
-
-    ADD_CUSTOM_TARGET(
-        run-${target}
-        COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" $<TARGET_FILE:${target}>
-        DEPENDS ${target}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    )
-
-    SET_TARGET_PROPERTIES(
-        run-${target}
-        PROPERTIES FOLDER "Automation"
-    )
 ENDMACRO()
 
 # Include Demos
 
 ADD_SUBDIRECTORY(HelloWorld)
+
+SET_PROPERTY(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT "HelloWorld")

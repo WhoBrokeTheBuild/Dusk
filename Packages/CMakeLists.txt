@@ -5,21 +5,21 @@ FIND_PROGRAM(
 )
 
 IF(TAR_EXECUTABLE)
-    SET(_PACKAGE "libdusk-${PROJECT_VERSION}")
+    SET(_package "libdusk-${PROJECT_VERSION}")
 
-    FILE(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${_PACKAGE}")
+    FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${_package})
 
     ADD_CUSTOM_COMMAND(
-        OUTPUT "${_PACKAGE}.tgz"
+        OUTPUT "${_package}.tgz"
         DEPENDS ${_ENGINE}
-        COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX="${CMAKE_CURRENT_BINARY_DIR}/${_PACKAGE}" ${CMAKE_SOURCE_DIR}
+        COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX="${CMAKE_CURRENT_BINARY_DIR}/${_package}" ${CMAKE_SOURCE_DIR}
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --config Release --target install
-        COMMAND ${TAR_EXECUTABLE} -cvzf "${CMAKE_CURRENT_BINARY_DIR}/${_PACKAGE}.tgz" "${CMAKE_CURRENT_BINARY_DIR}/${_PACKAGE}/*"
+        COMMAND ${TAR_EXECUTABLE} -cvzf "${CMAKE_CURRENT_BINARY_DIR}/${_package}.tgz" "${CMAKE_CURRENT_BINARY_DIR}/${_package}/*"
     )
 
     ADD_CUSTOM_TARGET(
         tgz
-        DEPENDS "${_PACKAGE}.tgz"
+        DEPENDS "${_package}.tgz"
     )
 ENDIF()
 
@@ -29,26 +29,26 @@ FIND_PROGRAM(
 )
 
 IF(DPKG_DEB_EXECUTABLE)
-    SET(_PACKAGE "libdusk-dev_${PROJECT_VERSION}-1")
+    SET(_package "libdusk-dev_${PROJECT_VERSION}-1")
 
-    FILE(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${_PACKAGE}/DEBIAN")
+    FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${_package}/DEBIAN)
 
     CONFIGURE_FILE(
-        "${CMAKE_CURRENT_SOURCE_DIR}/DEBIAN/control.in"
-        "${CMAKE_CURRENT_BINARY_DIR}/${_PACKAGE}/DEBIAN/control"
+        ${CMAKE_CURRENT_SOURCE_DIR}/DEBIAN/control.in
+        ${CMAKE_CURRENT_BINARY_DIR}/${_package}/DEBIAN/control
         @ONLY
     )
 
     ADD_CUSTOM_COMMAND(
-        OUTPUT "${_PACKAGE}.deb"
+        OUTPUT "${_package}.deb"
         DEPENDS ${_ENGINE}
-        COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX="${CMAKE_CURRENT_BINARY_DIR}/${_PACKAGE}/usr/local" ${CMAKE_SOURCE_DIR}
+        COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX="${CMAKE_CURRENT_BINARY_DIR}/${_package}/usr/local" ${CMAKE_SOURCE_DIR}
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --config Release --target install
-        COMMAND ${DPKG_DEB_EXECUTABLE} --build "${CMAKE_CURRENT_BINARY_DIR}/${_PACKAGE}"
+        COMMAND ${DPKG_DEB_EXECUTABLE} --build "${CMAKE_CURRENT_BINARY_DIR}/${_package}"
     )
 
     ADD_CUSTOM_TARGET(
         deb
-        DEPENDS "${_PACKAGE}.deb"
+        DEPENDS "${_package}.deb"
     )
 ENDIF()

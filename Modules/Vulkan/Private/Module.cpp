@@ -1,11 +1,11 @@
 #include <Dusk/Module.hpp>
 
-#include <Dusk/Vulkan/Drivers/GraphicsDriver.hpp>
+#include <Dusk/Vulkan/GraphicsDriver.hpp>
 
 namespace Dusk::Vulkan {
 
 void ModuleInit() {
-    SetGraphicsDriver(new GraphicsDriver());
+    SetGraphicsDriver(std::unique_ptr<IGraphicsDriver>(new GraphicsDriver()));
 }
 
 void ModuleTerm() {

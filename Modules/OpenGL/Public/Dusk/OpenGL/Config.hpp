@@ -9,4 +9,10 @@
     #define DUSK_OPENGL_API DUSK_API_IMPORT
 #endif
 
+#include <glad/gl.h>
+
+#undef CreateWindow
+#undef near
+#undef far
+
 #endif // DUSK_OPENGL_HPP

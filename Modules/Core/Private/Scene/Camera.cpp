@@ -1,6 +1,6 @@
 #include <Dusk/Scene/Camera.hpp>
 
-#include <Dusk/Drivers/GraphicsDriver.hpp>
+#include <Dusk/Graphics/GraphicsDriver.hpp>
 
 namespace Dusk {
 

@@ -2,8 +2,8 @@
 
 #include <Dusk/Log.hpp>
 #include <Dusk/Module.hpp>
-#include <Dusk/Drivers/GraphicsDriver.hpp>
-#include <Dusk/Importers/TextureImporter.hpp>
+#include <Dusk/Graphics/GraphicsDriver.hpp>
+#include <Dusk/Graphics/ShaderImporter.hpp>
 
 int main(int argc, char** argv) 
 {
@@ -13,8 +13,6 @@ int main(int argc, char** argv)
     Dusk::Initialize(argc, argv);
     
     if (!Dusk::LoadModuleArray({
-        // "DuskAssimp",
-        // "DuskGLTF2",
         "DuskSTBI",
         "DuskOpenGL",
         // "DuskVulkan",
@@ -23,15 +21,12 @@ int main(int argc, char** argv)
     }
 
     auto gfx = Dusk::GetGraphicsDriver();
-    auto png = Dusk::GetTextureImporter("png");
+
+    auto tex = gfx->CreateTexture();
+    tex->LoadFromFile("Assets/models/teapot.png");
+    delete tex;
 
     gfx->SetWindowSize({ 1024, 768 });
-
-    Dusk::RunScript("Assets/scripts/Hello.py");
-
-    auto data = png->LoadFromFile("Assets/models/teapot.png");
-    DuskLogInfo("Dimensions of teapot.png: (%zu, %zu)", data.Width, data.Height);
-    data.Free();
 
     Dusk::SetRunning(true);
     while (Dusk::IsRunning()) {

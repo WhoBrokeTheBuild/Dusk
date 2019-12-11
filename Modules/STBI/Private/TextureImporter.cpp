@@ -1,4 +1,4 @@
-#include <Dusk/STBI/Importers/TextureImporter.hpp>
+#include <Dusk/STBI/TextureImporter.hpp>
 
 #include <Dusk/Log.hpp>
 #include <Dusk/Math.hpp>
@@ -23,7 +23,7 @@
 namespace Dusk::STBI {
 
 DUSK_STBI_API
-TextureData TextureImporter::LoadFromFile(const std::string& filename) {
+TextureData && TextureImporter::LoadFromFile(const std::string& filename) {
     int comp;
     ivec2 size;
     TextureData data;
@@ -51,12 +51,13 @@ TextureData TextureImporter::LoadFromFile(const std::string& filename) {
         DuskLogError("Unknown texture data format");
     }
 
-    return data;
+    return std::move(data);
 }
 
 DUSK_STBI_API
-TextureData TextureImporter::LoadFromMemory(const std::string& filename, uint8_t * data, size_t length) {
-    return TextureData();
+TextureData && TextureImporter::LoadFromMemory(uint8_t * buffer, size_t length) {
+    TextureData data;
+    return std::move(data);
 }
 
 }

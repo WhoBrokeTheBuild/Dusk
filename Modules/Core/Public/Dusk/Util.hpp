@@ -16,7 +16,6 @@ std::string GetBasename(std::string);
 DUSK_CORE_API
 std::string GetExtension(std::string);
 
-
 } // namespace Dusk
 
 #endif // DUSK_UTIL_HPP

@@ -11,6 +11,8 @@
 
 namespace Dusk::Vulkan {
 
+bool IsDeviceSuitable(const VkPhysicalDevice device);
+
 DUSK_VULKAN_API
 GraphicsDriver::GraphicsDriver() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -25,7 +27,9 @@ GraphicsDriver::GraphicsDriver() {
         (int)sdlVersion.minor, 
         (int)sdlVersion.patch);
 
-    _sdlWindow = SDL_CreateWindow("Dusk", 
+    std::string title = GetApplicationName() + " (" + GetApplicationVersion().GetString() + ")";
+
+    _sdlWindow = SDL_CreateWindow(title.c_str(), 
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         640, 480, 
@@ -70,18 +74,22 @@ GraphicsDriver::GraphicsDriver() {
         DuskLogVerbose("\t%s", requiredExtensions[i]);
     }
 
+    const auto& version = GetVersion();
+    const auto& appVersion = GetApplicationVersion();
+    const auto& appName = GetApplicationName().c_str();
+
     VkApplicationInfo appInfo = { };
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    //appInfo.pApplicationName = "app->GetName()";
-    //appInfo.applicationVersion = VK_MAKE_VERSION(
-    //    app->GetVersionMajor(),
-    //    app->GetVersionMinor(),
-    //    app->GetVersionPatch());
     appInfo.pEngineName = "Dusk";
     appInfo.engineVersion = VK_MAKE_VERSION(
-        DUSK_VERSION_MAJOR,
-        DUSK_VERSION_MINOR,
-        DUSK_VERSION_PATCH);
+        version.Major,
+        version.Minor,
+        version.Patch);
+    appInfo.pApplicationName = appName;
+    appInfo.applicationVersion = VK_MAKE_VERSION(
+        appVersion.Major,
+        appVersion.Minor,
+        appVersion.Patch);
     appInfo.apiVersion = VK_API_VERSION_1_1;
 
     VkInstanceCreateInfo createInfo = { };
@@ -173,9 +181,13 @@ void GraphicsDriver::ProcessEvents() {
     }
 }
 
-
 DUSK_VULKAN_API
-bool GraphicsDriver::IsDeviceSuitable(const VkPhysicalDevice device)
+void GraphicsDriver::SwapBuffers() {
+    // glClear(GL_COLOR_BUFFER_BIT);
+    SDL_GL_SwapWindow(_sdlWindow);
+}
+
+bool IsDeviceSuitable(const VkPhysicalDevice device)
 {
     VkPhysicalDeviceProperties deviceProperties;
     VkPhysicalDeviceFeatures deviceFeatures;
@@ -183,12 +195,6 @@ bool GraphicsDriver::IsDeviceSuitable(const VkPhysicalDevice device)
     vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 
     return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && deviceFeatures.geometryShader;
-}
-
-DUSK_VULKAN_API
-void GraphicsDriver::SwapBuffers() {
-    // glClear(GL_COLOR_BUFFER_BIT);
-    SDL_GL_SwapWindow(_sdlWindow);
 }
 
 } // namespace Dusk::OpenGL

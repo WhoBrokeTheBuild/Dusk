@@ -7,11 +7,14 @@
 
 int main(int argc, char** argv) 
 {
+    Dusk::SetApplicationName("HelloWorld");
+    Dusk::SetApplicationVersion(1, 0, 0);
+
     Dusk::Initialize(argc, argv);
     
     if (!Dusk::LoadModuleArray({
         // "DuskAssimp",
-        "DuskGLTF2",
+        // "DuskGLTF2",
         "DuskSTBI",
         "DuskOpenGL",
         // "DuskVulkan",
@@ -22,7 +25,6 @@ int main(int argc, char** argv)
     auto gfx = Dusk::GetGraphicsDriver();
     auto png = Dusk::GetTextureImporter("png");
 
-    gfx->SetWindowTitle("Hello, World!");
     gfx->SetWindowSize({ 1024, 768 });
 
     Dusk::RunScript("Assets/scripts/Hello.py");

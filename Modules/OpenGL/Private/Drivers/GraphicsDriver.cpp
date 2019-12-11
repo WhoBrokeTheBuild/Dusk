@@ -31,7 +31,9 @@ GraphicsDriver::GraphicsDriver() {
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
-    _sdlWindow = SDL_CreateWindow("Dusk", 
+    std::string title = GetApplicationName() + " (" + GetApplicationVersion().GetString() + ")";
+
+    _sdlWindow = SDL_CreateWindow(title.c_str(), 
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         640, 480, 
@@ -54,10 +56,10 @@ GraphicsDriver::GraphicsDriver() {
         return;
     }
     
-    DuskLogVerbose("OpenGL Version %s",  glGetString(GL_VERSION));
-    DuskLogVerbose("GLSL Version %s",    glGetString(GL_SHADING_LANGUAGE_VERSION));
-    DuskLogVerbose("OpenGL Vendor %s",   glGetString(GL_VENDOR));
-    DuskLogVerbose("OpenGL Renderer %s", glGetString(GL_RENDERER));
+    DuskLogVerbose("OpenGL Version: %s",  glGetString(GL_VERSION));
+    DuskLogVerbose("GLSL Version: %s",    glGetString(GL_SHADING_LANGUAGE_VERSION));
+    DuskLogVerbose("OpenGL Vendor: %s",   glGetString(GL_VENDOR));
+    DuskLogVerbose("OpenGL Renderer: %s", glGetString(GL_RENDERER));
 }
 
 DUSK_OPENGL_API

@@ -29,8 +29,6 @@ public:
 
     void ProcessEvents() override;
 
-    bool IsDeviceSuitable(const VkPhysicalDevice device);
-
     void SwapBuffers() override;
 
 private:

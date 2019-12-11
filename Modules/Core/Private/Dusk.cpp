@@ -156,6 +156,10 @@ DUSK_CORE_API void Initialize(int argc, char ** argv) {
     
     Py_Initialize();
     PyImport_ImportModule("Dusk");
+
+    DuskLogVerbose("Dusk Version: %s", GetVersion().GetString());
+    DuskLogVerbose("Application Name: %s", GetApplicationName());
+    DuskLogVerbose("Application Version: %s", GetApplicationVersion().GetString());
 }
 
 DUSK_CORE_API void Terminate() {
@@ -219,6 +223,40 @@ DUSK_CORE_API void RunScript(const std::string& filename) {
     }
 
     fclose(file);
+}
+
+static std::string _ApplicationName;
+
+DUSK_CORE_API
+void SetApplicationName(const std::string& name)
+{
+    _ApplicationName = name;
+}
+
+DUSK_CORE_API
+std::string GetApplicationName()
+{
+    return _ApplicationName;
+}
+
+static Version _ApplicationVersion;
+
+DUSK_CORE_API
+void SetApplicationVersion(unsigned major, unsigned minor, unsigned patch)
+{
+    _ApplicationVersion = Version(major, minor, patch);
+}
+
+DUSK_CORE_API
+void SetApplicationVersion(const Version& version)
+{
+    _ApplicationVersion = version;
+}
+
+DUSK_CORE_API
+Version GetApplicationVersion()
+{
+    return _ApplicationVersion;
 }
 
 }

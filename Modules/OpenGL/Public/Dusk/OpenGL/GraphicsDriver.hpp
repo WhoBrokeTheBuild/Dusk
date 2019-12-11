@@ -28,9 +28,9 @@ public:
 
     void SwapBuffers() override;
 
-    ITexture * CreateTexture() override;
+    std::unique_ptr<ITexture> CreateTexture() override;
 
-    IShader * CreateShader() override;
+    std::unique_ptr<IShader> CreateShader() override;
 
 private:
 

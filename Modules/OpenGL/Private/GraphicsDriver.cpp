@@ -102,12 +102,12 @@ void GraphicsDriver::SwapBuffers() {
     SDL_GL_SwapWindow(_sdlWindow);
 }
 
-ITexture * GraphicsDriver::CreateTexture()
+std::unique_ptr<ITexture> GraphicsDriver::CreateTexture()
 {
-    return new Texture();
+    return std::make_unique<Texture>();
 }
 
-IShader * GraphicsDriver::CreateShader()
+std::unique_ptr<IShader> GraphicsDriver::CreateShader()
 {
     return nullptr;
 }

@@ -10,9 +10,9 @@ class DUSK_STBI_API TextureImporter : public ITextureImporter
 {
 public:
 
-    TextureData && LoadFromFile(const std::string& filename) override;
+    bool LoadFromFile(TextureData& data, const std::string& filename) override;
 
-    TextureData && LoadFromMemory(uint8_t * buffer, size_t length) override;
+    bool LoadFromMemory(TextureData& data, uint8_t * buffer, size_t length) override;
 
 }; // class TextureImporter
 

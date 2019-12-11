@@ -6,13 +6,14 @@ namespace Dusk {
 DUSK_CORE_API
 bool ITexture::LoadFromFile(const std::string& filename)
 {
+    TextureData data;
     const auto& importers = GetAllTextureImporters();
     for (const auto& importer : importers) {
-        auto&& data = importer->LoadFromFile(filename);
-        if (data.Buffer) {
+        if (importer->LoadFromFile(data, filename)) {
             if (Load(data)) {
                 return true;
             }
+            data.Free();
         }
     }
     return false;
@@ -21,13 +22,14 @@ bool ITexture::LoadFromFile(const std::string& filename)
 DUSK_CORE_API
 bool ITexture::LoadFromMemory(uint8_t * buffer, size_t length)
 {
+    TextureData data;
     const auto& importers = GetAllTextureImporters();
     for (const auto& importer : importers) {
-        const auto& data = importer->LoadFromMemory(buffer, length);
-        if (data.Buffer) {
+        if (importer->LoadFromMemory(data, buffer, length)) {
             if (Load(data)) {
                 return true;
             }
+            data.Free();
         }
     }
     return false;

@@ -55,11 +55,8 @@ before_install:
   - mkdir cmake
   - bash install-cmake.sh --prefix=$PWD/cmake --skip-license --exclude-subdir
   - export PATH="$PWD/cmake/bin:$PATH"
-  - which cmake
-  - env
-  - $CC --version
-  - $CXX --version
   - cmake --version
+  - env
 
 script:
   - git describe --tags

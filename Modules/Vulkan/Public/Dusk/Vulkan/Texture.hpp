@@ -10,7 +10,7 @@ class DUSK_VULKAN_API Texture : public ITexture
 {
 public:
 
-    explicit Texture(VkPhysicalDevice vkPhysicalDevice);
+    explicit Texture(VkDevice vkDevice);
 
     virtual ~Texture();
 
@@ -20,7 +20,11 @@ public:
 
 private:
 
-    VkPhysicalDevice _vkPhysicalDevice;
+    int GetChannelCount(const TextureDataFormat& format);
+
+    VkFormat GetVkDataFormat(const TextureDataFormat& format, const TextureDataType& type);
+
+    VkDevice _vkDevice;
 
 }; // class Texture
 

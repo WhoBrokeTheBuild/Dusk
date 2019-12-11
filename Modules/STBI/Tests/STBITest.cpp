@@ -1,4 +1,4 @@
-#include <Dusk/STBI/Importers/TextureImporter.hpp>
+#include <Dusk/STBI/TextureImporter.hpp>
 
 #include <gtest/gtest.h>
 

@@ -190,7 +190,7 @@ void GraphicsDriver::SwapBuffers() {
 
 std::unique_ptr<ITexture> GraphicsDriver::CreateTexture()
 {
-    return std::make_unique<Texture>(_vkPhysicalDevice);
+    return std::make_unique<Texture>(_vkDevice);
 }
 
 std::unique_ptr<IShader> GraphicsDriver::CreateShader()

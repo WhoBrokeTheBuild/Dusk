@@ -35,9 +35,9 @@ public:
     
     virtual void SwapBuffers() = 0;
 
-    virtual ITexture * CreateTexture() = 0;
+    virtual std::unique_ptr<ITexture> CreateTexture() = 0;
 
-    virtual IShader * CreateShader() = 0;
+    virtual std::unique_ptr<IShader> CreateShader() = 0;
 
 }; // class IGraphicsDriver
 

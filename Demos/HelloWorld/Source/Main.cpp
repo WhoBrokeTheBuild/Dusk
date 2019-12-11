@@ -20,18 +20,19 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    auto gfx = Dusk::GetGraphicsDriver();
+    {
+        auto gfx = Dusk::GetGraphicsDriver();
 
-    auto tex = gfx->CreateTexture();
-    tex->LoadFromFile("Assets/models/teapot.png");
-    delete tex;
+        auto tex = gfx->CreateTexture();
+        tex->LoadFromFile("Assets/models/teapot.png");
 
-    gfx->SetWindowSize({ 1024, 768 });
+        gfx->SetWindowSize({ 1024, 768 });
 
-    Dusk::SetRunning(true);
-    while (Dusk::IsRunning()) {
-        gfx->ProcessEvents();
-        gfx->SwapBuffers();
+        Dusk::SetRunning(true);
+        while (Dusk::IsRunning()) {
+            gfx->ProcessEvents();
+            gfx->SwapBuffers();
+        }
     }
 
     Dusk::Terminate();

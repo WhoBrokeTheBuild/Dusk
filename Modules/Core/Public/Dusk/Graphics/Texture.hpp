@@ -3,6 +3,7 @@
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Macros.hpp>
+#include <Dusk/Math.hpp>
 
 #include <cstdint>
 #include <cstdlib>
@@ -45,8 +46,7 @@ struct DUSK_CORE_API TextureData
     explicit TextureData() = default;
 
     TextureData(TextureData && rhs) {
-        std::swap(Width, rhs.Width);
-        std::swap(Height, rhs.Height);
+        std::swap(Size, rhs.Size);
         std::swap(Buffer, rhs.Buffer);
         std::swap(DataFormat, rhs.DataFormat);
         std::swap(DataCompression, rhs.DataCompression);
@@ -59,8 +59,7 @@ struct DUSK_CORE_API TextureData
     }
     
     // Width and Height in pixels
-    size_t Width;
-    size_t Height;
+    uvec2 Size;
 
     // Pointer to pixel data Buffer
     uint8_t * Buffer = nullptr;

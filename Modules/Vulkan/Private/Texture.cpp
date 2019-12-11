@@ -4,8 +4,8 @@
 namespace Dusk::Vulkan {
 
 DUSK_VULKAN_API
-Texture::Texture(VkPhysicalDevice vkPhysicalDevice)
-    : _vkPhysicalDevice(vkPhysicalDevice)
+Texture::Texture(VkDevice vkDevice)
+    : _vkDevice(vkDevice)
 { }
 
 DUSK_VULKAN_API
@@ -19,7 +19,7 @@ bool Texture::Load(const TextureData& data)
 {
     DuskBenchmarkStart();
 
-    VkDeviceSize imageSize = data.Size.x * data.Size.y * data.Comp;
+    VkDeviceSize imageSize = data.Size.x * data.Size.y * GetChannelCount(data.DataFormat);
 
     VkImage vkImage;
     VkDeviceMemory vkDeviceMemory;
@@ -32,7 +32,7 @@ bool Texture::Load(const TextureData& data)
     vkImageCreateInfo.extent.depth = 1;
     vkImageCreateInfo.mipLevels = 1;
     vkImageCreateInfo.arrayLayers = 1;
-    vkImageCreateInfo.format = GetVkDataFormat(data.Format, data.Type);
+    vkImageCreateInfo.format = GetVkDataFormat(data.DataFormat, data.DataType);
     vkImageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     vkImageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     vkImageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -40,7 +40,7 @@ bool Texture::Load(const TextureData& data)
     vkImageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     vkImageCreateInfo.flags = 0;
 
-    if (vkCreateImage(&_vkPhysicalDevice, &vkImageCreateInfo, nullptr, &vkImage) != VK_SUCCESS) {
+    if (vkCreateImage(_vkDevice, &vkImageCreateInfo, nullptr, &vkImage) != VK_SUCCESS) {
         return false;
     }
 
@@ -51,6 +51,23 @@ bool Texture::Load(const TextureData& data)
 DUSK_VULKAN_API
 void Texture::Bind() 
 {
+}
+
+DUSK_VULKAN_API
+int Texture::GetChannelCount(const TextureDataFormat& format)
+{
+    switch (format) {
+    case TextureDataFormat::R:
+        return 1;
+    case TextureDataFormat::RG:
+        return 2;
+    case TextureDataFormat::RGB:
+        return 3;
+    case TextureDataFormat::RGBA:
+        return 4;
+    }
+
+    return -1;
 }
 
 DUSK_VULKAN_API

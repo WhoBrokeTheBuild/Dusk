@@ -17,8 +17,7 @@ matrix:
         apt:
           sources:
           - sourceline: 'ppa:ubuntu-toolchain-r/test'
-          - sourceline: 'ppa:george-edison55/cmake-3.x'
-          packages: [ 'g++-7', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
+          packages: [ 'g++-7', 'libstdc++-7-dev', 'ninja-build', 'xorg-dev', 'libglu1-mesa-dev' ]
       env: CMAKE_BUILD_TYPE=DEBUG
 
     - name: "GCC Release (System)"
@@ -28,8 +27,7 @@ matrix:
         apt:
           sources:
           - sourceline: 'ppa:ubuntu-toolchain-r/test'
-          - sourceline: 'ppa:george-edison55/cmake-3.x'
-          packages: [ 'g++-7', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev', 'libglm-dev', 'libsdl2-dev', 'libopenal-dev', 'libogg-dev', 'libvorbis-dev', 'libtheora-dev', 'libpython3-dev' ]
+          packages: [ 'g++-7', 'libstdc++-7-dev', 'ninja-build', 'xorg-dev', 'libglu1-mesa-dev', 'libglm-dev', 'libsdl2-dev', 'libopenal-dev', 'libogg-dev', 'libvorbis-dev', 'libtheora-dev', 'libpython3-dev' ]
       env: CMAKE_BUILD_TYPE=RELEASE
 
     - name: "Clang Debug (ThirdParty)"
@@ -39,8 +37,7 @@ matrix:
         apt:
           sources:
           - sourceline: 'ppa:ubuntu-toolchain-r/test'
-          - sourceline: 'ppa:george-edison55/cmake-3.x'
-          packages: [ 'clang-6.0', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
+          packages: [ 'clang-6.0', 'libstdc++-7-dev', 'ninja-build', 'xorg-dev', 'libglu1-mesa-dev' ]
       env: CMAKE_BUILD_TYPE=DEBUG
 
     - name: "Clang Release (System)"
@@ -50,8 +47,7 @@ matrix:
         apt:
           sources:
           - sourceline: 'ppa:ubuntu-toolchain-r/test'
-          - sourceline: 'ppa:george-edison55/cmake-3.x'
-          packages: [ 'clang-6.0', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev', 'libglm-dev', 'libsdl2-dev', 'libopenal-dev', 'libogg-dev', 'libvorbis-dev', 'libtheora-dev', 'libpython3-dev' ]
+          packages: [ 'clang-6.0', 'libstdc++-7-dev', 'ninja-build', 'xorg-dev', 'libglu1-mesa-dev', 'libglm-dev', 'libsdl2-dev', 'libopenal-dev', 'libogg-dev', 'libvorbis-dev', 'libtheora-dev', 'libpython3-dev' ]
       env: CMAKE_BUILD_TYPE=RELEASE
 
 before_install:
@@ -59,6 +55,10 @@ before_install:
   - export SRC_DIR="`pwd`"
   - if [ "$CXX" = "g++" ]; then export CXX="g++-7" CC="gcc-7"; fi
   - if [ "$CXX" = "clang++" ]; then export CXX="clang++-6.0" CC="clang-6.0"; fi
+  - wget -O install-cmake.sh https://github.com/Kitware/CMake/releases/download/v3.15.5/cmake-3.15.5-Linux-x86_64.sh
+  - mkdir cmake
+  - bash install-cmake.sh --install-prefix=$PWD/cmake --skip-license --exclude-subdir
+  - export PATH="$PWD/cmake/bin:$PATH"
 
 script:
   - $CXX --version
@@ -68,4 +68,4 @@ script:
   - cd "$TRAVIS_BUILD_DIR/build"
   - pwd
   - cmake -Dstdlib=libstdc++ -DVERBOSE_LOGGING=ON -DBUILD_DEMOS=ON -DBUILD_TESTS=ON -G "Unix Makefiles" "$SRC_DIR"
-  - make -l
+  - make -l all test

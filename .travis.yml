@@ -51,21 +51,20 @@ matrix:
       env: CMAKE_BUILD_TYPE=RELEASE
 
 before_install:
-  - env
-  - export SRC_DIR="`pwd`"
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-7" CC="gcc-7"; fi
-  - if [ "$CXX" = "clang++" ]; then export CXX="clang++-6.0" CC="clang-6.0"; fi
   - wget -O install-cmake.sh https://github.com/Kitware/CMake/releases/download/v3.15.5/cmake-3.15.5-Linux-x86_64.sh
   - mkdir cmake
   - bash install-cmake.sh --install-prefix=$PWD/cmake --skip-license --exclude-subdir
   - export PATH="$PWD/cmake/bin:$PATH"
-
-script:
+  - which cmake
+  - env
+  - $CC --version
   - $CXX --version
   - cmake --version
+
+script:
   - git describe --tags
-  - mkdir -p "$TRAVIS_BUILD_DIR/build"
-  - cd "$TRAVIS_BUILD_DIR/build"
+  - mkdir -p "$TRAVIS_BUILD_DIR/Build"
+  - cd "$TRAVIS_BUILD_DIR/Build"
   - pwd
-  - cmake -Dstdlib=libstdc++ -DVERBOSE_LOGGING=ON -DBUILD_DEMOS=ON -DBUILD_TESTS=ON -G "Unix Makefiles" "$SRC_DIR"
+  - cmake -Dstdlib=libstdc++ -DVERBOSE_LOGGING=ON -DBUILD_DEMOS=ON -DBUILD_TESTS=ON -G "Unix Makefiles" "$TRAVIS_BUILD_DIR"
   - make -l all test

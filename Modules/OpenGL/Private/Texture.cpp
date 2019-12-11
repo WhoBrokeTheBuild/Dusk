@@ -25,8 +25,8 @@ bool Texture::Load(const TextureData& data)
         return false;
     }
 
-    GLenum format = GetGLDataFormat(data.DataFormat);
-    GLenum type = GetGLDataType(data.DataType);
+    GLenum glFormat = GetGLDataFormat(data.DataFormat);
+    GLenum glType = GetGLDataType(data.DataType);
 
     glBindTexture(GL_TEXTURE_2D, _glID);
     
@@ -36,7 +36,7 @@ bool Texture::Load(const TextureData& data)
     // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, opts.MagFilter);
     // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, opts.MinFilter);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, (GLint)format, data.Size.x, data.Size.y, 0, format, type, data.Buffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, (GLint)glFormat, data.Size.x, data.Size.y, 0, glFormat, glType, data.Buffer);
 
     DuskLogVerbose("Bound texture to %d", _glID);
 

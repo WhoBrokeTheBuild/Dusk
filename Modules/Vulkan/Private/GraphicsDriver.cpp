@@ -1,4 +1,5 @@
 #include <Dusk/Vulkan/GraphicsDriver.hpp>
+#include <Dusk/Vulkan/Texture.hpp>
 
 #include <Dusk/Log.hpp>
 #include <Dusk/Dusk.hpp>
@@ -187,6 +188,16 @@ void GraphicsDriver::SwapBuffers() {
     SDL_GL_SwapWindow(_sdlWindow);
 }
 
+std::unique_ptr<ITexture> GraphicsDriver::CreateTexture()
+{
+    return std::make_unique<Texture>(_vkPhysicalDevice);
+}
+
+std::unique_ptr<IShader> GraphicsDriver::CreateShader()
+{
+    return nullptr;
+}
+
 bool IsDeviceSuitable(const VkPhysicalDevice device)
 {
     VkPhysicalDeviceProperties deviceProperties;
@@ -195,16 +206,6 @@ bool IsDeviceSuitable(const VkPhysicalDevice device)
     vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 
     return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && deviceFeatures.geometryShader;
-}
-
-ITexture * GraphicsDriver::CreateTexture()
-{
-    return nullptr;
-}
-
-IShader * GraphicsDriver::CreateShader()
-{
-    return nullptr;
 }
 
 } // namespace Dusk::OpenGL

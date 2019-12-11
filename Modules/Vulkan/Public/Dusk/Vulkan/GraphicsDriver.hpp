@@ -5,7 +5,6 @@
 #include <Dusk/Graphics/GraphicsDriver.hpp>
 
 #include <SDL.h>
-#include <glad/vulkan.h>
 
 #include <vector>
 
@@ -31,9 +30,9 @@ public:
 
     void SwapBuffers() override;
 
-    ITexture * CreateTexture() override;
+    std::unique_ptr<ITexture> CreateTexture() override;
 
-    IShader * CreateShader() override;
+    std::unique_ptr<IShader> CreateShader() override;
 
 private:
 

@@ -89,8 +89,58 @@ MACRO(Demo target)
             PROPERTIES 
                 FOLDER "Automation"
         )
+
+        IF(GDB_COMMAND)
+            ADD_CUSTOM_TARGET(
+                gdb-${target}
+                COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" gdb --args $<TARGET_FILE:${target}>
+                DEPENDS ${target}
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            )
+
+            SET_TARGET_PROPERTIES(
+                gdb-${target}
+                PROPERTIES 
+                    FOLDER "Automation"
+            )
+        ENDIF()
+
+        IF(LLDB_COMMAND)
+            ADD_CUSTOM_TARGET(
+                lldb-${target}
+                COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" lldb --args $<TARGET_FILE:${target}>
+                DEPENDS ${target}
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            )
+
+            SET_TARGET_PROPERTIES(
+                lldb-${target}
+                PROPERTIES 
+                    FOLDER "Automation"
+            )
+        ENDIF()
+
+        IF(VALGRIND_COMMAND)
+            ADD_CUSTOM_TARGET(
+                valgrind-${target}
+                COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" valgrind $<TARGET_FILE:${target}>
+                DEPENDS ${target}
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            )
+
+            SET_TARGET_PROPERTIES(
+                valgrind-${target}
+                PROPERTIES 
+                    FOLDER "Automation"
+            )
+        ENDIF()
+
     ENDIF()
 ENDMACRO()
+
+FIND_PROGRAM(GDB_COMMAND gdb)
+FIND_PROGRAM(LLDB_COMMAND lldb)
+FIND_PROGRAM(VALGRIND_COMMAND valgrind)
 
 # Include Demos
 

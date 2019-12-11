@@ -4,8 +4,12 @@
 #include <Dusk/Config.hpp>
 #include <Dusk/Macros.hpp>
 #include <Dusk/Math.hpp>
+#include <Dusk/Graphics/Texture.hpp>
+#include <Dusk/Graphics/Shader.hpp>
 
 #include <string>
+#include <vector>
+#include <memory>
 
 namespace Dusk {
 
@@ -31,9 +35,13 @@ public:
     
     virtual void SwapBuffers() = 0;
 
+    virtual ITexture * CreateTexture() = 0;
+
+    virtual IShader * CreateShader() = 0;
+
 }; // class IGraphicsDriver
 
-DUSK_CORE_API void SetGraphicsDriver(IGraphicsDriver * driver);
+DUSK_CORE_API void SetGraphicsDriver(std::unique_ptr<IGraphicsDriver> && driver);
 
 DUSK_CORE_API IGraphicsDriver * GetGraphicsDriver();
 

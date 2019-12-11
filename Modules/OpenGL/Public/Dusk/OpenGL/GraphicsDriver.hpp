@@ -2,7 +2,7 @@
 #define DUSK_OPENGL_GRAPHICS_DRIVER_HPP
 
 #include <Dusk/OpenGL/Config.hpp>
-#include <Dusk/Drivers/GraphicsDriver.hpp>
+#include <Dusk/Graphics/GraphicsDriver.hpp>
 
 #include <SDL.h>
 
@@ -27,6 +27,10 @@ public:
     void ProcessEvents() override;
 
     void SwapBuffers() override;
+
+    ITexture * CreateTexture() override;
+
+    IShader * CreateShader() override;
 
 private:
 

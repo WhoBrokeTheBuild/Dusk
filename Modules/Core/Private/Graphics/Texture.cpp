@@ -1,0 +1,36 @@
+#include <Dusk/Graphics/Texture.hpp>
+#include <Dusk/Graphics/TextureImporter.hpp>
+
+namespace Dusk {
+
+DUSK_CORE_API
+bool ITexture::LoadFromFile(const std::string& filename)
+{
+    const auto& importers = GetAllTextureImporters();
+    for (const auto& importer : importers) {
+        auto&& data = importer->LoadFromFile(filename);
+        if (data.Buffer) {
+            if (Load(data)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+DUSK_CORE_API
+bool ITexture::LoadFromMemory(uint8_t * buffer, size_t length)
+{
+    const auto& importers = GetAllTextureImporters();
+    for (const auto& importer : importers) {
+        const auto& data = importer->LoadFromMemory(buffer, length);
+        if (data.Buffer) {
+            if (Load(data)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+} // namespace Dusk

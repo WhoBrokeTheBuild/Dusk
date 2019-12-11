@@ -2,7 +2,7 @@
 #define DUSK_VULKAN_GRAPHICS_DRIVER_HPP
 
 #include <Dusk/Vulkan/Config.hpp>
-#include <Dusk/Drivers/GraphicsDriver.hpp>
+#include <Dusk/Graphics/GraphicsDriver.hpp>
 
 #include <SDL.h>
 #include <glad/vulkan.h>
@@ -30,6 +30,10 @@ public:
     void ProcessEvents() override;
 
     void SwapBuffers() override;
+
+    ITexture * CreateTexture() override;
+
+    IShader * CreateShader() override;
 
 private:
 

@@ -1,4 +1,4 @@
-#include <Dusk/Vulkan/Drivers/GraphicsDriver.hpp>
+#include <Dusk/Vulkan/GraphicsDriver.hpp>
 
 #include <Dusk/Log.hpp>
 #include <Dusk/Dusk.hpp>
@@ -195,6 +195,16 @@ bool IsDeviceSuitable(const VkPhysicalDevice device)
     vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 
     return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && deviceFeatures.geometryShader;
+}
+
+ITexture * GraphicsDriver::CreateTexture()
+{
+    return nullptr;
+}
+
+IShader * GraphicsDriver::CreateShader()
+{
+    return nullptr;
 }
 
 } // namespace Dusk::OpenGL

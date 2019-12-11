@@ -25,40 +25,48 @@ struct DUSK_CORE_API Version
         , Patch(rhs.Patch)
     { }
 
-    inline Version& operator=(const Version& rhs) {
+    inline Version& operator=(const Version& rhs)
+    {
         Major = rhs.Major;
         Minor = rhs.Minor;
         Patch = rhs.Patch;
         return *this;
     }
 
-    inline bool operator==(const Version& rhs) {
+    inline bool operator==(const Version& rhs)
+    {
         return (Compare(*this, rhs) == 0);
     }
 
-    inline bool operator!=(const Version& rhs) {
+    inline bool operator!=(const Version& rhs)
+    {
         return !(*this == rhs);
     }
 
-    inline friend bool operator>(const Version& lhs, const Version& rhs) {
+    inline friend bool operator>(const Version& lhs, const Version& rhs)
+    {
         return (Version::Compare(lhs, rhs) == 1);
     }
 
-    inline friend bool operator>=(const Version& lhs, const Version& rhs) {
+    inline friend bool operator>=(const Version& lhs, const Version& rhs)
+    {
         int res = Version::Compare(lhs, rhs);
         return (res == 0 || res == 1);
     }
 
-    inline friend bool operator<(const Version& lhs, const Version& rhs) {
+    inline friend bool operator<(const Version& lhs, const Version& rhs)
+    {
         return (Version::Compare(lhs, rhs) == -1);
     }
 
-    inline friend bool operator<=(const Version& lhs, const Version& rhs) {
+    inline friend bool operator<=(const Version& lhs, const Version& rhs)
+    {
         int res = Version::Compare(lhs, rhs);
         return (res == 0 || res == -1);
     }
 
-    inline std::string GetString() const {
+    inline std::string GetString() const
+    {
         return std::to_string(Major) + 
             "." + 
             std::to_string(Minor) + 
@@ -66,7 +74,8 @@ struct DUSK_CORE_API Version
             std::to_string(Patch);
     }
 
-    inline static int Compare(const Version& a, const Version& b) {
+    inline static int Compare(const Version& a, const Version& b)
+    {
         int result = CompareSingle(a.Major, b.Major);
         if (result == 0) {
             result = CompareSingle(a.Minor, b.Minor);
@@ -77,7 +86,8 @@ struct DUSK_CORE_API Version
         return result;
     }
 
-    inline static int CompareSingle(int a, int b) {
+    inline static int CompareSingle(int a, int b)
+    {
         if (a == b) {
             return 0;
         }

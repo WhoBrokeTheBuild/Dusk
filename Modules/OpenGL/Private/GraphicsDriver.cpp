@@ -1,13 +1,7 @@
-#include <Dusk/OpenGL/Drivers/GraphicsDriver.hpp>
-
-#include <Dusk/Log.hpp>
+#include <Dusk/OpenGL/GraphicsDriver.hpp>
+#include <Dusk/OpenGL/Texture.hpp>
 #include <Dusk/Dusk.hpp>
-
-#include <glad/gl.h>
-
-#undef CreateWindow
-#undef near
-#undef far
+#include <Dusk/Log.hpp>
 
 namespace Dusk::OpenGL {
 
@@ -106,6 +100,16 @@ DUSK_OPENGL_API
 void GraphicsDriver::SwapBuffers() {
     glClear(GL_COLOR_BUFFER_BIT);
     SDL_GL_SwapWindow(_sdlWindow);
+}
+
+ITexture * GraphicsDriver::CreateTexture()
+{
+    return new Texture();
+}
+
+IShader * GraphicsDriver::CreateShader()
+{
+    return nullptr;
 }
 
 } // namespace Dusk::OpenGL

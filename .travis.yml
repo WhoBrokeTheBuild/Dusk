@@ -15,7 +15,9 @@ matrix:
       compiler: gcc
       addons:
         apt:
-          sources: [ 'ubuntu-toolchain-r-test', 'george-edison55/cmake-3.x' ]
+          sources:
+          - sourceline: 'ppa:ubuntu-toolchain-r/test'
+          - sourceline: 'ppa:george-edison55/cmake-3.x'
           packages: [ 'g++-7', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
       env: CMAKE_BUILD_TYPE=DEBUG
 
@@ -24,7 +26,9 @@ matrix:
       compiler: gcc
       addons:
         apt:
-          sources: [ 'ubuntu-toolchain-r-test', 'george-edison55/cmake-3.x' ]
+          sources:
+          - sourceline: 'ppa:ubuntu-toolchain-r/test'
+          - sourceline: 'ppa:george-edison55/cmake-3.x'
           packages: [ 'g++-7', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev', 'libglm-dev', 'libsdl2-dev', 'libopenal-dev', 'libogg-dev', 'libvorbis-dev', 'libtheora-dev', 'libpython3-dev' ]
       env: CMAKE_BUILD_TYPE=RELEASE
 
@@ -33,7 +37,9 @@ matrix:
       compiler: clang
       addons:
         apt:
-          sources: [ 'llvm-toolchain-xenial-6.0', 'ubuntu-toolchain-r-test', 'george-edison55/cmake-3.x' ]
+          sources:
+          - sourceline: 'ppa:ubuntu-toolchain-r/test'
+          - sourceline: 'ppa:george-edison55/cmake-3.x'
           packages: [ 'clang-6.0', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev' ]
       env: CMAKE_BUILD_TYPE=DEBUG
 
@@ -42,7 +48,9 @@ matrix:
       compiler: clang
       addons:
         apt:
-          sources: [ 'llvm-toolchain-xenial-6.0', 'ubuntu-toolchain-r-test', 'george-edison55/cmake-3.x' ]
+          sources:
+          - sourceline: 'ppa:ubuntu-toolchain-r/test'
+          - sourceline: 'ppa:george-edison55/cmake-3.x'
           packages: [ 'clang-6.0', 'libstdc++-7-dev', 'ninja-build', 'cmake', 'xorg-dev', 'libglu1-mesa-dev', 'libglm-dev', 'libsdl2-dev', 'libopenal-dev', 'libogg-dev', 'libvorbis-dev', 'libtheora-dev', 'libpython3-dev' ]
       env: CMAKE_BUILD_TYPE=RELEASE
 

@@ -100,6 +100,38 @@ GraphicsDriver::GraphicsDriver() {
         DuskLogError("SDL_Vulkan_CreateSurface failed, %s", SDL_GetError());
         return;
     }
+
+
+    // Physical Devices
+
+    uint32_t deviceCount = 0;
+    vkEnumeratePhysicalDevices(_vkInstance, &deviceCount, nullptr);
+
+    if (deviceCount == 0)
+    {
+        DuskLogError("Failed to find GPUs with Vulkan Support.\n");
+        return;
+    }
+
+    std::vector<VkPhysicalDevice> devices(deviceCount);
+    vkEnumeratePhysicalDevices(_vkInstance, &deviceCount, devices.data());
+
+    for (const auto& device : devices) {
+        if (IsDeviceSuitable(device)) {
+            _vkPhysicalDevice = device;
+        }
+    }
+
+    if (_vkPhysicalDevice == VK_NULL_HANDLE) {
+        DuskLogError("Failed to find a suitable GPU\n");
+        return;
+    }
+
+    // Logical Devices
+
+    VkDeviceQueueCreateInfo queueCreateInfo;
+
+
 }
 
 DUSK_VULKAN_API
@@ -139,6 +171,18 @@ void GraphicsDriver::ProcessEvents() {
             SetRunning(false);
         }
     }
+}
+
+
+DUSK_VULKAN_API
+bool GraphicsDriver::IsDeviceSuitable(const VkPhysicalDevice device)
+{
+    VkPhysicalDeviceProperties deviceProperties;
+    VkPhysicalDeviceFeatures deviceFeatures;
+    vkGetPhysicalDeviceProperties(device, &deviceProperties);
+    vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+    return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && deviceFeatures.geometryShader;
 }
 
 DUSK_VULKAN_API

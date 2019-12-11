@@ -9,4 +9,8 @@
     #define DUSK_VULKAN_API DUSK_API_IMPORT
 #endif
 
+#include <glad/vulkan.h>
+#undef near
+#undef far
+
 #endif // DUSK_VULKAN_HPP

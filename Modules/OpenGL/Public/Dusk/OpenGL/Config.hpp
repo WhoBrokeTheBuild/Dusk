@@ -10,8 +10,6 @@
 #endif
 
 #include <glad/gl.h>
-
-#undef CreateWindow
 #undef near
 #undef far
 

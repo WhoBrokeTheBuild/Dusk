@@ -60,8 +60,6 @@ before_install:
 
 script:
   - git describe --tags
-  - mkdir -p "$TRAVIS_BUILD_DIR/Build"
   - cd "$TRAVIS_BUILD_DIR/Build"
-  - pwd
   - cmake -Dstdlib=libstdc++ -DVERBOSE_LOGGING=ON -DBUILD_DEMOS=ON -DBUILD_TESTS=ON -G "Unix Makefiles" "$TRAVIS_BUILD_DIR"
   - make -l all test

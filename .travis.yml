@@ -17,7 +17,7 @@ matrix:
         apt:
           sources:
           - sourceline: 'ppa:ubuntu-toolchain-r/test'
-          packages: [ 'g++-7', 'libstdc++-7-dev', 'ninja-build', 'xorg-dev', 'libglu1-mesa-dev' ]
+          packages: [ 'g++-7', 'libstdc++-7-dev', 'xorg-dev', 'libglu1-mesa-dev' ]
       env: CMAKE_BUILD_TYPE=DEBUG
 
     - name: "GCC Release (System)"
@@ -27,7 +27,7 @@ matrix:
         apt:
           sources:
           - sourceline: 'ppa:ubuntu-toolchain-r/test'
-          packages: [ 'g++-7', 'libstdc++-7-dev', 'ninja-build', 'xorg-dev', 'libglu1-mesa-dev', 'libglm-dev', 'libsdl2-dev', 'libopenal-dev', 'libogg-dev', 'libvorbis-dev', 'libtheora-dev', 'libpython3-dev' ]
+          packages: [ 'g++-7', 'libstdc++-7-dev', 'xorg-dev', 'libglu1-mesa-dev', 'libglm-dev', 'libsdl2-dev', 'libopenal-dev', 'libogg-dev', 'libvorbis-dev', 'libtheora-dev', 'libpython3-dev' ]
       env: CMAKE_BUILD_TYPE=RELEASE
 
     - name: "Clang Debug (ThirdParty)"
@@ -37,7 +37,7 @@ matrix:
         apt:
           sources:
           - sourceline: 'ppa:ubuntu-toolchain-r/test'
-          packages: [ 'clang-6.0', 'libstdc++-7-dev', 'ninja-build', 'xorg-dev', 'libglu1-mesa-dev' ]
+          packages: [ 'clang-6.0', 'libstdc++-7-dev', 'xorg-dev', 'libglu1-mesa-dev' ]
       env: CMAKE_BUILD_TYPE=DEBUG
 
     - name: "Clang Release (System)"
@@ -47,7 +47,7 @@ matrix:
         apt:
           sources:
           - sourceline: 'ppa:ubuntu-toolchain-r/test'
-          packages: [ 'clang-6.0', 'libstdc++-7-dev', 'ninja-build', 'xorg-dev', 'libglu1-mesa-dev', 'libglm-dev', 'libsdl2-dev', 'libopenal-dev', 'libogg-dev', 'libvorbis-dev', 'libtheora-dev', 'libpython3-dev' ]
+          packages: [ 'clang-6.0', 'libstdc++-7-dev', 'xorg-dev', 'libglu1-mesa-dev', 'libglm-dev', 'libsdl2-dev', 'libopenal-dev', 'libogg-dev', 'libvorbis-dev', 'libtheora-dev', 'libpython3-dev' ]
       env: CMAKE_BUILD_TYPE=RELEASE
 
 before_install:

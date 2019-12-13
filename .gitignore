@@ -165,3 +165,7 @@ vgcore.*
 imgui.ini
 cmake/Config.cmake
 cmake/NewDuskProject.reg
+.vscode
+
+# Vulkan
+*.spv

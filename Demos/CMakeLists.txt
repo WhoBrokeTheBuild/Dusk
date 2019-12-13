@@ -13,9 +13,79 @@ MACRO(Demo target)
         Source/*.cpp
     )
 
+    FILE(
+        GLOB_RECURSE
+        sources_in
+        Source/*.in
+    )
+
+    FOREACH(file ${sources_in})
+        STRING(REPLACE 
+            ${CMAKE_CURRENT_SOURCE_DIR}
+            ${CMAKE_CURRENT_BINARY_DIR}
+            file_out
+            ${file}
+        )
+
+        string(REGEX MATCH "^(.*)\\.[^.]*$" file_out ${file_out})
+        set(file_out ${CMAKE_MATCH_1})
+
+        CONFIGURE_FILE(${file} ${file_out})
+        LIST(APPEND sources_out ${file_out})
+    ENDFOREACH()
+
+    FILE(
+        GLOB_RECURSE
+        shaders_in
+        Shaders/*.glsl
+        Shaders/*.hlsl
+        Shaders/*.vert
+        #Shaders/*.tesc
+        #Shaders/*.tese
+        #Shaders/*.geom
+        Shaders/*.frag
+        #Shaders/*.comp
+        #Shaders/*.mesh
+        #Shaders/*.task
+        #Shaders/*.rgen
+        #Shaders/*.rint
+        #Shaders/*.rahit
+        #Shaders/*.rchit
+        #Shaders/*.rmiss
+        #Shaders/*.rcall
+    )
+
+    SET(shader_ids "")
+    FOREACH(file ${shaders_in})
+        GET_FILENAME_COMPONENT(shader_name ${file} NAME_WE)
+        GET_FILENAME_COMPONENT(shader_path ${file} DIRECTORY)
+        FILE(RELATIVE_PATH shader_path ${CMAKE_SOURCE_DIR} ${shader_path})
+        
+        STRING(MAKE_C_IDENTIFIER ${shader_name} shader_id)
+
+        LIST(APPEND shader_ids ${shader_id})
+        LIST(APPEND shader_files_${shader_id} ${file})
+        SET(shader_out_${shader_id} "${shader_path}/${shader_name}.spv")
+    ENDFOREACH()
+
+    LIST(REMOVE_DUPLICATES shader_ids)
+
+    SET(shaders_out "")
+    FOREACH(id ${shader_ids})
+        ADD_CUSTOM_COMMAND(
+            OUTPUT ${shader_out_${id}}
+            COMMAND ${VulkanSDK_glslangValidator_PROGRAM} -o ${shader_out_${id}} -V ${shader_files_${id}}
+            DEPENDS ${shader_files_${id}}
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        )
+        LIST(APPEND shaders_out ${shader_out_${id}})
+    ENDFOREACH()
+
     ADD_EXECUTABLE(
         ${target}
         ${sources}
+        ${sources_out}
+        ${shaders_out}
     )
 
     TARGET_LINK_LIBRARIES(

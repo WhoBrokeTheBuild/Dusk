@@ -1,5 +1,6 @@
+#version 400 core
 
-out vec4 _Color;
+layout(location = 0) out vec4 _Color;
 
 void main()
 {

@@ -1,6 +1,4 @@
 #include <Dusk/Graphics/GraphicsDriver.hpp>
-#include <Dusk/Graphics/TextureImporter.hpp>
-#include <Dusk/Graphics/ShaderImporter.hpp>
 
 namespace Dusk {
 

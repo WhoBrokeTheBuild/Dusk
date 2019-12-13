@@ -1,0 +1,30 @@
+# FindVulkanSDK.cmake
+#
+# Finds the Vulkan SDK
+#
+# This will define the following variables
+#
+#   VulkanSDK_FOUND
+#   VulkanSDK_glslangValidator_PROGRAM
+#
+# The following variables can be set as arguments
+#
+#   VulkanSDK_ROOT_DIR
+#
+
+FIND_PROGRAM(
+    VulkanSDK_glslangValidator_PROGRAM
+    glslangValidator
+    PATHS
+        ${VulkanSDK_ROOT_DIR}
+    PATH_SUFFIXES
+        bin
+)
+
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(
+    VulkanSDK
+    HANDLE_COMPONENTS
+    REQUIRED_VARS 
+        VulkanSDK_glslangValidator_PROGRAM
+)

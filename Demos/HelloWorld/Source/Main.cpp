@@ -3,7 +3,6 @@
 #include <Dusk/Log.hpp>
 #include <Dusk/Module.hpp>
 #include <Dusk/Graphics/GraphicsDriver.hpp>
-#include <Dusk/Graphics/ShaderImporter.hpp>
 
 int main(int argc, char** argv) 
 {

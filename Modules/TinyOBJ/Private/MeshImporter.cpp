@@ -1,6 +1,7 @@
 #include <Dusk/TinyOBJ/MeshImporter.hpp>
 #include <Dusk/Benchmark.hpp>
 #include <Dusk/Log.hpp>
+#include <Dusk/Util.hpp>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
@@ -12,6 +13,7 @@ std::vector<std::unique_ptr<IMeshData>> MeshImporter::LoadFromFile(const std::st
 {
     DuskBenchmarkStart();
 
+    const std::string& dir = GetDirname(filename);
     std::vector<std::unique_ptr<IMeshData>> meshes;
 
     tinyobj::attrib_t attrib;
@@ -20,7 +22,7 @@ std::vector<std::unique_ptr<IMeshData>> MeshImporter::LoadFromFile(const std::st
 
     std::string warn, err;
 
-    bool result = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filename.c_str());
+    bool result = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filename.c_str(), dir.c_str());
 
     if (!warn.empty()) {
         DuskLogWarn("tinyobj: %s", warn);

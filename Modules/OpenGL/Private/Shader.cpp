@@ -24,6 +24,12 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
         else if (ext == "glsl") {
             shader = LoadGLSL(filename);
         }
+        else {
+            shader = LoadSPV(filename + ".spv");
+            if (shader == 0) {
+                shader = LoadGLSL(filename + ".glsl");
+            }
+        }
 
         if (shader == 0) {
             for (GLuint shader : shaders) {
@@ -101,15 +107,16 @@ void Shader::Bind()
 
 GLuint Shader::LoadSPV(const std::string& filename)
 {
-    DuskLogLoad("Loading SPIR-V shader '%s'", filename);
+    DuskLogVerbose("Looking for SPIR-V shader '%s'", filename);
 
     std::ifstream file(filename, std::ios::binary);
     file.unsetf(std::ios::skipws);
 
     if (!file) {
-        DuskLogError("File not found '%s'", filename);
         return 0;
     }
+
+    DuskLogLoad("Loading SPIR-V shader '%s'", filename);
 
     std::vector<uint8_t> data(
         (std::istreambuf_iterator<char>(file)),
@@ -132,14 +139,15 @@ GLuint Shader::LoadSPV(const std::string& filename)
 
 GLuint Shader::LoadGLSL(const std::string& filename)
 {
-    DuskLogLoad("Loading GLSL shader '%s'", filename);
+    DuskLogVerbose("Looking for GLSL shader '%s'", filename);
 
     std::ifstream file(filename);
 
     if (!file) {
-        DuskLogError("File not found '%s'", filename);
         return 0;
     }
+    
+    DuskLogLoad("Loading GLSL shader '%s'", filename);
 
     std::string data(
         (std::istreambuf_iterator<char>(file)),

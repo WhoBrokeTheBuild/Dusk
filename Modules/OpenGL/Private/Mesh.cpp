@@ -84,8 +84,6 @@ bool Mesh::Load(const IMeshData * data)
         vbos.push_back(vbo);
     }
 
-    DuskLogInfo("Bound Mesh to VAO %d", _glVAO);
-
     glBindVertexArray(0);
 
     DuskBenchmarkEnd("OpenGL::Mesh::Load");

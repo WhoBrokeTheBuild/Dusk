@@ -6,13 +6,43 @@
 
 namespace Dusk::STBI {
 
+class DUSK_STBI_API TextureData : public ITextureData
+{
+public:
+
+    uint8_t * Data = nullptr;
+
+    uvec2 Size;
+
+    int Components;
+
+    virtual ~TextureData();
+
+    uint8_t * GetData() const override {
+        return Data;
+    }
+
+    uvec2 GetSize() const override {
+        return Size;
+    }
+
+    int GetComponents() const override {
+        return Components;
+    }
+
+    DataType GetDataType() const override {
+        return TextureData::DataType::UnsignedByte;
+    }
+
+}; // class TextureData
+
 class DUSK_STBI_API TextureImporter : public ITextureImporter
 {
 public:
 
-    bool LoadFromFile(TextureData& data, const std::string& filename) override;
+    std::unique_ptr<ITextureData> LoadFromFile(const std::string& filename) override;
 
-    bool LoadFromMemory(TextureData& data, uint8_t * buffer, size_t length) override;
+    std::unique_ptr<ITextureData> LoadFromMemory(uint8_t * buffer, size_t length) override;
 
 }; // class TextureImporter
 

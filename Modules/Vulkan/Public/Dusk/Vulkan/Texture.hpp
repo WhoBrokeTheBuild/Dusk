@@ -14,15 +14,13 @@ public:
 
     virtual ~Texture();
 
-    bool Load(const TextureData& data) override;
+    bool Load(const ITextureData * data) override;
 
     void Bind() override;
 
 private:
 
-    int GetChannelCount(const TextureDataFormat& format);
-
-    VkFormat GetVkDataFormat(const TextureDataFormat& format, const TextureDataType& type);
+    VkFormat GetVkDataFormat(int components, const ITextureData::DataType& type);
 
     VkDevice _vkDevice;
 

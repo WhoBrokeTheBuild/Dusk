@@ -22,72 +22,45 @@
 
 namespace Dusk::STBI {
 
-DUSK_STBI_API
-bool TextureImporter::LoadFromFile(TextureData& data, const std::string& filename) {
-    int comp;
-    ivec2 size;
-
-    data.Buffer = stbi_load(filename.c_str(), &size.x, &size.y, &comp, 0);
-    if (!data.Buffer) {
-        return false;
-    }
-
-    data.Size = size;
-    data.FreeFunc = stbi_image_free;
-    data.DataType = TextureDataType::UnsignedByte;
-
-    switch (comp) {
-    case 1:
-        data.DataFormat = TextureDataFormat::R;
-        break;
-    case 2:
-        data.DataFormat = TextureDataFormat::RG;
-        break;
-    case 3:
-        data.DataFormat = TextureDataFormat::RGB;
-        break;
-        data.DataFormat = TextureDataFormat::RGBA;
-    case 4:
-        break;
-    default:
-        DuskLogError("Unknown texture data format");
-    }
-
-    return true;
+TextureData::~TextureData()
+{
+    stbi_image_free(Data);
 }
 
 DUSK_STBI_API
-bool TextureImporter::LoadFromMemory(TextureData& data, uint8_t * buffer, size_t length) {
-    int comp;
+std::unique_ptr<ITextureData> TextureImporter::LoadFromFile(const std::string& filename)
+{
     ivec2 size;
+    int components;
 
-    data.Buffer = stbi_load_from_memory(buffer, length, &size.x, &size.y, &comp, 0);
-    if (!data.Buffer) {
-        return false;
+    uint8_t * data = stbi_load(filename.c_str(), &size.x, &size.y, &components, 0);
+    if (!data) {
+        return nullptr;
     }
 
-    data.Size = size;
-    data.FreeFunc = stbi_image_free;
-    data.DataType = TextureDataType::UnsignedByte;
+    auto tex = std::make_unique<TextureData>();
+    tex->Data = data;
+    tex->Size = size;
+    tex->Components = components;
+    return tex;
+}
 
-    switch (comp) {
-    case 1:
-        data.DataFormat = TextureDataFormat::R;
-        break;
-    case 2:
-        data.DataFormat = TextureDataFormat::RG;
-        break;
-    case 3:
-        data.DataFormat = TextureDataFormat::RGB;
-        break;
-        data.DataFormat = TextureDataFormat::RGBA;
-    case 4:
-        break;
-    default:
-        DuskLogError("Unknown texture data format");
+DUSK_STBI_API
+std::unique_ptr<ITextureData> TextureImporter::LoadFromMemory(uint8_t * buffer, size_t length)
+{
+    ivec2 size;
+    int components;
+
+    uint8_t * data = stbi_load_from_memory(buffer, length, &size.x, &size.y, &components, 0);
+    if (!data) {
+        return nullptr;
     }
 
-    return true;
+    auto tex = std::make_unique<TextureData>();
+    tex->Data = data;
+    tex->Size = size;
+    tex->Components = components;
+    return tex;
 }
 
 }

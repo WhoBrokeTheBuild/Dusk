@@ -198,6 +198,11 @@ std::unique_ptr<IShader> GraphicsDriver::CreateShader()
     return nullptr;
 }
 
+std::unique_ptr<IMesh> GraphicsDriver::CreateMesh()
+{
+    return nullptr;
+}
+
 bool IsDeviceSuitable(const VkPhysicalDevice device)
 {
     VkPhysicalDeviceProperties deviceProperties;

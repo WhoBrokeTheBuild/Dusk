@@ -6,6 +6,7 @@
 #include <Dusk/Math.hpp>
 #include <Dusk/Graphics/Texture.hpp>
 #include <Dusk/Graphics/Shader.hpp>
+#include <Dusk/Graphics/Mesh.hpp>
 
 #include <string>
 #include <vector>
@@ -38,6 +39,8 @@ public:
     virtual std::unique_ptr<ITexture> CreateTexture() = 0;
 
     virtual std::unique_ptr<IShader> CreateShader() = 0;
+
+    virtual std::unique_ptr<IMesh> CreateMesh() = 0;
 
 }; // class IGraphicsDriver
 

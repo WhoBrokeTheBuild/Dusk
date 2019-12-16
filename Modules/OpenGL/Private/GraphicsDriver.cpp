@@ -1,5 +1,7 @@
 #include <Dusk/OpenGL/GraphicsDriver.hpp>
 #include <Dusk/OpenGL/Texture.hpp>
+#include <Dusk/OpenGL/Shader.hpp>
+#include <Dusk/OpenGL/Mesh.hpp>
 #include <Dusk/Dusk.hpp>
 #include <Dusk/Log.hpp>
 
@@ -54,6 +56,8 @@ GraphicsDriver::GraphicsDriver() {
     DuskLogVerbose("GLSL Version: %s",    glGetString(GL_SHADING_LANGUAGE_VERSION));
     DuskLogVerbose("OpenGL Vendor: %s",   glGetString(GL_VENDOR));
     DuskLogVerbose("OpenGL Renderer: %s", glGetString(GL_RENDERER));
+
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 }
 
 DUSK_OPENGL_API
@@ -94,11 +98,12 @@ void GraphicsDriver::ProcessEvents() {
             SetRunning(false);
         }
     }
+    
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 DUSK_OPENGL_API
 void GraphicsDriver::SwapBuffers() {
-    glClear(GL_COLOR_BUFFER_BIT);
     SDL_GL_SwapWindow(_sdlWindow);
 }
 
@@ -109,7 +114,12 @@ std::unique_ptr<ITexture> GraphicsDriver::CreateTexture()
 
 std::unique_ptr<IShader> GraphicsDriver::CreateShader()
 {
-    return nullptr;
+    return std::make_unique<Shader>();
+}
+
+std::unique_ptr<IMesh> GraphicsDriver::CreateMesh()
+{
+    return std::make_unique<Mesh>();
 }
 
 } // namespace Dusk::OpenGL

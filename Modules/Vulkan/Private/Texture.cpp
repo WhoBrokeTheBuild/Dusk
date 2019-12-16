@@ -15,11 +15,12 @@ Texture::~Texture()
 }
 
 DUSK_VULKAN_API
-bool Texture::Load(const TextureData& data)
+bool Texture::Load(const ITextureData * data)
 {
     DuskBenchmarkStart();
 
-    VkDeviceSize imageSize = data.Size.x * data.Size.y * GetChannelCount(data.DataFormat);
+    const auto& size = data->GetSize();
+    VkDeviceSize imageSize = size.x * size.y * data->GetComponents();
 
     VkImage vkImage;
     VkDeviceMemory vkDeviceMemory;
@@ -27,12 +28,12 @@ bool Texture::Load(const TextureData& data)
     VkImageCreateInfo vkImageCreateInfo = {};
     vkImageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     vkImageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-    vkImageCreateInfo.extent.width = static_cast<uint32_t>(data.Size.x);
-    vkImageCreateInfo.extent.height = static_cast<uint32_t>(data.Size.y);
+    vkImageCreateInfo.extent.width = size.x;
+    vkImageCreateInfo.extent.height = size.y;
     vkImageCreateInfo.extent.depth = 1;
     vkImageCreateInfo.mipLevels = 1;
     vkImageCreateInfo.arrayLayers = 1;
-    vkImageCreateInfo.format = GetVkDataFormat(data.DataFormat, data.DataType);
+    vkImageCreateInfo.format = GetVkDataFormat(data->GetComponents(), data->GetDataType());
     vkImageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     vkImageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     vkImageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -54,90 +55,71 @@ void Texture::Bind()
 }
 
 DUSK_VULKAN_API
-int Texture::GetChannelCount(const TextureDataFormat& format)
+VkFormat Texture::GetVkDataFormat(int components, const ITextureData::DataType& type)
 {
-    switch (format) {
-    case TextureDataFormat::R:
-        return 1;
-    case TextureDataFormat::RG:
-        return 2;
-    case TextureDataFormat::RGB:
-        return 3;
-    case TextureDataFormat::RGBA:
-        return 4;
-    }
-
-    return -1;
-}
-
-DUSK_VULKAN_API
-VkFormat Texture::GetVkDataFormat(const TextureDataFormat& format, const TextureDataType& type)
-{
-    switch (format) {
-    case TextureDataFormat::R:
+    if (components == 1) {
         switch(type) {
-            case TextureDataType::UnsignedByte:
+            case ITextureData::DataType::UnsignedByte:
                 return VK_FORMAT_R8_UINT;
-            case TextureDataType::Byte:
+            case ITextureData::DataType::Byte:
                 return VK_FORMAT_R8_SINT;
-            case TextureDataType::UnsignedShort:
+            case ITextureData::DataType::UnsignedShort:
                 return VK_FORMAT_R16_UINT;
-            case TextureDataType::Short:
+            case ITextureData::DataType::Short:
                 return VK_FORMAT_R16_SINT;
-            case TextureDataType::UnsignedInt:
+            case ITextureData::DataType::UnsignedInt:
                 return VK_FORMAT_R32_UINT;
-            case TextureDataType::Int:
+            case ITextureData::DataType::Int:
                 return VK_FORMAT_R32_SINT;
         }
-        break;
-    case TextureDataFormat::RG:
+    }
+    else if (components == 2) {
         switch(type) {
-            case TextureDataType::UnsignedByte:
+            case ITextureData::DataType::UnsignedByte:
                 return VK_FORMAT_R8G8_UINT;
-            case TextureDataType::Byte:
+            case ITextureData::DataType::Byte:
                 return VK_FORMAT_R8G8_SINT;
-            case TextureDataType::UnsignedShort:
+            case ITextureData::DataType::UnsignedShort:
                 return VK_FORMAT_R16G16_UINT;
-            case TextureDataType::Short:
+            case ITextureData::DataType::Short:
                 return VK_FORMAT_R16G16_SINT;
-            case TextureDataType::UnsignedInt:
+            case ITextureData::DataType::UnsignedInt:
                 return VK_FORMAT_R32G32_UINT;
-            case TextureDataType::Int:
+            case ITextureData::DataType::Int:
                 return VK_FORMAT_R32G32_SINT;
         }
-        break;
-    case TextureDataFormat::RGB:
+    }
+    else if (components == 3) {
         switch(type) {
-            case TextureDataType::UnsignedByte:
+            case ITextureData::DataType::UnsignedByte:
                 return VK_FORMAT_R8G8B8_UINT;
-            case TextureDataType::Byte:
+            case ITextureData::DataType::Byte:
                 return VK_FORMAT_R8G8B8_SINT;
-            case TextureDataType::UnsignedShort:
+            case ITextureData::DataType::UnsignedShort:
                 return VK_FORMAT_R16G16B16_UINT;
-            case TextureDataType::Short:
+            case ITextureData::DataType::Short:
                 return VK_FORMAT_R16G16B16_SINT;
-            case TextureDataType::UnsignedInt:
+            case ITextureData::DataType::UnsignedInt:
                 return VK_FORMAT_R32G32B32_UINT;
-            case TextureDataType::Int:
+            case ITextureData::DataType::Int:
                 return VK_FORMAT_R32G32B32_SINT;
         }
-        break;
-    case TextureDataFormat::RGBA:
+    }
+    else if (components == 4) {
         switch(type) {
-            case TextureDataType::UnsignedByte:
+            case ITextureData::DataType::UnsignedByte:
                 return VK_FORMAT_R8G8B8A8_UINT;
-            case TextureDataType::Byte:
+            case ITextureData::DataType::Byte:
                 return VK_FORMAT_R8G8B8A8_SINT;
-            case TextureDataType::UnsignedShort:
+            case ITextureData::DataType::UnsignedShort:
                 return VK_FORMAT_R16G16B16A16_UINT;
-            case TextureDataType::Short:
+            case ITextureData::DataType::Short:
                 return VK_FORMAT_R16G16B16A16_SINT;
-            case TextureDataType::UnsignedInt:
+            case ITextureData::DataType::UnsignedInt:
                 return VK_FORMAT_R32G32B32A32_UINT;
-            case TextureDataType::Int:
+            case ITextureData::DataType::Int:
                 return VK_FORMAT_R32G32B32A32_SINT;
         }
-        break;
     }
 
     return VK_FORMAT_UNDEFINED;

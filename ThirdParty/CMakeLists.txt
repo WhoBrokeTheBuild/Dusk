@@ -28,6 +28,27 @@ IF(NOT glm_FOUND)
     )
 ENDIF()
 
+# GSL
+
+SET(GSL_ROOT       ${CMAKE_BINARY_DIR}/GSL)
+SET(GSL_SOURCE_DIR ${CMAKE_BINARY_DIR}/GSL_src)
+
+FIND_PACKAGE(GSL CONFIG QUIET)
+
+IF(NOT GSL_FOUND)
+    ExternalProject_Add(
+        ThirdParty_GSL
+        GIT_REPOSITORY      "https://github.com/microsoft/GSL"
+        GIT_TAG             "v2.0.0"
+        GIT_SHALLOW         TRUE
+        SOURCE_DIR          ${GSL_SOURCE_DIR}
+        CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${GSL_ROOT}
+                            -DGSL_TEST=OFF
+        BUILD_COMMAND       ""
+        UPDATE_COMMAND      ""
+    )
+ENDIF()
+
 # nlohmann_json
 
 SET(nlohmann_json_ROOT       ${CMAKE_BINARY_DIR}/nlohmann_json)

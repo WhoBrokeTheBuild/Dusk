@@ -21,9 +21,9 @@ public:
 
     virtual ~ITextureImporter() = default;
 
-    virtual bool LoadFromFile(TextureData& data, const std::string& filename) = 0;
+    virtual std::unique_ptr<ITextureData> LoadFromFile(const std::string& filename) = 0;
 
-    virtual bool LoadFromMemory(TextureData& data, uint8_t * buffer, size_t length) = 0;
+    virtual std::unique_ptr<ITextureData> LoadFromMemory(uint8_t * buffer, size_t length) = 0;
 
 };
 

@@ -33,6 +33,8 @@ public:
     std::unique_ptr<ITexture> CreateTexture() override;
 
     std::unique_ptr<IShader> CreateShader() override;
+    
+    std::unique_ptr<IMesh> CreateMesh() override;
 
 private:
 

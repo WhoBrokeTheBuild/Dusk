@@ -39,47 +39,23 @@ MACRO(Demo target)
         shaders_in
         Shaders/*.glsl
         Shaders/*.hlsl
-        Shaders/*.vert
-        #Shaders/*.tesc
-        #Shaders/*.tese
-        #Shaders/*.geom
-        Shaders/*.frag
-        #Shaders/*.comp
-        #Shaders/*.mesh
-        #Shaders/*.task
-        #Shaders/*.rgen
-        #Shaders/*.rint
-        #Shaders/*.rahit
-        #Shaders/*.rchit
-        #Shaders/*.rmiss
-        #Shaders/*.rcall
     )
 
-    SET(shader_ids "")
-    FOREACH(file ${shaders_in})
-        GET_FILENAME_COMPONENT(shader_name ${file} NAME_WE)
-        GET_FILENAME_COMPONENT(shader_path ${file} DIRECTORY)
-        FILE(RELATIVE_PATH shader_path ${CMAKE_SOURCE_DIR} ${shader_path})
-        
-        STRING(MAKE_C_IDENTIFIER ${shader_name} shader_id)
+    IF(VulkanSDK_glslangValidator_PROGRAM)
+        FOREACH(file ${shaders_in})
+            GET_FILENAME_COMPONENT(shader_name ${file} NAME_WLE)
+            GET_FILENAME_COMPONENT(shader_path ${file} DIRECTORY)
+            SET(shader_out "${shader_path}/${shader_name}.spv")
 
-        LIST(APPEND shader_ids ${shader_id})
-        LIST(APPEND shader_files_${shader_id} ${file})
-        SET(shader_out_${shader_id} "${shader_path}/${shader_name}.spv")
-    ENDFOREACH()
-
-    LIST(REMOVE_DUPLICATES shader_ids)
-
-    SET(shaders_out "")
-    FOREACH(id ${shader_ids})
-        ADD_CUSTOM_COMMAND(
-            OUTPUT ${shader_out_${id}}
-            COMMAND ${VulkanSDK_glslangValidator_PROGRAM} -o ${shader_out_${id}} -V ${shader_files_${id}}
-            DEPENDS ${shader_files_${id}}
-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        )
-        LIST(APPEND shaders_out ${shader_out_${id}})
-    ENDFOREACH()
+            ADD_CUSTOM_COMMAND(
+                OUTPUT ${shader_out}
+                COMMAND ${VulkanSDK_glslangValidator_PROGRAM} -o ${shader_out} -V ${file}
+                DEPENDS ${file}
+                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            )
+            LIST(APPEND shaders_out ${shader_out})
+        ENDFOREACH()
+    ENDIF()
 
     ADD_EXECUTABLE(
         ${target}

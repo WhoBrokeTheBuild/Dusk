@@ -4,11 +4,11 @@
 namespace Dusk::STBI {
 
 void ModuleInit() {
-    AddTextureImporter("stbi", std::unique_ptr<ITextureImporter>(new TextureImporter()));
+    AddTextureImporter("STBI", std::unique_ptr<ITextureImporter>(new TextureImporter()));
 }
 
 void ModuleTerm() {
-    RemoveTextureImporter("stbi");
+    RemoveTextureImporter("STBI");
 }
 
 DUSK_MODULE() {

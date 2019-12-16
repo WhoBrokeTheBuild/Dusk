@@ -4,22 +4,10 @@
 #include <Dusk/Config.hpp>
 #include <Dusk/Macros.hpp>
 
-#include <unordered_map>
+#include <string>
+#include <vector>
 
 namespace Dusk {
-
-struct DUSK_CORE_API ShaderData
-{
-    DISALLOW_COPY_AND_ASSIGN(ShaderData)
-
-    explicit ShaderData() = default;
-
-    ShaderData(ShaderData&& rhs) {
-        std::swap(Files, rhs.Files);
-    }
-
-    std::unordered_map<std::string, std::string> Files;
-};
 
 class DUSK_CORE_API IShader 
 {
@@ -30,6 +18,8 @@ public:
     explicit IShader() = default;
 
     virtual ~IShader() = default;
+
+    virtual bool LoadFromFiles(const std::vector<std::string>& filenames) = 0;
 
     virtual void Bind() = 0;
 

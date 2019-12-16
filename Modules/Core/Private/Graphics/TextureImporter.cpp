@@ -1,5 +1,4 @@
 #include <Dusk/Graphics/TextureImporter.hpp>
-#include <Dusk/Log.hpp>
 
 #include <unordered_map>
 

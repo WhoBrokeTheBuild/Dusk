@@ -84,7 +84,7 @@ MACRO(Module target prefix)
 
     TARGET_SOURCES(
         ${target}
-        PRIVATE ${private} ${public}
+        PRIVATE ${public} ${private}
     )
 
     TARGET_COMPILE_DEFINITIONS(

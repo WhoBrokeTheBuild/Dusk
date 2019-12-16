@@ -90,36 +90,34 @@ inline void Log(LogLevel level, const char * format, Args... args)
 
         static bool isTTY = isatty(fileno(stdout));
 
-        const short FgDefault = 39;
-        const short BgDefault = 49;
+        const char * Default = "0;39";
 
-        short fgColor = FgDefault;
-        short bgColor = BgDefault;
+        const char * color = Default;
 
         switch (level)
         {
         case LogLevel::Info:
-            fgColor = 97; // White
+            color = "0;97"; // White
             break;
         case LogLevel::Warn:
-            fgColor = 33; // Yellow
+            color = "0;33"; // Yellow
             break;
         case LogLevel::Error:
-            fgColor = 31; // Red
+            color = "0;31"; // Red
             break;
         case LogLevel::Performance:
-            fgColor = 35; // Magenta
+            color = "0;35"; // Magenta
             break;
         case LogLevel::Verbose:
-            fgColor = 37; // Grey
+            color = "1;30"; // Grey
             break;
         case LogLevel::Load:
-            fgColor = 32; // Green
+            color = "0;32"; // Green
             break;
         }
 
         if (isTTY) {
-            printf("\033[%dm\033[%dm", fgColor, bgColor);
+            printf("\033[%sm", color);
         }
 
     #endif
@@ -140,7 +138,7 @@ inline void Log(LogLevel level, const char * format, Args... args)
         SetConsoleTextAttribute(hConsole, Default);
     #else
         if (isTTY) {
-            printf("\033[%dm\033[%dm", FgDefault, BgDefault);
+            printf("\033[%sm", Default);
         }
     #endif
 }

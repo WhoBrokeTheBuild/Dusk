@@ -1,10 +1,48 @@
 #include <Python/PyDusk.hpp>
 
+#include <Python/PyLog.hpp>
+#include <Python/PyGraphicsDriver.hpp>
+
 #include <Dusk/Dusk.hpp>
 #include <Dusk/Log.hpp>
 #include <Dusk/Module.hpp>
 
 namespace Dusk {
+
+PyObject * PyDusk_RunScript(PyObject * self, PyObject * args)
+{
+    const char * filename;
+
+    if (!PyArg_ParseTuple(args, "s", &filename)) {
+        PyErr_BadArgument();
+        Py_RETURN_NONE;
+    }
+
+    RunScript(filename);
+    Py_RETURN_NONE;
+}
+
+PyObject * PyDusk_SetRunning(PyObject * self, PyObject * args)
+{
+    bool running;
+
+    if (!PyArg_ParseTuple(args, "b", &running)) {
+        PyErr_BadArgument();
+        Py_RETURN_NONE;
+    }
+
+    SetRunning(running);
+    Py_RETURN_NONE;
+}
+
+PyObject * PyDusk_IsRunning(PyObject * self, PyObject * args)
+{
+    if (IsRunning()) {
+        Py_RETURN_TRUE;
+    }
+
+    Py_RETURN_FALSE;
+}
 
 PyObject * PyDusk_GetVersion(PyObject * self, PyObject * args) 
 {
@@ -22,6 +60,19 @@ PyObject * PyDusk_GetApplicationName(PyObject * self, PyObject * args)
     return PyUnicode_FromString(name.c_str());
 }
 
+PyObject * PyDusk_SetApplicationName(PyObject * self, PyObject * args) 
+{
+    const char * name;
+
+    if (!PyArg_ParseTuple(args, "s", &name)) {
+        PyErr_BadArgument();
+        Py_RETURN_NONE;
+    }
+
+    SetApplicationName(name);
+    Py_RETURN_NONE;
+}
+
 PyObject * PyDusk_GetApplicationVersion(PyObject * self, PyObject * args) 
 {
     const auto& version = GetApplicationVersion();
@@ -32,83 +83,16 @@ PyObject * PyDusk_GetApplicationVersion(PyObject * self, PyObject * args)
     return ret;
 }
 
-PyObject * PyDusk_LogVerbose(PyObject * self, PyObject * args)
+PyObject * PyDusk_SetApplicationVersion(PyObject * self, PyObject * args) 
 {
-#if defined(DUSK_ENABLE_VERBOSE_LOGGING)
-    const char * msg;
+    Version version;
 
-    if (!PyArg_ParseTuple(args, "s", &msg)) {
-        return nullptr;
-    }
-
-    Log(LogLevel::Verbose, "[VERB](Py): %s\n", msg);
-#endif
-
-    Py_RETURN_NONE;
-}
-
-PyObject * PyDusk_LogInfo(PyObject * self, PyObject * args)
-{
-    const char * msg;
-
-    if (!PyArg_ParseTuple(args, "s", &msg)) {
+    if (!PyArg_ParseTuple(args, "(iii)", &version.Major, &version.Minor, &version.Patch)) {
         PyErr_BadArgument();
-        return nullptr;
+        Py_RETURN_NONE;
     }
 
-    Log(LogLevel::Info, "[INFO](Py): %s\n", msg);
-    Py_RETURN_NONE;
-}
-
-PyObject * PyDusk_LogWarn(PyObject * self, PyObject * args)
-{
-    const char * msg;
-
-    if (!PyArg_ParseTuple(args, "s", &msg)) {
-        PyErr_BadArgument();
-        return nullptr;
-    }
-
-    Log(LogLevel::Warn, "[WARN](Py): %s\n", msg);
-    Py_RETURN_NONE;
-}
-
-PyObject * PyDusk_LogError(PyObject * self, PyObject * args)
-{
-    const char * msg;
-
-    if (!PyArg_ParseTuple(args, "s", &msg)) {
-        PyErr_BadArgument();
-        return nullptr;
-    }
-
-    Log(LogLevel::Error, "[ERRO](Py): %s\n", msg);
-    Py_RETURN_NONE;
-}
-
-PyObject * PyDusk_LogPerf(PyObject * self, PyObject * args)
-{
-    const char * msg;
-
-    if (!PyArg_ParseTuple(args, "s", &msg)) {
-        PyErr_BadArgument();
-        return nullptr;
-    }
-
-    Log(LogLevel::Performance, "[PERF](Py): %s\n", msg);
-    Py_RETURN_NONE;
-}
-
-PyObject * PyDusk_LogLoad(PyObject * self, PyObject * args)
-{
-    const char * msg;
-
-    if (!PyArg_ParseTuple(args, "s", &msg)) {
-        PyErr_BadArgument();
-        return nullptr;
-    }
-
-    Log(LogLevel::Load, "[LOAD](Py): %s\n", msg);
+    SetApplicationVersion(version);
     Py_RETURN_NONE;
 }
 
@@ -118,12 +102,40 @@ PyObject * PyDusk_LadModule(PyObject * self, PyObject * args)
 
     if (!PyArg_ParseTuple(args, "s", &module)) {
         PyErr_BadArgument();
-        return nullptr;
+        Py_RETURN_NONE;
     }
 
     LoadModule(module);
     Py_RETURN_NONE;
 }
+
+static struct PyMethodDef PyDusk_methods[] = {
+    { "RunScript",              PyDusk_RunScript,               METH_VARARGS,   nullptr },
+    { "SetRunning",             PyDusk_SetRunning,              METH_VARARGS,   nullptr },
+    { "IsRunning",              PyDusk_IsRunning,               METH_VARARGS,   nullptr },
+    { "GetVersion",             PyDusk_GetVersion,              METH_NOARGS,    nullptr },
+    { "GetApplicationName",     PyDusk_GetApplicationName,      METH_NOARGS,    nullptr },
+    { "SetApplicationName",     PyDusk_SetApplicationName,      METH_VARARGS,   nullptr },
+    { "GetApplicationVersion",  PyDusk_GetApplicationVersion,   METH_NOARGS,    nullptr },
+    { "SetApplicationVersion",  PyDusk_SetApplicationVersion,   METH_VARARGS,   nullptr },
+    { "LogVerbose",             PyDusk_LogVerbose,              METH_VARARGS,   nullptr },
+    { "LogInfo",                PyDusk_LogInfo,                 METH_VARARGS,   nullptr },
+    { "LogWarn",                PyDusk_LogWarn,                 METH_VARARGS,   nullptr },
+    { "LogError",               PyDusk_LogError,                METH_VARARGS,   nullptr },
+    { "LogPerf",                PyDusk_LogPerf,                 METH_VARARGS,   nullptr },
+    { "LogLoad",                PyDusk_LogLoad,                 METH_VARARGS,   nullptr },
+    { "LoadModule",             PyDusk_LadModule,               METH_VARARGS,   nullptr },
+    { "GetGraphicsDriver",      PyDusk_GetGraphicsDriver,       METH_NOARGS,    nullptr },
+    { nullptr, nullptr, 0, nullptr },
+};
+
+static struct PyModuleDef PyDuskModule = {
+    PyModuleDef_HEAD_INIT,
+    "Dusk",                 // m_name
+    "Dusk",                 // m_doc
+    -1,                     // m_size
+    PyDusk_methods,         // m_methods
+};
 
 PyMODINIT_FUNC PyInit_Dusk()
 {
@@ -134,14 +146,7 @@ PyMODINIT_FUNC PyInit_Dusk()
         return nullptr;
     }
 
-    // if (PyType_Ready(&Thing_type) == 0) {
-    //     Py_INCREF(&Thing_type);
-    //     if (PyModule_AddObject(module, "Thing", (PyObject *)&Thing_type) < 0) {
-    //         Py_DECREF(&Thing_type);
-    //         Py_DECREF(module);
-    //         return nullptr;
-    //     }
-    // }
+    PyInit_GraphicsDriver(module);
 
     return module;
 }

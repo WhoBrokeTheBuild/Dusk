@@ -93,7 +93,7 @@ ivec2 GraphicsDriver::GetWindowSize() {
 DUSK_OPENGL_API
 void GraphicsDriver::ProcessEvents() {
     SDL_Event event;
-    while (SDL_PollEvent(&event) > 0) {
+    while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
             SetRunning(false);
         }

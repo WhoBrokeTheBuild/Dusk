@@ -31,7 +31,7 @@ IF(BUILD_TESTS)
 ENDIF()
 
 OPTION(BUILD_DEMOS      "Build Demo Projects"                               ON)
-OPTION(BUILD_THIRDPARTY "Build Missing ThirdParty Dependencies"             ON)
+OPTION(BUILD_ThirdParty "Build Missing ThirdParty Dependencies"             ON)
 OPTION(BUILD_PACKAGES   "Build Packages"                                    OFF)
 
 # Optional Modules
@@ -41,6 +41,7 @@ OPTION(NEED_MODULE_DirectX     "Require the DirectX Module (Windows Only)"  OFF)
 OPTION(NEED_MODULE_Vulkan      "Require the Vulkan Module"                  OFF)
 OPTION(NEED_MODULE_OpenAL      "Require the OpenAL Module"                  OFF)
 OPTION(NEED_MODULE_Assimp      "Require the Assimp Module"                  OFF)
+OPTION(NEED_MODULE_freetype    "Require the freetype Module"                ON)
 OPTION(NEED_MODULE_Archive     "Require the Archive Module"                 OFF)
 
 IF(NEED_MODULE_OpenGL OR NEED_MODULE_Vulkan)
@@ -57,6 +58,10 @@ ENDIF()
 
 IF(NEED_MODULE_Assimp)
     SET(NEED_assimp TRUE)
+ENDIF()
+
+IF(NEED_MODULE_freetype)
+    SET(NEED_freetype TRUE)
 ENDIF()
 
 IF(NEED_MODULE_Archive)
@@ -84,27 +89,28 @@ SET(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 ### Third Party Dependencies
 ###
 
-IF(BUILD_THIRDPARTY)
-    SET(THIRDPARTY_SOURCE_DIR ${CMAKE_SOURCE_DIR}/ThirdParty)
-    SET(THIRDPARTY_BINARY_DIR ${CMAKE_BINARY_DIR}/ThirdParty)
+IF(BUILD_ThirdParty)
+    SET(ThirdParty_SOURCE_DIR ${CMAKE_SOURCE_DIR}/ThirdParty)
+    SET(ThirdParty_BINARY_DIR ${CMAKE_BINARY_DIR}/ThirdParty)
 
-    FILE(MAKE_DIRECTORY ${THIRDPARTY_BINARY_DIR})
+    FILE(MAKE_DIRECTORY ${ThirdParty_BINARY_DIR})
 
     # Set _ROOT variables for config-based packages
-    SET(glm_ROOT            ${THIRDPARTY_BINARY_DIR}/glm)
-    SET(nlohmann_json_ROOT  ${THIRDPARTY_BINARY_DIR}/nlohmann_json)
-    SET(SDL2_ROOT           ${THIRDPARTY_BINARY_DIR}/SDL2)
-    SET(OpenAL_ROOT         ${THIRDPARTY_BINARY_DIR}/OpenAL)
-    SET(assimp_ROOT         ${THIRDPARTY_BINARY_DIR}/assimp)
+    SET(glm_ROOT            ${ThirdParty_BINARY_DIR}/glm)
+    SET(nlohmann_json_ROOT  ${ThirdParty_BINARY_DIR}/nlohmann_json)
+    SET(SDL2_ROOT           ${ThirdParty_BINARY_DIR}/SDL2)
+    SET(OpenAL_ROOT         ${ThirdParty_BINARY_DIR}/OpenAL)
+    SET(assimp_ROOT         ${ThirdParty_BINARY_DIR}/assimp)
+    SET(freetype_ROOT       ${ThirdParty_BINARY_DIR}/freetype)
 
     # Set CMAKE_PREFIX_PATH for find-based packages
     LIST(APPEND CMAKE_PREFIX_PATH
-        ${THIRDPARTY_BINARY_DIR}/GSL
-        ${THIRDPARTY_BINARY_DIR}/Python3
-        ${THIRDPARTY_BINARY_DIR}/libogg
-        ${THIRDPARTY_BINARY_DIR}/libvorbis
-        ${THIRDPARTY_BINARY_DIR}/libtheora
-        ${THIRDPARTY_BINARY_DIR}/GTest
+        ${ThirdParty_BINARY_DIR}/GSL
+        ${ThirdParty_BINARY_DIR}/Python3
+        ${ThirdParty_BINARY_DIR}/libogg
+        ${ThirdParty_BINARY_DIR}/libvorbis
+        ${ThirdParty_BINARY_DIR}/libtheora
+        ${ThirdParty_BINARY_DIR}/GTest
     )
 
     # Configure path to cmake config files
@@ -116,9 +122,10 @@ IF(BUILD_THIRDPARTY)
             -DNEED_SDL2=${NEED_SDL2}
             -DNEED_OpenAL=${NEED_OpenAL}
             -DNEED_assimp=${NEED_assimp}
+            -DNEED_freetype=${NEED_freetype}
             -DNEED_GTest=${NEED_GTest}
-            ${THIRDPARTY_SOURCE_DIR}
-        WORKING_DIRECTORY ${THIRDPARTY_BINARY_DIR}
+            ${ThirdParty_SOURCE_DIR}
+        WORKING_DIRECTORY ${ThirdParty_BINARY_DIR}
         RESULT_VARIABLE _result
     )
     IF(_result)
@@ -126,14 +133,14 @@ IF(BUILD_THIRDPARTY)
         MESSAGE(FATAL_ERROR "Failed to configure ThirdParty projects")
     ENDIF()
 
-    SET(_THIRDPARTY_BUILD_COMMAND ${CMAKE_COMMAND} --build . )
+    SET(_ThirdParty_BUILD_COMMAND ${CMAKE_COMMAND} --build . )
     IF(CMAKE_GENERATOR STREQUAL "Unix Makefiles")
-        SET(_THIRDPARTY_BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} -l )
+        SET(_ThirdParty_BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} -l )
     ENDIF()
 
     EXECUTE_PROCESS(
-        COMMAND ${_THIRDPARTY_BUILD_COMMAND}
-        WORKING_DIRECTORY ${THIRDPARTY_BINARY_DIR}
+        COMMAND ${_ThirdParty_BUILD_COMMAND}
+        WORKING_DIRECTORY ${ThirdParty_BINARY_DIR}
         RESULT_VARIABLE _result
     )
 
@@ -167,6 +174,11 @@ ENDIF()
 FIND_PACKAGE(assimp 5.0 CONFIG)
 IF(NEED_assimp AND NOT assimp_FOUND)
     MESSAGE(SEND_ERROR "NEED_assimp is set, but assimp could not be found.")
+ENDIF()
+
+FIND_PACKAGE(freetype CONFIG)
+IF(NEED_freetype AND NOT freetype_FOUND)
+    MESSAGE(SEND_ERROR "NEED_freetype is set, but freetype could not be found.")
 ENDIF()
 
 FIND_PACKAGE(Ogg COMPONENTS Vorbis Theora)

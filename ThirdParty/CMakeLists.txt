@@ -141,7 +141,7 @@ IF(NOT Python3_FOUND)
     SET(_Python3_INSTALL_COMMAND2 "")
 
     IF(WIN32)
-        MESSAGE(WARNING "Unable to find Python3, install to continue https://www.python.org/downloads/windows/")
+        MESSAGE(SEND_ERROR "Unable to find Python3, install to continue https://www.python.org/downloads/windows/")
     ELSE()
         SET(_Python3_INSTALL_COMMAND1 ./configure --prefix=${Python3_ROOT_DIR} --enable-shared --enable-optimizations)
         SET(_Python3_INSTALL_COMMAND2 ${CMAKE_MAKE_PROGRAM} -l libpython3.so install)
@@ -215,6 +215,30 @@ IF(NEED_OpenAL)
                                 -DALSOFT_UTILS=OFF
                                 -DALSOFT_EXAMPLES=OFF
                                 -DALSOFT_TESTS=OFF
+            BUILD_COMMAND       ""
+            UPDATE_COMMAND      ""
+            TEST_COMMAND        ""
+            INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
+        )
+    ENDIF()
+ENDIF()
+
+IF(NEED_freetype)
+    SET(freetype_ROOT           ${CMAKE_BINARY_DIR}/freetype)
+    SET(freetype_SOURCE_DIR     ${CMAKE_BINARY_DIR}/freetype_src)
+    SET(freetype_BINARY_DIR     ${CMAKE_BINARY_DIR}/freetype_bin)
+    
+    FIND_PACKAGE(freetype CONFIG QUIET)
+
+    IF(NOT freetype_FOUND)
+        ExternalProject_Add(
+            ThirdParty_freetype
+            GIT_REPOSITORY      "https://github.com/aseprite/freetype2.git"
+            GIT_TAG             "VER-2-10-0"
+            GIT_SHALLOW         TRUE
+            SOURCE_DIR          ${freetype_SOURCE_DIR}
+            BINARY_DIR          ${freetype_BINARY_DIR}
+            CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${freetype_ROOT}
             BUILD_COMMAND       ""
             UPDATE_COMMAND      ""
             TEST_COMMAND        ""

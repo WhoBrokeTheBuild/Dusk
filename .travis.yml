@@ -14,7 +14,7 @@ matrix:
         apt:
           sources:
           - sourceline: 'ppa:ubuntu-toolchain-r/test'
-          packages: [ 'g++-7', 'libstdc++-7-dev', 'xorg-dev', 'libglu1-mesa-dev' ]
+          packages: [ 'g++-7', 'xorg-dev', 'libglu1-mesa-dev' ]
       env: CMAKE_BUILD_TYPE=DEBUG
 
     - name: "GCC Release (System)"
@@ -24,7 +24,7 @@ matrix:
         apt:
           sources:
           - sourceline: 'ppa:ubuntu-toolchain-r/test'
-          packages: [ 'g++-7', 'libstdc++-7-dev', 'xorg-dev', 'libglu1-mesa-dev', 'libglm-dev', 'libsdl2-dev', 'libopenal-dev', 'libogg-dev', 'libvorbis-dev', 'libtheora-dev', 'libpython3-dev' ]
+          packages: [ 'g++-7', 'xorg-dev', 'libglu1-mesa-dev', 'libglm-dev', 'libsdl2-dev', 'libopenal-dev', 'libogg-dev', 'libvorbis-dev', 'libtheora-dev', 'libpython3-dev' ]
       env: CMAKE_BUILD_TYPE=RELEASE
 
     - name: "Clang Debug (ThirdParty)"
@@ -34,7 +34,7 @@ matrix:
         apt:
           sources:
           - sourceline: 'ppa:ubuntu-toolchain-r/test'
-          packages: [ 'clang-6.0', 'libstdc++-7-dev', 'xorg-dev', 'libglu1-mesa-dev' ]
+          packages: [ 'clang-6.0', 'xorg-dev', 'libglu1-mesa-dev' ]
       env: CMAKE_BUILD_TYPE=DEBUG
 
     - name: "Clang Release (System)"
@@ -44,7 +44,7 @@ matrix:
         apt:
           sources:
           - sourceline: 'ppa:ubuntu-toolchain-r/test'
-          packages: [ 'clang-6.0', 'libstdc++-7-dev', 'xorg-dev', 'libglu1-mesa-dev', 'libglm-dev', 'libsdl2-dev', 'libopenal-dev', 'libogg-dev', 'libvorbis-dev', 'libtheora-dev', 'libpython3-dev' ]
+          packages: [ 'clang-6.0', 'xorg-dev', 'libglu1-mesa-dev', 'libglm-dev', 'libsdl2-dev', 'libopenal-dev', 'libogg-dev', 'libvorbis-dev', 'libtheora-dev', 'libpython3-dev' ]
       env: CMAKE_BUILD_TYPE=RELEASE
 
 before_install:
@@ -56,7 +56,6 @@ before_install:
   - env
 
 script:
-  - git describe --tags
   - cd "$TRAVIS_BUILD_DIR/Build"
-  - cmake -Dstdlib=libstdc++ -DVERBOSE_LOGGING=ON -DBUILD_DEMOS=ON -DBUILD_TESTS=ON -G "Unix Makefiles" "$TRAVIS_BUILD_DIR"
+  - cmake -DVERBOSE_LOGGING=ON -DBUILD_DEMOS=ON -DBUILD_TESTS=ON -G "Unix Makefiles" "$TRAVIS_BUILD_DIR"
   - make -l all test

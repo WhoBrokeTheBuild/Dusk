@@ -5,9 +5,6 @@ dist: bionic
 notifications:
   slack: c0demonk3ys:gnjXYwuoMOBnffg9h8YnlLyE
 
-git:
-  depth: 50
-
 matrix:
   include:
     - name: "GCC Debug (ThirdParty)"

@@ -13,8 +13,6 @@ configuration:
   - Debug
   - Release
 
-clone_depth: 50
-
 init:
   - cmd: cmake --version
   - cmd: msbuild /version

@@ -26,10 +26,10 @@ before_build:
 
 build_script:
   - cmd: cd C:\projects\Dusk
-  - cmd: git describe --tags
   - cmd: cd Build
   - cmd: cmake -DBUILD_TESTS=ON -DBUILD_DEMOS=ON -G "%CMAKE_GENERATOR_NAME%" ..
   - cmd: cmake --build .
+  - cmd: cmake --build . --target test
 
 test: off
 

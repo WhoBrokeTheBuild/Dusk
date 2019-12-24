@@ -199,7 +199,7 @@ MACRO(Module target prefix)
             ADD_TEST(
                 NAME ${test_target}
                 COMMAND $<TARGET_FILE:${test_target}>
-                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Tests"
             )
         ENDFOREACH()
     ENDIF()

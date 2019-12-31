@@ -24,6 +24,37 @@ PyObject * PyGraphicsDriver_SwapBuffers(PyObject * self, PyObject * args)
     Py_RETURN_NONE;
 }
 
+PyObject * PyGraphicsDriver_GetWindowTitle(PyObject * self, PyObject * args)
+{
+    PyGraphicsDriver * gfx = (PyGraphicsDriver *)self;
+    const auto& title = gfx->Pointer->GetWindowTitle();
+    return PyUnicode_FromString(title.c_str());
+}
+
+PyObject * PyGraphicsDriver_SetWindowTitle(PyObject * self, PyObject * args)
+{
+    PyGraphicsDriver * gfx = (PyGraphicsDriver *)self;
+    const char * title;
+
+    if (!PyArg_ParseTuple(args, "s", &title)) {
+        PyErr_BadArgument();
+        Py_RETURN_NONE;
+    }
+
+    gfx->Pointer->SetWindowTitle(title);
+    Py_RETURN_NONE;
+}
+
+PyObject * PyGraphicsDriver_GetWindowSize(PyObject * self, PyObject * args)
+{
+    PyGraphicsDriver * gfx = (PyGraphicsDriver *)self;
+    const auto& size = gfx->Pointer->GetWindowSize();
+    PyObject * ret = PyTuple_New(2);
+    PyTuple_SET_ITEM(ret, 0, PyLong_FromLong(size.x));
+    PyTuple_SET_ITEM(ret, 1, PyLong_FromLong(size.y));
+    return ret;
+}
+
 PyObject * PyGraphicsDriver_SetWindowSize(PyObject * self, PyObject * args)
 {
     PyGraphicsDriver * gfx = (PyGraphicsDriver *)self;
@@ -41,6 +72,9 @@ PyObject * PyGraphicsDriver_SetWindowSize(PyObject * self, PyObject * args)
 static PyMethodDef PyGraphicsDriver_methods[] = {
     { "ProcessEvents",      PyGraphicsDriver_ProcessEvents,     METH_NOARGS,    nullptr },
     { "SwapBuffers",        PyGraphicsDriver_SwapBuffers,       METH_NOARGS,    nullptr },
+    { "GetWindowTitle",     PyGraphicsDriver_GetWindowTitle,    METH_NOARGS,    nullptr },
+    { "SetWindowTitle",     PyGraphicsDriver_SetWindowTitle,    METH_VARARGS,   nullptr },
+    { "GetWindowSize",      PyGraphicsDriver_GetWindowSize,     METH_NOARGS,    nullptr },
     { "SetWindowSize",      PyGraphicsDriver_SetWindowSize,     METH_VARARGS,   nullptr },
     { nullptr, nullptr, 0, nullptr },
 };

@@ -112,7 +112,7 @@ PyObject * PyDusk_LadModule(PyObject * self, PyObject * args)
 static struct PyMethodDef PyDusk_methods[] = {
     { "RunScript",              PyDusk_RunScript,               METH_VARARGS,   nullptr },
     { "SetRunning",             PyDusk_SetRunning,              METH_VARARGS,   nullptr },
-    { "IsRunning",              PyDusk_IsRunning,               METH_VARARGS,   nullptr },
+    { "IsRunning",              PyDusk_IsRunning,               METH_NOARGS,    nullptr },
     { "GetVersion",             PyDusk_GetVersion,              METH_NOARGS,    nullptr },
     { "GetApplicationName",     PyDusk_GetApplicationName,      METH_NOARGS,    nullptr },
     { "SetApplicationName",     PyDusk_SetApplicationName,      METH_VARARGS,   nullptr },

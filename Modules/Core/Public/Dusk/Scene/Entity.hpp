@@ -1,9 +1,15 @@
-#ifndef DUSK_ACTOR_HPP
-#define DUSK_ACTOR_HPP
+#ifndef DUSK_ENTITY_HPP
+#define DUSK_ENTITY_HPP
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Macros.hpp>
 #include <Dusk/Math.hpp>
+#include <Dusk/Scene/Component.hpp>
+#include <Dusk/UpdateContext.hpp>
+#include <Dusk/RenderContext.hpp>
+
+#include <vector>
+#include <memory>
 
 namespace Dusk {
 
@@ -17,21 +23,30 @@ inline vec3 GetWorldForward() {
     return { 0.f, 0.f, -1.f };
 }
 
-class DUSK_CORE_API Actor 
+
+class DUSK_CORE_API Entity 
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(Actor)
+    DISALLOW_COPY_AND_ASSIGN(Entity)
 
-    Actor() = default;
+    explicit Entity() = default;
 
-    virtual ~Actor() = default;
+    virtual ~Entity() = default;
 
-    void SetParent(Actor * parent);
+    void SetParent(Entity * parent);
 
-    inline Actor * GetParent() const {
+    inline Entity * GetParent() const {
         return _parent;
     }
+
+    Entity * AddChild(std::unique_ptr<Entity> && child);
+
+    std::vector<Entity *> GetChildren() const;
+
+    IComponent * AddComponent(std::unique_ptr<IComponent> && component);
+
+    std::vector<IComponent *> GetComponents() const;
 
     void SetPosition(const vec3& position);
 
@@ -61,9 +76,21 @@ public:
 
     mat4 GetWorldTransform() const;
 
+    void Update(UpdateContext * ctx);
+
+    void Render(RenderContext * ctx);
+
 private:
 
-    Actor * _parent = nullptr;
+    Entity * _parent = nullptr;
+
+    std::vector<std::unique_ptr<Entity>> _children;
+
+    std::vector<Entity *> _childPtrs;
+
+    std::vector<std::unique_ptr<IComponent>> _components;
+
+    std::vector<IComponent *> _componentPtrs;
 
     vec3 _position = vec3(0.f);
 
@@ -75,4 +102,4 @@ private:
 
 } // namespace Dusk
 
-#endif // DUSK_ACTOR_HPP
+#endif // DUSK_ENTITY_HPP

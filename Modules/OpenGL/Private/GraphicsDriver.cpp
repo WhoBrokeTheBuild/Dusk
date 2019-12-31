@@ -41,8 +41,8 @@ GraphicsDriver::GraphicsDriver() {
     SDL_SetWindowIcon(_sdlWindow, surface);
     SDL_FreeSurface(surface);
 
-    _sdlContext = SDL_GL_CreateContext(_sdlWindow);
-    if (!_sdlContext) {
+    _glContext = SDL_GL_CreateContext(_sdlWindow);
+    if (!_glContext) {
         DuskLogError("Failed to create OpenGL context, %s", SDL_GetError());
         return;
     }
@@ -58,11 +58,14 @@ GraphicsDriver::GraphicsDriver() {
     DuskLogVerbose("OpenGL Renderer: %s", glGetString(GL_RENDERER));
 
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_ONE_MINUS_SRC_ALPHA);
 }
 
 DUSK_OPENGL_API
 GraphicsDriver::~GraphicsDriver() {
-    SDL_GL_DeleteContext(_sdlContext);
+    SDL_GL_DeleteContext(_glContext);
     SDL_DestroyWindow(_sdlWindow);
     SDL_Quit();
 }

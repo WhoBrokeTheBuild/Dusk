@@ -4,13 +4,17 @@
 #include <Dusk/Module.hpp>
 #include <Dusk/Graphics/GraphicsDriver.hpp>
 #include <Dusk/Graphics/Model.hpp>
+#include <Dusk/Scene/Scene.hpp>
 
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
     Dusk::Initialize(argc, argv);
     Dusk::RunScript("Scripts/Main.py");
 
-    /*
+    Dusk::Scene scene;
+    Dusk::Entity * entity = scene.AddChild(std::make_unique<Dusk::Entity>());
+    DuskLog("Entity at %s", glm::to_string(entity->GetPosition()));
+
     {
         auto gfx = Dusk::GetGraphicsDriver();
 
@@ -36,7 +40,6 @@ int main(int argc, char** argv)
             gfx->SwapBuffers();
         }
     }
-    */
 
     Dusk::Terminate();
 

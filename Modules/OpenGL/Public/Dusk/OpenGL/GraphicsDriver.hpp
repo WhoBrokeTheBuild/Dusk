@@ -38,7 +38,7 @@ private:
 
     SDL_Window * _sdlWindow = nullptr;
 
-    SDL_GLContext _sdlContext;
+    SDL_GLContext _glContext;
     
 }; // class GraphicsDriver
 

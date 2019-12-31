@@ -4,11 +4,11 @@
 #include <Dusk/Config.hpp>
 #include <Dusk/Math.hpp>
 #include <Dusk/Macros.hpp>
-#include <Dusk/Scene/Actor.hpp>
+#include <Dusk/Scene/Entity.hpp>
 
 namespace Dusk {
 
-class DUSK_CORE_API Camera : public Actor
+class DUSK_CORE_API Camera : public Entity
 {
 public:
 

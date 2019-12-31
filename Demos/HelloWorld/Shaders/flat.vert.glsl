@@ -2,6 +2,8 @@
 
 layout(location = 0) in vec4 a_Position;
 
+out vec4 v_Position;
+
 void main()
 {
     // SetPos(3, 3, 3); LookAt(0, 0, 0);
@@ -12,4 +14,5 @@ void main()
         -0.000001, -0.000001, 4.996254, 5.196153
     );
     gl_Position = mvp * a_Position;
+    v_Position = a_Position;
 }

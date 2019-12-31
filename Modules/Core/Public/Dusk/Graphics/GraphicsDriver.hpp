@@ -4,6 +4,8 @@
 #include <Dusk/Config.hpp>
 #include <Dusk/Macros.hpp>
 #include <Dusk/Math.hpp>
+#include <Dusk/UpdateContext.hpp>
+#include <Dusk/RenderContext.hpp>
 #include <Dusk/Graphics/Texture.hpp>
 #include <Dusk/Graphics/Shader.hpp>
 #include <Dusk/Graphics/Mesh.hpp>
@@ -41,6 +43,16 @@ public:
     virtual std::unique_ptr<IShader> CreateShader() = 0;
 
     virtual std::unique_ptr<IMesh> CreateMesh() = 0;
+
+    virtual UpdateContext * GetUpdateContext();
+
+    virtual RenderContext * GetRenderContext();
+
+private:
+
+    std::unique_ptr<UpdateContext> _updateContext = std::make_unique<UpdateContext>();
+
+    std::unique_ptr<RenderContext> _renderContext = std::make_unique<RenderContext>();
 
 }; // class IGraphicsDriver
 

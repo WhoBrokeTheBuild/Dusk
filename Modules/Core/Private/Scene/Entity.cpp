@@ -1,6 +1,20 @@
 #include <Dusk/Scene/Entity.hpp>
 
+#include <Dusk/Scene/SceneImporter.hpp>
+
 namespace Dusk {
+
+DUSK_CORE_API
+bool Entity::LoadFromFile(const std::string& filename)
+{
+    const auto& importers = GetAllSceneImporters();
+    for (const auto& importer : importers) {
+        if (importer->LoadFromFile(this, filename)) {
+            return true;
+        }
+    }
+    return false;
+}
 
 DUSK_CORE_API
 void Entity::SetParent(Entity * parent)
@@ -8,6 +22,7 @@ void Entity::SetParent(Entity * parent)
     _parent = parent;
 }
 
+DUSK_CORE_API
 Entity * Entity::AddChild(std::unique_ptr<Entity> && child)
 {
     child->SetParent(this);
@@ -17,11 +32,13 @@ Entity * Entity::AddChild(std::unique_ptr<Entity> && child)
     return _childPtrs.back();
 }
 
+DUSK_CORE_API
 std::vector<Entity *> Entity::GetChildren() const
 {
     return _childPtrs;
 }
 
+DUSK_CORE_API
 IComponent * Entity::AddComponent(std::unique_ptr<IComponent> && component)
 {
     component->Attach(this);
@@ -31,9 +48,16 @@ IComponent * Entity::AddComponent(std::unique_ptr<IComponent> && component)
     return _componentPtrs.back();
 }
 
+DUSK_CORE_API
 std::vector<IComponent *> Entity::GetComponents() const
 {
     return _componentPtrs;
+}
+
+DUSK_CORE_API
+void Entity::SetName(const std::string& name)
+{
+    _name = name;
 }
 
 DUSK_CORE_API

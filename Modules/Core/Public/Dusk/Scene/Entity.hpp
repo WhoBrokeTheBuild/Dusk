@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <memory>
+#include <string>
 
 namespace Dusk {
 
@@ -34,6 +35,8 @@ public:
 
     virtual ~Entity() = default;
 
+    bool LoadFromFile(const std::string& filename);
+
     void SetParent(Entity * parent);
 
     inline Entity * GetParent() const {
@@ -47,6 +50,12 @@ public:
     IComponent * AddComponent(std::unique_ptr<IComponent> && component);
 
     std::vector<IComponent *> GetComponents() const;
+
+    void SetName(const std::string& name);
+
+    inline std::string GetName() const {
+        return _name;
+    }
 
     void SetPosition(const vec3& position);
 
@@ -83,6 +92,8 @@ public:
 private:
 
     Entity * _parent = nullptr;
+
+    std::string _name;
 
     std::vector<std::unique_ptr<Entity>> _children;
 

@@ -11,7 +11,13 @@ int main(int argc, char** argv)
     Dusk::Initialize(argc, argv);
     Dusk::RunScript("Scripts/Main.py");
 
+    Dusk::LoadModule("DuskAssimp");
+
     Dusk::Scene scene;
+    if (!scene.LoadFromFile("Models/TestScene.glb")) {
+        DuskLogError("Failed to load Models/TestScene.glb");
+    }
+
     Dusk::Entity * entity = scene.AddChild(std::make_unique<Dusk::Entity>());
     DuskLog("Entity at %s", glm::to_string(entity->GetPosition()));
 

@@ -77,6 +77,7 @@ std::vector<std::unique_ptr<IMeshData>> MeshImporter::LoadFromFile(const std::st
                 mesh->Colors.push_back(attrib.colors[3 * i.vertex_index + 0]);
                 mesh->Colors.push_back(attrib.colors[3 * i.vertex_index + 1]);
                 mesh->Colors.push_back(attrib.colors[3 * i.vertex_index + 2]);
+                mesh->Colors.push_back(1.0f);
             }
         }
 

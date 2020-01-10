@@ -41,6 +41,7 @@ std::vector<Entity *> Entity::GetChildren() const
 DUSK_CORE_API
 IComponent * Entity::AddComponent(std::unique_ptr<IComponent> && component)
 {
+    printf("???\n");
     component->Attach(this);
     _componentPtrs.push_back(component.get());
     _components.push_back(std::move(component));

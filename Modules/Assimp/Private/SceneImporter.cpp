@@ -2,7 +2,7 @@
 
 #include <Dusk/Benchmark.hpp>
 #include <Dusk/Graphics/Mesh.hpp>
-#include <Dusk/Graphics/Model.hpp>
+#include <Dusk/Graphics/MeshComponent.hpp>
 #include <Dusk/Graphics/GraphicsDriver.hpp>
 
 #include <assimp/Importer.hpp>
@@ -13,7 +13,11 @@ namespace Dusk::Assimp {
 
 void ProcessNode(const aiScene * scene, Entity * parentEntity, aiNode * parentNode)
 {
-    const auto& gfx = GetGraphicsDriver();
+    auto gfx = GetGraphicsDriver();
+    if (!gfx) {
+        DuskLogError("Unable to load mesh, no graphics driver found");
+        return;
+    }
 
     for (unsigned c = 0; c < parentNode->mNumChildren; ++c) {
         const auto& node = parentNode->mChildren[c];
@@ -31,7 +35,7 @@ void ProcessNode(const aiScene * scene, Entity * parentEntity, aiNode * parentNo
         entity->SetOrientation({ orient.w, orient.x, orient.y, orient.z });
 
         if (node->mNumMeshes > 0) {
-            auto model = std::make_unique<Model>();
+            auto meshComp = std::make_unique<MeshComponent>();
 
             for (unsigned m = 0; m < node->mNumMeshes; ++m) {
                 const auto& nodeMesh = scene->mMeshes[node->mMeshes[m]];
@@ -89,12 +93,11 @@ void ProcessNode(const aiScene * scene, Entity * parentEntity, aiNode * parentNo
                 
                 auto mesh = gfx->CreateMesh();
                 mesh->Load(&data);
-                model->AddMesh(std::move(mesh));
+                meshComp->AddMesh(std::move(mesh));
             }
 
-            // model
+            entity->AddComponent(std::move(meshComp));
         }
-
 
         parentEntity->AddChild(std::move(entity));
     }

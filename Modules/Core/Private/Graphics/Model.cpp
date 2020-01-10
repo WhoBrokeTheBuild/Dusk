@@ -38,4 +38,9 @@ bool Model::LoadFromFile(const std::string& filename)
     return false;
 }
 
+void Model::AddMesh(std::unique_ptr<IMesh> && mesh)
+{
+    _meshes.push_back(std::move(mesh));
+}
+
 } // namespace Dusk

@@ -21,6 +21,8 @@ public:
 
     virtual bool LoadFromFile(const std::string& filename);
 
+    virtual void AddMesh(std::unique_ptr<IMesh> && mesh);
+
 private:
 
     std::vector<std::unique_ptr<IMesh>> _meshes;

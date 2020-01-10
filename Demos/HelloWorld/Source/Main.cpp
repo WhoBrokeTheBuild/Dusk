@@ -3,7 +3,6 @@
 #include <Dusk/Log.hpp>
 #include <Dusk/Module.hpp>
 #include <Dusk/Graphics/GraphicsDriver.hpp>
-#include <Dusk/Graphics/Model.hpp>
 #include <Dusk/Scene/Scene.hpp>
 
 int main(int argc, char** argv)
@@ -14,18 +13,13 @@ int main(int argc, char** argv)
     Dusk::LoadModule("DuskAssimp");
 
     Dusk::Scene scene;
+
     if (!scene.LoadFromFile("Models/TestScene.glb")) {
         DuskLogError("Failed to load Models/TestScene.glb");
     }
 
-    Dusk::Entity * entity = scene.AddChild(std::make_unique<Dusk::Entity>());
-    DuskLog("Entity at %s", glm::to_string(entity->GetPosition()));
-
     {
         auto gfx = Dusk::GetGraphicsDriver();
-
-        auto model = Dusk::Model();
-        model.LoadFromFile("Models/crate/crate.obj");
 
         auto shader = gfx->CreateShader();
         shader->LoadFromFiles({
@@ -33,15 +27,14 @@ int main(int argc, char** argv)
             "Shaders/flat.frag",
         });
 
-        auto tex = gfx->CreateTexture();
-        tex->LoadFromFile("Models/crate/crate.png");
-
         Dusk::SetRunning(true);
         while (Dusk::IsRunning()) {
             gfx->ProcessEvents();
 
+            scene.Update(nullptr);
+
             shader->Bind();
-            model.Render();
+            scene.Render(nullptr);
 
             gfx->SwapBuffers();
         }

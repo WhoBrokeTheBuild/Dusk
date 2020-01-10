@@ -20,9 +20,13 @@ public:
 
     virtual ~IComponent() = default;
 
-    virtual void Attach(Entity * entity) = 0;
+    virtual inline void Attach(Entity * entity) {
+        _entity = entity;
+    }
 
-    virtual void Detach() = 0;
+    virtual inline void Detach() {
+        _entity = nullptr;
+    }
 
     virtual inline bool IsAttached() const {
         return (_entity != nullptr);

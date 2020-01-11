@@ -5,6 +5,10 @@
 #include <Dusk/Macros.hpp>
 #include <Dusk/Scene/Component.hpp>
 #include <Dusk/Graphics/Mesh.hpp>
+#include <Dusk/Graphics/TransformShaderData.hpp>
+
+#include <memory>
+#include <vector>
 
 namespace Dusk {
 
@@ -33,6 +37,8 @@ public:
 private:
 
     std::vector<std::unique_ptr<IMesh>> _meshes;
+
+    TransformShaderData _transformData;
 
 }; // class MeshComponent
 

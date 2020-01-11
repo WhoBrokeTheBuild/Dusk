@@ -37,19 +37,37 @@ MACRO(Demo target)
     FILE(
         GLOB_RECURSE
         shaders_in
-        Shaders/*.glsl
-        Shaders/*.hlsl
+        Shaders/*.vert
+        Shaders/*.vertex
+        Shaders/*.frag
+        Shaders/*.fragment
+        Shaders/*.tesc
+        Shaders/*.tesscontrol
+        Shaders/*.tese
+        Shaders/*.tesseval
+        Shaders/*.geom
+        Shaders/*.geometry
+        Shaders/*.comp
+        Shaders/*.compute
     )
 
-    IF(VulkanSDK_glslangValidator_PROGRAM)
+    IF(VulkanSDK_FOUND)
+        GET_SHADER_DATA_BINDINGS(bindings)
+        SET(defines "")
+        FOREACH(binding ${bindings})
+            SET(defines ${defines} -D${binding})
+        ENDFOREACH()
+
         FOREACH(file ${shaders_in})
-            GET_FILENAME_COMPONENT(shader_name ${file} NAME_WLE)
+            GET_FILENAME_COMPONENT(shader_name ${file} NAME)
             GET_FILENAME_COMPONENT(shader_path ${file} DIRECTORY)
             SET(shader_out "${shader_path}/${shader_name}.spv")
 
+            MESSAGE(STATUS "${VulkanSDK_glslc_PROGRAM} -std=430core -o ${shader_out} ${defines} ${file}")
+            
             ADD_CUSTOM_COMMAND(
                 OUTPUT ${shader_out}
-                COMMAND ${VulkanSDK_glslangValidator_PROGRAM} -o ${shader_out} -V ${file}
+                COMMAND ${VulkanSDK_glslc_PROGRAM} -std=430core -o ${shader_out} ${defines} ${file}
                 DEPENDS ${file}
                 WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             )

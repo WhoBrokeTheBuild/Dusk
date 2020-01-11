@@ -32,6 +32,10 @@ public:
         return (_entity != nullptr);
     }
 
+    virtual Entity * GetEntity() const {
+        return _entity;
+    }
+
     virtual inline void Update(UpdateContext * ctx) { }
 
     virtual inline void Render(RenderContext * ctx) { }

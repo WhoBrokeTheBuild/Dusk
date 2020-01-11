@@ -1,6 +1,7 @@
 #include <Dusk/Graphics/MeshComponent.hpp>
 #include <Dusk/Graphics/MeshImporter.hpp>
 #include <Dusk/Graphics/GraphicsDriver.hpp>
+#include <Dusk/Scene/Entity.hpp>
 #include <Dusk/Log.hpp>
 
 namespace Dusk {
@@ -55,6 +56,8 @@ void MeshComponent::AddMeshes(std::vector<std::unique_ptr<IMesh>> && meshes)
 
 void MeshComponent::Render(RenderContext * ctx)
 {
+    _transformData.Model = GetEntity()->GetWorldTransform();
+
     for (auto& mesh : _meshes) {
         mesh->Render();
     }

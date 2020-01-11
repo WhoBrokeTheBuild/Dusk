@@ -11,8 +11,8 @@ typedef nlohmann::basic_json<
     std::vector,
     std::string,
     bool,
-    std::int64_t,
-    std::uint64_t,
+    int,
+    unsigned,
     float,
     std::allocator> json;
 

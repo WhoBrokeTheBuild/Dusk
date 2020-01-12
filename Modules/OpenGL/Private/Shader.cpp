@@ -21,7 +21,17 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
         if (ext == "spv") {
             shader = LoadSPV(filename);
         }
-        else if (ext == "glsl") {
+        else if (ext == "glsl"
+            || ext == "vert"
+            || ext == "vertex"
+            || ext == "frag"
+            || ext == "fragment"
+            || ext == "tesc"
+            || ext == "tesscontrol"
+            || ext == "tese" 
+            || ext == "tesseval"
+            || ext == "comp"
+            || ext == "compute") {
             shader = LoadGLSL(filename);
         }
         else {
@@ -36,7 +46,7 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
                 glDeleteShader(shader);
             }
 
-            DuskLogError("Failed to load '%s'");
+            DuskLogError("Failed to load '%s'", filename);
             return false;
         }
 

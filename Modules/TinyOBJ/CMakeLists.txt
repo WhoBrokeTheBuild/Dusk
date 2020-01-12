@@ -1,7 +1,7 @@
 
 SET(_TARGET DuskTinyOBJ)
 
-Module(${_TARGET} TinyOBJ)
+Module(${_TARGET} TINYOBJ)
 
 TARGET_LINK_LIBRARIES(
     ${_TARGET}

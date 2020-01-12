@@ -223,6 +223,8 @@ IF(NEED_OpenAL)
     ENDIF()
 ENDIF()
 
+# FreeType
+
 IF(NEED_freetype)
     SET(freetype_ROOT           ${CMAKE_BINARY_DIR}/freetype)
     SET(freetype_SOURCE_DIR     ${CMAKE_BINARY_DIR}/freetype_src)

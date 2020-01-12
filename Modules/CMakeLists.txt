@@ -94,6 +94,7 @@ MACRO(Module target prefix)
             $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
         PRIVATE
             DUSK_${prefix}_EXPORT
+            HAVE_SNPRINTF
     )
 
     TARGET_COMPILE_OPTIONS(

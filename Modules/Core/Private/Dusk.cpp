@@ -12,7 +12,8 @@
 
 namespace Dusk {
 
-DUSK_CORE_API void Initialize(int argc, char ** argv) {
+DUSK_CORE_API
+void Initialize(int argc, char ** argv) {
     PyImport_AppendInittab("Dusk", PyInit_Dusk);
 
     wchar_t *program = Py_DecodeLocale(argv[0], NULL);
@@ -30,7 +31,8 @@ DUSK_CORE_API void Initialize(int argc, char ** argv) {
     DuskLogVerbose("Application Version: %s", GetApplicationVersion().GetString());
 }
 
-DUSK_CORE_API void Terminate() {
+DUSK_CORE_API
+void Terminate() {
     Py_Finalize();
 
     FreeModules();
@@ -38,15 +40,18 @@ DUSK_CORE_API void Terminate() {
 
 static bool _Running = false;
 
-DUSK_CORE_API void SetRunning(bool running) {
+DUSK_CORE_API
+void SetRunning(bool running) {
     _Running = running;
 }
 
-DUSK_CORE_API bool IsRunning() {
+DUSK_CORE_API
+bool IsRunning() {
     return _Running;
 }
 
-DUSK_CORE_API void RunScript(const std::string& filename) {
+DUSK_CORE_API
+void RunScript(const std::string& filename) {
     FILE * file = fopen(filename.c_str(), "rt");
     if (!file) {
         exit(1);

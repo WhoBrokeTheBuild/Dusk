@@ -236,14 +236,18 @@ SET(RUNTIME_SEARCH_PATH
 ### Modules
 ###
 
-INCLUDE(ShaderDataBinding)
+INCLUDE(ShaderDataBindings)
+INCLUDE(ShaderInputLocations)
 
 ADD_SHADER_DATA_BINDING(TRANSFORM)
 ADD_SHADER_DATA_BINDING(MATERIAL)
 
-GET_PROPERTY(shader_data_bindings GLOBAL PROPERTY _shader_data_bindings)
-MESSAGE(STATUS "${shader_data_bindings}")
-# TRANSFORM_SHADER_DATA_BINDING=0;MATERIAL_SHADER_DATA_BINDING=1
+ADD_SHADER_INPUT_LOCATION(POSITION)
+ADD_SHADER_INPUT_LOCATION(NORMAL)
+ADD_SHADER_INPUT_LOCATION(TANGENT)
+ADD_SHADER_INPUT_LOCATION(BITANGENT)
+ADD_SHADER_INPUT_LOCATION(COLOR)
+ADD_SHADER_INPUT_LOCATION(UV)
 
 ADD_SUBDIRECTORY(Modules)
 
@@ -257,6 +261,24 @@ SET(CMAKE_MSVCIDE_RUN_PATH ${RUNTIME_SEARCH_PATH})
 IF(BUILD_DEMOS)
     ADD_SUBDIRECTORY(Demos)
 ENDIF()
+
+
+GET_SHADER_DATA_BINDINGS(bindings)
+GET_SHADER_INPUT_LOCATIONS(locations)
+
+SET(binding_defines "")
+SET(location_defines "")
+
+FOREACH(binding ${bindings})
+    SET(bindings_include_content "${bindings_include_content}\n#define ${binding}")
+ENDFOREACH()
+
+FOREACH(location ${locations})
+    SET(locations_include_content "${locations_include_content}\n#define ${location}")
+ENDFOREACH()
+
+FILE(WRITE "${CMAKE_BINARY_DIR}/shader_data_bindings.glsl" ${bindings_include_content})
+FILE(WRITE "${CMAKE_BINARY_DIR}/uniform_locations.glsl" ${locations_include_content})
 
 ###
 ### Packaging

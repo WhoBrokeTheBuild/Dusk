@@ -1,7 +1,10 @@
 
 # Demo Macro definition
 
-MACRO(Demo target)
+MACRO(DUSK_DEMO target)
+
+    # Source Files
+
     FILE(
         GLOB_RECURSE
         sources
@@ -19,6 +22,8 @@ MACRO(Demo target)
         Source/*.in
     )
 
+    # Template Files
+
     FOREACH(file ${sources_in})
         STRING(REPLACE 
             ${CMAKE_CURRENT_SOURCE_DIR}
@@ -34,24 +39,66 @@ MACRO(Demo target)
         LIST(APPEND sources_out ${file_out})
     ENDFOREACH()
 
+    # Shader Data Bindings
+
+    WRITE_SHADER_DATA_BINDING_FILES(
+        ${CMAKE_CURRENT_BINARY_DIR}/Shaders/ShaderDataBindings.inc.glsl
+        ${CMAKE_CURRENT_BINARY_DIR}/Shaders/ShaderDataBindings.hpp
+    )
+
+    LIST(APPEND shaders_out ${CMAKE_CURRENT_BINARY_DIR}/Shaders/ShaderDataBindings.inc.glsl)
+    LIST(APPEND sources     ${CMAKE_CURRENT_BINARY_DIR}/Source/ShaderDataBindings.hpp)
+
+    # Shader Input Locations
+
+    WRITE_SHADER_INPUT_LOCATION_FILES(
+        ${CMAKE_CURRENT_BINARY_DIR}/Shaders/ShaderInputLocations.inc.glsl
+        ${CMAKE_CURRENT_BINARY_DIR}/Shaders/ShaderInputLocations.hpp
+    )
+    LIST(APPEND shaders_out ${CMAKE_CURRENT_BINARY_DIR}/Shaders/ShaderInputLocations.inc.glsl)
+    LIST(APPEND sources     ${CMAKE_CURRENT_BINARY_DIR}/Source/ShaderInputLocations.hpp)
+
+    # Shader Processing
+
     FILE(
         GLOB_RECURSE
         shaders_in
         Shaders/*.glsl
     )
 
+    LIST(APPEND SHADER_INCLUDE_PATH
+        ${CMAKE_CURRENT_SOURCE_DIR}/Shaders/
+        ${CMAKE_CURRENT_BINARY_DIR}/Shaders/
+    )
+
     IF(VulkanSDK_FOUND)
         FOREACH(file ${shaders_in})
             GET_FILENAME_COMPONENT(shader_name ${file} NAME_WLE)
             GET_FILENAME_COMPONENT(shader_path ${file} DIRECTORY)
-            SET(shader_out "${shader_path}/${shader_name}.spv")
+            STRING(REPLACE 
+                ${CMAKE_CURRENT_SOURCE_DIR}
+                ${CMAKE_CURRENT_BINARY_DIR}
+                shader_out_path
+                ${shader_path}
+            )
+
+            SET(shader_cflags "")
+            FOREACH(dir ${SHADER_INCLUDE_PATH} ${shader_path})
+                SET(shader_cflags ${shader_cflags} -I${dir})
+            ENDFOREACH()
+
+            SET(shader_out "${shader_out_path}/${shader_name}.spv")
 
             GET_FILENAME_COMPONENT(shader_type ${shader_name} LAST_EXT)
             STRING(SUBSTRING ${shader_type} 1 -1 shader_type)
 
+            IF(shader_type STREQUAL "inc")
+                CONTINUE()
+            ENDIF()
+
             ADD_CUSTOM_COMMAND(
                 OUTPUT ${shader_out}
-                COMMAND ${VulkanSDK_glslc_PROGRAM} -std=430core -fshader-stage=${shader_type} -o ${shader_out} ${file}
+                COMMAND ${VulkanSDK_glslc_PROGRAM} -fshader-stage=${shader_type} ${shader_cflags} -o ${shader_out} ${file}
                 DEPENDS ${file}
                 WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             )
@@ -69,6 +116,13 @@ MACRO(Demo target)
     TARGET_LINK_LIBRARIES(
         ${target}
         DuskCore
+    )
+
+    TARGET_INCLUDE_DIRECTORIES(
+        ${target}
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/Source
+            ${CMAKE_CURRENT_BINARY_DIR}/Source
     )
 
     TARGET_COMPILE_DEFINITIONS(
@@ -121,13 +175,15 @@ MACRO(Demo target)
             PROPERTIES 
                 VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                 VS_DEBUGGER_ENVIRONMENT "PATH=%PATH%;${RUNTIME_SEARCH_PATH}"
+                # TODO SHADER_INCLUDE_PATH
         )
     ELSE()
         STRING(JOIN ":" LD_LIBRARY_PATH ${RUNTIME_SEARCH_PATH})
+        STRING(JOIN ":" SHADER_INCLUDE_PATH ${SHADER_INCLUDE_PATH})
 
         ADD_CUSTOM_TARGET(
             run-${target}
-            COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" $<TARGET_FILE:${target}>
+            COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_SHADER_INCLUDE_PATH=${SHADER_INCLUDE_PATH}" $<TARGET_FILE:${target}>
             DEPENDS ${target}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         )
@@ -141,7 +197,7 @@ MACRO(Demo target)
         IF(GDB_COMMAND)
             ADD_CUSTOM_TARGET(
                 gdb-${target}
-                COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" gdb --args $<TARGET_FILE:${target}>
+                COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_SHADER_INCLUDE_PATH=${SHADER_INCLUDE_PATH}" gdb --args $<TARGET_FILE:${target}>
                 DEPENDS ${target}
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             )
@@ -156,7 +212,7 @@ MACRO(Demo target)
         IF(LLDB_COMMAND)
             ADD_CUSTOM_TARGET(
                 lldb-${target}
-                COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" lldb --args $<TARGET_FILE:${target}>
+                COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_SHADER_INCLUDE_PATH=${SHADER_INCLUDE_PATH}" lldb --args $<TARGET_FILE:${target}>
                 DEPENDS ${target}
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             )
@@ -171,7 +227,7 @@ MACRO(Demo target)
         IF(VALGRIND_COMMAND)
             ADD_CUSTOM_TARGET(
                 valgrind-${target}
-                COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" valgrind $<TARGET_FILE:${target}>
+                COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_SHADER_INCLUDE_PATH=${SHADER_INCLUDE_PATH}" valgrind $<TARGET_FILE:${target}>
                 DEPENDS ${target}
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             )

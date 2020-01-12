@@ -2,7 +2,7 @@
 SET(_TARGET DuskAssimp)
 
 IF(TARGET assimp::assimp)
-    Module(${_TARGET} ASSIMP)
+    DUSK_MODULE(${_TARGET} ASSIMP)
 
     TARGET_LINK_LIBRARIES(
         ${_TARGET}

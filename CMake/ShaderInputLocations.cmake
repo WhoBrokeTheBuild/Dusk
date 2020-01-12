@@ -1,19 +1,35 @@
 
-SET_PROPERTY(GLOBAL PROPERTY shader_input_location_index 0)
-SET_PROPERTY(GLOBAL PROPERTY shader_input_locations "")
+SET(_shader_input_location_index 0)
+SET(_shader_input_locations "")
 
 FUNCTION(ADD_SHADER_INPUT_LOCATION name)
-    GET_PROPERTY(index      GLOBAL PROPERTY shader_input_location_index)
-    GET_PROPERTY(locations  GLOBAL PROPERTY shader_input_locations)
-    
-    LIST(APPEND locations "${name}_LOCATION ${index}")
+    LIST(APPEND _shader_input_locations "${name}_INPUT_LOCATION ${_shader_input_location_index}")
 
-    MATH(EXPR index "${index}+1")
-    SET_PROPERTY(GLOBAL PROPERTY shader_input_location_index ${index})
-    SET_PROPERTY(GLOBAL PROPERTY shader_input_locations ${locations})
+    MATH(EXPR _shader_input_location_index "${_shader_input_location_index}+1")
+    SET(_shader_input_location_index ${_shader_input_location_index} PARENT_SCOPE)
+    SET(_shader_input_locations ${_shader_input_locations} PARENT_SCOPE)
 ENDFUNCTION()
 
 FUNCTION(GET_SHADER_INPUT_LOCATIONS out)
-    GET_PROPERTY(locations GLOBAL PROPERTY shader_input_locations)
-    SET(${out} "${locations}" PARENT_SCOPE)
+    SET(${out} "${_shader_input_locations}" PARENT_SCOPE)
+ENDFUNCTION()
+
+FUNCTION(WRITE_SHADER_INPUT_LOCATION_FILES cppout glslout)
+    SET(SHADER_INPUT_LOCATIONS_DEFINES "")
+
+    FOREACH(location ${_shader_input_locations})
+        SET(SHADER_INPUT_LOCATIONS_DEFINES "${SHADER_INPUT_LOCATIONS_DEFINES}\n#define ${location}")
+    ENDFOREACH()
+
+    CONFIGURE_FILE(
+        ${CMAKE_SOURCE_DIR}/CMake/ShaderInputLocations.hpp.in
+        ${cppout}
+        @ONLY
+    )
+
+    CONFIGURE_FILE(
+        ${CMAKE_SOURCE_DIR}/CMake/ShaderInputLocations.inc.glsl.in
+        ${glslout}
+        @ONLY
+    )
 ENDFUNCTION()

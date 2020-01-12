@@ -2,7 +2,7 @@
 SET(_TARGET DuskFreeType)
 
 IF(TARGET freetype)
-    Module(${_TARGET} FREETYPE)
+    DUSK_MODULE(${_TARGET} FREETYPE)
 
     TARGET_LINK_LIBRARIES(
         ${_TARGET}

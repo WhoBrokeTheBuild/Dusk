@@ -2,7 +2,7 @@
 SET(_TARGET DuskOpenAL)
 
 IF(TARGET OpenAL::OpenAL)
-    Module(${_TARGET} OPENAL)
+    DUSK_MODULE(${_TARGET} OPENAL)
 
     TARGET_LINK_LIBRARIES(
         ${_TARGET}

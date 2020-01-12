@@ -23,8 +23,8 @@ int main(int argc, char** argv)
 
         auto shader = gfx->CreateShader();
         shader->LoadFromFiles({
-           "Shaders/flat.vert",
-           "Shaders/flat.frag",
+           "flat.vert",
+           "flat.frag",
         });
 
         Dusk::SetRunning(true);

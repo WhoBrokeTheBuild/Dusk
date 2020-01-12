@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <vector>
+#include <sstream>
 
 namespace Dusk::OpenGL {
 
@@ -21,17 +22,7 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
         if (ext == "spv") {
             shader = LoadSPV(filename);
         }
-        else if (ext == "glsl"
-            || ext == "vert"
-            || ext == "vertex"
-            || ext == "frag"
-            || ext == "fragment"
-            || ext == "tesc"
-            || ext == "tesscontrol"
-            || ext == "tese" 
-            || ext == "tesseval"
-            || ext == "comp"
-            || ext == "compute") {
+        else if (ext == "glsl") {
             shader = LoadGLSL(filename);
         }
         else {
@@ -119,12 +110,24 @@ GLuint Shader::LoadSPV(const std::string& filename)
 {
     DuskLogVerbose("Looking for SPIR-V shader '%s'", filename);
 
-    std::ifstream file(filename, std::ios::binary);
-    file.unsetf(std::ios::skipws);
+    const auto& shaderPaths = GetShaderPaths();
 
-    if (!file) {
+    std::ifstream file;
+
+    for (const auto& path : shaderPaths) {
+        DuskLogVerbose("Checking '%s'", path + filename);
+        
+        file.open(path + filename, std::ios::binary);
+        if (file.is_open()) {
+            break;
+        }
+    }
+
+    if (!file.is_open()) {
         return 0;
     }
+
+    file.unsetf(std::ios::skipws);
 
     DuskLogLoad("Loading SPIR-V shader '%s'", filename);
 
@@ -151,18 +154,79 @@ GLuint Shader::LoadGLSL(const std::string& filename)
 {
     DuskLogVerbose("Looking for GLSL shader '%s'", filename);
 
-    std::ifstream file(filename);
+    const auto& shaderPaths = GetShaderPaths();
 
-    if (!file) {
+    std::ifstream file;
+
+    for (const auto& path : shaderPaths) {
+        DuskLogVerbose("Checking '%s'", path + filename);
+        
+        file.open(path + filename);
+        if (file.is_open()) {
+            break;
+        }
+    }
+
+    if (!file.is_open()) {
         return 0;
     }
     
     DuskLogLoad("Loading GLSL shader '%s'", filename);
 
-    std::string data(
+    std::string code(
         (std::istreambuf_iterator<char>(file)),
         std::istreambuf_iterator<char>()
     );
+
+    std::function<std::string(std::string)> preprocessGLSL = 
+        [&](std::string code) -> std::string {
+            std::istringstream iss(code);
+            std::string outCode;
+            std::string line;
+
+            while (std::getline(iss, line)) {
+                if (line.compare(0, sizeof("#include")-1, "#include") == 0) {
+                    size_t left = line.find('"');
+                    size_t right = line.rfind('"');
+
+                    if (left == std::string::npos || right == std::string::npos) {
+                        DuskLogError("Unable to parse filename from shader include");
+                        return "";
+                    }
+
+                    std::string incFilename = line.substr(left + 1, right - left - 1);
+                    std::ifstream incFile;
+
+                    for (const auto& path : shaderPaths) {
+                        DuskLogVerbose("Checking '%s'", path + incFilename);
+                        
+                        incFile.open(path + incFilename);
+                        if (incFile.is_open()) {
+                            break;
+                        }
+                    }
+
+                    if (!incFile.is_open()) {
+                        DuskLogError("Unable to find shader include '%s'", incFilename);
+                        return "";
+                    }
+
+                    std::string incCode(
+                        (std::istreambuf_iterator<char>(incFile)),
+                        std::istreambuf_iterator<char>()
+                    );
+
+                    outCode += preprocessGLSL(incCode);
+                }
+                else {
+                    outCode += line + "\n";
+                }
+            }
+
+            return outCode;
+        };
+
+    code = preprocessGLSL(code);
 
     GLenum type = GetGLShaderType(filename);
     if (type == GL_INVALID_ENUM) {
@@ -171,7 +235,7 @@ GLuint Shader::LoadGLSL(const std::string& filename)
 
     GLuint shader = glCreateShader(type);
     
-    const char * ptr = data.c_str();
+    const char * ptr = code.c_str();
     glShaderSource(shader, 1, (const GLchar **)&ptr, nullptr);
 
     glCompileShader(shader);
@@ -181,20 +245,30 @@ GLuint Shader::LoadGLSL(const std::string& filename)
 
 GLenum Shader::GetGLShaderType(const std::string& filename)
 {
-    // Strip .glsl or .spv
-    size_t pivot = filename.find_last_of('.');
-    if (pivot == std::string::npos) {
-        return GL_INVALID_ENUM;
+    std::string ext = GetExtension(filename);
+    if (ext == "spv" || ext == "glsl") {
+        size_t pivot = filename.find_last_of('.');
+        if (pivot == std::string::npos) {
+            return GL_INVALID_ENUM;
+        }
+        ext = GetExtension(filename.substr(0, pivot));
     }
 
-    const auto& ext = GetExtension(filename.substr(0, pivot));
-    if (ext == "vert") {
+    if (ext == "vert" || ext == "vertex") {
         return GL_VERTEX_SHADER;
     }
-    else if (ext == "frag") {
+    else if (ext == "frag" || ext == "fragment") {
         return GL_FRAGMENT_SHADER;
     }
-    // TODO
+    else if (ext == "tesc" || ext == "tesscontrol") {
+        return GL_TESS_CONTROL_SHADER;
+    }
+    else if (ext == "tese" || ext == "tesseval") {
+        return GL_TESS_EVALUATION_SHADER;
+    }
+    else if (ext == "comp" || ext == "compute") {
+        return GL_COMPUTE_SHADER;
+    }
 
     return GL_INVALID_ENUM;
 }

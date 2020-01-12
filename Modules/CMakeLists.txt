@@ -3,7 +3,7 @@
 ### Module Macro definition
 ###
 
-MACRO(Module target prefix)
+MACRO(DUSK_MODULE target prefix)
     ADD_LIBRARY(${target} SHARED "")
     
     LIST(APPEND MODULE_TARGETS ${target})

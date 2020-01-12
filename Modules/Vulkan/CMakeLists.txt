@@ -2,7 +2,7 @@
 SET(_TARGET DuskVulkan)
 
 IF(TARGET SDL2::SDL2)
-    Module(${_TARGET} VULKAN)
+    DUSK_MODULE(${_TARGET} VULKAN)
 
     TARGET_LINK_LIBRARIES(
         ${_TARGET}

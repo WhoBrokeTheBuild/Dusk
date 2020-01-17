@@ -17,7 +17,7 @@ ENDFUNCTION()
 FUNCTION(WRITE_SHADER_DATA_BINDING_FILES cppout glslout)
     SET(SHADER_DATA_BINDINGS_DEFINES "")
 
-    FOREACH(location ${_shader_input_locations})
+    FOREACH(location ${_shader_data_bindings})
         SET(SHADER_DATA_BINDINGS_DEFINES "${SHADER_DATA_BINDINGS_DEFINES}\n#define ${location}")
     ENDFOREACH()
 

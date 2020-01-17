@@ -2,7 +2,7 @@
 
 #include "ShaderInputLocations.inc.glsl"
 
-layout(location = POSITION_INPUT_LOCATION) in vec4 a_Position;
+layout(location = POSITION_INPUT_LOCATION)    in vec4 a_Position;
 layout(location = NORMAL_INPUT_LOCATION)      in vec4 a_Normal;
 layout(location = COLOR_INPUT_LOCATION)       in vec4 a_Color;
 layout(location = UV_INPUT_LOCATION)          in vec4 a_UV;

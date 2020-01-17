@@ -42,8 +42,8 @@ MACRO(DUSK_DEMO target)
     # Shader Data Bindings
 
     WRITE_SHADER_DATA_BINDING_FILES(
+        ${CMAKE_CURRENT_BINARY_DIR}/Source/ShaderDataBindings.hpp
         ${CMAKE_CURRENT_BINARY_DIR}/Shaders/ShaderDataBindings.inc.glsl
-        ${CMAKE_CURRENT_BINARY_DIR}/Shaders/ShaderDataBindings.hpp
     )
 
     LIST(APPEND shaders_out ${CMAKE_CURRENT_BINARY_DIR}/Shaders/ShaderDataBindings.inc.glsl)
@@ -52,8 +52,8 @@ MACRO(DUSK_DEMO target)
     # Shader Input Locations
 
     WRITE_SHADER_INPUT_LOCATION_FILES(
+        ${CMAKE_CURRENT_BINARY_DIR}/Source/ShaderInputLocations.hpp
         ${CMAKE_CURRENT_BINARY_DIR}/Shaders/ShaderInputLocations.inc.glsl
-        ${CMAKE_CURRENT_BINARY_DIR}/Shaders/ShaderInputLocations.hpp
     )
     LIST(APPEND shaders_out ${CMAKE_CURRENT_BINARY_DIR}/Shaders/ShaderInputLocations.inc.glsl)
     LIST(APPEND sources     ${CMAKE_CURRENT_BINARY_DIR}/Source/ShaderInputLocations.hpp)

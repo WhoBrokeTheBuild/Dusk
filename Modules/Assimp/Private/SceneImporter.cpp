@@ -55,12 +55,14 @@ void ProcessNode(const aiScene * scene, Entity * parentEntity, aiNode * parentNo
                         data.Vertices.push_back(vertex.x);
                         data.Vertices.push_back(vertex.y);
                         data.Vertices.push_back(vertex.z);
+                        data.Vertices.push_back(1.0f);
 
                         if (hasNormals) {
                             const auto& normal = nodeMesh->mNormals[index];
                             data.Normals.push_back(normal.x);
                             data.Normals.push_back(normal.y);
                             data.Normals.push_back(normal.z);
+                            data.Normals.push_back(1.0f);
                         }
 
                         if (hasUVs) {
@@ -82,11 +84,13 @@ void ProcessNode(const aiScene * scene, Entity * parentEntity, aiNode * parentNo
                             data.Tangents.push_back(tangent.x);
                             data.Tangents.push_back(tangent.y);
                             data.Tangents.push_back(tangent.z);
+                            data.Tangents.push_back(1.0f);
 
                             const auto& bitangent = nodeMesh->mBitangents[index];
                             data.Bitangents.push_back(bitangent.x);
                             data.Bitangents.push_back(bitangent.y);
                             data.Bitangents.push_back(bitangent.z);
+                            data.Bitangents.push_back(1.0f);
                         }
                     }
                 }

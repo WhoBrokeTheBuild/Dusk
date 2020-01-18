@@ -5,6 +5,8 @@
 #include <Dusk/Scene/SceneImporter.hpp>
 #include <Dusk/Graphics/Mesh.hpp>
 
+#include <Dusk/Log.hpp>
+
 #include <vector>
 
 namespace Dusk::Assimp {
@@ -24,6 +26,10 @@ public:
     std::vector<float> Tangents;
 
     std::vector<float> Bitangents;
+
+    Mode GetMode() const override {
+        return Mode::Triangles;
+    }
 
     gsl::span<const unsigned> GetIndices() const override {
         return gsl::span<unsigned>();

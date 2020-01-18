@@ -7,7 +7,14 @@ DUSK_OPENGL_API
 void Mesh::Render()
 {
     glBindVertexArray(_glVAO);
-    glDrawArrays(_glMode, 0, _glVertexCount);
+
+    if (_indexed) {
+        glDrawElements(_glMode, _glCount, GL_UNSIGNED_INT, NULL);
+    }
+    else {
+        glDrawArrays(_glMode, 0, _glCount);
+    }
+
     glBindVertexArray(0);
 }
 
@@ -25,8 +32,16 @@ bool Mesh::Load(const IMeshData * data)
     const auto& uvs = data->GetUVs();
     const auto& colors = data->GetColors();
 
-    _glMode = GL_TRIANGLES;
-    _glVertexCount = vertices.size();
+    _glMode = GetGLMode(data->GetMode());
+
+    if (indices.empty()) {
+        _indexed = false;
+        _glCount = vertices.size();
+    }
+    else {
+        _indexed = true;
+        _glCount = indices.size();
+    }
 
     GLuint vbo;
     std::vector<GLuint> vbos;
@@ -47,7 +62,7 @@ bool Mesh::Load(const IMeshData * data)
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray((GLuint)VertexAttributeLocation::Position);
-    glVertexAttribPointer((GLuint)VertexAttributeLocation::Position, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glVertexAttribPointer((GLuint)VertexAttributeLocation::Position, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     vbos.push_back(vbo);
 
@@ -57,7 +72,7 @@ bool Mesh::Load(const IMeshData * data)
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(float), normals.data(), GL_STATIC_DRAW);
         glEnableVertexAttribArray((GLuint)VertexAttributeLocation::Normal);
-        glVertexAttribPointer((GLuint)VertexAttributeLocation::Normal, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glVertexAttribPointer((GLuint)VertexAttributeLocation::Normal, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
 
         vbos.push_back(vbo);
     }
@@ -88,6 +103,23 @@ bool Mesh::Load(const IMeshData * data)
 
     DuskBenchmarkEnd("OpenGL::Mesh::Load");
     return true;
+}
+
+DUSK_OPENGL_API
+GLenum Mesh::GetGLMode(const IMeshData::Mode& mode)
+{
+    switch (mode) {
+    case IMeshData::Mode::Points:
+        return GL_POINTS;
+    case IMeshData::Mode::Lines:
+        return GL_LINES;
+    case IMeshData::Mode::Triangles:
+        return GL_TRIANGLES;
+    case IMeshData::Mode::TriangleFan:
+        return GL_TRIANGLE_FAN;
+    }
+
+    return GL_INVALID_ENUM;
 }
 
 } // namespace Dusk::OpenGL

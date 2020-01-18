@@ -4,6 +4,7 @@
 #include <Dusk/Module.hpp>
 #include <Dusk/Graphics/GraphicsDriver.hpp>
 #include <Dusk/Graphics/TransformData.hpp>
+#include <Dusk/Scene/AxisComponent.hpp>
 #include <Dusk/Scene/Scene.hpp>
 #include <Dusk/Scene/Camera.hpp>
 

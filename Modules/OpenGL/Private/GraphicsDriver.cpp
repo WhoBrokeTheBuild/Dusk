@@ -57,25 +57,43 @@ GraphicsDriver::GraphicsDriver() {
     DuskLogVerbose("OpenGL Vendor: %s",   glGetString(GL_VENDOR));
     DuskLogVerbose("OpenGL Renderer: %s", glGetString(GL_RENDERER));
 
-    int maxVertexAttribs = 0;
-    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertexAttribs);
-    DuskLogVerbose("Max Vertex Attributes: %d", maxVertexAttribs);
+    int value = 0;
 
-    int maxUniformBufferBindings = 0;
-    glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &maxUniformBufferBindings);
-    DuskLogVerbose("Max Uniform Buffer Bindings: %d", maxUniformBufferBindings);
+    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &value);
+    DuskLogVerbose("Max Vertex Attributes: %d", value);
 
-    int maxVertexUniformBlocks = 0;
-    glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &maxVertexUniformBlocks);
-    DuskLogVerbose("Max Vertex Uniform Blocks: %d", maxVertexUniformBlocks);
+    glGetIntegerv(GL_MAX_VERTEX_UNIFORM_COMPONENTS, &value);
+    DuskLogVerbose("Max Vertex Uniform Components: %d", value);
 
-    int maxFragmentUniformBlocks = 0;
-    glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &maxFragmentUniformBlocks);
-    DuskLogVerbose("Max Fragment Uniform Blocks: %d", maxFragmentUniformBlocks);
+    glGetIntegerv(GL_MAX_VERTEX_OUTPUT_COMPONENTS, &value);
+    DuskLogVerbose("Max Vertex Output Components: %d", value);
 
-    int maxUniformBlockSize = 0;
-    glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &maxUniformBlockSize);
-    DuskLogVerbose("Max Uniform Block Size: %d", maxUniformBlockSize);
+    glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, &value);
+    DuskLogVerbose("Max Fragment Uniform Components: %d", value);
+
+    glGetIntegerv(GL_MAX_FRAGMENT_INPUT_COMPONENTS, &value);
+    DuskLogVerbose("Max Fragment Input Components: %d", value);
+
+    glGetIntegerv(GL_MAX_DRAW_BUFFERS, &value);
+    DuskLogVerbose("Max Draw Buffers: %d", value);
+
+    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &value);
+    DuskLogVerbose("Max Fragment Texture Image Units: %d", value);
+
+    glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &value);
+    DuskLogVerbose("Max Vertex Texture Image Units: %d", value);
+    
+    glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &value);
+    DuskLogVerbose("Max Uniform Buffer Bindings: %d", value);
+    
+    glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &value);
+    DuskLogVerbose("Max Vertex Uniform Blocks: %d", value);
+    
+    glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &value);
+    DuskLogVerbose("Max Fragment Uniform Blocks: %d", value);
+    
+    glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &value);
+    DuskLogVerbose("Max Uniform Block Size: %d", value);
 
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 

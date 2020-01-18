@@ -233,10 +233,62 @@ SET(RUNTIME_SEARCH_PATH
 )
 
 ###
-### Shader Configuration
+### Shader Processing
 ###
 
-SET(SHADER_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/Assets/Shaders/")
+FILE(
+    GLOB_RECURSE
+    global_shaders_in
+    Assets/Shaders/*.glsl
+)
+
+LIST(APPEND SHADER_INCLUDE_PATH
+    ${CMAKE_SOURCE_DIR}/Assets/Shaders/
+    ${CMAKE_BINARY_DIR}/Assets/Shaders/
+)
+
+IF(VulkanSDK_FOUND)
+    FOREACH(file ${global_shaders_in})
+        GET_FILENAME_COMPONENT(shader_name ${file} NAME_WLE)
+        GET_FILENAME_COMPONENT(shader_path ${file} DIRECTORY)
+        STRING(REPLACE 
+            ${CMAKE_SOURCE_DIR}
+            ${CMAKE_BINARY_DIR}
+            shader_out_path
+            ${shader_path}
+        )
+
+        FILE(MAKE_DIRECTORY ${shader_out_path})
+
+        SET(shader_cflags "")
+        FOREACH(dir ${SHADER_INCLUDE_PATH} ${shader_path})
+            SET(shader_cflags ${shader_cflags} -I${dir})
+        ENDFOREACH()
+
+        SET(shader_out "${shader_out_path}/${shader_name}.spv")
+
+        GET_FILENAME_COMPONENT(shader_type ${shader_name} LAST_EXT)
+        STRING(SUBSTRING ${shader_type} 1 -1 shader_type)
+
+        IF(shader_type STREQUAL "inc")
+            CONTINUE()
+        ENDIF()
+
+        ADD_CUSTOM_COMMAND(
+            OUTPUT ${shader_out}
+            COMMAND ${VulkanSDK_glslc_PROGRAM} -fshader-stage=${shader_type} ${shader_cflags} -o ${shader_out} ${file}
+            DEPENDS ${file}
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        )
+
+        LIST(APPEND global_shaders ${shader_out})
+    ENDFOREACH()
+ENDIF()
+
+ADD_CUSTOM_TARGET(
+    global-shaders ALL
+    DEPENDS ${global_shaders}
+)
 
 ###
 ### Modules

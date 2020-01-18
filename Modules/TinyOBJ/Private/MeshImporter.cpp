@@ -61,11 +61,13 @@ std::vector<std::unique_ptr<IMeshData>> MeshImporter::LoadFromFile(const std::st
             mesh->Vertices.push_back(attrib.vertices[3 * i.vertex_index + 0]);
             mesh->Vertices.push_back(attrib.vertices[3 * i.vertex_index + 1]);
             mesh->Vertices.push_back(attrib.vertices[3 * i.vertex_index + 2]);
+            mesh->Vertices.push_back(1.0f);
             
             if (hasNormals) {
                 mesh->Normals.push_back(attrib.normals[3 * i.normal_index + 0]);
                 mesh->Normals.push_back(attrib.normals[3 * i.normal_index + 1]);
                 mesh->Normals.push_back(attrib.normals[3 * i.normal_index + 2]);
+                mesh->Normals.push_back(1.0f);
             }
             
             if (hasUVs) {

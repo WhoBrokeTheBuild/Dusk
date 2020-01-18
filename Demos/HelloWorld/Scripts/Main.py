@@ -1,8 +1,5 @@
 import Dusk
 
-Dusk.SetApplicationName("HelloWorld")
-Dusk.SetApplicationVersion(( 1, 0, 0 ))
-
 Dusk.LoadModule("DuskSTBI")
 Dusk.LoadModule("DuskTinyOBJ")
 # Dusk.LoadModule("DuskFreeType")

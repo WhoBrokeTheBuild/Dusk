@@ -20,6 +20,10 @@ public:
 
     std::vector<float> Colors;
 
+    Mode GetMode() const override {
+        return Mode::Triangles;
+    }
+
     gsl::span<const unsigned> GetIndices() const override {
         return gsl::span<unsigned>();
     }

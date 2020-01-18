@@ -10,6 +10,9 @@
 
 int main(int argc, char** argv)
 {
+    Dusk::SetApplicationName("HelloWorld");
+    Dusk::SetApplicationVersion({ 1, 0, 0 });
+
     Dusk::Initialize(argc, argv);
     Dusk::RunScript("Scripts/Main.py");
 
@@ -22,6 +25,8 @@ int main(int argc, char** argv)
     Dusk::Camera camera;
     camera.SetPosition({ 10, 10, 10 });
     camera.SetLookAt({ 0, 0, 0 });
+
+    // scene.AddComponent(std::make_unique<Dusk::AxisComponent>());
 
     auto transformData = renderContext.GetTransformData();
     transformData->View = camera.GetView();

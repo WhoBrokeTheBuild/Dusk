@@ -47,7 +47,7 @@ MACRO(DUSK_DEMO target)
         Shaders/*.glsl
     )
 
-    LIST(APPEND SHADER_INCLUDE_PATH
+    LIST(INSERT SHADER_INCLUDE_PATH 0
         ${CMAKE_CURRENT_SOURCE_DIR}/Shaders/
         ${CMAKE_CURRENT_BINARY_DIR}/Shaders/
     )

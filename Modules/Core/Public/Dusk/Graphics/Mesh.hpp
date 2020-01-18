@@ -12,11 +12,21 @@ class DUSK_CORE_API IMeshData
 {
 public:
 
+    enum class Mode 
+    {
+        Points,
+        Lines,
+        Triangles,
+        TriangleFan,
+    };
+
     DISALLOW_COPY_AND_ASSIGN(IMeshData);
 
     explicit IMeshData() = default;
 
     virtual ~IMeshData() = default;
+
+    virtual Mode GetMode() const = 0;
 
     virtual gsl::span<const unsigned> GetIndices() const = 0;
 

@@ -19,30 +19,34 @@ public:
         4, 5,
     };
 
-    const float Vertices[18] = { 
-        0.f, 0.f, 0.f,
-        1.f, 0.f, 0.f,
-        0.f, 0.f, 0.f,
-        0.f, 1.f, 0.f,
-        0.f, 0.f, 0.f,
-        0.f, 0.f, 1.f, 
+    const float Vertices[24] = { 
+        0.f, 0.f, 0.f, 1.0f,
+        1.f, 0.f, 0.f, 1.0f,
+        0.f, 0.f, 0.f, 1.0f,
+        0.f, 1.f, 0.f, 1.0f,
+        0.f, 0.f, 0.f, 1.0f,
+        0.f, 0.f, 1.f, 1.0f,
     };
 
-    const float Colors[18] = { 
-        1.f, 0.f, 0.f,
-        1.f, 0.f, 0.f,
-        0.f, 1.f, 0.f,
-        0.f, 1.f, 0.f,
-        0.f, 0.f, 1.f,
-        0.f, 0.f, 1.f,
+    const float Colors[24] = { 
+        1.f, 0.f, 0.f, 1.0f,
+        1.f, 0.f, 0.f, 1.0f,
+        0.f, 1.f, 0.f, 1.0f,
+        0.f, 1.f, 0.f, 1.0f,
+        0.f, 0.f, 1.f, 1.0f,
+        0.f, 0.f, 1.f, 1.0f,
     };
+
+    Mode GetMode() const override {
+        return Mode::Lines;
+    }
 
     gsl::span<const unsigned> GetIndices() const override {
         return gsl::span(Indices, 6);
     }
 
     gsl::span<const float> GetVertices() const override {
-        return gsl::span(Vertices, 18);
+        return gsl::span(Vertices, 24);
     }
 
     gsl::span<const float> GetNormals() const override {
@@ -54,7 +58,7 @@ public:
     }
 
     gsl::span<const float> GetColors() const override {
-        return gsl::span(Colors, 18);
+        return gsl::span(Colors, 24);
     }
 
     gsl::span<const float> GetTangents() const override {

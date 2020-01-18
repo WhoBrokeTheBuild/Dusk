@@ -16,9 +16,11 @@ public:
 
 private:
 
+    GLenum GetGLMode(const IMeshData::Mode& mode);
+
     GLuint _glVAO;
     GLenum _glMode;
-    GLsizei _glVertexCount;
+    GLsizei _glCount;
 
     bool _indexed;
 

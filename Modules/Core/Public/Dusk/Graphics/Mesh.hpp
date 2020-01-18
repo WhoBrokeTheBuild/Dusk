@@ -48,6 +48,23 @@ public:
 
     virtual bool Load(const IMeshData * data) = 0;
 
+protected:
+
+    enum class VertexAttributeLocation {
+        Position        = 0,
+        Normal          = 1,
+        Tangent         = 2,
+        Bitangent       = 3,
+        Color1          = 4,
+        Color2          = 5,
+        UV1             = 6,
+        UV2             = 6,
+        UV3             = 7,
+        UV4             = 7,
+        UV5             = 8,
+        UV6             = 8,
+    };
+
 }; // class IMesh
 
 } // namespace Dusk

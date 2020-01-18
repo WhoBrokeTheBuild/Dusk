@@ -11,6 +11,12 @@ class DUSK_CORE_API ISceneImporter
 {
 public:
 
+    DISALLOW_COPY_AND_ASSIGN(ISceneImporter)
+
+    explicit ISceneImporter() = default;
+
+    virtual ~ISceneImporter() = default;
+
     virtual bool LoadFromFile(Entity * root, const std::string& filename) = 0;
 
 }; // class ISceneImporter

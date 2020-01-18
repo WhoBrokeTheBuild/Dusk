@@ -36,6 +36,8 @@ public:
     
     std::unique_ptr<IMesh> CreateMesh() override;
 
+    bool SetShaderData(unsigned index, size_t size, void * data) override;
+
 private:
 
     SDL_Window * _sdlWindow = nullptr;

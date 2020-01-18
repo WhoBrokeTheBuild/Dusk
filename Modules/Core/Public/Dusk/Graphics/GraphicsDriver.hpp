@@ -48,6 +48,8 @@ public:
 
     virtual RenderContext * GetRenderContext();
 
+    virtual bool SetShaderData(unsigned binding, size_t size, void * data) = 0;
+
 private:
 
     std::unique_ptr<UpdateContext> _updateContext = std::make_unique<UpdateContext>();

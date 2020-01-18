@@ -25,11 +25,6 @@ bool Mesh::Load(const IMeshData * data)
     const auto& uvs = data->GetUVs();
     const auto& colors = data->GetColors();
 
-    const unsigned POSITION = 0;
-    const unsigned NORMAL = 1;
-    const unsigned UV = 2;
-    const unsigned COLOR = 3;
-
     _glMode = GL_TRIANGLES;
     _glVertexCount = vertices.size();
 
@@ -40,6 +35,7 @@ bool Mesh::Load(const IMeshData * data)
         _indexed = true;
 
         glGenBuffers(1, &vbo);
+
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned), indices.data(), GL_STATIC_DRAW);
         
@@ -47,39 +43,43 @@ bool Mesh::Load(const IMeshData * data)
     }
 
     glGenBuffers(1, &vbo);
+
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-    glEnableVertexAttribArray(POSITION);
-    glVertexAttribPointer(POSITION, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray((GLuint)VertexAttributeLocation::Position);
+    glVertexAttribPointer((GLuint)VertexAttributeLocation::Position, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     vbos.push_back(vbo);
 
     if (!normals.empty()) {
         glGenBuffers(1, &vbo);
+        
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(float), normals.data(), GL_STATIC_DRAW);
-        glEnableVertexAttribArray(NORMAL);
-        glVertexAttribPointer(NORMAL, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-        vbos.push_back(vbo);
-    }
-
-    if (!uvs.empty()) {
-        glGenBuffers(1, &vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(float), uvs.data(), GL_STATIC_DRAW);
-        glEnableVertexAttribArray(UV);
-        glVertexAttribPointer(UV, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glEnableVertexAttribArray((GLuint)VertexAttributeLocation::Normal);
+        glVertexAttribPointer((GLuint)VertexAttributeLocation::Normal, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
         vbos.push_back(vbo);
     }
 
     if (!colors.empty()) {
         glGenBuffers(1, &vbo);
+        
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(float), colors.data(), GL_STATIC_DRAW);
-        glEnableVertexAttribArray(COLOR);
-        glVertexAttribPointer(COLOR, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glEnableVertexAttribArray((GLuint)VertexAttributeLocation::Color1);
+        glVertexAttribPointer((GLuint)VertexAttributeLocation::Color1, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+        vbos.push_back(vbo);
+    }
+    
+    if (!uvs.empty()) {
+        glGenBuffers(1, &vbo);
+        
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(float), uvs.data(), GL_STATIC_DRAW);
+        glEnableVertexAttribArray((GLuint)VertexAttributeLocation::UV1);
+        glVertexAttribPointer((GLuint)VertexAttributeLocation::UV1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
 
         vbos.push_back(vbo);
     }

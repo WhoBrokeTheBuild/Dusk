@@ -4,10 +4,13 @@ SET(_TARGET DuskOpenGL)
 IF(TARGET SDL2::SDL2)
     DUSK_MODULE(${_TARGET} OPENGL)
 
+    LIST(APPEND MODULE_TARGETS ${_TARGET})
+    SET(MODULE_TARGETS ${MODULE_TARGETS} PARENT_SCOPE)
+
     TARGET_LINK_LIBRARIES(
         ${_TARGET}
         PUBLIC
-            DuskCore
+            DuskEngine
             SDL2::SDL2
     )
 ELSE()

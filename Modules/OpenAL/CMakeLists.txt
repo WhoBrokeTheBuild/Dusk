@@ -4,10 +4,13 @@ SET(_TARGET DuskOpenAL)
 IF(TARGET OpenAL::OpenAL)
     DUSK_MODULE(${_TARGET} OPENAL)
 
+    LIST(APPEND MODULE_TARGETS ${_TARGET})
+    SET(MODULE_TARGETS ${MODULE_TARGETS} PARENT_SCOPE)
+
     TARGET_LINK_LIBRARIES(
         ${_TARGET}
         PUBLIC
-            DuskCore
+            DuskEngine
             OpenAL::OpenAL
     )
 ELSE()

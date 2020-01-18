@@ -6,5 +6,5 @@ DUSK_MODULE(${_TARGET} ARCHIVE)
 TARGET_LINK_LIBRARIES(
     ${_TARGET}
     PUBLIC
-        DuskCore
+        DuskEngine
 )

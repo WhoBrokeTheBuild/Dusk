@@ -26,8 +26,8 @@ int main(int argc, char** argv)
     transformData->View = camera.GetView();
     transformData->Projection = camera.GetProjection();
 
-    if (!scene.LoadFromFile("Models/crate/crate.obj")) {
-        DuskLogError("Failed to load Models/crate/crate.obj");
+    if (!scene.LoadFromFile("Models/TestScene.glb")) {
+        DuskLogError("Failed to load Models/TestScene.glb");
     }
 
     {

@@ -63,6 +63,8 @@ MACRO(DUSK_DEMO target)
                 ${shader_path}
             )
 
+            FILE(MAKE_DIRECTORY ${shader_out_path})
+
             SET(shader_cflags "")
             FOREACH(dir ${SHADER_INCLUDE_PATH} ${shader_path})
                 SET(shader_cflags ${shader_cflags} -I${dir})

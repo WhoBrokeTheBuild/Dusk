@@ -3,12 +3,27 @@
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Macros.hpp>
+#include <Dusk/Graphics/TransformData.hpp>
 
 namespace Dusk {
 
 class RenderContext
 {
 public:
+
+    DISALLOW_COPY_AND_ASSIGN(RenderContext)
+
+    explicit RenderContext() = default;
+
+    virtual ~RenderContext() = default;
+
+    virtual TransformData * GetTransformData() {
+        return &_transformData;
+    }
+
+private:
+
+    TransformData _transformData;
 
 }; // class RenderContext
 

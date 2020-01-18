@@ -56,7 +56,13 @@ void MeshComponent::AddMeshes(std::vector<std::unique_ptr<IMesh>> && meshes)
 
 void MeshComponent::Render(RenderContext * ctx)
 {
-    _transformData.Model = GetEntity()->GetWorldTransform();
+    auto gfx = GetGraphicsDriver();
+    auto transformData = ctx->GetTransformData();
+
+    transformData->Model = GetEntity()->GetWorldTransform();
+    transformData->UpdateMVP();
+    
+    gfx->SetShaderData(Dusk::TransformDataBinding, sizeof(TransformData), transformData);
 
     for (auto& mesh : _meshes) {
         mesh->Render();

@@ -203,6 +203,12 @@ std::unique_ptr<IMesh> GraphicsDriver::CreateMesh()
     return nullptr;
 }
 
+bool GraphicsDriver::SetShaderData(unsigned binding, size_t size, void * buffer)
+{
+    return true;
+}
+
+
 bool IsDeviceSuitable(const VkPhysicalDevice device)
 {
     VkPhysicalDeviceProperties deviceProperties;

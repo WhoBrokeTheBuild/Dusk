@@ -20,7 +20,7 @@ GraphicsDriver::GraphicsDriver() {
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
@@ -56,6 +56,26 @@ GraphicsDriver::GraphicsDriver() {
     DuskLogVerbose("GLSL Version: %s",    glGetString(GL_SHADING_LANGUAGE_VERSION));
     DuskLogVerbose("OpenGL Vendor: %s",   glGetString(GL_VENDOR));
     DuskLogVerbose("OpenGL Renderer: %s", glGetString(GL_RENDERER));
+
+    int maxVertexAttribs = 0;
+    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertexAttribs);
+    DuskLogVerbose("Max Vertex Attributes: %d", maxVertexAttribs);
+
+    int maxUniformBufferBindings = 0;
+    glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &maxUniformBufferBindings);
+    DuskLogVerbose("Max Uniform Buffer Bindings: %d", maxUniformBufferBindings);
+
+    int maxVertexUniformBlocks = 0;
+    glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &maxVertexUniformBlocks);
+    DuskLogVerbose("Max Vertex Uniform Blocks: %d", maxVertexUniformBlocks);
+
+    int maxFragmentUniformBlocks = 0;
+    glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &maxFragmentUniformBlocks);
+    DuskLogVerbose("Max Fragment Uniform Blocks: %d", maxFragmentUniformBlocks);
+
+    int maxUniformBlockSize = 0;
+    glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &maxUniformBlockSize);
+    DuskLogVerbose("Max Uniform Block Size: %d", maxUniformBlockSize);
 
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 
@@ -123,6 +143,34 @@ std::unique_ptr<IShader> GraphicsDriver::CreateShader()
 std::unique_ptr<IMesh> GraphicsDriver::CreateMesh()
 {
     return std::make_unique<Mesh>();
+}
+
+bool GraphicsDriver::SetShaderData(unsigned binding, size_t size, void * buffer)
+{
+    GLuint glID;
+
+    const auto& it = _shaderDataBindings.find(binding);
+    if (it == _shaderDataBindings.end()) {
+        glGenBuffers(1, &glID);
+        glBindBuffer(GL_UNIFORM_BUFFER, glID);
+        glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_STATIC_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        glBindBufferBase(GL_UNIFORM_BUFFER, binding, glID);
+
+        _shaderDataBindings.emplace(binding, glID);
+    }
+    else {
+        glID = it->second;
+    }
+
+    glBindBuffer(GL_UNIFORM_BUFFER, glID);
+    GLvoid * ptr = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+    memcpy(ptr, buffer, size);
+    glUnmapBuffer(GL_UNIFORM_BUFFER);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    return true;
 }
 
 } // namespace Dusk::OpenGL

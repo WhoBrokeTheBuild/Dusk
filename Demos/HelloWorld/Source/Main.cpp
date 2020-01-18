@@ -3,7 +3,9 @@
 #include <Dusk/Log.hpp>
 #include <Dusk/Module.hpp>
 #include <Dusk/Graphics/GraphicsDriver.hpp>
+#include <Dusk/Graphics/TransformData.hpp>
 #include <Dusk/Scene/Scene.hpp>
+#include <Dusk/Scene/Camera.hpp>
 
 int main(int argc, char** argv)
 {
@@ -12,10 +14,20 @@ int main(int argc, char** argv)
 
     Dusk::LoadModule("DuskAssimp");
 
-    Dusk::Scene scene;
+    Dusk::UpdateContext updateContext;
+    Dusk::RenderContext renderContext;
 
-    if (!scene.LoadFromFile("Models/TestScene.glb")) {
-        DuskLogError("Failed to load Models/TestScene.glb");
+    Dusk::Scene scene;
+    Dusk::Camera camera;
+    camera.SetPosition({ 10, 10, 10 });
+    camera.SetLookAt({ 0, 0, 0 });
+
+    auto transformData = renderContext.GetTransformData();
+    transformData->View = camera.GetView();
+    transformData->Projection = camera.GetProjection();
+
+    if (!scene.LoadFromFile("Models/crate/crate.obj")) {
+        DuskLogError("Failed to load Models/crate/crate.obj");
     }
 
     {
@@ -31,10 +43,10 @@ int main(int argc, char** argv)
         while (Dusk::IsRunning()) {
             gfx->ProcessEvents();
 
-            scene.Update(nullptr);
+            scene.Update(&updateContext);
 
             shader->Bind();
-            scene.Render(nullptr);
+            scene.Render(&renderContext);
 
             gfx->SwapBuffers();
         }

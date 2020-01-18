@@ -8,6 +8,12 @@
 
 namespace Dusk::OpenGL {
 
+struct ShaderDataBindingInfo
+{
+    GLuint glID;
+    size_t size;
+};
+
 class DUSK_OPENGL_API GraphicsDriver : public IGraphicsDriver
 {
 public:
@@ -34,11 +40,15 @@ public:
 
     std::unique_ptr<IMesh> CreateMesh() override;
 
+    bool SetShaderData(unsigned binding, size_t size, void * data) override;
+
 private:
 
     SDL_Window * _sdlWindow = nullptr;
 
     SDL_GLContext _glContext;
+
+    std::unordered_map<unsigned, GLuint> _shaderDataBindings;
     
 }; // class GraphicsDriver
 

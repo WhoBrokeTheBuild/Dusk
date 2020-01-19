@@ -50,6 +50,8 @@ GraphicsDriver::GraphicsDriver() {
     
     DuskLogVerbose("Vulkan %d.%d", GLAD_VERSION_MAJOR(vkVersion), GLAD_VERSION_MINOR(vkVersion));
 
+    // Extensions
+
     uint32_t availableExtensionCount = 0;
     vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, nullptr);
 
@@ -62,22 +64,24 @@ GraphicsDriver::GraphicsDriver() {
     }
 
     static const char * requiredExtensions[64];
-    unsigned requiredExtensionCount = sizeof(requiredExtensions) / sizeof(requiredExtensions[0]);
+    uint32_t requiredExtensionCount = sizeof(requiredExtensions) / sizeof(requiredExtensions[0]);
 
-    SDL_bool result = SDL_Vulkan_GetInstanceExtensions(_sdlWindow, &requiredExtensionCount, requiredExtensions);
-    if (!result) {
+    SDL_bool sdlResult = SDL_Vulkan_GetInstanceExtensions(_sdlWindow, &requiredExtensionCount, requiredExtensions);
+    if (!sdlResult) {
         DuskLogError("SDL_Vulkan_GetInstanceExtensions failed, %s", SDL_GetError());
         return;
     }
 
     DuskLogVerbose("Required Vulkan Extensions:");
-    for (unsigned i = 0; i < requiredExtensionCount; ++i) {
+    for (uint32_t i = 0; i < requiredExtensionCount; ++i) {
         DuskLogVerbose("\t%s", requiredExtensions[i]);
     }
 
     const auto& version = GetVersion();
     const auto& appVersion = GetApplicationVersion();
     const auto& appName = GetApplicationName().c_str();
+
+    // Instance
 
     VkApplicationInfo appInfo = { };
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -104,12 +108,11 @@ GraphicsDriver::GraphicsDriver() {
         return;
     }
 
-    result = SDL_Vulkan_CreateSurface(_sdlWindow, _vkInstance, &_vkWindowSurface);
-    if (!result) {
+    sdlResult = SDL_Vulkan_CreateSurface(_sdlWindow, _vkInstance, &_vkWindowSurface);
+    if (!sdlResult) {
         DuskLogError("SDL_Vulkan_CreateSurface failed, %s", SDL_GetError());
         return;
     }
-
 
     // Physical Devices
 
@@ -118,7 +121,7 @@ GraphicsDriver::GraphicsDriver() {
 
     if (deviceCount == 0)
     {
-        DuskLogError("Failed to find GPUs with Vulkan Support.\n");
+        DuskLogError("Failed to find GPUs with Vulkan Support");
         return;
     }
 
@@ -136,12 +139,98 @@ GraphicsDriver::GraphicsDriver() {
         return;
     }
 
-    // Logical Devices
+    // Queue
+
+    uint32_t queueFamilyCount;
+    vkGetPhysicalDeviceQueueFamilyProperties(_vkPhysicalDevice, &queueFamilyCount, nullptr);
+    if (queueFamilyCount < 1) {
+        DuskLogError("Failed to get Queue Families");
+        return;
+    }
+
+    std::vector<VkQueueFamilyProperties> queueFamilyProps(queueFamilyCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(_vkPhysicalDevice, &queueFamilyCount, queueFamilyProps.data());
 
     VkDeviceQueueCreateInfo queueCreateInfo;
+    queueCreateInfo.queueFamilyIndex = 0;
+    
+    for (const auto& prop : queueFamilyProps) {
+        if (prop.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+            break;
+        }
+        ++queueCreateInfo.queueFamilyIndex;
+    }
+
+    if (queueCreateInfo.queueFamilyIndex == queueFamilyCount) {
+        DuskLogError("Failed to get Queue");
+        return;
+    }
+    
+    const float queuePriorities = 0.f;
+    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queueCreateInfo.pNext = nullptr;
+    queueCreateInfo.queueCount = 1;
+    queueCreateInfo.pQueuePriorities = &queuePriorities;
+
+    // Device
+
+    VkDeviceCreateInfo deviceCreateInfo;
+    deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    deviceCreateInfo.pNext = nullptr;
+    deviceCreateInfo.queueCreateInfoCount = 1;
+    deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
+    deviceCreateInfo.enabledExtensionCount = 0;
+    deviceCreateInfo.ppEnabledExtensionNames = nullptr;
+    deviceCreateInfo.enabledLayerCount = 0;
+    deviceCreateInfo.ppEnabledExtensionNames = nullptr;
+    deviceCreateInfo.pEnabledFeatures = nullptr;
+
+    VkResult vkResult = vkCreateDevice(_vkPhysicalDevice, &deviceCreateInfo, nullptr, &_vkDevice);
+    if (vkResult != VK_SUCCESS) {
+        DuskLogError("Failed to create Device");
+        return;
+    }
+
+    // Command Pool
+
+    VkCommandPoolCreateInfo commandPoolCreateInfo;
+    commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    commandPoolCreateInfo.pNext = nullptr;
+    commandPoolCreateInfo.queueFamilyIndex = queueCreateInfo.queueFamilyIndex;
+    commandPoolCreateInfo.flags = 0;
+
+    vkResult = vkCreateCommandPool(_vkDevice, &commandPoolCreateInfo, nullptr, &_vkCommandPool);
+    if (vkResult != VK_SUCCESS) {
+        DuskLogError("Failed to create Command Pool");
+        return;
+    }
+
+    // Command Buffer
+
+    VkCommandBufferAllocateInfo commandBufferAllocateInfo;
+    commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    commandBufferAllocateInfo.pNext = nullptr;
+    commandBufferAllocateInfo.commandPool = _vkCommandPool;
+    commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    commandBufferAllocateInfo.commandBufferCount = 1;
+
+    _vkCommandBuffers.resize(1);
+    vkResult = vkAllocateCommandBuffers(_vkDevice, &commandBufferAllocateInfo, _vkCommandBuffers.data());
+    if (vkResult != VK_SUCCESS) {
+        DuskLogError("Failed to create Command Buffers");
+        return;
+    }
+
+    // Swapchain
+
+    std::vector<VkBool32> supportsPresent(queueFamilyCount);
+    for (uint32_t i = 0; i < queueFamilyCount; ++i) {
+        vkGetPhysicalDeviceSurfaceSupportKHR(_vkPhysicalDevice, i, _vkWindowSurface, &supportsPresent[i]);
+    }
 
 
-}
+
+} 
 
 DUSK_VULKAN_API
 GraphicsDriver::~GraphicsDriver() {

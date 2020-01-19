@@ -32,18 +32,18 @@ int main(int argc, char** argv)
     transformData->View = camera.GetView();
     transformData->Projection = camera.GetProjection();
 
-    if (!scene.LoadFromFile("Models/TestScene.glb")) {
-        DuskLogError("Failed to load Models/TestScene.glb");
-    }
+    // if (!scene.LoadFromFile("Models/TestScene.glb")) {
+    //     DuskLogError("Failed to load Models/TestScene.glb");
+    // }
 
     {
         auto gfx = Dusk::GetGraphicsDriver();
 
         auto shader = gfx->CreateShader();
-        shader->LoadFromFiles({
-           "flat.vert",
-           "flat.frag",
-        });
+        // shader->LoadFromFiles({
+        //    "flat.vert",
+        //    "flat.frag",
+        // });
 
         Dusk::SetRunning(true);
         while (Dusk::IsRunning()) {
@@ -51,7 +51,7 @@ int main(int argc, char** argv)
 
             scene.Update(&updateContext);
 
-            shader->Bind();
+            // shader->Bind();
             scene.Render(&renderContext);
 
             gfx->SwapBuffers();

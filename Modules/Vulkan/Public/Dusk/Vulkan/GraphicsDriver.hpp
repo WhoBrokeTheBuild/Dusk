@@ -62,7 +62,7 @@ private:
 
     VkCommandPool _vkCommandPool;
 
-    std::vector<VkCommandBuffer> _vkPresentCommandBuffers;
+    std::vector<VkCommandBuffer> _vkCommandBuffers;
 
 }; // class GraphicsDriver
 

@@ -8,8 +8,9 @@
 namespace Dusk::OpenGL {
 
 DUSK_OPENGL_API
-GraphicsDriver::GraphicsDriver() {
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK) < 0) {
+GraphicsDriver::GraphicsDriver()
+{
+    if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
         DuskLogError("Failed to initialize SDL, %s", SDL_GetError());
         return;
     }
@@ -99,67 +100,67 @@ GraphicsDriver::GraphicsDriver() {
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_ONE_MINUS_SRC_ALPHA);
+
+    _inputDriver = new InputDriver();
+    SetInputDriver(std::unique_ptr<Dusk::InputDriver>(_inputDriver));
 }
 
 DUSK_OPENGL_API
-GraphicsDriver::~GraphicsDriver() {
+GraphicsDriver::~GraphicsDriver()
+{
+    _inputDriver = nullptr;
+    SetInputDriver(nullptr);
+
     SDL_GL_DeleteContext(_glContext);
     SDL_DestroyWindow(_sdlWindow);
     SDL_Quit();
 }
 
 DUSK_OPENGL_API
-void GraphicsDriver::SetWindowTitle(const std::string& title) {
+void GraphicsDriver::SetWindowTitle(const std::string& title)
+{
     SDL_SetWindowTitle(_sdlWindow, title.c_str());
 }
 
 DUSK_OPENGL_API
-std::string GraphicsDriver::GetWindowTitle() {
+std::string GraphicsDriver::GetWindowTitle()
+{
     return SDL_GetWindowTitle(_sdlWindow);
 }
 
 DUSK_OPENGL_API
-void GraphicsDriver::SetWindowSize(const ivec2& size) {
+void GraphicsDriver::SetWindowSize(const ivec2& size)
+{
     SDL_SetWindowSize(_sdlWindow, size.x, size.y);
     glViewport(0, 0, size.x, size.y);
 }
 
 DUSK_OPENGL_API
-ivec2 GraphicsDriver::GetWindowSize() {
+ivec2 GraphicsDriver::GetWindowSize()
+{
     ivec2 size;
     SDL_GetWindowSize(_sdlWindow, &size.x, &size.y);
     return size;
 }
 
 DUSK_OPENGL_API
-void GraphicsDriver::ProcessEvents() {
+void GraphicsDriver::ProcessEvents()
+{
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
             SetRunning(false);
         }
-        else if (event.type == SDL_CONTROLLERDEVICEADDED) {
-            DuskLogInfo("Controller Connected %d", event.cdevice.which);
-        }
-        else if (event.type == SDL_CONTROLLERDEVICEREMAPPED) {
-            DuskLogInfo("Controller Remapped %d", event.cdevice.which);
-        }
-        else if (event.type == SDL_CONTROLLERDEVICEREMOVED) {
-            DuskLogInfo("Controller Disconnected %d", event.cdevice.which);
-        }
-        else if (event.type == SDL_JOYDEVICEADDED) {
-            DuskLogInfo("Joystick Connected %d", event.jdevice.which);
-        }
-        else if (event.type == SDL_JOYDEVICEREMOVED) {
-            DuskLogInfo("Joystick Disconnected %d", event.jdevice.which);
-        }
+
+        _inputDriver->ProcessEvent(&event);
     }
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 DUSK_OPENGL_API
-void GraphicsDriver::SwapBuffers() {
+void GraphicsDriver::SwapBuffers()
+{
     SDL_GL_SwapWindow(_sdlWindow);
 }
 

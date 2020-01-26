@@ -2,6 +2,7 @@
 #define DUSK_OPENGL_GRAPHICS_DRIVER_HPP
 
 #include <Dusk/OpenGL/Config.hpp>
+#include <Dusk/OpenGL/InputDriver.hpp>
 #include <Dusk/Graphics/GraphicsDriver.hpp>
 
 #include <SDL.h>
@@ -18,7 +19,7 @@ class DUSK_OPENGL_API GraphicsDriver : public Dusk::GraphicsDriver
 {
 public:
 
-    GraphicsDriver();
+    explicit GraphicsDriver();
 
     virtual ~GraphicsDriver();
 
@@ -47,6 +48,8 @@ private:
     SDL_Window * _sdlWindow = nullptr;
 
     SDL_GLContext _glContext;
+
+    InputDriver * _inputDriver = nullptr;
 
     std::unordered_map<unsigned, GLuint> _shaderDataBindings;
     

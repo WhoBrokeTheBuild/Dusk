@@ -2,6 +2,7 @@
 
 #include <Dusk/Log.hpp>
 #include <Dusk/OpenGL/GraphicsDriver.hpp>
+#include <Dusk/OpenGL/InputDriver.hpp>
 
 namespace Dusk::OpenGL {
 

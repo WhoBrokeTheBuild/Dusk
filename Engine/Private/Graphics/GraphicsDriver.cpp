@@ -2,28 +2,28 @@
 
 namespace Dusk {
 
-static std::unique_ptr<IGraphicsDriver> _GraphicsDriver(nullptr);
+static std::unique_ptr<GraphicsDriver> _GraphicsDriver(nullptr);
 
 DUSK_CORE_API 
-void SetGraphicsDriver(std::unique_ptr<IGraphicsDriver> && driver)
+void SetGraphicsDriver(std::unique_ptr<GraphicsDriver> && driver)
 {
     _GraphicsDriver = std::move(driver);
 }
 
 DUSK_CORE_API 
-IGraphicsDriver * GetGraphicsDriver()
+GraphicsDriver * GetGraphicsDriver()
 {
     return _GraphicsDriver.get();
 }
 
 DUSK_CORE_API
-UpdateContext * IGraphicsDriver::GetUpdateContext()
+UpdateContext * GraphicsDriver::GetUpdateContext()
 {
     return _updateContext.get();
 }
 
 DUSK_CORE_API
-RenderContext * IGraphicsDriver::GetRenderContext()
+RenderContext * GraphicsDriver::GetRenderContext()
 {
     return _renderContext.get();
 }

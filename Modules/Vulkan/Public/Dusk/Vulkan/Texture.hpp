@@ -6,7 +6,7 @@
 
 namespace Dusk::Vulkan {
 
-class DUSK_VULKAN_API Texture : public ITexture
+class DUSK_VULKAN_API Texture : public Dusk::Texture
 {
 public:
 
@@ -14,13 +14,13 @@ public:
 
     virtual ~Texture();
 
-    bool Load(const ITextureData * data) override;
+    bool Load(const TextureData * data) override;
 
     void Bind() override;
 
 private:
 
-    VkFormat GetVkDataFormat(int components, const ITextureData::DataType& type);
+    VkFormat GetVkDataFormat(int components, const TextureData::DataType& type);
 
     VkDevice _vkDevice;
 

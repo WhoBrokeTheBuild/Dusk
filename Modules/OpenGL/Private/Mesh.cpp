@@ -19,7 +19,7 @@ void Mesh::Render()
 }
 
 DUSK_OPENGL_API
-bool Mesh::Load(const IMeshData * data)
+bool Mesh::Load(const MeshData * data)
 {
     DuskBenchmarkStart();
 
@@ -106,16 +106,16 @@ bool Mesh::Load(const IMeshData * data)
 }
 
 DUSK_OPENGL_API
-GLenum Mesh::GetGLMode(const IMeshData::Mode& mode)
+GLenum Mesh::GetGLMode(const MeshData::Mode& mode)
 {
     switch (mode) {
-    case IMeshData::Mode::Points:
+    case MeshData::Mode::Points:
         return GL_POINTS;
-    case IMeshData::Mode::Lines:
+    case MeshData::Mode::Lines:
         return GL_LINES;
-    case IMeshData::Mode::Triangles:
+    case MeshData::Mode::Triangles:
         return GL_TRIANGLES;
-    case IMeshData::Mode::TriangleFan:
+    case MeshData::Mode::TriangleFan:
         return GL_TRIANGLE_FAN;
     }
 

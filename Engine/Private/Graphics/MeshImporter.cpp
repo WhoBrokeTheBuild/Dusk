@@ -4,9 +4,9 @@
 
 namespace Dusk {
 
-static std::unordered_map<std::string, std::unique_ptr<IMeshImporter>> _MeshImporters;
+static std::unordered_map<std::string, std::unique_ptr<MeshImporter>> _MeshImporters;
 
-static std::vector<IMeshImporter *> _MeshImporterList;
+static std::vector<MeshImporter *> _MeshImporterList;
 
 void updateMeshImporterList()
 {
@@ -17,7 +17,7 @@ void updateMeshImporterList()
 }
 
 DUSK_CORE_API
-void AddMeshImporter(const std::string& id, std::unique_ptr<IMeshImporter> importer)
+void AddMeshImporter(const std::string& id, std::unique_ptr<MeshImporter> importer)
 {
     _MeshImporters[id] = std::move(importer);
     updateMeshImporterList();
@@ -35,7 +35,7 @@ void RemoveMeshImporter(const std::string& id)
 }
 
 DUSK_CORE_API
-const std::vector<IMeshImporter *>& GetAllMeshImporters()
+const std::vector<MeshImporter *>& GetAllMeshImporters()
 {
     return _MeshImporterList;
 }

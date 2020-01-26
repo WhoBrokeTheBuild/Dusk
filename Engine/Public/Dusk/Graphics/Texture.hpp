@@ -13,7 +13,7 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API ITextureData
+class DUSK_CORE_API TextureData
 {
 public:
 
@@ -51,11 +51,11 @@ public:
 
     }; // enum FilterType
 
-    DISALLOW_COPY_AND_ASSIGN(ITextureData)
+    DISALLOW_COPY_AND_ASSIGN(TextureData)
 
-    explicit ITextureData() = default;
+    explicit TextureData() = default;
 
-    virtual ~ITextureData() = default;
+    virtual ~TextureData() = default;
 
     // Pointer to pixel data Buffer
     virtual uint8_t * GetData() const = 0;
@@ -89,27 +89,27 @@ public:
         return true;
     }
 
-}; // class ITextureData
+}; // class TextureData
 
-class DUSK_CORE_API ITexture 
+class DUSK_CORE_API Texture 
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(ITexture)
+    DISALLOW_COPY_AND_ASSIGN(Texture)
 
-    explicit ITexture() = default;
+    explicit Texture() = default;
 
-    virtual ~ITexture() = default;
+    virtual ~Texture() = default;
 
     virtual void Bind() = 0;
 
-    virtual bool Load(const ITextureData * data) = 0;
+    virtual bool Load(const TextureData * data) = 0;
 
     virtual bool LoadFromFile(const std::string& filename);
 
     virtual bool LoadFromMemory(uint8_t * buffer, size_t length);
 
-}; // class ITexture
+}; // class Texture
 
 } // namespace Dusk
 

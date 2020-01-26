@@ -9,7 +9,7 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API AxisMeshData : public IMeshData
+class DUSK_CORE_API AxisMeshData : public MeshData
 {
 public:
 
@@ -71,7 +71,7 @@ public:
 
 }; // class MeshData
 
-class DUSK_CORE_API AxisComponent : public IComponent
+class DUSK_CORE_API AxisComponent : public Component
 {
 public:
 
@@ -87,9 +87,9 @@ private:
 
     static AxisMeshData _MeshData;
 
-    std::unique_ptr<IShader> _shader;
+    std::unique_ptr<Shader> _shader;
 
-    std::unique_ptr<IMesh> _mesh;
+    std::unique_ptr<Mesh> _mesh;
 
 }; // class AxisComponent
 

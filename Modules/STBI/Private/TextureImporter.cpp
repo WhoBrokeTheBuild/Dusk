@@ -28,7 +28,7 @@ TextureData::~TextureData()
 }
 
 DUSK_STBI_API
-std::unique_ptr<ITextureData> TextureImporter::LoadFromFile(const std::string& filename)
+std::unique_ptr<Dusk::TextureData> TextureImporter::LoadFromFile(const std::string& filename)
 {
     ivec2 size;
     int components;
@@ -46,7 +46,7 @@ std::unique_ptr<ITextureData> TextureImporter::LoadFromFile(const std::string& f
 }
 
 DUSK_STBI_API
-std::unique_ptr<ITextureData> TextureImporter::LoadFromMemory(uint8_t * buffer, size_t length)
+std::unique_ptr<Dusk::TextureData> TextureImporter::LoadFromMemory(uint8_t * buffer, size_t length)
 {
     ivec2 size;
     int components;

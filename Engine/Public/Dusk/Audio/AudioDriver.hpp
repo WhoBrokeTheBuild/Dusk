@@ -5,21 +5,21 @@
 
 namespace Dusk {
 
-class IAudioDriver
+class AudioDriver
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(IAudioDriver)
+    DISALLOW_COPY_AND_ASSIGN(AudioDriver)
 
-    explicit IAudioDriver() = default;
+    explicit AudioDriver() = default;
 
-    virtual ~IAudioDriver() = default;
+    virtual ~AudioDriver() = default;
 
-}; // class IAudioDriver
+}; // class AudioDriver
 
-void SetAudioDriver(IAudioDriver * driver);
+void SetAudioDriver(AudioDriver * driver);
 
-IAudioDriver * GetAudioDriver();
+AudioDriver * GetAudioDriver();
 
 } // namespace Dusk
 

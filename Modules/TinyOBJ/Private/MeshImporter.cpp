@@ -9,12 +9,12 @@
 namespace Dusk::TinyOBJ {
 
 DUSK_TINYOBJ_API
-std::vector<std::unique_ptr<IMeshData>> MeshImporter::LoadFromFile(const std::string& filename)
+std::vector<std::unique_ptr<Dusk::MeshData>> MeshImporter::LoadFromFile(const std::string& filename)
 {
     DuskBenchmarkStart();
 
     const std::string& dir = GetDirname(filename);
-    std::vector<std::unique_ptr<IMeshData>> meshes;
+    std::vector<std::unique_ptr<Dusk::MeshData>> meshes;
 
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;

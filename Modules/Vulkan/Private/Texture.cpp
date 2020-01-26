@@ -15,7 +15,7 @@ Texture::~Texture()
 }
 
 DUSK_VULKAN_API
-bool Texture::Load(const ITextureData * data)
+bool Texture::Load(const TextureData * data)
 {
     DuskBenchmarkStart();
 
@@ -55,69 +55,69 @@ void Texture::Bind()
 }
 
 DUSK_VULKAN_API
-VkFormat Texture::GetVkDataFormat(int components, const ITextureData::DataType& type)
+VkFormat Texture::GetVkDataFormat(int components, const TextureData::DataType& type)
 {
     if (components == 1) {
         switch(type) {
-            case ITextureData::DataType::UnsignedByte:
+            case TextureData::DataType::UnsignedByte:
                 return VK_FORMAT_R8_UINT;
-            case ITextureData::DataType::Byte:
+            case TextureData::DataType::Byte:
                 return VK_FORMAT_R8_SINT;
-            case ITextureData::DataType::UnsignedShort:
+            case TextureData::DataType::UnsignedShort:
                 return VK_FORMAT_R16_UINT;
-            case ITextureData::DataType::Short:
+            case TextureData::DataType::Short:
                 return VK_FORMAT_R16_SINT;
-            case ITextureData::DataType::UnsignedInt:
+            case TextureData::DataType::UnsignedInt:
                 return VK_FORMAT_R32_UINT;
-            case ITextureData::DataType::Int:
+            case TextureData::DataType::Int:
                 return VK_FORMAT_R32_SINT;
         }
     }
     else if (components == 2) {
         switch(type) {
-            case ITextureData::DataType::UnsignedByte:
+            case TextureData::DataType::UnsignedByte:
                 return VK_FORMAT_R8G8_UINT;
-            case ITextureData::DataType::Byte:
+            case TextureData::DataType::Byte:
                 return VK_FORMAT_R8G8_SINT;
-            case ITextureData::DataType::UnsignedShort:
+            case TextureData::DataType::UnsignedShort:
                 return VK_FORMAT_R16G16_UINT;
-            case ITextureData::DataType::Short:
+            case TextureData::DataType::Short:
                 return VK_FORMAT_R16G16_SINT;
-            case ITextureData::DataType::UnsignedInt:
+            case TextureData::DataType::UnsignedInt:
                 return VK_FORMAT_R32G32_UINT;
-            case ITextureData::DataType::Int:
+            case TextureData::DataType::Int:
                 return VK_FORMAT_R32G32_SINT;
         }
     }
     else if (components == 3) {
         switch(type) {
-            case ITextureData::DataType::UnsignedByte:
+            case TextureData::DataType::UnsignedByte:
                 return VK_FORMAT_R8G8B8_UINT;
-            case ITextureData::DataType::Byte:
+            case TextureData::DataType::Byte:
                 return VK_FORMAT_R8G8B8_SINT;
-            case ITextureData::DataType::UnsignedShort:
+            case TextureData::DataType::UnsignedShort:
                 return VK_FORMAT_R16G16B16_UINT;
-            case ITextureData::DataType::Short:
+            case TextureData::DataType::Short:
                 return VK_FORMAT_R16G16B16_SINT;
-            case ITextureData::DataType::UnsignedInt:
+            case TextureData::DataType::UnsignedInt:
                 return VK_FORMAT_R32G32B32_UINT;
-            case ITextureData::DataType::Int:
+            case TextureData::DataType::Int:
                 return VK_FORMAT_R32G32B32_SINT;
         }
     }
     else if (components == 4) {
         switch(type) {
-            case ITextureData::DataType::UnsignedByte:
+            case TextureData::DataType::UnsignedByte:
                 return VK_FORMAT_R8G8B8A8_UINT;
-            case ITextureData::DataType::Byte:
+            case TextureData::DataType::Byte:
                 return VK_FORMAT_R8G8B8A8_SINT;
-            case ITextureData::DataType::UnsignedShort:
+            case TextureData::DataType::UnsignedShort:
                 return VK_FORMAT_R16G16B16A16_UINT;
-            case ITextureData::DataType::Short:
+            case TextureData::DataType::Short:
                 return VK_FORMAT_R16G16B16A16_SINT;
-            case ITextureData::DataType::UnsignedInt:
+            case TextureData::DataType::UnsignedInt:
                 return VK_FORMAT_R32G32B32A32_UINT;
-            case ITextureData::DataType::Int:
+            case TextureData::DataType::Int:
                 return VK_FORMAT_R32G32B32A32_SINT;
         }
     }

@@ -5,7 +5,7 @@
 namespace Dusk::Vulkan {
 
 void ModuleInit() {
-    SetGraphicsDriver(std::unique_ptr<IGraphicsDriver>(new GraphicsDriver()));
+    SetGraphicsDriver(std::unique_ptr<Dusk::GraphicsDriver>(new GraphicsDriver()));
 }
 
 void ModuleTerm() {

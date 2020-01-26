@@ -8,7 +8,7 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API IMeshData
+class DUSK_CORE_API MeshData
 {
 public:
 
@@ -20,11 +20,11 @@ public:
         TriangleFan,
     };
 
-    DISALLOW_COPY_AND_ASSIGN(IMeshData);
+    DISALLOW_COPY_AND_ASSIGN(MeshData);
 
-    explicit IMeshData() = default;
+    explicit MeshData() = default;
 
-    virtual ~IMeshData() = default;
+    virtual ~MeshData() = default;
 
     virtual Mode GetMode() const = 0;
 
@@ -42,21 +42,21 @@ public:
 
     virtual gsl::span<const float> GetBitangents() const = 0;
 
-}; // class IMeshData
+}; // class MeshData
 
-class DUSK_CORE_API IMesh 
+class DUSK_CORE_API Mesh 
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(IMesh)
+    DISALLOW_COPY_AND_ASSIGN(Mesh)
 
-    explicit IMesh() = default;
+    explicit Mesh() = default;
 
-    virtual ~IMesh() = default;
+    virtual ~Mesh() = default;
 
     virtual void Render() = 0;
 
-    virtual bool Load(const IMeshData * data) = 0;
+    virtual bool Load(const MeshData * data) = 0;
 
 protected:
 
@@ -75,7 +75,7 @@ protected:
         UV6             = 8,
     };
 
-}; // class IMesh
+}; // class Mesh
 
 } // namespace Dusk
 

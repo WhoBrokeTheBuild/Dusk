@@ -6,17 +6,17 @@
 
 namespace Dusk::OpenGL {
 
-class DUSK_OPENGL_API Mesh : public IMesh 
+class DUSK_OPENGL_API Mesh : public Dusk::Mesh 
 {
 public:
 
     void Render() override;
 
-    bool Load(const IMeshData * data) override;
+    bool Load(const MeshData * data) override;
 
 private:
 
-    GLenum GetGLMode(const IMeshData::Mode& mode);
+    GLenum GetGLMode(const MeshData::Mode& mode);
 
     GLuint _glVAO;
     GLenum _glMode;

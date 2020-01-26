@@ -277,17 +277,17 @@ void GraphicsDriver::SwapBuffers() {
     SDL_GL_SwapWindow(_sdlWindow);
 }
 
-std::unique_ptr<ITexture> GraphicsDriver::CreateTexture()
+std::unique_ptr<Dusk::Texture> GraphicsDriver::CreateTexture()
 {
     return std::make_unique<Texture>(_vkDevice);
 }
 
-std::unique_ptr<IShader> GraphicsDriver::CreateShader()
+std::unique_ptr<Dusk::Shader> GraphicsDriver::CreateShader()
 {
     return nullptr;
 }
 
-std::unique_ptr<IMesh> GraphicsDriver::CreateMesh()
+std::unique_ptr<Dusk::Mesh> GraphicsDriver::CreateMesh()
 {
     return nullptr;
 }

@@ -11,30 +11,30 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API ITextureImporter
+class DUSK_CORE_API TextureImporter
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(ITextureImporter)
+    DISALLOW_COPY_AND_ASSIGN(TextureImporter)
 
-    explicit ITextureImporter() = default;
+    explicit TextureImporter() = default;
 
-    virtual ~ITextureImporter() = default;
+    virtual ~TextureImporter() = default;
 
-    virtual std::unique_ptr<ITextureData> LoadFromFile(const std::string& filename) = 0;
+    virtual std::unique_ptr<TextureData> LoadFromFile(const std::string& filename) = 0;
 
-    virtual std::unique_ptr<ITextureData> LoadFromMemory(uint8_t * buffer, size_t length) = 0;
+    virtual std::unique_ptr<TextureData> LoadFromMemory(uint8_t * buffer, size_t length) = 0;
 
 };
 
 DUSK_CORE_API
-void AddTextureImporter(const std::string& id, std::unique_ptr<ITextureImporter> importer);
+void AddTextureImporter(const std::string& id, std::unique_ptr<TextureImporter> importer);
 
 DUSK_CORE_API
 void RemoveTextureImporter(const std::string& id);
 
 DUSK_CORE_API
-const std::vector<ITextureImporter *>& GetAllTextureImporters();
+const std::vector<TextureImporter *>& GetAllTextureImporters();
 
 }
 

@@ -9,7 +9,7 @@ namespace Dusk::OpenGL {
 
 DUSK_OPENGL_API
 GraphicsDriver::GraphicsDriver() {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK) < 0) {
         DuskLogError("Failed to initialize SDL, %s", SDL_GetError());
         return;
     }
@@ -138,6 +138,21 @@ void GraphicsDriver::ProcessEvents() {
         if (event.type == SDL_QUIT) {
             SetRunning(false);
         }
+        else if (event.type == SDL_CONTROLLERDEVICEADDED) {
+            DuskLogInfo("Controller Connected %d", event.cdevice.which);
+        }
+        else if (event.type == SDL_CONTROLLERDEVICEREMAPPED) {
+            DuskLogInfo("Controller Remapped %d", event.cdevice.which);
+        }
+        else if (event.type == SDL_CONTROLLERDEVICEREMOVED) {
+            DuskLogInfo("Controller Disconnected %d", event.cdevice.which);
+        }
+        else if (event.type == SDL_JOYDEVICEADDED) {
+            DuskLogInfo("Joystick Connected %d", event.jdevice.which);
+        }
+        else if (event.type == SDL_JOYDEVICEREMOVED) {
+            DuskLogInfo("Joystick Disconnected %d", event.jdevice.which);
+        }
     }
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -148,17 +163,17 @@ void GraphicsDriver::SwapBuffers() {
     SDL_GL_SwapWindow(_sdlWindow);
 }
 
-std::unique_ptr<ITexture> GraphicsDriver::CreateTexture()
+std::unique_ptr<Dusk::Texture> GraphicsDriver::CreateTexture()
 {
     return std::make_unique<Texture>();
 }
 
-std::unique_ptr<IShader> GraphicsDriver::CreateShader()
+std::unique_ptr<Dusk::Shader> GraphicsDriver::CreateShader()
 {
     return std::make_unique<Shader>();
 }
 
-std::unique_ptr<IMesh> GraphicsDriver::CreateMesh()
+std::unique_ptr<Dusk::Mesh> GraphicsDriver::CreateMesh()
 {
     return std::make_unique<Mesh>();
 }

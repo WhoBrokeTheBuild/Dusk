@@ -16,15 +16,15 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API IGraphicsDriver
+class DUSK_CORE_API GraphicsDriver
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(IGraphicsDriver)
+    DISALLOW_COPY_AND_ASSIGN(GraphicsDriver)
 
-    explicit IGraphicsDriver() = default;
+    explicit GraphicsDriver() = default;
 
-    virtual ~IGraphicsDriver() = default;
+    virtual ~GraphicsDriver() = default;
 
     virtual void SetWindowTitle(const std::string& title) = 0;
 
@@ -38,11 +38,11 @@ public:
     
     virtual void SwapBuffers() = 0;
 
-    virtual std::unique_ptr<ITexture> CreateTexture() = 0;
+    virtual std::unique_ptr<Texture> CreateTexture() = 0;
 
-    virtual std::unique_ptr<IShader> CreateShader() = 0;
+    virtual std::unique_ptr<Shader> CreateShader() = 0;
 
-    virtual std::unique_ptr<IMesh> CreateMesh() = 0;
+    virtual std::unique_ptr<Mesh> CreateMesh() = 0;
 
     virtual UpdateContext * GetUpdateContext();
 
@@ -56,11 +56,11 @@ private:
 
     std::unique_ptr<RenderContext> _renderContext = std::make_unique<RenderContext>();
 
-}; // class IGraphicsDriver
+}; // class GraphicsDriver
 
-DUSK_CORE_API void SetGraphicsDriver(std::unique_ptr<IGraphicsDriver> && driver);
+DUSK_CORE_API void SetGraphicsDriver(std::unique_ptr<GraphicsDriver> && driver);
 
-DUSK_CORE_API IGraphicsDriver * GetGraphicsDriver();
+DUSK_CORE_API GraphicsDriver * GetGraphicsDriver();
 
 } // namespace Dusk
 

@@ -9,15 +9,15 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API IShader 
+class DUSK_CORE_API Shader 
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(IShader)
+    DISALLOW_COPY_AND_ASSIGN(Shader)
 
-    explicit IShader() = default;
+    explicit Shader() = default;
 
-    virtual ~IShader() = default;
+    virtual ~Shader() = default;
 
     virtual bool LoadFromFiles(const std::vector<std::string>& filenames) = 0;
 

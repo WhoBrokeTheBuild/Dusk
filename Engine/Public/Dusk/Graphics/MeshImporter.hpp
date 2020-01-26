@@ -10,28 +10,28 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API IMeshImporter 
+class DUSK_CORE_API MeshImporter 
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(IMeshImporter)
+    DISALLOW_COPY_AND_ASSIGN(MeshImporter)
 
-    explicit IMeshImporter() = default;
+    explicit MeshImporter() = default;
 
-    virtual ~IMeshImporter() = default;
+    virtual ~MeshImporter() = default;
 
-    virtual std::vector<std::unique_ptr<IMeshData>> LoadFromFile(const std::string& filename) = 0;
+    virtual std::vector<std::unique_ptr<MeshData>> LoadFromFile(const std::string& filename) = 0;
 
-}; // class IMeshImporter
+}; // class MeshImporter
 
 DUSK_CORE_API
-void AddMeshImporter(const std::string& id, std::unique_ptr<IMeshImporter> importer);
+void AddMeshImporter(const std::string& id, std::unique_ptr<MeshImporter> importer);
 
 DUSK_CORE_API
 void RemoveMeshImporter(const std::string& id);
 
 DUSK_CORE_API
-const std::vector<IMeshImporter *>& GetAllMeshImporters();
+const std::vector<MeshImporter *>& GetAllMeshImporters();
 
 } // namespace Dusk
 

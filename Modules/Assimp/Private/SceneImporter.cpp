@@ -2,8 +2,8 @@
 
 #include <Dusk/Benchmark.hpp>
 #include <Dusk/Graphics/Mesh.hpp>
-#include <Dusk/Graphics/MeshComponent.hpp>
 #include <Dusk/Graphics/GraphicsDriver.hpp>
+#include <Dusk/Scene/MeshComponent.hpp>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>

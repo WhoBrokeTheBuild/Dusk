@@ -10,7 +10,7 @@ Texture::~Texture()
 }
 
 DUSK_OPENGL_API
-bool Texture::Load(const ITextureData * data)
+bool Texture::Load(const TextureData * data)
 {
     DuskBenchmarkStart();
 
@@ -78,20 +78,20 @@ GLenum Texture::GetGLDataFormat(int components)
 }
 
 DUSK_OPENGL_API
-GLenum Texture::GetGLDataType(const ITextureData::DataType& type)
+GLenum Texture::GetGLDataType(const TextureData::DataType& type)
 {
     switch (type) {
-    case ITextureData::DataType::UnsignedByte:
+    case TextureData::DataType::UnsignedByte:
         return GL_UNSIGNED_BYTE;
-    case ITextureData::DataType::Byte:
+    case TextureData::DataType::Byte:
         return GL_BYTE;
-    case ITextureData::DataType::UnsignedShort:
+    case TextureData::DataType::UnsignedShort:
         return GL_UNSIGNED_SHORT;
-    case ITextureData::DataType::Short:
+    case TextureData::DataType::Short:
         return GL_SHORT;
-    case ITextureData::DataType::UnsignedInt:
+    case TextureData::DataType::UnsignedInt:
         return GL_UNSIGNED_INT;
-    case ITextureData::DataType::Int:
+    case TextureData::DataType::Int:
         return GL_INT;
     }
 
@@ -99,16 +99,16 @@ GLenum Texture::GetGLDataType(const ITextureData::DataType& type)
 }
 
 DUSK_OPENGL_API
-GLenum Texture::GetGLWrapType(const ITextureData::WrapType& type)
+GLenum Texture::GetGLWrapType(const TextureData::WrapType& type)
 {
     switch (type) {
-    case ITextureData::WrapType::Repeat:
+    case TextureData::WrapType::Repeat:
         return GL_REPEAT;
-    case ITextureData::WrapType::MirroredRepeat:
+    case TextureData::WrapType::MirroredRepeat:
         return GL_MIRRORED_REPEAT;
-    case ITextureData::WrapType::ClampToEdge:
+    case TextureData::WrapType::ClampToEdge:
         return GL_CLAMP_TO_EDGE;
-    case ITextureData::WrapType::ClampToBorder:
+    case TextureData::WrapType::ClampToBorder:
         return GL_CLAMP_TO_BORDER;
     }
 
@@ -116,12 +116,12 @@ GLenum Texture::GetGLWrapType(const ITextureData::WrapType& type)
 }
 
 DUSK_OPENGL_API
-GLenum Texture::GetGLFilterType(const ITextureData::FilterType& type)
+GLenum Texture::GetGLFilterType(const TextureData::FilterType& type)
 {
     switch (type) {
-    case ITextureData::FilterType::Nearest:
+    case TextureData::FilterType::Nearest:
         return GL_NEAREST;
-    case ITextureData::FilterType::Linear:
+    case TextureData::FilterType::Linear:
         return GL_LINEAR;
     }
 

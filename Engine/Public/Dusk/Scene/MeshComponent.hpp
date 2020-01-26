@@ -11,7 +11,7 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API MeshComponent : public IComponent
+class DUSK_CORE_API MeshComponent : public Component
 {
 public:
 
@@ -19,23 +19,23 @@ public:
 
     explicit MeshComponent() = default;
 
-    explicit MeshComponent(std::unique_ptr<IMesh> && mesh);
+    explicit MeshComponent(std::unique_ptr<Mesh> && mesh);
 
-    explicit MeshComponent(std::vector<std::unique_ptr<IMesh>> && meshes);
+    explicit MeshComponent(std::vector<std::unique_ptr<Mesh>> && meshes);
 
     virtual ~MeshComponent() = default;
 
     bool LoadFromFile(const std::string& filename);
 
-    void AddMesh(std::unique_ptr<IMesh> && mesh);
+    void AddMesh(std::unique_ptr<Mesh> && mesh);
 
-    void AddMeshes(std::vector<std::unique_ptr<IMesh>> && meshes);
+    void AddMeshes(std::vector<std::unique_ptr<Mesh>> && meshes);
 
     void Render(RenderContext * ctx) override;
 
 private:
 
-    std::vector<std::unique_ptr<IMesh>> _meshes;
+    std::vector<std::unique_ptr<Mesh>> _meshes;
 
 }; // class MeshComponent
 

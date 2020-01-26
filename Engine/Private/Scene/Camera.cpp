@@ -7,12 +7,9 @@ namespace Dusk {
 DUSK_CORE_API
 Camera::Camera()
 {
-    IGraphicsDriver * gfx = GetGraphicsDriver();
-    if (gfx) {
-        const ivec2& size = gfx->GetWindowSize();
-        SetAspect(size);
-        SetViewportSize(size);
-    }
+    const ivec2& size = GetGraphicsDriver()->GetWindowSize();
+    SetAspect(size);
+    SetViewportSize(size);
 }
 
 DUSK_CORE_API

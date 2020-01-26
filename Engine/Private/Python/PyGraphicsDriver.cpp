@@ -6,7 +6,7 @@ namespace Dusk {
 typedef struct 
 {
     PyObject_HEAD
-    IGraphicsDriver * Pointer;
+    GraphicsDriver * Pointer;
 
 } PyGraphicsDriver;
 

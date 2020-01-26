@@ -10,7 +10,7 @@
 
 namespace Dusk::Vulkan {
 
-class DUSK_VULKAN_API GraphicsDriver : public IGraphicsDriver
+class DUSK_VULKAN_API GraphicsDriver : public Dusk::GraphicsDriver
 {
 public:
 
@@ -30,11 +30,11 @@ public:
 
     void SwapBuffers() override;
 
-    std::unique_ptr<ITexture> CreateTexture() override;
+    std::unique_ptr<Dusk::Texture> CreateTexture() override;
 
-    std::unique_ptr<IShader> CreateShader() override;
+    std::unique_ptr<Dusk::Shader> CreateShader() override;
     
-    std::unique_ptr<IMesh> CreateMesh() override;
+    std::unique_ptr<Dusk::Mesh> CreateMesh() override;
 
     bool SetShaderData(unsigned index, size_t size, void * data) override;
 

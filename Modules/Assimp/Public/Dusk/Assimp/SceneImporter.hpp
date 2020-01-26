@@ -11,7 +11,7 @@
 
 namespace Dusk::Assimp {
 
-class DUSK_ASSIMP_API MeshData : public IMeshData
+class DUSK_ASSIMP_API MeshData : public Dusk::MeshData
 {
 public:
 

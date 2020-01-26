@@ -8,7 +8,7 @@
 
 namespace Dusk::TinyOBJ {
 
-class DUSK_TINYOBJ_API MeshData : public IMeshData
+class DUSK_TINYOBJ_API MeshData : public Dusk::MeshData
 {
 public:
 
@@ -54,11 +54,11 @@ public:
 
 }; // class MeshData
 
-class DUSK_TINYOBJ_API MeshImporter : public IMeshImporter
+class DUSK_TINYOBJ_API MeshImporter : public Dusk::MeshImporter
 {
 public:
 
-    std::vector<std::unique_ptr<IMeshData>> LoadFromFile(const std::string& filename) override;
+    std::vector<std::unique_ptr<Dusk::MeshData>> LoadFromFile(const std::string& filename) override;
 
 }; // class MeshImporter
 

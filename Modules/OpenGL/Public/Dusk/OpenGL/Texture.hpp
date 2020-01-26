@@ -6,22 +6,22 @@
 
 namespace Dusk::OpenGL {
 
-class DUSK_OPENGL_API Texture : public ITexture 
+class DUSK_OPENGL_API Texture : public Dusk::Texture 
 {
 public:
 
     virtual ~Texture();
 
-    bool Load(const ITextureData * data) override;
+    bool Load(const TextureData * data) override;
 
     void Bind() override;
 
 private:
 
     GLenum GetGLDataFormat(int components);
-    GLenum GetGLDataType(const ITextureData::DataType& type);
-    GLenum GetGLWrapType(const ITextureData::WrapType& type);
-    GLenum GetGLFilterType(const ITextureData::FilterType& type);
+    GLenum GetGLDataType(const TextureData::DataType& type);
+    GLenum GetGLWrapType(const TextureData::WrapType& type);
+    GLenum GetGLFilterType(const TextureData::FilterType& type);
 
     GLuint _glID = 0;
 

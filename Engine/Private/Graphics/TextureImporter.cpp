@@ -4,9 +4,9 @@
 
 namespace Dusk {
 
-static std::unordered_map<std::string, std::unique_ptr<ITextureImporter>> _TextureImporters;
+static std::unordered_map<std::string, std::unique_ptr<TextureImporter>> _TextureImporters;
 
-static std::vector<ITextureImporter *> _TextureImporterList;
+static std::vector<TextureImporter *> _TextureImporterList;
 
 void updateTextureImporterList()
 {
@@ -17,7 +17,7 @@ void updateTextureImporterList()
 }
 
 DUSK_CORE_API
-void AddTextureImporter(const std::string& id, std::unique_ptr<ITextureImporter> importer)
+void AddTextureImporter(const std::string& id, std::unique_ptr<TextureImporter> importer)
 {
     _TextureImporters[id] = std::move(importer);
     updateTextureImporterList();
@@ -35,7 +35,7 @@ void RemoveTextureImporter(const std::string& id)
 }
 
 DUSK_CORE_API
-const std::vector<ITextureImporter *>& GetAllTextureImporters()
+const std::vector<TextureImporter *>& GetAllTextureImporters()
 {
     return _TextureImporterList;
 }

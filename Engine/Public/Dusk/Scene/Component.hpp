@@ -10,15 +10,15 @@ namespace Dusk {
 
 class Entity;
 
-class DUSK_CORE_API IComponent 
+class DUSK_CORE_API Component 
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(IComponent)
+    DISALLOW_COPY_AND_ASSIGN(Component)
 
-    explicit IComponent() = default;
+    explicit Component() = default;
 
-    virtual ~IComponent() = default;
+    virtual ~Component() = default;
 
     virtual inline void Attach(Entity * entity) {
         _entity = entity;
@@ -44,7 +44,7 @@ private:
 
     Entity * _entity = nullptr;
 
-}; // class IComponent
+}; // class Component
 
 } // namespace Dusk
 

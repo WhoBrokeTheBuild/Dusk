@@ -6,15 +6,15 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API IFont
+class DUSK_CORE_API Font
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(IFont);
+    DISALLOW_COPY_AND_ASSIGN(Font);
 
     bool LoadFromFile(const std::string& filename);
 
-}; // class IFont
+}; // class Font
 
 } // namespace Dusk
 

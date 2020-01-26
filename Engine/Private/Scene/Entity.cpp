@@ -39,7 +39,7 @@ std::vector<Entity *> Entity::GetChildren() const
 }
 
 DUSK_CORE_API
-IComponent * Entity::AddComponent(std::unique_ptr<IComponent> && component)
+Component * Entity::AddComponent(std::unique_ptr<Component> && component)
 {
     component->Attach(this);
     _componentPtrs.push_back(component.get());
@@ -49,7 +49,7 @@ IComponent * Entity::AddComponent(std::unique_ptr<IComponent> && component)
 }
 
 DUSK_CORE_API
-std::vector<IComponent *> Entity::GetComponents() const
+std::vector<Component *> Entity::GetComponents() const
 {
     return _componentPtrs;
 }

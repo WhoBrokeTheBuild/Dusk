@@ -47,9 +47,9 @@ public:
 
     std::vector<Entity *> GetChildren() const;
 
-    IComponent * AddComponent(std::unique_ptr<IComponent> && component);
+    Component * AddComponent(std::unique_ptr<Component> && component);
 
-    std::vector<IComponent *> GetComponents() const;
+    std::vector<Component *> GetComponents() const;
 
     void SetName(const std::string& name);
 
@@ -99,9 +99,9 @@ private:
 
     std::vector<Entity *> _childPtrs;
 
-    std::vector<std::unique_ptr<IComponent>> _components;
+    std::vector<std::unique_ptr<Component>> _components;
 
-    std::vector<IComponent *> _componentPtrs;
+    std::vector<Component *> _componentPtrs;
 
     vec3 _position = vec3(0.f);
 

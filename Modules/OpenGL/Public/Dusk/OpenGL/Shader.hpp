@@ -6,7 +6,7 @@
 
 namespace Dusk::OpenGL {
 
-class DUSK_OPENGL_API Shader : public IShader 
+class DUSK_OPENGL_API Shader : public Dusk::Shader 
 {
 public:
 

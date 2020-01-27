@@ -47,7 +47,7 @@ bool ScriptEvent::RemovePythonListener(unsigned id)
     return false;
 }
 
-void ScriptEvent::Call(const EventData * data)
+void ScriptEvent::CallPython(const EventData * data)
 {
     PyObject * dict = data->GetPyObject();
     PyObject * arg = Py_BuildValue("(O)", dict);

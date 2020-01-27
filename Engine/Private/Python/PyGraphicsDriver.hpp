@@ -4,6 +4,7 @@
 #include <Dusk/Graphics/GraphicsDriver.hpp>
 
 #include <Python.h>
+#include <structmember.h>
 
 namespace Dusk {
 
@@ -19,8 +20,6 @@ PyObject * PyGraphicsDriver_GetWindowSize(PyObject * self, PyObject * args);
 
 PyObject * PyGraphicsDriver_SetWindowSize(PyObject * self, PyObject * args);
 
-PyObject * PyGraphicsDriver_GetWindowResizedEvent(PyObject * self, PyObject * args);
-
 PyObject * PyDusk_GetGraphicsDriver(PyObject * self, PyObject * args);
 
 bool PyInit_GraphicsDriver(PyObject * module);
@@ -29,6 +28,7 @@ typedef struct
 {
     PyObject_HEAD
     GraphicsDriver * Pointer;
+    PyObject * WindowResizedEvent;
 
 } PyGraphicsDriver;
 
@@ -39,8 +39,12 @@ static PyMethodDef PyGraphicsDriver_methods[] = {
     { "SetWindowTitle",         PyGraphicsDriver_SetWindowTitle,        METH_VARARGS,   nullptr },
     { "GetWindowSize",          PyGraphicsDriver_GetWindowSize,         METH_NOARGS,    nullptr },
     { "SetWindowSize",          PyGraphicsDriver_SetWindowSize,         METH_VARARGS,   nullptr },
-    { "GetWindowResizedEvent",  PyGraphicsDriver_GetWindowResizedEvent, METH_VARARGS,   nullptr },
     { nullptr, nullptr, 0, nullptr },
+};
+
+static PyMemberDef PyGraphicsDriver_members[] = {
+    { "WindowResizedEvent", T_OBJECT_EX, offsetof(PyGraphicsDriver, WindowResizedEvent), READONLY, nullptr },
+    { nullptr, 0, 0, 0, nullptr },
 };
 
 static PyTypeObject PyGraphicsDriver_type = {
@@ -72,7 +76,7 @@ static PyTypeObject PyGraphicsDriver_type = {
     0,                                          // tp_iter
     0,                                          // tp_iternext
     PyGraphicsDriver_methods,                   // tp_methods
-    0,                                          // tp_members
+    PyGraphicsDriver_members,                   // tp_members
     0,                                          // tp_getset
     0,                                          // tp_base
     0,                                          // tp_dict

@@ -63,15 +63,6 @@ PyObject * PyGraphicsDriver_SetWindowSize(PyObject * self, PyObject * args)
     Py_RETURN_NONE;
 }
 
-PyObject * PyGraphicsDriver_GetWindowResizedEvent(PyObject * self, PyObject * args)
-{
-    PyGraphicsDriver * gfx = (PyGraphicsDriver *)self;
-
-    PyScriptEvent * obj = (PyScriptEvent *)PyType_GenericAlloc(&PyScriptEvent_type, 1);
-    obj->Pointer = &(gfx->Pointer->WindowResizedEvent);
-    return (PyObject *)obj;
-}
-
 PyObject * PyDusk_GetGraphicsDriver(PyObject * self, PyObject * args)
 {
     auto gfx = GetGraphicsDriver();
@@ -80,8 +71,12 @@ PyObject * PyDusk_GetGraphicsDriver(PyObject * self, PyObject * args)
         Py_RETURN_NONE;
     }
 
+    PyScriptEvent * windowResizedEvt = (PyScriptEvent *)PyType_GenericAlloc(&PyScriptEvent_type, 1);
+    windowResizedEvt->Pointer = &(gfx->WindowResizedEvent);
+
     PyGraphicsDriver * obj = (PyGraphicsDriver *)PyType_GenericAlloc(&PyGraphicsDriver_type, 1);
     obj->Pointer = gfx;
+    obj->WindowResizedEvent = (PyObject *)windowResizedEvt;
     return (PyObject *)obj;
 }
 

@@ -13,9 +13,8 @@ def onWindowResize(data):
     print(data['Size'])
     print(data['Delta'])
 
-evt = gfx.GetWindowResizedEvent()
-dir(evt) # Breaks without this and I have no idea why
-evt.AddListener(onWindowResize)
+print(dir(gfx.WindowResizedEvent))
+gfx.WindowResizedEvent.AddListener(onWindowResize)
 
 # Dusk.SetRunning(True)
 # while Dusk.IsRunning():

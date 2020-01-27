@@ -43,7 +43,7 @@ public:
 
     bool RemovePythonListener(unsigned id);
 
-    void Call(const EventData * data);
+    void CallPython(const EventData * data);
 
     void RemoveAllPythonListeners();
 
@@ -95,7 +95,7 @@ public:
             it.second(data);
         }
 
-        ScriptEvent::Call(static_cast<const EventData *>(data));
+        CallPython(static_cast<const EventData *>(data));
     }
 
     void RemoveAllListeners() {

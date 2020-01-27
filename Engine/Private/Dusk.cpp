@@ -63,37 +63,7 @@ void RunScript(const std::string& filename) {
 
     PyRun_File(file, filename.c_str(), Py_file_input, pyMainDict, pyLocalDict);
 
-    if (PyErr_Occurred()) {
-        PyObject * pyType = nullptr;
-        PyObject * pyValue = nullptr;
-        PyObject * pyTrace = nullptr;
-
-        PyErr_Fetch(&pyType, &pyValue, &pyTrace);
-        PyErr_NormalizeException(&pyType, &pyValue, &pyTrace);
-
-        PyObject * pyValueRepr = PyObject_Repr(pyValue);
-        if (pyValueRepr) {
-            PyObject * pyValueStr = PyUnicode_AsEncodedString(pyValueRepr, "utf-8", "~E~");
-
-            fprintf(stderr,
-                "[ERRO] Exception %s\n", 
-                PyBytes_AS_STRING(pyValueStr));
-
-            Py_XDECREF(pyValueStr);
-            Py_XDECREF(pyValueRepr);
-        }
-        else {
-            PyObject * pyTypeName = PyObject_GetAttrString(pyType, "__name__");
-            PyObject * pyTypeNameStr = PyUnicode_AsEncodedString(pyTypeName, "utf-8", "~E~");
-
-            fprintf(stderr,
-                "[ERRO] Exception %s\n", 
-                PyBytes_AS_STRING(pyTypeNameStr));
-
-            Py_XDECREF(pyTypeNameStr);
-            Py_XDECREF(pyTypeName);
-        }
-    }
+    PyPrintStackTrace();
 
     fclose(file);
 }

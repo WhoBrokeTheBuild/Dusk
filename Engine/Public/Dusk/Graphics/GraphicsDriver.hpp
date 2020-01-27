@@ -9,12 +9,24 @@
 #include <Dusk/Graphics/Texture.hpp>
 #include <Dusk/Graphics/Shader.hpp>
 #include <Dusk/Graphics/Mesh.hpp>
+#include <Dusk/Event.hpp>
 
 #include <string>
 #include <vector>
 #include <memory>
 
 namespace Dusk {
+
+class WindowResizedEventData : public EventData
+{
+public:
+
+    ivec2 Size;
+    ivec2 Delta;
+
+    PyObject * GetPyObject() const override;
+
+}; // class WindowResizedEventData
 
 class DUSK_CORE_API GraphicsDriver
 {
@@ -49,6 +61,8 @@ public:
     virtual RenderContext * GetRenderContext();
 
     virtual bool SetShaderData(unsigned binding, size_t size, void * data) = 0;
+
+    Event<Dusk::WindowResizedEventData> WindowResizedEvent;
 
 private:
 

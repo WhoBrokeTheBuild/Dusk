@@ -248,9 +248,9 @@ KeyboardKey InputDriver::GetSDLKey(int sdlKey)
     case SDLK_RSHIFT:
         return KeyboardKey::RightShift;
     case SDLK_LCTRL:
-        return KeyboardKey::LeftCtrl;
+        return KeyboardKey::LeftControl;
     case SDLK_RCTRL:
-        return KeyboardKey::RightCtrl;
+        return KeyboardKey::RightControl;
     case SDLK_LALT:
         return KeyboardKey::LeftAlt;
     case SDLK_RALT:

@@ -1,52 +1,37 @@
-#ifndef DUSK_PY_GRAPHICS_DRIVER_HPP
-#define DUSK_PY_GRAPHICS_DRIVER_HPP
+#ifndef DUSK_PY_SCRIPT_EVENT_HPP
+#define DUSK_PY_SCRIPT_EVENT_HPP
 
-#include <Dusk/Graphics/GraphicsDriver.hpp>
+#include <Dusk/Event.hpp>
 
 #include <Python.h>
 
 namespace Dusk {
 
-PyObject * PyGraphicsDriver_ProcessEvents(PyObject * self, PyObject * args);
+PyObject * PyScriptEvent_AddListener(PyObject * self, PyObject * args);
 
-PyObject * PyGraphicsDriver_SwapBuffers(PyObject * self, PyObject * args);
+PyObject * PyScriptEvent_RemoveAllListeners(PyObject * self, PyObject * args);
 
-PyObject * PyGraphicsDriver_GetWindowTitle(PyObject * self, PyObject * args);
+// PyObject * PyDusk_Call(PyObject * self, PyObject * args);
 
-PyObject * PyGraphicsDriver_SetWindowTitle(PyObject * self, PyObject * args);
+bool PyInit_ScriptEvent(PyObject * module);
 
-PyObject * PyGraphicsDriver_GetWindowSize(PyObject * self, PyObject * args);
-
-PyObject * PyGraphicsDriver_SetWindowSize(PyObject * self, PyObject * args);
-
-PyObject * PyGraphicsDriver_GetWindowResizedEvent(PyObject * self, PyObject * args);
-
-PyObject * PyDusk_GetGraphicsDriver(PyObject * self, PyObject * args);
-
-bool PyInit_GraphicsDriver(PyObject * module);
-
-typedef struct 
+typedef struct
 {
     PyObject_HEAD
-    GraphicsDriver * Pointer;
+    ScriptEvent * Pointer;
+    
+} PyScriptEvent;
 
-} PyGraphicsDriver;
-
-static PyMethodDef PyGraphicsDriver_methods[] = {
-    { "ProcessEvents",          PyGraphicsDriver_ProcessEvents,         METH_NOARGS,    nullptr },
-    { "SwapBuffers",            PyGraphicsDriver_SwapBuffers,           METH_NOARGS,    nullptr },
-    { "GetWindowTitle",         PyGraphicsDriver_GetWindowTitle,        METH_NOARGS,    nullptr },
-    { "SetWindowTitle",         PyGraphicsDriver_SetWindowTitle,        METH_VARARGS,   nullptr },
-    { "GetWindowSize",          PyGraphicsDriver_GetWindowSize,         METH_NOARGS,    nullptr },
-    { "SetWindowSize",          PyGraphicsDriver_SetWindowSize,         METH_VARARGS,   nullptr },
-    { "GetWindowResizedEvent",  PyGraphicsDriver_GetWindowResizedEvent, METH_VARARGS,   nullptr },
+static PyMethodDef PyScriptEvent_methods[] = {
+    { "AddListener",            PyScriptEvent_AddListener,          METH_VARARGS,    nullptr },
+    { "RemoveAllListeners",     PyScriptEvent_RemoveAllListeners,   METH_VARARGS,    nullptr },
     { nullptr, nullptr, 0, nullptr },
 };
 
-static PyTypeObject PyGraphicsDriver_type = {
+static PyTypeObject PyScriptEvent_type = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    "Dusk.GraphicsDriver",                      // tp_name 
-    sizeof(PyGraphicsDriver),                   // tp_basicsize
+    "Dusk.ScriptEvent",                         // tp_name 
+    sizeof(PyScriptEvent),                      // tp_basicsize
     0,                                          // tp_itemsize
     0,                                          // tp_dealloc
     0,                                          // tp_print
@@ -71,7 +56,7 @@ static PyTypeObject PyGraphicsDriver_type = {
     0,                                          // tp_weaklistoffset
     0,                                          // tp_iter
     0,                                          // tp_iternext
-    PyGraphicsDriver_methods,                   // tp_methods
+    PyScriptEvent_methods,                      // tp_methods
     0,                                          // tp_members
     0,                                          // tp_getset
     0,                                          // tp_base
@@ -96,4 +81,4 @@ static PyTypeObject PyGraphicsDriver_type = {
 
 } // namespace Dusk
 
-#endif // DUSK_PY_GRAPHICS_DRIVER_HPP
+#endif // DUSK_PY_SCRIPT_EVENT_HPP

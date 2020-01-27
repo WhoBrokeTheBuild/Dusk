@@ -8,6 +8,15 @@
 #include <Dusk/Scene/Scene.hpp>
 #include <Dusk/Scene/Camera.hpp>
 
+#include <Dusk/Event.hpp>
+
+void testFunc(const Dusk::WindowResizedEventData * data)
+{
+    DuskLogInfo("testFunc %s %s", 
+        glm::to_string(data->Delta), 
+        glm::to_string(data->Size));
+}
+
 int main(int argc, char** argv)
 {
     Dusk::SetApplicationName("HelloWorld");
@@ -17,7 +26,7 @@ int main(int argc, char** argv)
     Dusk::RunScript("Scripts/Main.py");
 
     Dusk::LoadModule("DuskAssimp");
-
+    
     Dusk::UpdateContext updateContext;
     Dusk::RenderContext renderContext;
 
@@ -38,6 +47,11 @@ int main(int argc, char** argv)
 
     {
         auto gfx = Dusk::GetGraphicsDriver();
+
+        Dusk::WindowResizedEventData testData;
+        testData.Size = { 1024, 768 };
+        testData.Delta = { 0, 0 };
+        gfx->WindowResizedEvent.Call(&testData);
 
         auto shader = gfx->CreateShader();
         // shader->LoadFromFiles({

@@ -13,7 +13,6 @@ def onWindowResize(data):
     print(data['Size'])
     print(data['Delta'])
 
-print(dir(gfx.WindowResizedEvent))
 gfx.WindowResizedEvent.AddListener(onWindowResize)
 
 # Dusk.SetRunning(True)

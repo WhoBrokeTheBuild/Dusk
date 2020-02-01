@@ -10,7 +10,7 @@
 
 namespace Dusk {
 
-PyObject * PyDusk_RunScript(PyObject * self, PyObject * args)
+PyObject * PyDusk_RunScriptFile(PyObject * self, PyObject * args)
 {
     const char * filename;
 
@@ -19,7 +19,7 @@ PyObject * PyDusk_RunScript(PyObject * self, PyObject * args)
         Py_RETURN_NONE;
     }
 
-    RunScript(filename);
+    RunScriptFile(filename);
     Py_RETURN_NONE;
 }
 
@@ -111,7 +111,7 @@ PyObject * PyDusk_LadModule(PyObject * self, PyObject * args)
 }
 
 static struct PyMethodDef PyDusk_methods[] = {
-    { "RunScript",              PyDusk_RunScript,               METH_VARARGS,   nullptr },
+    { "RunScriptFile",          PyDusk_RunScriptFile,           METH_VARARGS,   nullptr },
     { "SetRunning",             PyDusk_SetRunning,              METH_VARARGS,   nullptr },
     { "IsRunning",              PyDusk_IsRunning,               METH_NOARGS,    nullptr },
     { "GetVersion",             PyDusk_GetVersion,              METH_NOARGS,    nullptr },

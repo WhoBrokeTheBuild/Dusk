@@ -5,7 +5,7 @@
 
 namespace Dusk {
 
-PyObject * PyDusk_RunScript(PyObject * self, PyObject * args);
+PyObject * PyDusk_RunScriptFile(PyObject * self, PyObject * args);
 
 PyObject * PyDusk_SetRunning(PyObject * self, PyObject * args);
 

@@ -10,6 +10,8 @@
 
 #include <Dusk/Event.hpp>
 
+#include <thread>
+
 void testFunc(const Dusk::WindowResizedEventData * data)
 {
     DuskLogInfo("testFunc %s %s", 
@@ -23,7 +25,7 @@ int main(int argc, char** argv)
     Dusk::SetApplicationVersion({ 1, 0, 0 });
 
     Dusk::Initialize(argc, argv);
-    Dusk::RunScript("Scripts/Main.py");
+    Dusk::RunScriptFile("Scripts/Main.py");
 
     Dusk::LoadModule("DuskAssimp");
     
@@ -60,6 +62,15 @@ int main(int argc, char** argv)
         });
 
         Dusk::SetRunning(true);
+
+        std::thread pyPrompt([]{
+            while (Dusk::IsRunning()) {
+                PyRun_InteractiveLoop(stdin, "");
+            }
+        });
+
+        pyPrompt.detach();
+
         while (Dusk::IsRunning()) {
             gfx->ProcessEvents();
 

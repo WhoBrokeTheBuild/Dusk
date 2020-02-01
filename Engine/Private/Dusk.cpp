@@ -51,7 +51,7 @@ bool IsRunning() {
 }
 
 DUSK_CORE_API
-void RunScript(const std::string& filename) {
+void RunScriptFile(const std::string& filename) {
     FILE * file = fopen(filename.c_str(), "rt");
     if (!file) {
         exit(1);
@@ -66,6 +66,18 @@ void RunScript(const std::string& filename) {
     PyPrintStackTrace();
 
     fclose(file);
+}
+
+DUSK_CORE_API
+void RunScriptString(const std::string& code)
+{
+    PyObject * pyMain = PyImport_AddModule("__main__");
+    PyObject * pyMainDict = PyModule_GetDict(pyMain);
+    PyObject * pyLocalDict = PyDict_New();
+
+    PyRun_String(code.c_str(), 0, pyMainDict, pyLocalDict);
+
+    PyPrintStackTrace();
 }
 
 static std::string _ApplicationName;

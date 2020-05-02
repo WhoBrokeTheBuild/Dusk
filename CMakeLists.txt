@@ -40,7 +40,7 @@ OPTION(NEED_MODULE_OpenGL      "Require the OpenGL Module"                  ON)
 OPTION(NEED_MODULE_DirectX     "Require the DirectX Module (Windows Only)"  OFF)
 OPTION(NEED_MODULE_Vulkan      "Require the Vulkan Module"                  OFF)
 OPTION(NEED_MODULE_OpenAL      "Require the OpenAL Module"                  OFF)
-OPTION(NEED_MODULE_Assimp      "Require the Assimp Module"                  OFF)
+OPTION(NEED_MODULE_Assimp      "Require the Assimp Module"                  ON)
 OPTION(NEED_MODULE_freetype    "Require the freetype Module"                ON)
 OPTION(NEED_MODULE_Archive     "Require the Archive Module"                 OFF)
 

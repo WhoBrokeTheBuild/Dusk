@@ -44,7 +44,9 @@ inline auto LogWrap<std::string>(const std::string& v) {
 
 template <>
 inline auto LogWrap<json>(const json& v) {
-    return v.get<std::string>().c_str();
+    static std::string str;
+    str = v.get<std::string>();
+    return str.c_str();
 }
 
 #pragma clang diagnostic pop

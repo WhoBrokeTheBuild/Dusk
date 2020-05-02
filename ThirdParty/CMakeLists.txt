@@ -109,9 +109,8 @@ IF(NEED_SDL2)
     IF(NOT SDL2_FOUND)
         ExternalProject_Add(
             ThirdParty_SDL2
-            GIT_REPOSITORY      "https://github.com/spurious/SDL-mirror.git"
-            GIT_TAG             "master"
-            GIT_SHALLOW         TRUE
+            HG_REPOSITORY       "http://hg.libsdl.org/SDL"
+            HG_TAG              "release-2.0.12"
             SOURCE_DIR          ${SDL2_SOURCE_DIR}
             BINARY_DIR          ${SDL2_BINARY_DIR}
             CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${SDL2_ROOT}
@@ -176,7 +175,7 @@ IF(NEED_assimp)
         ExternalProject_Add(
             ThirdParty_assimp
             GIT_REPOSITORY      "https://github.com/assimp/assimp.git"
-            GIT_TAG             "master"
+            GIT_TAG             "v5.0.1"
             GIT_SHALLOW         TRUE
             SOURCE_DIR          ${assimp_SOURCE_DIR}
             BINARY_DIR          ${assimp_BINARY_DIR}

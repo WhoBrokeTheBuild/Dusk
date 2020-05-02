@@ -73,7 +73,7 @@ public:
 
     typedef std::function<void(const EventDataType *)> Listener;
 
-    void AddListener(Listener listener) {
+    unsigned AddListener(Listener listener) {
         ++_maxListenerID;
         _listeners.emplace(_maxListenerID, listener);
         return _maxListenerID;

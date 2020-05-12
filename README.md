@@ -9,6 +9,9 @@
 ```
 cd Build
 cmake ..
+
+make -j8
+# or
 cmake --build .
 ```
 

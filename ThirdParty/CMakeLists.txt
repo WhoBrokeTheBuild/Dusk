@@ -33,7 +33,7 @@ ENDIF()
 SET(GSL_ROOT       ${CMAKE_BINARY_DIR}/GSL)
 SET(GSL_SOURCE_DIR ${CMAKE_BINARY_DIR}/GSL_src)
 
-FIND_PACKAGE(GSL CONFIG QUIET)
+FIND_PACKAGE(GSL QUIET)
 
 IF(NOT GSL_FOUND)
     ExternalProject_Add(
@@ -180,14 +180,13 @@ IF(NEED_assimp)
             SOURCE_DIR          ${assimp_SOURCE_DIR}
             BINARY_DIR          ${assimp_BINARY_DIR}
             CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${assimp_ROOT}
-                                -DINJECT_DEBUG_POSTFIX=OFF
                                 -DASSIMP_BUILD_ASSIMP_TOOLS=OFF
                                 -DASSIMP_BUILD_SAMPLES=OFF
                                 -DASSIMP_BUILD_TESTS=OFF
-                                -DBUILD_DOCS=OFF
             BUILD_COMMAND       ""
             UPDATE_COMMAND      ""
             TEST_COMMAND        ""
+            INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Debug
             INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
         )
     ENDIF()
@@ -222,7 +221,7 @@ IF(NEED_OpenAL)
     ENDIF()
 ENDIF()
 
-# FreeType
+# freetype
 
 IF(NEED_freetype)
     SET(freetype_ROOT           ${CMAKE_BINARY_DIR}/freetype)

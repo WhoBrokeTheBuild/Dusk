@@ -11,7 +11,7 @@ IF(TARGET freetype)
         ${_TARGET}
         PUBLIC
             DuskEngine
-            Freetype::Freetype
+            freetype
     )
 ELSE()
     MESSAGE(WARNING "Not building ${_TARGET}, missing freetype")

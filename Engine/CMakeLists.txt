@@ -11,7 +11,7 @@ SET(MODULE_TARGETS ${MODULE_TARGETS} PARENT_SCOPE)
 TARGET_LINK_LIBRARIES(
     ${_TARGET}
     PUBLIC
-        glm
+        glm::glm
         GSL::GSL
         nlohmann_json::nlohmann_json
         Python3::Python

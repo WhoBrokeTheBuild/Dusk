@@ -40,7 +40,6 @@ OPTION(NEED_MODULE_OpenGL      "Require the OpenGL Module"                  ON)
 OPTION(NEED_MODULE_DirectX     "Require the DirectX Module (Windows Only)"  OFF)
 OPTION(NEED_MODULE_Vulkan      "Require the Vulkan Module"                  OFF)
 OPTION(NEED_MODULE_OpenAL      "Require the OpenAL Module"                  OFF)
-OPTION(NEED_MODULE_Assimp      "Require the Assimp Module"                  ON)
 OPTION(NEED_MODULE_freetype    "Require the freetype Module"                ON)
 OPTION(NEED_MODULE_Archive     "Require the Archive Module"                 OFF)
 
@@ -54,10 +53,6 @@ ENDIF()
 
 IF(NEED_MODULE_OpenAL)
     SET(NEED_OpenAL TRUE)
-ENDIF()
-
-IF(NEED_MODULE_Assimp)
-    SET(NEED_assimp TRUE)
 ENDIF()
 
 IF(NEED_MODULE_freetype)
@@ -96,11 +91,10 @@ IF(BUILD_ThirdParty)
     FILE(MAKE_DIRECTORY ${ThirdParty_BINARY_DIR})
 
     # Set _ROOT variables for config-based packages
-    SET(glm_ROOT            ${ThirdParty_BINARY_DIR}/glm)
+    SET(glm_ROOT            ${ThirdParty_BINARY_DIR}/glm/cmake)
     SET(nlohmann_json_ROOT  ${ThirdParty_BINARY_DIR}/nlohmann_json)
     SET(SDL2_ROOT           ${ThirdParty_BINARY_DIR}/SDL2)
     SET(OpenAL_ROOT         ${ThirdParty_BINARY_DIR}/OpenAL)
-    SET(assimp_ROOT         ${ThirdParty_BINARY_DIR}/assimp)
     SET(freetype_ROOT       ${ThirdParty_BINARY_DIR}/freetype)
 
     # Set CMAKE_PREFIX_PATH for find-based packages
@@ -121,7 +115,6 @@ IF(BUILD_ThirdParty)
             -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
             -DNEED_SDL2=${NEED_SDL2}
             -DNEED_OpenAL=${NEED_OpenAL}
-            -DNEED_assimp=${NEED_assimp}
             -DNEED_freetype=${NEED_freetype}
             -DNEED_GTest=${NEED_GTest}
             ${ThirdParty_SOURCE_DIR}
@@ -171,11 +164,6 @@ IF(NEED_OpenAL AND NOT OpenAL_FOUND)
     MESSAGE(SEND_ERROR "NEED_OpenAL is set, but OpenAL could not be found.")
 ENDIF()
 
-FIND_PACKAGE(assimp 5.0 CONFIG)
-IF(NEED_assimp AND NOT assimp_FOUND)
-    MESSAGE(SEND_ERROR "NEED_assimp is set, but assimp could not be found.")
-ENDIF()
-
 FIND_PACKAGE(freetype CONFIG)
 IF(NEED_freetype AND NOT freetype_FOUND)
     MESSAGE(SEND_ERROR "NEED_freetype is set, but freetype could not be found.")
@@ -200,27 +188,6 @@ IF(TARGET OpenAL::OpenAL)
     GET_FILENAME_COMPONENT(OpenAL_RUNTIME_DIR ${_location} DIRECTORY)
 ENDIF()
 
-IF(TARGET assimp::assimp)
-    # Extract release-specific configuration
-    GET_TARGET_PROPERTY(soname   assimp::assimp IMPORTED_SONAME_RELEASE)
-    GET_TARGET_PROPERTY(implib   assimp::assimp IMPORTED_IMPLIB_RELEASE)
-    GET_TARGET_PROPERTY(_location assimp::assimp IMPORTED_LOCATION_RELEASE)
-
-    GET_FILENAME_COMPONENT(assimp_RUNTIME_DIR ${_location} DIRECTORY)
-
-    # Set build type agnostic configuration for assimp
-    SET_TARGET_PROPERTIES(
-        assimp::assimp 
-        PROPERTIES
-            IMPORTED_SONAME         ${_soname}
-            IMPORTED_IMPLIB         ${_implib}
-            IMPORTED_LOCATION       ${_location}
-            IMPORTED_SONAME_DEBUG   ${_soname}
-            IMPORTED_IMPLIB_DEBUG   ${_implib}
-            IMPORTED_LOCATION_DEBUG ${_location}
-    )
-ENDIF()
-
 # Allow custom targets in Visual Studio to find .dll files
 SET(RUNTIME_SEARCH_PATH
     ${SDL2_RUNTIME_DIR}
@@ -229,7 +196,6 @@ SET(RUNTIME_SEARCH_PATH
     ${Ogg_RUNTIME_DIR}
     ${Vorbis_RUNTIME_DIR}
     ${Theora_RUNTIME_DIR}
-    ${assimp_RUNTIME_DIR}
 )
 
 ###

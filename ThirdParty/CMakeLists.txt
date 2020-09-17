@@ -9,21 +9,20 @@ PROJECT(ThirdParty)
 
 # glm
 
-SET(glm_ROOT       ${CMAKE_BINARY_DIR}/glm)
-SET(glm_SOURCE_DIR ${CMAKE_BINARY_DIR}/glm_src)
+SET(glm_ROOT       ${CMAKE_BINARY_DIR}/glm/cmake)
+SET(glm_SOURCE_DIR ${CMAKE_BINARY_DIR}/glm)
 
 FIND_PACKAGE(glm CONFIG QUIET)
 
 IF(NOT glm_FOUND)
     ExternalProject_Add(
         ThirdParty_glm
-        GIT_REPOSITORY      "https://github.com/g-truc/glm.git"
-        GIT_TAG             "0.9.9.3"
-        GIT_SHALLOW         TRUE
+        URL                 "https://github.com/g-truc/glm/releases/download/0.9.9.8/glm-0.9.9.8.zip"
+        URL_HASH            MD5=69895110052f0d711c9c54fbf385f6f5
         SOURCE_DIR          ${glm_SOURCE_DIR}
-        CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${glm_ROOT}
-                            -DGLM_TEST_ENABLE=OFF
+        CONFIGURE_COMMAND   ""
         BUILD_COMMAND       ""
+        INSTALL_COMMAND     ""
         UPDATE_COMMAND      ""
     )
 ENDIF()
@@ -109,8 +108,8 @@ IF(NEED_SDL2)
     IF(NOT SDL2_FOUND)
         ExternalProject_Add(
             ThirdParty_SDL2
-            HG_REPOSITORY       "http://hg.libsdl.org/SDL"
-            HG_TAG              "release-2.0.12"
+            URL                 "https://www.libsdl.org/release/SDL2-2.0.12.tar.gz"
+            URL_HASH            MD5=783b6f2df8ff02b19bb5ce492b99c8ff
             SOURCE_DIR          ${SDL2_SOURCE_DIR}
             BINARY_DIR          ${SDL2_BINARY_DIR}
             CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${SDL2_ROOT}
@@ -119,6 +118,7 @@ IF(NEED_SDL2)
             UPDATE_COMMAND      ""
             TEST_COMMAND        ""
             INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
+            COMMAND             ${CMAKE_COMMAND} --build . --target install --config Debug
         )
     ENDIF()
 ENDIF()
@@ -148,9 +148,8 @@ IF(NOT Python3_FOUND)
 
     ExternalProject_Add(
         ThirdParty_Python3
-        GIT_REPOSITORY      "https://github.com/python/cpython.git"
-        GIT_TAG             "3.8"
-        GIT_SHALLOW         TRUE
+        URL                 "https://www.python.org/ftp/python/3.8.5/Python-3.8.5.tgz"
+        URL_HASH            MD5=e2f52bcf531c8cc94732c0b6ff933ff0
         SOURCE_DIR          ${Python3_SOURCE_DIR}
         BUILD_IN_SOURCE     TRUE
         CONFIGURE_COMMAND   ""
@@ -160,36 +159,6 @@ IF(NOT Python3_FOUND)
         COMMAND             ${_Python3_INSTALL_COMMAND2}
         TEST_COMMAND        ""
     )
-ENDIF()
-
-# assimp
-
-IF(NEED_assimp)
-    SET(assimp_ROOT       ${CMAKE_BINARY_DIR}/assimp)
-    SET(assimp_SOURCE_DIR ${CMAKE_BINARY_DIR}/assimp_src)
-    SET(assimp_BINARY_DIR ${CMAKE_BINARY_DIR}/assimp_bin)
-
-    FIND_PACKAGE(assimp 5.0 CONFIG QUIET)
-
-    IF(NOT assimp_FOUND)
-        ExternalProject_Add(
-            ThirdParty_assimp
-            GIT_REPOSITORY      "https://github.com/assimp/assimp.git"
-            GIT_TAG             "v5.0.1"
-            GIT_SHALLOW         TRUE
-            SOURCE_DIR          ${assimp_SOURCE_DIR}
-            BINARY_DIR          ${assimp_BINARY_DIR}
-            CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${assimp_ROOT}
-                                -DASSIMP_BUILD_ASSIMP_TOOLS=OFF
-                                -DASSIMP_BUILD_SAMPLES=OFF
-                                -DASSIMP_BUILD_TESTS=OFF
-            BUILD_COMMAND       ""
-            UPDATE_COMMAND      ""
-            TEST_COMMAND        ""
-            INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Debug
-            INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
-        )
-    ENDIF()
 ENDIF()
 
 # OpenAL
@@ -204,9 +173,8 @@ IF(NEED_OpenAL)
     IF(NOT OpenAL_FOUND)
         ExternalProject_Add(
             ThirdParty_OpenAL
-            GIT_REPOSITORY      "https://github.com/kcat/openal-soft.git"
-            GIT_TAG             "v1.19"
-            GIT_SHALLOW         TRUE
+            URL                 "https://github.com/kcat/openal-soft/archive/openal-soft-1.19.0.tar.gz"
+            URL_HASH            MD5=a98737cc8fe65eb9c91b82c719c6465f
             SOURCE_DIR          ${OpenAL_SOURCE_DIR}
             BINARY_DIR          ${OpenAL_BINARY_DIR}
             CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${OpenAL_ROOT}
@@ -233,9 +201,8 @@ IF(NEED_freetype)
     IF(NOT freetype_FOUND)
         ExternalProject_Add(
             ThirdParty_freetype
-            GIT_REPOSITORY      "https://github.com/aseprite/freetype2.git"
-            GIT_TAG             "VER-2-10-0"
-            GIT_SHALLOW         TRUE
+            URL                 "https://github.com/aseprite/freetype2/archive/VER-2-10-0.tar.gz"
+            URL_HASH            MD5=33a87b91db6334c02e5b2a6c98604aa8
             SOURCE_DIR          ${freetype_SOURCE_DIR}
             BINARY_DIR          ${freetype_BINARY_DIR}
             CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${freetype_ROOT}

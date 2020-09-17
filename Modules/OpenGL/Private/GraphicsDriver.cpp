@@ -153,6 +153,15 @@ void GraphicsDriver::ProcessEvents()
         }
 
         _inputDriver->ProcessEvent(&event);
+
+        if (event.type == SDL_WINDOWEVENT)
+        {
+            switch (event.window.event) {
+            case SDL_WINDOWEVENT_RESIZED:
+                glViewport(0, 0, event.window.data1, event.window.data2);
+                break;
+            }
+        }
     }
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

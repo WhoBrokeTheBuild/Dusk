@@ -5,6 +5,8 @@
 #include <Dusk/Graphics/GraphicsDriver.hpp>
 #include <Dusk/Graphics/TransformData.hpp>
 #include <Dusk/Scene/AxisComponent.hpp>
+#include <Dusk/Scene/MeshComponent.hpp>
+#include <Dusk/Scene/Entity.hpp>
 #include <Dusk/Scene/Scene.hpp>
 #include <Dusk/Scene/Camera.hpp>
 
@@ -27,8 +29,6 @@ int main(int argc, char** argv)
     Dusk::Initialize(argc, argv);
     Dusk::RunScriptFile("Scripts/Main.py");
 
-    Dusk::LoadModule("DuskAssimp");
-    
     Dusk::UpdateContext updateContext;
     Dusk::RenderContext renderContext;
 
@@ -43,9 +43,14 @@ int main(int argc, char** argv)
     transformData->View = camera.GetView();
     transformData->Projection = camera.GetProjection();
 
-    if (!scene.LoadFromFile("Models/TestScene.glb")) {
-        DuskLogError("Failed to load Models/TestScene.glb");
-    }
+    // if (!scene.LoadFromFile("Models/cube.obj")) {
+    //     DuskLogError("Failed to load Models/cube.obj");
+    // }
+
+    auto actor = scene.AddChild(std::make_unique<Dusk::Entity>());
+    auto mesh = std::make_unique<Dusk::MeshComponent>();
+    mesh->LoadFromFile("Models/crate/crate.obj");
+    actor->AddComponent(std::move(mesh));
 
     {
         auto gfx = Dusk::GetGraphicsDriver();

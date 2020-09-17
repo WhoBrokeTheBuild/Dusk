@@ -14,7 +14,7 @@ SET(glm_SOURCE_DIR ${CMAKE_BINARY_DIR}/glm)
 
 FIND_PACKAGE(glm CONFIG QUIET)
 
-IF(NOT glm_FOUND)
+IF(NOT glm_FOUND OR NOT TARGET glm::glm)
     ExternalProject_Add(
         ThirdParty_glm
         URL                 "https://github.com/g-truc/glm/releases/download/0.9.9.8/glm-0.9.9.8.zip"
@@ -37,9 +37,8 @@ FIND_PACKAGE(GSL QUIET)
 IF(NOT GSL_FOUND)
     ExternalProject_Add(
         ThirdParty_GSL
-        GIT_REPOSITORY      "https://github.com/microsoft/GSL"
-        GIT_TAG             "v2.0.0"
-        GIT_SHALLOW         TRUE
+        URL                 "https://github.com/microsoft/GSL/archive/v3.1.0.tar.gz"
+        URL_HASH            MD5=b6910c54113f921b03dc06642cf7f11c
         SOURCE_DIR          ${GSL_SOURCE_DIR}
         CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${GSL_ROOT}
                             -DGSL_TEST=OFF
@@ -58,9 +57,8 @@ FIND_PACKAGE(nlohmann_json CONFIG QUIET)
 IF(NOT nlohmann_json_FOUND)
     ExternalProject_Add(
         ThirdParty_nlohmann_json
-        GIT_REPOSITORY      "https://github.com/nlohmann/json.git"
-        GIT_TAG             "master"
-        GIT_SHALLOW         TRUE
+        URL                 "https://github.com/nlohmann/json/archive/v3.9.1.tar.gz"
+        URL_HASH            MD5=e386222fb57dd2fcb8a7879fc016d037
         SOURCE_DIR          ${nlohmann_json_SOURCE_DIR}
         CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${nlohmann_json_ROOT}
                             -DJSON_BuildTests=OFF
@@ -81,9 +79,8 @@ IF(NEED_GTest)
     IF(NOT GTEST_FOUND)
         ExternalProject_Add(
             ThirdParty_GTest
-            GIT_REPOSITORY      "https://github.com/google/googletest"
-            GIT_TAG             "v1.10.x"
-            GIT_SHALLOW         TRUE
+            URL                 "https://github.com/google/googletest/archive/release-1.10.0.tar.gz"
+            URL_HASH            MD5=ecd1fa65e7de707cd5c00bdac56022cd
             SOURCE_DIR          ${GTest_SOURCE_DIR}
             BINARY_DIR          ${GTest_BINARY_DIR}
             CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${GTest_ROOT}
@@ -249,9 +246,8 @@ IF(NEED_Ogg)
 
         ExternalProject_Add(
             ThirdParty_Ogg
-            GIT_REPOSITORY      "https://github.com/xiph/ogg.git"
-            GIT_TAG             "v1.3.4"
-            GIT_SHALLOW         TRUE
+            URL                 "https://github.com/xiph/ogg/releases/download/v1.3.4/libogg-1.3.4.tar.gz"
+            URL_HASH            MD5=b9a66c80bdf45363605e4aa75fa951a8
             SOURCE_DIR          ${Ogg_SOURCE_DIR}
             BUILD_IN_SOURCE     TRUE
             CONFIGURE_COMMAND   ""
@@ -284,9 +280,8 @@ IF(NEED_Ogg)
 
         ExternalProject_Add(
             ThirdParty_Vorbis
-            GIT_REPOSITORY      "https://github.com/xiph/vorbis.git"
-            GIT_TAG             "v1.3.6"
-            GIT_SHALLOW         TRUE
+            URL                 "https://github.com/xiph/vorbis/releases/download/v1.3.7/libvorbis-1.3.7.tar.gz"
+            URL_HASH            MD5=9b8034da6edc1a17d18b9bc4542015c7
             SOURCE_DIR          ${Vorbis_SOURCE_DIR}
             BUILD_IN_SOURCE     TRUE
             CONFIGURE_COMMAND   ""
@@ -322,9 +317,8 @@ IF(NEED_Ogg)
 
         ExternalProject_Add(
             ThirdParty_Theora
-            GIT_REPOSITORY      "https://github.com/xiph/theora.git"
-            GIT_TAG             "v1.1.1"
-            GIT_SHALLOW         TRUE
+            URL                "https://github.com/xiph/theora/archive/v1.1.1.tar.gz"
+            URL_HASH            MD5=c19c149cde55d631902a5396ea921bf3
             SOURCE_DIR          ${Theora_SOURCE_DIR}
             BUILD_IN_SOURCE     TRUE
             CONFIGURE_COMMAND   ""

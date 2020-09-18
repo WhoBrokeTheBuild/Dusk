@@ -25,7 +25,7 @@ PyObject * PyDusk_LadModule(PyObject * self, PyObject * args);
 
 PyMODINIT_FUNC PyInit_Dusk();
 
-void PyPrintStackTrace();
+bool PyCheckError();
 
 } // namespace Dusk
 

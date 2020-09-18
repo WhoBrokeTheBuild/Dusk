@@ -57,7 +57,7 @@ void ScriptEvent::CallPython(const EventData * data)
         PyObject * result = PyEval_CallObject(it.second, arg);
         if (!result) {
             DuskLogError("Failed to call Python Event Listener");
-            PyPrintStackTrace();
+            PyCheckError();
         }
     }
 

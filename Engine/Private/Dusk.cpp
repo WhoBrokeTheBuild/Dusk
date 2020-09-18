@@ -20,6 +20,8 @@
 
 #endif // defined(_WIN32)
 
+#include <string>
+#include <vector>
 #include <cstdio>
 
 namespace Dusk {
@@ -75,7 +77,7 @@ void RunScriptFile(const std::string& filename) {
 
     PyRun_File(file, filename.c_str(), Py_file_input, pyMainDict, pyLocalDict);
 
-    PyPrintStackTrace();
+    PyCheckError();
 
     fclose(file);
 }
@@ -89,10 +91,20 @@ void RunScriptString(const std::string& code)
 
     PyRun_String(code.c_str(), Py_single_input, pyMainDict, pyLocalDict);
 
-    PyPrintStackTrace();
+    PyCheckError();
 }
 
 static PyObject * _PyScriptConsoleLocals = NULL;
+
+static std::vector<std::string> _ScriptConsoleHistory;
+
+static int _ScriptConsoleCursor = 0;
+static int _ScriptConsoleHistoryIndex = 0;
+
+bool _ScriptConsoleRunCommand(const std::string&);
+void _ScriptConsoleMoveCursorLeft(int);
+void _ScriptConsoleMoveCursorRight(int);
+void _ScriptConsoleNextCharacter();
 
 #if !defined(_WIN32)
 
@@ -123,7 +135,10 @@ void InitScriptConsole()
 
     PyRun_String("import Dusk", Py_single_input, pyMainDict, _PyScriptConsoleLocals);
 
-    printf("> ");
+    _ScriptConsoleHistory.push_back(std::string());
+    _ScriptConsoleHistoryIndex = _ScriptConsoleHistory.size() - 1;
+
+    printf(">>> ");
     fflush(stdout);
 }
 
@@ -141,6 +156,206 @@ void TermScriptConsole()
 #endif
 }
 
+bool _ScriptConsoleRunCommand(const std::string& command)
+{
+    if (command[0] == '#') {
+        return true;
+    }
+
+    bool whitespace = true;
+    for (const auto& c : command) {
+        if (!isspace(c)) {
+            whitespace = false;
+        }
+    }
+
+    if (whitespace) {
+        return false;
+    }
+
+    PyObject * pyMain = PyImport_AddModule("__main__");
+    PyObject * pyMainDict = PyModule_GetDict(pyMain);
+
+    PyObject * result = PyRun_String(command.c_str(), Py_single_input, pyMainDict, _PyScriptConsoleLocals);
+    if (PyCheckError()) {
+        return false;
+    }
+    else if (result && result != Py_None) {
+        PyObject * resultRepr = PyObject_Repr(result);
+        if (resultRepr) {
+            PyObject * resultStr = PyUnicode_AsEncodedString(resultRepr, "utf-8", "~E~");
+
+            printf("%s\n", PyBytes_AS_STRING(resultStr));
+
+            Py_XDECREF(resultStr);
+            Py_XDECREF(resultRepr);
+        }
+
+        Py_XDECREF(result);
+    }
+
+    return true;
+}
+
+void _ScriptConsoleMoveCursorLeft(int amount)
+{
+    printf("\033[%dD", amount);
+    fflush(stdout);
+}
+
+void _ScriptConsoleMoveCursorRight(int amount)
+{
+    printf("\033[%dC", amount);
+    fflush(stdout);
+}
+
+void _ScriptConsoleNextCharacter() 
+{
+    static bool inEscape = false;
+
+    unsigned char c;
+    if (read(STDIN_FILENO, &c, sizeof(c)) < 0) {
+        return;
+    }
+
+    if (inEscape) {
+        if (c == '[' || c == '~') {
+            return;
+        }
+
+        switch (c) {
+        case 'A': // up
+            if (_ScriptConsoleHistoryIndex > 0) {
+                --_ScriptConsoleHistoryIndex;
+
+                if (_ScriptConsoleCursor > 0) {
+                    _ScriptConsoleMoveCursorLeft(_ScriptConsoleCursor);   
+                }
+                _ScriptConsoleCursor = 0;
+                printf("\033[K");
+                fflush(stdout);
+
+                const auto& str = _ScriptConsoleHistory[_ScriptConsoleHistoryIndex];
+
+                printf("%s", str.c_str());
+                fflush(stdout);
+
+                _ScriptConsoleCursor = str.size();
+            }
+
+            break;
+        case 'B': // down
+            if (_ScriptConsoleHistoryIndex < _ScriptConsoleHistory.size() - 1) {
+                ++_ScriptConsoleHistoryIndex;
+
+                if (_ScriptConsoleCursor > 0) {
+                    _ScriptConsoleMoveCursorLeft(_ScriptConsoleCursor);   
+                }
+                _ScriptConsoleCursor = 0;
+                printf("\033[K");
+                fflush(stdout);
+
+                const auto& str = _ScriptConsoleHistory[_ScriptConsoleHistoryIndex];
+
+                printf("%s", str.c_str());
+                fflush(stdout);
+
+                _ScriptConsoleCursor = str.size();
+            }
+
+            break;
+        case 'C': // right
+            if (_ScriptConsoleCursor < _ScriptConsoleHistory.back().size()) {
+                _ScriptConsoleMoveCursorRight(1);
+                ++_ScriptConsoleCursor;
+            }
+            break;
+        case 'D': // left
+            if (_ScriptConsoleCursor > 0) {
+                _ScriptConsoleMoveCursorLeft(1);
+                --_ScriptConsoleCursor;
+            }
+            break;
+        case 'H': // home
+            if (_ScriptConsoleCursor > 0) {
+            _ScriptConsoleMoveCursorLeft(_ScriptConsoleCursor);
+                _ScriptConsoleCursor = 0;
+            }
+            break;
+        case 'F': // end
+            if (_ScriptConsoleCursor < _ScriptConsoleHistory.back().size()) {
+                _ScriptConsoleMoveCursorRight(_ScriptConsoleHistory.back().size() - _ScriptConsoleCursor);
+                _ScriptConsoleCursor = _ScriptConsoleHistory.back().size();
+            }
+            break;
+        }
+
+        inEscape = false;
+    }
+    else if (c != 9 && iscntrl(c)) {
+        switch (c) {
+        case 3: // Ctrl+C
+        case 4: // Ctrl+D
+            SetRunning(false);
+            break;
+        case 10: // Enter
+            printf("\n");
+            fflush(stdout);
+
+            if (_ScriptConsoleHistoryIndex < _ScriptConsoleHistory.size() - 1) {
+                _ScriptConsoleHistory.back() = _ScriptConsoleHistory[_ScriptConsoleHistoryIndex];
+            }
+
+            if (_ScriptConsoleRunCommand(_ScriptConsoleHistory.back())) {
+                _ScriptConsoleHistory.push_back(std::string());
+                _ScriptConsoleHistoryIndex = _ScriptConsoleHistory.size() - 1;
+            }
+            else {
+                _ScriptConsoleHistory.back().clear();
+            }
+
+            _ScriptConsoleCursor = 0;
+            printf(">>> ");
+            fflush(stdout);
+
+            break;
+        case 27: // Escape
+            inEscape = true;
+            break;
+        case 127: // Backspace
+            if (_ScriptConsoleCursor > 0) {
+                printf("\010\033[K");
+                fflush(stdout);
+
+                --_ScriptConsoleCursor;
+                _ScriptConsoleHistory.back().erase(_ScriptConsoleCursor, 1);
+
+                printf("%s", _ScriptConsoleHistory.back().c_str() + _ScriptConsoleCursor);
+                fflush(stdout);
+
+                if (_ScriptConsoleCursor < _ScriptConsoleHistory.back().size()) {
+                    _ScriptConsoleMoveCursorLeft(_ScriptConsoleHistory.back().size() - _ScriptConsoleCursor);
+                }
+            }
+            break;
+        }
+    }
+    else {
+        putchar(c);
+        fflush(stdout);
+
+        _ScriptConsoleHistory.back().insert(_ScriptConsoleCursor, 1, c);
+        ++_ScriptConsoleCursor;
+
+        printf("%s", _ScriptConsoleHistory.back().c_str() + _ScriptConsoleCursor);
+        fflush(stdout);
+
+        if (_ScriptConsoleCursor < _ScriptConsoleHistory.back().size()) {
+            _ScriptConsoleMoveCursorLeft(_ScriptConsoleHistory.back().size() - _ScriptConsoleCursor);
+        }
+    }
+}
+
 DUSK_CORE_API
 void UpdateScriptConsole()
 {
@@ -150,152 +365,9 @@ void UpdateScriptConsole()
     FD_ZERO(&fds);
     FD_SET(STDIN_FILENO, &fds);
 
-    static char buffer[4096];
-    static int length = 0;
-    static int cursor = 0;
-
-    bool printable = false;
-    bool sequence = false;
-
-    unsigned char c;
     while (select(1, &fds, NULL, NULL, &tv)) {
-        if (read(STDIN_FILENO, &c, sizeof(c)) < 0) {
-            break;
-        }
-
-        if (sequence) {
-            if (c == '[' || c == '~') {
-                continue;
-            }
-
-            switch (c) {
-            case 'A': // up
-                break;
-            case 'B': // down
-                break;
-            case 'C': // right
-                if (cursor < length) {
-                    printf("\033[1C");
-                    fflush(stdout);
-                    ++cursor;
-                }
-                break;
-            case 'D': // left
-                if (cursor > 0) {
-                    printf("\033[1D");
-                    fflush(stdout);
-                    --cursor;
-                }
-                break;
-            case 'H': // home
-                if (cursor > 0) {
-                    printf("\033[%dD", cursor);
-                    fflush(stdout);
-                    cursor = 0;
-                }
-                break;
-            case 'F': // end
-                if (cursor < length) {
-                    printf("\033[%dC", length - cursor);
-                    fflush(stdout);
-                    cursor = length;
-                }
-                break;
-            }
-
-            sequence = false;
-        }
-        else if (iscntrl(c)) {
-            switch (c) {
-            case 3:
-            case 4:
-                SetRunning(false);
-                break;
-            case 9:
-                printable = true;
-                break;
-            case 10:
-                printf("\n");
-                fflush(stdout);
-
-                if (length > 0) {
-                    PyObject * pyMain = PyImport_AddModule("__main__");
-                    PyObject * pyMainDict = PyModule_GetDict(pyMain);
-
-                    PyObject * result = PyRun_String(buffer, Py_single_input, pyMainDict, _PyScriptConsoleLocals);
-                    PyPrintStackTrace();
-                    if (result && result != Py_None) {
-                        PyObject * resultRepr = PyObject_Repr(result);
-                        if (resultRepr) {
-                            PyObject * resultStr = PyUnicode_AsEncodedString(resultRepr, "utf-8", "~E~");
-
-                            printf("%s\n", PyBytes_AS_STRING(resultStr));
-
-                            Py_XDECREF(resultStr);
-                            Py_XDECREF(resultRepr);
-                        }
-
-                        Py_XDECREF(result);
-                    }
-                }
-
-                length = 0;
-                cursor = 0;
-                buffer[0] = '\0';
-                printf(">>> ");
-                fflush(stdout);
-
-                break;
-            case 27:
-                sequence = true;
-                break;
-            case 127:
-                if (cursor > 0) {
-                    printf("\010\033[K");
-                    fflush(stdout);
-
-                    --length;
-                    --cursor;
-
-                    for (int i = cursor; i < length; ++i) {
-                        buffer[i] = buffer[i + 1];
-                    }
-                    buffer[length] = '\0';
-
-                    printf("%s", buffer + cursor);
-                    fflush(stdout);
-
-                    if (cursor < length) {
-                        printf("\033[%dD", length - cursor);
-                        fflush(stdout);
-                    }
-                }
-                break;
-            }
-        }
-        else {
-            putchar(c);
-            fflush(stdout);
-
-            for (int i = length - 1; i >= cursor; --i) {
-                buffer[i + 1] = buffer[i];
-            }
-
-            buffer[cursor] = c;
-            ++length;
-            ++cursor;
-            buffer[length] = '\0';
-
-            printf("%s", buffer + cursor);
-            fflush(stdout);
-
-            if (cursor < length) {
-                printf("\033[%dD", length - cursor);
-                fflush(stdout);
-            }
-        }
+        _ScriptConsoleNextCharacter();
     }
-
 }
 
 static std::string _ApplicationName;

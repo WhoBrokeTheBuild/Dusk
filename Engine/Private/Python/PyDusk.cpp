@@ -158,7 +158,7 @@ PyMODINIT_FUNC PyInit_Dusk()
     return module;
 }
 
-void PyPrintStackTrace()
+bool PyCheckError()
 {
     if (PyErr_Occurred()) {
         PyObject * pyType = nullptr;
@@ -190,7 +190,11 @@ void PyPrintStackTrace()
             Py_XDECREF(pyTypeNameStr);
             Py_XDECREF(pyTypeName);
         }
+
+        return true;
     }
+
+    return false;
 }
 
 } // namespace Dusk

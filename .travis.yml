@@ -1,14 +1,10 @@
 language: cpp
-sudo: false
 dist: bionic
+os: linux
 
-notifications:
-  slack: c0demonk3ys:gnjXYwuoMOBnffg9h8YnlLyE
-
-matrix:
+jobs:
   include:
     - name: "GCC Debug (ThirdParty)"
-      os: linux
       compiler: gcc
       addons:
         apt:
@@ -18,7 +14,6 @@ matrix:
       env: CMAKE_BUILD_TYPE=DEBUG
 
     - name: "GCC Release (System)"
-      os: linux
       compiler: gcc
       addons:
         apt:
@@ -28,7 +23,6 @@ matrix:
       env: CMAKE_BUILD_TYPE=RELEASE
 
     - name: "Clang Debug (ThirdParty)"
-      os: linux
       compiler: clang
       addons:
         apt:
@@ -38,7 +32,6 @@ matrix:
       env: CMAKE_BUILD_TYPE=DEBUG
 
     - name: "Clang Release (System)"
-      os: linux
       compiler: clang
       addons:
         apt:

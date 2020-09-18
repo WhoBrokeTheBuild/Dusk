@@ -1,0 +1,4 @@
+
+SET(_TARGET Console)
+
+DUSK_DEMO(${_TARGET})

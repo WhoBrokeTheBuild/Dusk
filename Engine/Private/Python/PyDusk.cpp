@@ -114,7 +114,7 @@ static struct PyMethodDef PyDusk_methods[] = {
     { "RunScriptFile",          PyDusk_RunScriptFile,           METH_VARARGS,   nullptr },
     { "SetRunning",             PyDusk_SetRunning,              METH_VARARGS,   nullptr },
     { "IsRunning",              PyDusk_IsRunning,               METH_NOARGS,    nullptr },
-    { "GetVersion",             PyDusk_GetVersion,              METH_NOARGS,    nullptr },
+    { "GetVersion",             PyDusk_GetVersion,              METH_NOARGS,    "Get Dusk's version as a tuple, e.g. (1, 0, 0)" },
     { "GetApplicationName",     PyDusk_GetApplicationName,      METH_NOARGS,    nullptr },
     { "SetApplicationName",     PyDusk_SetApplicationName,      METH_VARARGS,   nullptr },
     { "GetApplicationVersion",  PyDusk_GetApplicationVersion,   METH_NOARGS,    nullptr },

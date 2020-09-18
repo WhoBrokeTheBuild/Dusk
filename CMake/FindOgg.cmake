@@ -26,6 +26,8 @@
 # and the following imported targets
 #
 #   Ogg::Ogg
+#   Ogg::Vorbis
+#   Ogg::Theora
 #
 # The following variables can be set as arguments
 #

@@ -8,6 +8,18 @@
 #include <Python.h>
 #include <frameobject.h>
 
+#if defined(_WIN32)
+
+#include <Windows.h>
+#include <conio.h>
+
+#else
+
+#include <termios.h>
+#include <unistd.h>
+
+#endif // defined(_WIN32)
+
 #include <cstdio>
 
 namespace Dusk {
@@ -75,9 +87,215 @@ void RunScriptString(const std::string& code)
     PyObject * pyMainDict = PyModule_GetDict(pyMain);
     PyObject * pyLocalDict = PyDict_New();
 
-    PyRun_String(code.c_str(), 0, pyMainDict, pyLocalDict);
+    PyRun_String(code.c_str(), Py_single_input, pyMainDict, pyLocalDict);
 
     PyPrintStackTrace();
+}
+
+static PyObject * _PyScriptConsoleLocals = NULL;
+
+#if !defined(_WIN32)
+
+static struct termios _Termios;
+
+#endif
+
+DUSK_CORE_API
+void InitScriptConsole()
+{
+#if defined(_WIN32)
+
+#else
+
+    struct termios tmp;
+
+    tcgetattr(STDIN_FILENO, &_Termios);
+    tmp = _Termios;
+    tmp.c_lflag &= ~(ECHO | ICANON | ISIG | IEXTEN);
+    tmp.c_cc[VMIN] = 0;
+    tcsetattr(STDIN_FILENO, TCSANOW, &tmp);
+
+#endif
+
+    PyObject * pyMain = PyImport_AddModule("__main__");
+    PyObject * pyMainDict = PyModule_GetDict(pyMain);
+    _PyScriptConsoleLocals = PyDict_New();
+
+    PyRun_String("import Dusk", Py_single_input, pyMainDict, _PyScriptConsoleLocals);
+
+    printf("> ");
+    fflush(stdout);
+}
+
+DUSK_CORE_API
+void TermScriptConsole()
+{
+    Py_XDECREF(_PyScriptConsoleLocals);
+
+#if defined(_WIN32)
+
+#else
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &_Termios);
+    
+#endif
+}
+
+DUSK_CORE_API
+void UpdateScriptConsole()
+{
+    struct timeval tv = { 0L, 0L };
+    fd_set fds;
+
+    FD_ZERO(&fds);
+    FD_SET(STDIN_FILENO, &fds);
+
+    static char buffer[4096];
+    static int length = 0;
+    static int cursor = 0;
+
+    bool printable = false;
+    bool sequence = false;
+
+    unsigned char c;
+    while (select(1, &fds, NULL, NULL, &tv)) {
+        if (read(STDIN_FILENO, &c, sizeof(c)) < 0) {
+            break;
+        }
+
+        if (sequence) {
+            if (c == '[' || c == '~') {
+                continue;
+            }
+
+            switch (c) {
+            case 'A': // up
+                break;
+            case 'B': // down
+                break;
+            case 'C': // right
+                if (cursor < length) {
+                    printf("\033[1C");
+                    fflush(stdout);
+                    ++cursor;
+                }
+                break;
+            case 'D': // left
+                if (cursor > 0) {
+                    printf("\033[1D");
+                    fflush(stdout);
+                    --cursor;
+                }
+                break;
+            case 'H': // home
+                if (cursor > 0) {
+                    printf("\033[%dD", cursor);
+                    fflush(stdout);
+                    cursor = 0;
+                }
+                break;
+            case 'F': // end
+                if (cursor < length) {
+                    printf("\033[%dC", length - cursor);
+                    fflush(stdout);
+                    cursor = length;
+                }
+                break;
+            }
+
+            sequence = false;
+        }
+        else if (iscntrl(c)) {
+            switch (c) {
+            case 3:
+            case 4:
+                SetRunning(false);
+                break;
+            case 9:
+                printable = true;
+                break;
+            case 10:
+                printf("\n");
+                fflush(stdout);
+
+                if (length > 0) {
+                    PyObject * pyMain = PyImport_AddModule("__main__");
+                    PyObject * pyMainDict = PyModule_GetDict(pyMain);
+
+                    PyObject * result = PyRun_String(buffer, Py_single_input, pyMainDict, _PyScriptConsoleLocals);
+                    PyPrintStackTrace();
+                    if (result && result != Py_None) {
+                        PyObject * resultRepr = PyObject_Repr(result);
+                        if (resultRepr) {
+                            PyObject * resultStr = PyUnicode_AsEncodedString(resultRepr, "utf-8", "~E~");
+
+                            printf("%s\n", PyBytes_AS_STRING(resultStr));
+
+                            Py_XDECREF(resultStr);
+                            Py_XDECREF(resultRepr);
+                        }
+
+                        Py_XDECREF(result);
+                    }
+                }
+
+                length = 0;
+                cursor = 0;
+                buffer[0] = '\0';
+                printf(">>> ");
+                fflush(stdout);
+
+                break;
+            case 27:
+                sequence = true;
+                break;
+            case 127:
+                if (cursor > 0) {
+                    printf("\010\033[K");
+                    fflush(stdout);
+
+                    --length;
+                    --cursor;
+
+                    for (int i = cursor; i < length; ++i) {
+                        buffer[i] = buffer[i + 1];
+                    }
+                    buffer[length] = '\0';
+
+                    printf("%s", buffer + cursor);
+                    fflush(stdout);
+
+                    if (cursor < length) {
+                        printf("\033[%dD", length - cursor);
+                        fflush(stdout);
+                    }
+                }
+                break;
+            }
+        }
+        else {
+            putchar(c);
+            fflush(stdout);
+
+            for (int i = length - 1; i >= cursor; --i) {
+                buffer[i + 1] = buffer[i];
+            }
+
+            buffer[cursor] = c;
+            ++length;
+            ++cursor;
+            buffer[length] = '\0';
+
+            printf("%s", buffer + cursor);
+            fflush(stdout);
+
+            if (cursor < length) {
+                printf("\033[%dD", length - cursor);
+                fflush(stdout);
+            }
+        }
+    }
+
 }
 
 static std::string _ApplicationName;

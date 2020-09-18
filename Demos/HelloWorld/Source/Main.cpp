@@ -29,6 +29,8 @@ int main(int argc, char** argv)
     Dusk::Initialize(argc, argv);
     Dusk::RunScriptFile("Scripts/Main.py");
 
+    Dusk::InitScriptConsole();
+
     Dusk::UpdateContext updateContext;
     Dusk::RenderContext renderContext;
 
@@ -68,18 +70,12 @@ int main(int argc, char** argv)
 
         Dusk::SetRunning(true);
 
-        std::thread pyPrompt([]{
-            while (Dusk::IsRunning()) {
-                PyRun_InteractiveLoop(stdin, "");
-            }
-        });
-
-        pyPrompt.detach();
-
         while (Dusk::IsRunning()) {
             gfx->ProcessEvents();
 
             scene.Update(&updateContext);
+
+            Dusk::UpdateScriptConsole();
 
             shader->Bind();
             scene.Render(&renderContext);
@@ -87,6 +83,8 @@ int main(int argc, char** argv)
             gfx->SwapBuffers();
         }
     }
+
+    Dusk::TermScriptConsole();
 
     Dusk::Terminate();
 

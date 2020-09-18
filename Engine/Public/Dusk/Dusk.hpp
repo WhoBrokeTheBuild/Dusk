@@ -29,6 +29,15 @@ DUSK_CORE_API
 void RunScriptString(const std::string& code);
 
 DUSK_CORE_API
+void InitScriptConsole();
+
+DUSK_CORE_API
+void TermScriptConsole();
+
+DUSK_CORE_API
+void UpdateScriptConsole();
+
+DUSK_CORE_API
 inline Version GetVersion() {
     return Version(DUSK_VERSION_MAJOR, DUSK_VERSION_MINOR, DUSK_VERSION_PATCH);
 }

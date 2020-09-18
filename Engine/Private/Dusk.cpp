@@ -327,6 +327,11 @@ void _ScriptConsoleNextCharacter()
                 printf("\010\033[K");
                 fflush(stdout);
 
+                if (_ScriptConsoleHistoryIndex < _ScriptConsoleHistory.size() - 1) {
+                    _ScriptConsoleHistory.back() = _ScriptConsoleHistory[_ScriptConsoleHistoryIndex];
+                    _ScriptConsoleHistoryIndex = _ScriptConsoleHistory.size() - 1;
+                }
+
                 --_ScriptConsoleCursor;
                 _ScriptConsoleHistory.back().erase(_ScriptConsoleCursor, 1);
 
@@ -343,6 +348,11 @@ void _ScriptConsoleNextCharacter()
     else {
         putchar(c);
         fflush(stdout);
+
+        if (_ScriptConsoleHistoryIndex < _ScriptConsoleHistory.size() - 1) {
+            _ScriptConsoleHistory.back() = _ScriptConsoleHistory[_ScriptConsoleHistoryIndex];
+            _ScriptConsoleHistoryIndex = _ScriptConsoleHistory.size() - 1;
+        }
 
         _ScriptConsoleHistory.back().insert(_ScriptConsoleCursor, 1, c);
         ++_ScriptConsoleCursor;

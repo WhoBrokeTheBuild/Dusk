@@ -7,6 +7,8 @@ INCLUDE(ExternalProject)
 
 PROJECT(ThirdParty)
 
+FIND_PACKAGE(patch REQUIRED)
+
 # glm
 
 SET(glm_ROOT       ${CMAKE_BINARY_DIR}/glm/cmake)
@@ -102,6 +104,10 @@ IF(NEED_SDL2)
 
     FIND_PACKAGE(SDL2 2.0.6 CONFIG QUIET)
 
+    IF(CMAKE_GENERATOR STREQUAL "Visual Studio 16 2019")
+        SET(_SDL2_PATCH_COMMAND ${patch_COMMAND} ${SDL2_SOURCE_DIR}/CMakeLists.txt ${CMAKE_SOURCE_DIR}/SDL2_vcruntime.patch )
+    ENDIF()
+
     IF(NOT SDL2_FOUND)
         ExternalProject_Add(
             ThirdParty_SDL2
@@ -116,6 +122,7 @@ IF(NEED_SDL2)
             TEST_COMMAND        ""
             INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
             COMMAND             ${CMAKE_COMMAND} --build . --target install --config Debug
+            PATCH_COMMAND       ${_SDL2_PATCH_COMMAND}
         )
     ENDIF()
 ENDIF()
@@ -296,7 +303,7 @@ IF(NEED_Ogg)
         
         ADD_DEPENDENCIES(ThirdParty_Vorbis ThirdParty_Ogg)
 
-        SET(_Theora_PATCH ${CMAKE_SOURCE_DIR}/libtheora-png_sizeof.patch)
+        SET(_Theora_PATCH_COMMAND ${patch_COMMAND} -p0 --forward < ${CMAKE_SOURCE_DIR}/libtheora-png_sizeof.patch || true)
 
         SET(_Theora_INSTALL_COMMAND1 "")
         SET(_Theora_INSTALL_COMMAND2 "")
@@ -304,13 +311,11 @@ IF(NEED_Ogg)
         SET(_Theora_INSTALL_COMMAND4 "")
         IF(MSVC) 
             SET(_Theora_SOLUTION win32/VS2008/libtheora_static.sln)
-            SET(_Theora_PATCH_COMMAND ${GIT_EXECUTABLE} apply --ignore-space-change --ignore-whitespace -v ${_Theora_PATCH} || ver > nul)
             SET(_Theora_INSTALL_COMMAND1 ${CMAKE_VS_DEVENV_COMMAND} ${_Theora_SOLUTION} /Upgrade )
             SET(_Theora_INSTALL_COMMAND2 ${CMAKE_VS_MSBUILD_COMMAND} ${_Theora_SOLUTION} /t:libtheora_static /clp:ErrorsOnly /p:OutDir=${Theora_ROOT}/lib/ )
             SET(_Theora_INSTALL_COMMAND3 ${CMAKE_COMMAND} -E make_directory ${Theora_ROOT}/include/theora)
             SET(_Theora_INSTALL_COMMAND4 ${CMAKE_COMMAND} -E copy include/theora/codec.h include/theora/theora.h ${Theora_ROOT}/include/theora)
         ELSE()
-            SET(_Theora_PATCH_COMMAND patch -p0 --forward < ${_Theora_PATCH} || true)
             SET(_Theora_INSTALL_COMMAND1 ./autogen.sh ${_WITH_OGG} ${_WITH_VORBIS} --prefix=${Theora_ROOT} )
             SET(_Theora_INSTALL_COMMAND2 ${CMAKE_MAKE_PROGRAM} install -l )
         ENDIF()

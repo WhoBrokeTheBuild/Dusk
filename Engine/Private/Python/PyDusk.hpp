@@ -1,6 +1,7 @@
 #ifndef DUSK_PY_DUSK_HPP
 #define DUSK_PY_DUSK_HPP
 
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
 namespace Dusk {

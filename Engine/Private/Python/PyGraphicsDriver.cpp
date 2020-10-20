@@ -139,7 +139,7 @@ PyObject * PyGraphicsDriver_SetWindowSize(PyObject * self, PyObject * args)
     ivec2 size;
     if (!PyArg_ParseTuple(args, "(ii)", &size.x, &size.y)) {
         PyErr_BadArgument();
-        return nullptr;
+        Py_RETURN_NONE;
     }
 
     gfx->Pointer->SetWindowSize(size);

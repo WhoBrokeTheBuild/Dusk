@@ -29,19 +29,19 @@ public:
     }
 
     gsl::span<const float> GetVertices() const override {
-        return gsl::span(Vertices.data(), Vertices.size());
+        return gsl::span<const float>(Vertices.data(), Vertices.size());
     }
 
     gsl::span<const float> GetNormals() const override {
-        return gsl::span(Normals.data(), Normals.size());
+        return gsl::span<const float>(Normals.data(), Normals.size());
     }
 
     gsl::span<const float> GetUVs() const override {
-        return gsl::span(UVs.data(), UVs.size());
+        return gsl::span<const float>(UVs.data(), UVs.size());
     }
 
     gsl::span<const float> GetColors() const override {
-        return gsl::span(Colors.data(), Colors.size());
+        return gsl::span<const float>(Colors.data(), Colors.size());
     }
 
     gsl::span<const float> GetTangents() const override {

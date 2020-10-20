@@ -58,34 +58,34 @@ public:
     virtual ~TextureData() = default;
 
     // Pointer to pixel data Buffer
-    virtual uint8_t * GetData() const = 0;
+    virtual uint8_t * GetData() = 0;
 
     // Width and Height in pixels
-    virtual uvec2 GetSize() const = 0;
+    virtual uvec2 GetSize() = 0;
 
     // Number of components (R, RG, RGB, RGBA)
-    virtual int GetComponents() const = 0;
+    virtual int GetComponents() = 0;
 
     // Compression of the pixels in the data
-    virtual inline CompressionType GetCompressionType() const {
+    virtual inline CompressionType GetCompressionType() {
         return CompressionType::None;
     }
 
     // Format of the data in the buffer
-    virtual DataType GetDataType() const = 0;
+    virtual DataType GetDataType() = 0;
 
     // Wrap config for (s, t)
-    virtual inline std::tuple<WrapType, WrapType> GetWrapTypes() const {
+    virtual inline std::tuple<WrapType, WrapType> GetWrapTypes() {
         return std::make_tuple(WrapType::Repeat, WrapType::Repeat);
     }
 
     // Filter config for (min, mag)
-    virtual inline std::tuple<FilterType, FilterType> GetFilterTypes() const {
+    virtual inline std::tuple<FilterType, FilterType> GetFilterTypes() {
         return std::make_tuple(FilterType::Nearest, FilterType::Nearest);
     }
 
     // Generate Mipmaps
-    virtual inline bool GenerateMipmaps() const {
+    virtual inline bool GenerateMipmaps() {
         return true;
     }
 

@@ -97,7 +97,7 @@ PyObject * PyDusk_SetApplicationVersion(PyObject * self, PyObject * args)
     Py_RETURN_NONE;
 }
 
-PyObject * PyDusk_LadModule(PyObject * self, PyObject * args)
+PyObject * PyDusk_LoadModule(PyObject * self, PyObject * args)
 {
     const char * module;
 

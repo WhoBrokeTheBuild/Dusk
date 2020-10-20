@@ -14,5 +14,5 @@ IF(TARGET OpenAL::OpenAL)
             OpenAL::OpenAL
     )
 ELSE()
-    MESSAGE(WARNING "Not building ${_TARGET}, missing OpenAL::OpenAL")
+    MESSAGE(STATUS "Not building ${_TARGET}, missing OpenAL::OpenAL")
 ENDIF()

@@ -18,19 +18,19 @@ public:
 
     virtual ~TextureData();
 
-    uint8_t * GetData() override {
+    uint8_t * GetData() const override {
         return Data;
     }
 
-    uvec2 GetSize() override {
+    uvec2 GetSize() const override {
         return Size;
     }
 
-    int GetComponents() override {
+    int GetComponents() const override {
         return Components;
     }
 
-    DataType GetDataType() override {
+    DataType GetDataType() const override {
         return TextureData::DataType::UnsignedByte;
     }
 

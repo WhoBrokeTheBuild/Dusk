@@ -8,6 +8,8 @@
 #include <Dusk/Log.hpp>
 #include <Dusk/Module.hpp>
 
+#include <string>
+
 namespace Dusk {
 
 PyObject * PyDusk_RunScriptFile(PyObject * self, PyObject * args)
@@ -125,7 +127,7 @@ static struct PyMethodDef PyDusk_methods[] = {
     { "LogError",               PyDusk_LogError,                METH_VARARGS,   nullptr },
     { "LogPerf",                PyDusk_LogPerf,                 METH_VARARGS,   nullptr },
     { "LogLoad",                PyDusk_LogLoad,                 METH_VARARGS,   nullptr },
-    { "LoadModule",             PyDusk_LadModule,               METH_VARARGS,   nullptr },
+    { "LoadModule",             PyDusk_LoadModule,              METH_VARARGS,   nullptr },
     { "GetGraphicsDriver",      PyDusk_GetGraphicsDriver,       METH_NOARGS,    nullptr },
     { nullptr, nullptr, 0, nullptr },
 };

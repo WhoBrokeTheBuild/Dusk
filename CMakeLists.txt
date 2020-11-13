@@ -11,16 +11,18 @@ INCLUDE(Policies)
 
 PROJECT(Dusk)
 
+INCLUDE(Version)
+
 ###
 ### Options
 ###
 
-OPTION(VERBOSE_LOGGING "Build Dusk with Verbose Logging enabled"            OFF)
+OPTION(VERBOSE_LOGGING  "Build Dusk with Verbose Logging enabled"            OFF)
 IF(VERBOSE_LOGGING)
     ADD_DEFINITIONS(-DDUSK_ENABLE_VERBOSE_LOGGING)
 ENDIF()
 
-OPTION(BINARY_SHADERS "Build Dusk with Binary Shader support"               OFF)
+OPTION(BINARY_SHADERS   "Build Dusk with Binary Shader support"               OFF)
 IF(BINARY_SHADERS)
     ADD_DEFINITIONS(-DDUSK_ENABLE_BINARY_SHADERS)
 ENDIF()
@@ -31,47 +33,91 @@ IF(BUILD_TESTS)
 ENDIF()
 
 OPTION(BUILD_DEMOS      "Build Demo Projects"                               ON)
-OPTION(BUILD_ThirdParty "Build Missing ThirdParty Dependencies"             ON)
+OPTION(BUILD_THIRDPARTY "Build Missing ThirdParty Dependencies"             ON)
 OPTION(BUILD_PACKAGES   "Build Packages"                                    OFF)
 
-# Optional Modules
+SET(MODULES
+    "All"
+    CACHE STRING
+    "Semicolon-separated list of required modules, use 'All' to build all modules"
+)
 
-OPTION(NEED_MODULE_OpenGL      "Require the OpenGL Module"                  ON)
-OPTION(NEED_MODULE_DirectX     "Require the DirectX Module (Windows Only)"  OFF)
-OPTION(NEED_MODULE_Vulkan      "Require the Vulkan Module"                  OFF)
-OPTION(NEED_MODULE_OpenAL      "Require the OpenAL Module"                  OFF)
-OPTION(NEED_MODULE_freetype    "Require the freetype Module"                ON)
-OPTION(NEED_MODULE_Archive     "Require the Archive Module"                 OFF)
+###
+### Modules Configuration
+###
 
-IF(NEED_MODULE_OpenGL OR NEED_MODULE_Vulkan)
-    SET(NEED_SDL2 TRUE)
+# Generate list of available modules
+SET(_available_modules
+    "Archive"
+    "FreeType"
+    "GLTF2"
+    "OpenAL"
+    "OpenGL"
+    "STBI"
+    "TinyOBJ"
+    "Vulkan"
+)
+IF(WIN32)
+    LIST(APPEND _available_modules "DirectX")
 ENDIF()
 
-IF(NEED_MODULE_Vulkan)
-    SET(NEED_VulkanSDK TRUE)
+IF(BUILD_DEMOS OR MODULES STREQUAL "All")
+    SET(MODULES "${_available_modules}")
 ENDIF()
 
-IF(NEED_MODULE_OpenAL)
-    SET(NEED_OpenAL TRUE)
+# Filter requested modules that are not available
+SET(_modules "")
+FOREACH(_module ${MODULES})
+    IF(${_module} IN_LIST _available_modules)
+        LIST(APPEND _modules ${_module})
+    ELSE()
+        MESSAGE(WARNING "Module '${_module}' not supported on this platform")
+ENDIF()
+ENDFOREACH()
+
+# Generate list of required third party dependencies
+SET(_dependencies
+    "glm"
+    "GSL"
+    "nlohmann_json"
+    "Python3"
+)
+
+IF("OpenGL" IN_LIST _modules)
+    LIST(APPEND _dependencies "SDL2")
 ENDIF()
 
-IF(NEED_MODULE_freetype)
-    SET(NEED_freetype TRUE)
+IF("Vulkan" IN_LIST _modules)
+    LIST(APPEND _dependencies "SDL2" "VulkanSDK")
 ENDIF()
 
-IF(NEED_MODULE_Archive)
+IF("OpenAL" IN_LIST _modules)
+    LIST(APPEND _dependencies "OpenAL")
+ENDIF()
+
+IF("FreeType" IN_LIST _modules)
+    LIST(APPEND _dependencies "freetype")
+ENDIF()
+
+IF("Archive" IN_LIST _modules)
 ENDIF()
 
 IF(BUILD_TESTS)
-    SET(NEED_GTest TRUE)
+    LIST(APPEND _dependencies "GTest")
 ENDIF()
+
+LIST(REMOVE_DUPLICATES _modules)
+LIST(REMOVE_DUPLICATES _dependencies)
+
+MESSAGE(STATUS "Available modules: ${_available_modules}")
+MESSAGE(STATUS "Building Modules: ${_modules}")
+MESSAGE(STATUS "Required Dependencies: ${_dependencies}")
 
 ###
 ### Configuration
 ###
 
 INCLUDE(Compiler)
-INCLUDE(Version)
 
 # Allow for custom organization of files in VisualStudio
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -84,41 +130,38 @@ SET(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 ### Third Party Dependencies
 ###
 
-IF(BUILD_ThirdParty)
-    SET(ThirdParty_SOURCE_DIR ${CMAKE_SOURCE_DIR}/ThirdParty)
-    SET(ThirdParty_BINARY_DIR ${CMAKE_BINARY_DIR}/ThirdParty)
+IF(BUILD_THIRDPARTY)
+    SET(THIRDPARTY_SOURCE_DIR ${CMAKE_SOURCE_DIR}/ThirdParty)
+    SET(THIRDPARTY_BINARY_DIR ${CMAKE_BINARY_DIR}/ThirdParty)
 
-    FILE(MAKE_DIRECTORY ${ThirdParty_BINARY_DIR})
+    FILE(MAKE_DIRECTORY ${THIRDPARTY_BINARY_DIR})
 
     # Set _ROOT variables for config-based packages
-    SET(glm_ROOT            ${ThirdParty_BINARY_DIR}/glm/cmake)
-    SET(nlohmann_json_ROOT  ${ThirdParty_BINARY_DIR}/nlohmann_json)
-    SET(SDL2_ROOT           ${ThirdParty_BINARY_DIR}/SDL2)
-    SET(OpenAL_ROOT         ${ThirdParty_BINARY_DIR}/OpenAL)
-    SET(freetype_ROOT       ${ThirdParty_BINARY_DIR}/freetype)
+    SET(glm_ROOT            ${THIRDPARTY_BINARY_DIR}/glm/cmake)
+    SET(nlohmann_json_ROOT  ${THIRDPARTY_BINARY_DIR}/nlohmann_json)
+    SET(SDL2_ROOT           ${THIRDPARTY_BINARY_DIR}/SDL2)
+    SET(OpenAL_ROOT         ${THIRDPARTY_BINARY_DIR}/OpenAL)
+    SET(freetype_ROOT       ${THIRDPARTY_BINARY_DIR}/freetype)
 
     # Set CMAKE_PREFIX_PATH for find-based packages
     LIST(APPEND CMAKE_PREFIX_PATH
-        ${ThirdParty_BINARY_DIR}/GSL
-        ${ThirdParty_BINARY_DIR}/Python3
-        ${ThirdParty_BINARY_DIR}/libogg
-        ${ThirdParty_BINARY_DIR}/libvorbis
-        ${ThirdParty_BINARY_DIR}/libtheora
-        ${ThirdParty_BINARY_DIR}/GTest
+        ${THIRDPARTY_BINARY_DIR}/GSL
+        ${THIRDPARTY_BINARY_DIR}/Python3
+        ${THIRDPARTY_BINARY_DIR}/libogg
+        ${THIRDPARTY_BINARY_DIR}/libvorbis
+        ${THIRDPARTY_BINARY_DIR}/libtheora
+        ${THIRDPARTY_BINARY_DIR}/GTest
     )
 
-    # Configure path to cmake config files
+    STRING(REPLACE ";" ":" _tmp "${_dependencies}")
 
     EXECUTE_PROCESS(
         COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" 
             -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
             -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-            -DNEED_SDL2=${NEED_SDL2}
-            -DNEED_OpenAL=${NEED_OpenAL}
-            -DNEED_freetype=${NEED_freetype}
-            -DNEED_GTest=${NEED_GTest}
-            ${ThirdParty_SOURCE_DIR}
-        WORKING_DIRECTORY ${ThirdParty_BINARY_DIR}
+            -DDEPENDENCIES=${_tmp}
+            ${THIRDPARTY_SOURCE_DIR}
+        WORKING_DIRECTORY ${THIRDPARTY_BINARY_DIR}
         RESULT_VARIABLE _result
     )
     IF(_result)
@@ -126,14 +169,14 @@ IF(BUILD_ThirdParty)
         MESSAGE(FATAL_ERROR "Failed to configure ThirdParty projects")
     ENDIF()
 
-    SET(_ThirdParty_BUILD_COMMAND ${CMAKE_COMMAND} --build . )
+    SET(_THIRDPARTY_BUILD_COMMAND ${CMAKE_COMMAND} --build . )
     IF(CMAKE_GENERATOR STREQUAL "Unix Makefiles")
-        SET(_ThirdParty_BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} -l )
+        SET(_THIRDPARTY_BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} -l )
     ENDIF()
 
     EXECUTE_PROCESS(
-        COMMAND ${_ThirdParty_BUILD_COMMAND}
-        WORKING_DIRECTORY ${ThirdParty_BINARY_DIR}
+        COMMAND ${_THIRDPARTY_BUILD_COMMAND}
+        WORKING_DIRECTORY ${THIRDPARTY_BINARY_DIR}
         RESULT_VARIABLE _result
     )
 
@@ -143,35 +186,46 @@ IF(BUILD_ThirdParty)
     ENDIF()
 ENDIF()
 
+IF("glm" IN_LIST _dependencies)
 FIND_PACKAGE(glm CONFIG REQUIRED)
 
 IF(NOT TARGET glm::glm)
     MESSAGE(SEND_ERROR "Incompatible version of glm found")
 ENDIF()
+ENDIF()
 
+IF("GSL" IN_LIST _dependencies)
 FIND_PACKAGE(GSL REQUIRED)
+ENDIF()
+
+IF("nlohmann_json" IN_LIST _dependencies)
 FIND_PACKAGE(nlohmann_json CONFIG REQUIRED)
-FIND_PACKAGE(Python3 3.8 COMPONENTS Development REQUIRED)
-FIND_PACKAGE(Threads REQUIRED)
-
-FIND_PACKAGE(SDL2 2.0.6 CONFIG)
-IF(NEED_SDL2 AND NOT SDL2_FOUND)
-    MESSAGE(SEND_ERROR "NEED_SDL2 is set, but SDL2 could not be found.")
 ENDIF()
 
-FIND_PACKAGE(VulkanSDK)
-IF(NEED_VulkanSDK AND NOT VulkanSDK_FOUND)
-    MESSAGE(SEND_ERROR "NEED_VulkanSDK is set, but the Vulkan SDK could not be found.")
+IF("Python3" IN_LIST _dependencies)
+    FIND_PACKAGE(Python3 3.8 REQUIRED
+        COMPONENTS Development)
 ENDIF()
 
-FIND_PACKAGE(OpenAL CONFIG)
-IF(NEED_OpenAL AND NOT OpenAL_FOUND)
-    MESSAGE(SEND_ERROR "NEED_OpenAL is set, but OpenAL could not be found.")
+IF("SDL2" IN_LIST _dependencies)
+    FIND_PACKAGE(SDL2 2.0.6 CONFIG REQUIRED)
 ENDIF()
 
-FIND_PACKAGE(freetype CONFIG)
-IF(NEED_freetype AND NOT freetype_FOUND)
-    MESSAGE(SEND_ERROR "NEED_freetype is set, but freetype could not be found.")
+IF("VulkanSDK" IN_LIST _dependencies)
+    FIND_PACKAGE(VulkanSDK REQUIRED)
+ENDIF()
+
+IF("OpenAL" IN_LIST _dependencies)
+    FIND_PACKAGE(OpenAL CONFIG REQUIRED)
+ENDIF()
+
+IF("freetype" IN_LIST _dependencies)
+    FIND_PACKAGE(freetype CONFIG REQUIRED)
+ENDIF()
+
+IF("Ogg" IN_LIST _dependencies)
+    FIND_PACKAGE(Ogg REQUIRED 
+        COMPONENTS Vorbis Theora)
 ENDIF()
 
 FIND_PACKAGE(Ogg COMPONENTS Vorbis Theora)
@@ -179,9 +233,11 @@ IF(NEED_Ogg AND NOT Ogg_FOUND)
     MESSAGE(SEND_ERROR "NEED_Ogg is set, but Ogg could not be found.")
 ENDIF()
 
-IF(NEED_GTest)
+IF("GTest" IN_LIST _dependencies)
     FIND_PACKAGE(GTest REQUIRED)
 ENDIF()
+
+# Compile list of runtime directories
 
 IF(TARGET SDL2::SDL2)
     GET_TARGET_PROPERTY(_location SDL2::SDL2 IMPORTED_LOCATION_RELEASE)

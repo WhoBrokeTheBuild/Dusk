@@ -164,6 +164,7 @@ void GraphicsDriver::ProcessEvents()
         }
     }
     
+    // TODO: Move
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -173,21 +174,25 @@ void GraphicsDriver::SwapBuffers()
     SDL_GL_SwapWindow(_sdlWindow);
 }
 
+DUSK_OPENGL_API
 std::unique_ptr<Dusk::Texture> GraphicsDriver::CreateTexture()
 {
     return std::make_unique<Texture>();
 }
 
+DUSK_OPENGL_API
 std::unique_ptr<Dusk::Shader> GraphicsDriver::CreateShader()
 {
     return std::make_unique<Shader>();
 }
 
+DUSK_OPENGL_API
 std::unique_ptr<Dusk::Mesh> GraphicsDriver::CreateMesh()
 {
     return std::make_unique<Mesh>();
 }
 
+DUSK_OPENGL_API
 bool GraphicsDriver::SetShaderData(unsigned binding, size_t size, void * buffer)
 {
     GLuint glID;

@@ -9,8 +9,17 @@ PROJECT(ThirdParty)
 
 FIND_PACKAGE(patch REQUIRED)
 
+SET(DEPENDENCIES 
+    "" 
+    CACHE STRING 
+    "Comma-separated list of required dependencies"
+)
+
+STRING(REPLACE ":" ";" DEPENDENCIES "${DEPENDENCIES}")
+
 # glm
 
+IF("glm" IN_LIST DEPENDENCIES)
 SET(glm_ROOT       ${CMAKE_BINARY_DIR}/glm/cmake)
 SET(glm_SOURCE_DIR ${CMAKE_BINARY_DIR}/glm)
 
@@ -28,9 +37,11 @@ IF(NOT glm_FOUND OR NOT TARGET glm::glm)
         UPDATE_COMMAND      ""
     )
 ENDIF()
+ENDIF()
 
 # GSL
 
+IF("GSL" IN_LIST DEPENDENCIES)
 SET(GSL_ROOT       ${CMAKE_BINARY_DIR}/GSL)
 SET(GSL_SOURCE_DIR ${CMAKE_BINARY_DIR}/GSL_src)
 
@@ -48,9 +59,11 @@ IF(NOT GSL_FOUND)
         UPDATE_COMMAND      ""
     )
 ENDIF()
+ENDIF()
 
 # nlohmann_json
 
+IF("nlohmann_json" IN_LIST DEPENDENCIES)
 SET(nlohmann_json_ROOT       ${CMAKE_BINARY_DIR}/nlohmann_json)
 SET(nlohmann_json_SOURCE_DIR ${CMAKE_BINARY_DIR}/nlohmann_json_src)
 
@@ -68,10 +81,11 @@ IF(NOT nlohmann_json_FOUND)
         UPDATE_COMMAND      ""
     )
 ENDIF()
+ENDIF()
 
 # GTest
 
-IF(NEED_GTest)
+IF("GTest" IN_LIST DEPENDENCIES)
     SET(GTest_ROOT       ${CMAKE_BINARY_DIR}/GTest)
     SET(GTest_SOURCE_DIR ${CMAKE_BINARY_DIR}/GTest_src)
     SET(GTest_BINARY_DIR ${CMAKE_BINARY_DIR}/GTest_bin)
@@ -97,7 +111,7 @@ ENDIF()
 
 # SDL2
 
-IF(NEED_SDL2)
+IF("SDL2" IN_LIST DEPENDENCIES)
     SET(SDL2_ROOT       ${CMAKE_BINARY_DIR}/SDL2)
     SET(SDL2_SOURCE_DIR ${CMAKE_BINARY_DIR}/SDL2_src)
     SET(SDL2_BINARY_DIR ${CMAKE_BINARY_DIR}/SDL2_bin)
@@ -129,6 +143,7 @@ ENDIF()
 
 # Python3
 
+IF("Python3" IN_LIST DEPENDENCIES)
 IF(WIN32)
     SET(Python3_ROOT_DIR   ${CMAKE_BINARY_DIR}/Python3)
     SET(Python3_SOURCE_DIR ${Python3_ROOT_DIR})
@@ -164,10 +179,11 @@ IF(NOT Python3_FOUND)
         TEST_COMMAND        ""
     )
 ENDIF()
+ENDIF()
 
 # OpenAL
 
-IF(NEED_OpenAL)
+IF("OpenAL" IN_LIST DEPENDENCIES)
     SET(OpenAL_ROOT       ${CMAKE_BINARY_DIR}/OpenAL)
     SET(OpenAL_SOURCE_DIR ${CMAKE_BINARY_DIR}/OpenAL_src)
     SET(OpenAL_BINARY_DIR ${CMAKE_BINARY_DIR}/OpenAL_bin)
@@ -195,7 +211,7 @@ ENDIF()
 
 # freetype
 
-IF(NEED_freetype)
+IF("freetype" IN_LIST DEPENDENCIES)
     SET(freetype_ROOT           ${CMAKE_BINARY_DIR}/freetype)
     SET(freetype_SOURCE_DIR     ${CMAKE_BINARY_DIR}/freetype_src)
     SET(freetype_BINARY_DIR     ${CMAKE_BINARY_DIR}/freetype_bin)
@@ -220,7 +236,7 @@ ENDIF()
 
 # Ogg, Vorbis, Theora
 
-IF(NEED_Ogg)
+IF("Ogg" IN_LIST DEPENDENCIES)
     SET(Ogg_ROOT          ${CMAKE_BINARY_DIR}/libogg)
     SET(Ogg_SOURCE_DIR    ${CMAKE_BINARY_DIR}/libogg_src)
 

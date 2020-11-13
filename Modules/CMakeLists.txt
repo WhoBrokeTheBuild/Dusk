@@ -5,23 +5,9 @@ INCLUDE(DuskModule)
 ### Include Modules
 ###
 
-ADD_SUBDIRECTORY(OpenGL)
-ADD_SUBDIRECTORY(Vulkan)
-IF(WIN32)
-    ADD_SUBDIRECTORY(DirectX)
-ENDIF()
-
-ADD_SUBDIRECTORY(OpenAL)
-
-ADD_SUBDIRECTORY(FreeType)
-
-ADD_SUBDIRECTORY(GLTF2)
-ADD_SUBDIRECTORY(TinyOBJ)
-
-ADD_SUBDIRECTORY(STBI)
-
-ADD_SUBDIRECTORY(Archive)
-
+FOREACH(_module ${_modules})
+    ADD_SUBDIRECTORY(${_module})
+ENDFOREACH()
 
 # Update the global RUNTIME_SEARCH_PATH to include paths to the
 # module's .dll's

@@ -15,6 +15,7 @@ TARGET_LINK_LIBRARIES(
         GSL::GSL
         nlohmann_json::nlohmann_json
         Python3::Python
+        ${CMAKE_DL_LIBS}
 )
 
 ###

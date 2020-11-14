@@ -8,9 +8,6 @@ MACRO(DUSK_MODULE target prefix)
         Public/*.h
         Public/*.hh
         Public/*.hpp
-        Public/*.c
-        Public/*.cc
-        Public/*.cpp
     )
 
     FILE(GLOB_RECURSE
@@ -71,8 +68,8 @@ MACRO(DUSK_MODULE target prefix)
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Public>
             $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/Public>
         PRIVATE
-            ${CMAKE_CURRENT_BINARY_DIR}/Private
             ${CMAKE_CURRENT_SOURCE_DIR}/Private
+            ${CMAKE_CURRENT_BINARY_DIR}/Private
     )
 
     TARGET_SOURCES(
@@ -96,7 +93,7 @@ MACRO(DUSK_MODULE target prefix)
             # Disable unknown pragmas warning, C++ exceptions
             $<$<CXX_COMPILER_ID:GNU>:-Wall -Wno-unknown-pragmas -fno-exceptions>
             $<$<CXX_COMPILER_ID:Clang>:-Wall -Wno-unknown-pragmas -fno-exceptions>
-            $<$<CXX_COMPILER_ID:MSVC>:/MP /wd4068 /EHsc- /GR->
+            $<$<CXX_COMPILER_ID:MSVC>:/MP /wd4068 /EHsc- /GR- /std:c++17>
     )
 
     TARGET_COMPILE_FEATURES(

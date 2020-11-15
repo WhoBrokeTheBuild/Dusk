@@ -2,6 +2,7 @@
 
 #include <Dusk/Log.hpp>
 #include <Dusk/Module.hpp>
+#include <Dusk/ScriptConsole.hpp>
 #include <Dusk/Graphics/GraphicsDriver.hpp>
 #include <Dusk/Graphics/TransformData.hpp>
 #include <Dusk/Scene/AxisComponent.hpp>
@@ -32,7 +33,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    Dusk::InitScriptConsole();
+    Dusk::ScriptConsole::Initialize();
 
     Dusk::UpdateContext updateContext;
     Dusk::RenderContext renderContext;
@@ -78,7 +79,7 @@ int main(int argc, char** argv)
 
             scene.Update(&updateContext);
 
-            Dusk::UpdateScriptConsole();
+            Dusk::ScriptConsole::Update();
 
             shader->Bind();
             scene.Render(&renderContext);
@@ -87,8 +88,7 @@ int main(int argc, char** argv)
         }
     }
 
-    Dusk::TermScriptConsole();
-
+    Dusk::ScriptConsole::Terminate();
     Dusk::Terminate();
 
     return 0;

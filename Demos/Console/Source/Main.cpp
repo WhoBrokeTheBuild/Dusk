@@ -2,6 +2,7 @@
 
 #include <Dusk/Log.hpp>
 #include <Dusk/Module.hpp>
+#include <Dusk/ScriptConsole.hpp>
 #include <Dusk/Graphics/GraphicsDriver.hpp>
 #include <Dusk/Graphics/TransformData.hpp>
 #include <Dusk/Scene/AxisComponent.hpp>
@@ -20,7 +21,7 @@ int main(int argc, char** argv)
     Dusk::SetApplicationVersion({ 1, 0, 0 });
 
     Dusk::Initialize(argc, argv);
-    Dusk::InitScriptConsole();
+    Dusk::ScriptConsole::Initialize();
 
     Dusk::SetRunning(true);
 
@@ -31,15 +32,14 @@ int main(int argc, char** argv)
             gfx->ProcessEvents();
         }
 
-        Dusk::UpdateScriptConsole();
+        Dusk::ScriptConsole::Update();
 
         if (gfx) {
             gfx->SwapBuffers();
         }
     }
 
-    Dusk::TermScriptConsole();
-
+    Dusk::ScriptConsole::Terminate();
     Dusk::Terminate();
 
     return 0;

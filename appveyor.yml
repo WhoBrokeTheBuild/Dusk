@@ -22,15 +22,14 @@ before_build:
   - ps: Start-FileDownload 'https://sdk.lunarg.com/sdk/download/1.2.154.1/windows/VulkanSDK-1.2.154.1-Installer.exe'
   - cmd: VulkanSDK-1.2.154.1-Installer.exe /S
   - cmd: set VULKAN_SDK=C:\VulkanSDK\1.2.154.1
-  - cmd: if "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2017" set CMAKE_GENERATOR_NAME=Visual Studio 15 2017 Win64
-  - cmd: if "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2019" set CMAKE_GENERATOR_NAME=Visual Studio 16 2019
 
 build_script:
   - cmd: cd C:\projects\Dusk
   - cmd: mkdir Build
   - cmd: cd Build
-  # - cmd: cmake -DBUILD_TESTS=ON -DBUILD_DEMOS=ON -G "%CMAKE_GENERATOR_NAME%" ..
-  - cmd: cmake -DBUILD_TESTS=ON -G "%CMAKE_GENERATOR_NAME%" -A x64 ..
+  # TODO -DBUILD_TESTS=ON
+  - cmd: if "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2017" cmake -G "Visual Studio 15 2017" ..
+  - cmd: if "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2019" cmake -G "Visual Studio 16 2019" -A x64 ..
   - cmd: cmake --build .
   # - cmd: cmake --build . --target RUN_TESTS
 

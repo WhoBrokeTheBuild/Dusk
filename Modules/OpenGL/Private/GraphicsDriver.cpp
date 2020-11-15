@@ -96,7 +96,7 @@ GraphicsDriver::GraphicsDriver()
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &value);
     DuskLogVerbose("Max Uniform Block Size: %d", value);
 
-    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+    glClearColor(0.392f, 0.584f, 0.929f, 1.0f);
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_ONE_MINUS_SRC_ALPHA);
@@ -158,8 +158,14 @@ void GraphicsDriver::ProcessEvents()
         {
             switch (event.window.event) {
             case SDL_WINDOWEVENT_RESIZED:
+            {
+                WindowResizedEventData data;
+                data.Size = { event.window.data1, event.window.data2 };
+                WindowResizedEvent.Call(&data);
+
                 glViewport(0, 0, event.window.data1, event.window.data2);
                 break;
+            }
             }
         }
     }

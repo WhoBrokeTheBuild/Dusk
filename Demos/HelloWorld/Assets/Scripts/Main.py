@@ -11,7 +11,6 @@ gfx.SetWindowSize(( 1024, 768 ))
 
 def onWindowResize(data):
     print(data['Size'])
-    print(data['Delta'])
 
 gfx.WindowResizedEvent.AddListener(onWindowResize)
 

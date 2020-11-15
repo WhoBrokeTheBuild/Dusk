@@ -1,12 +1,15 @@
 #include <Dusk/Module.hpp>
 
+#include <Dusk/DirectX/GraphicsDriver.hpp>
+
 namespace Dusk::DirectX {
 
 void ModuleInit() {
+    SetGraphicsDriver(std::unique_ptr<Dusk::GraphicsDriver>(new GraphicsDriver()));
 }
 
 void ModuleTerm() {
-
+    SetGraphicsDriver(nullptr);
 }
 
 DEFINE_MODULE() {
@@ -15,4 +18,4 @@ DEFINE_MODULE() {
     ModuleTerm,
 };
 
-}
+} // namespace Dusk::DirectX

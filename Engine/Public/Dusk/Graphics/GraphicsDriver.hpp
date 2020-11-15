@@ -22,7 +22,6 @@ class DUSK_ENGINE_API WindowResizedEventData : public EventData
 public:
 
     ivec2 Size;
-    ivec2 Delta;
 
     PyObject * GetPyObject() const override;
 

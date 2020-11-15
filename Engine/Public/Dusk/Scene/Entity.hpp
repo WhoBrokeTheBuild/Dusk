@@ -14,18 +14,18 @@
 
 namespace Dusk {
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 inline vec3 GetWorldUp() {
     return { 0.f, 1.f, 0.f };
 }
 
-DUSK_CORE_API 
+DUSK_ENGINE_API 
 inline vec3 GetWorldForward() {
     return { 0.f, 0.f, -1.f };
 }
 
 
-class DUSK_CORE_API Entity 
+class DUSK_ENGINE_API Entity 
 {
 public:
 

@@ -6,7 +6,7 @@
 
 namespace Dusk {
 
-struct DUSK_CORE_API TransformData
+struct DUSK_ENGINE_API TransformData
 {
 public:
 

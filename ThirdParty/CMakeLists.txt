@@ -9,83 +9,82 @@ PROJECT(ThirdParty)
 
 FIND_PACKAGE(patch REQUIRED)
 
-SET(DEPENDENCIES 
-    "" 
-    CACHE STRING 
-    "Comma-separated list of required dependencies"
-)
+IF(NOT REQUIRED_DEPENDENCIES)
+    MESSAGE(FATAL_ERROR "REQUIRED_DEPENDENCIES not set")
+ENDIF()
 
-STRING(REPLACE ":" ";" DEPENDENCIES "${DEPENDENCIES}")
+# See /CMakeLists.txt for explanation
+STRING(REPLACE ":" ";" REQUIRED_DEPENDENCIES "${REQUIRED_DEPENDENCIES}")
 
 # glm
 
-IF("glm" IN_LIST DEPENDENCIES)
-SET(glm_ROOT       ${CMAKE_BINARY_DIR}/glm/cmake)
-SET(glm_SOURCE_DIR ${CMAKE_BINARY_DIR}/glm)
+IF("glm" IN_LIST REQUIRED_DEPENDENCIES)
+    SET(glm_ROOT       ${CMAKE_BINARY_DIR}/glm/cmake)
+    SET(glm_SOURCE_DIR ${CMAKE_BINARY_DIR}/glm)
 
-FIND_PACKAGE(glm CONFIG QUIET)
+    FIND_PACKAGE(glm CONFIG QUIET)
 
-IF(NOT glm_FOUND OR NOT TARGET glm::glm)
-    ExternalProject_Add(
-        ThirdParty_glm
-        URL                 "https://github.com/g-truc/glm/releases/download/0.9.9.8/glm-0.9.9.8.zip"
-        URL_HASH            MD5=69895110052f0d711c9c54fbf385f6f5
-        SOURCE_DIR          ${glm_SOURCE_DIR}
-        CONFIGURE_COMMAND   ""
-        BUILD_COMMAND       ""
-        INSTALL_COMMAND     ""
-        UPDATE_COMMAND      ""
-    )
-ENDIF()
+    IF(NOT glm_FOUND OR NOT TARGET glm::glm)
+        ExternalProject_Add(
+            ThirdParty_glm
+            URL                 "https://github.com/g-truc/glm/releases/download/0.9.9.8/glm-0.9.9.8.zip"
+            URL_HASH            MD5=69895110052f0d711c9c54fbf385f6f5
+            SOURCE_DIR          ${glm_SOURCE_DIR}
+            CONFIGURE_COMMAND   ""
+            BUILD_COMMAND       ""
+            INSTALL_COMMAND     ""
+            UPDATE_COMMAND      ""
+        )
+    ENDIF()
 ENDIF()
 
 # GSL
 
-IF("GSL" IN_LIST DEPENDENCIES)
-SET(GSL_ROOT       ${CMAKE_BINARY_DIR}/GSL)
-SET(GSL_SOURCE_DIR ${CMAKE_BINARY_DIR}/GSL_src)
+IF("GSL" IN_LIST REQUIRED_DEPENDENCIES)
+    SET(GSL_ROOT       ${CMAKE_BINARY_DIR}/GSL)
+    SET(GSL_SOURCE_DIR ${CMAKE_BINARY_DIR}/GSL_src)
 
-FIND_PACKAGE(GSL QUIET)
+    FIND_PACKAGE(GSL QUIET)
 
-IF(NOT GSL_FOUND)
-    ExternalProject_Add(
-        ThirdParty_GSL
-        URL                 "https://github.com/microsoft/GSL/archive/v3.1.0.tar.gz"
-        URL_HASH            MD5=b6910c54113f921b03dc06642cf7f11c
-        SOURCE_DIR          ${GSL_SOURCE_DIR}
-        CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${GSL_ROOT}
-                            -DGSL_TEST=OFF
-        BUILD_COMMAND       ""
-        UPDATE_COMMAND      ""
-    )
-ENDIF()
+    IF(NOT GSL_FOUND)
+        ExternalProject_Add(
+            ThirdParty_GSL
+            URL                 "https://github.com/microsoft/GSL/archive/v3.1.0.tar.gz"
+            URL_HASH            MD5=b6910c54113f921b03dc06642cf7f11c
+            SOURCE_DIR          ${GSL_SOURCE_DIR}
+            CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${GSL_ROOT}
+                                -DGSL_TEST=OFF
+            BUILD_COMMAND       ""
+            UPDATE_COMMAND      ""
+        )
+    ENDIF()
 ENDIF()
 
 # nlohmann_json
 
-IF("nlohmann_json" IN_LIST DEPENDENCIES)
-SET(nlohmann_json_ROOT       ${CMAKE_BINARY_DIR}/nlohmann_json)
-SET(nlohmann_json_SOURCE_DIR ${CMAKE_BINARY_DIR}/nlohmann_json_src)
+IF("nlohmann_json" IN_LIST REQUIRED_DEPENDENCIES)
+    SET(nlohmann_json_ROOT       ${CMAKE_BINARY_DIR}/nlohmann_json)
+    SET(nlohmann_json_SOURCE_DIR ${CMAKE_BINARY_DIR}/nlohmann_json_src)
 
-FIND_PACKAGE(nlohmann_json CONFIG QUIET)
+    FIND_PACKAGE(nlohmann_json CONFIG QUIET)
 
-IF(NOT nlohmann_json_FOUND)
-    ExternalProject_Add(
-        ThirdParty_nlohmann_json
-        URL                 "https://github.com/nlohmann/json/archive/v3.9.1.tar.gz"
-        URL_HASH            MD5=e386222fb57dd2fcb8a7879fc016d037
-        SOURCE_DIR          ${nlohmann_json_SOURCE_DIR}
-        CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${nlohmann_json_ROOT}
-                            -DJSON_BuildTests=OFF
-        BUILD_COMMAND       ""
-        UPDATE_COMMAND      ""
-    )
-ENDIF()
+    IF(NOT nlohmann_json_FOUND)
+        ExternalProject_Add(
+            ThirdParty_nlohmann_json
+            URL                 "https://github.com/nlohmann/json/archive/v3.9.1.tar.gz"
+            URL_HASH            MD5=e386222fb57dd2fcb8a7879fc016d037
+            SOURCE_DIR          ${nlohmann_json_SOURCE_DIR}
+            CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${nlohmann_json_ROOT}
+                                -DJSON_BuildTests=OFF
+            BUILD_COMMAND       ""
+            UPDATE_COMMAND      ""
+        )
+    ENDIF()
 ENDIF()
 
 # GTest
 
-IF("GTest" IN_LIST DEPENDENCIES)
+IF("GTest" IN_LIST REQUIRED_DEPENDENCIES)
     SET(GTest_ROOT       ${CMAKE_BINARY_DIR}/GTest)
     SET(GTest_SOURCE_DIR ${CMAKE_BINARY_DIR}/GTest_src)
     SET(GTest_BINARY_DIR ${CMAKE_BINARY_DIR}/GTest_bin)
@@ -111,7 +110,7 @@ ENDIF()
 
 # SDL2
 
-IF("SDL2" IN_LIST DEPENDENCIES)
+IF("SDL2" IN_LIST REQUIRED_DEPENDENCIES)
     SET(SDL2_ROOT       ${CMAKE_BINARY_DIR}/SDL2)
     SET(SDL2_SOURCE_DIR ${CMAKE_BINARY_DIR}/SDL2_src)
     SET(SDL2_BINARY_DIR ${CMAKE_BINARY_DIR}/SDL2_bin)
@@ -143,7 +142,7 @@ ENDIF()
 
 # Python3
 
-IF("Python3" IN_LIST DEPENDENCIES)
+IF("Python3" IN_LIST REQUIRED_DEPENDENCIES)
 IF(WIN32)
     SET(Python3_ROOT_DIR   ${CMAKE_BINARY_DIR}/Python3)
     SET(Python3_SOURCE_DIR ${Python3_ROOT_DIR})
@@ -183,7 +182,7 @@ ENDIF()
 
 # OpenAL
 
-IF("OpenAL" IN_LIST DEPENDENCIES)
+IF("OpenAL" IN_LIST REQUIRED_DEPENDENCIES)
     SET(OpenAL_ROOT       ${CMAKE_BINARY_DIR}/OpenAL)
     SET(OpenAL_SOURCE_DIR ${CMAKE_BINARY_DIR}/OpenAL_src)
     SET(OpenAL_BINARY_DIR ${CMAKE_BINARY_DIR}/OpenAL_bin)
@@ -211,7 +210,7 @@ ENDIF()
 
 # freetype
 
-IF("freetype" IN_LIST DEPENDENCIES)
+IF("freetype" IN_LIST REQUIRED_DEPENDENCIES)
     SET(freetype_ROOT           ${CMAKE_BINARY_DIR}/freetype)
     SET(freetype_SOURCE_DIR     ${CMAKE_BINARY_DIR}/freetype_src)
     SET(freetype_BINARY_DIR     ${CMAKE_BINARY_DIR}/freetype_bin)
@@ -236,7 +235,7 @@ ENDIF()
 
 # Ogg, Vorbis, Theora
 
-IF("Ogg" IN_LIST DEPENDENCIES)
+IF("Ogg" IN_LIST REQUIRED_DEPENDENCIES)
     SET(Ogg_ROOT          ${CMAKE_BINARY_DIR}/libogg)
     SET(Ogg_SOURCE_DIR    ${CMAKE_BINARY_DIR}/libogg_src)
 
@@ -317,7 +316,7 @@ IF("Ogg" IN_LIST DEPENDENCIES)
             TEST_COMMAND        ""
         )
         
-        ADD_DEPENDENCIES(ThirdParty_Vorbis ThirdParty_Ogg)
+        ADD_REQUIRED_DEPENDENCIES(ThirdParty_Vorbis ThirdParty_Ogg)
 
         SET(_Theora_PATCH_COMMAND ${patch_COMMAND} -p0 --forward < ${CMAKE_SOURCE_DIR}/libtheora-png_sizeof.patch || true)
 
@@ -354,6 +353,6 @@ IF("Ogg" IN_LIST DEPENDENCIES)
             COMMAND             
         )
         
-        ADD_DEPENDENCIES(ThirdParty_Theora ThirdParty_Ogg ThirdParty_Vorbis)
+        ADD_REQUIRED_DEPENDENCIES(ThirdParty_Theora ThirdParty_Ogg ThirdParty_Vorbis)
     ENDIF()
 ENDIF()

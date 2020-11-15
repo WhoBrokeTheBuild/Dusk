@@ -6,7 +6,7 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API UpdateContext
+class DUSK_ENGINE_API UpdateContext
 {
 public:
 

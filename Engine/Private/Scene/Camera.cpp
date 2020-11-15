@@ -4,7 +4,7 @@
 
 namespace Dusk {
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 Camera::Camera()
 {
     const ivec2& size = GetGraphicsDriver()->GetWindowSize();
@@ -12,13 +12,13 @@ Camera::Camera()
     SetViewportSize(size);
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 mat4 Camera::GetView() const
 {
     return glm::lookAt(GetWorldPosition(), GetWorldPosition() + GetForward(), GetUp());
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 mat4 Camera::GetProjection() const 
 {
     if (_mode == Mode::Perspective) {
@@ -32,25 +32,25 @@ mat4 Camera::GetProjection() const
     return mat4(1.f);
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void Camera::SetMode(Mode mode)
 {
     _mode = mode;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void Camera::SetClip(const vec2& clip)
 {
     _clip = clip;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void Camera::SetUp(const vec3& up)
 {
     _up = up;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void Camera::SetForward(const vec3& forward)
 {
     if ((glm::normalize(forward) + _up) == vec3(0.f)) {
@@ -61,61 +61,61 @@ void Camera::SetForward(const vec3& forward)
     }
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 vec3 Camera::GetForward() const
 {
     return glm::rotate(GetWorldOrientation(), GetWorldForward());
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 vec3 Camera::GetRight() const
 {
     return glm::normalize(glm::cross(GetForward(), GetUp()));
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void Camera::SetAspect(float aspect)
 {
     _aspect = aspect;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void Camera::SetAspect(const vec2& size)
 {
     _aspect = size.x / size.y;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void Camera::SetFOVX(float fovX)
 {
     _fovX = fovX;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void Camera::SetFOVY(float fovY)
 {
     _fovX = 2.f * atanf(tanf(fovY * .5f) * _aspect);
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void Camera::SetLookAt(const vec3& point)
 {
     SetForward(point - GetPosition());
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void Camera::SetViewportSize(const vec2& size) 
 {
     _viewportSize = size;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void Camera::SetViewportScale(const vec4& scale) 
 {
     _viewportScale = scale;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 vec4 Camera::GetViewport() const
 {
     const vec4& scale = GetViewportScale();

@@ -4,7 +4,7 @@
 
 namespace Dusk {
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 bool Entity::LoadFromFile(const std::string& filename)
 {
     const auto& importers = GetAllSceneImporters();
@@ -16,13 +16,13 @@ bool Entity::LoadFromFile(const std::string& filename)
     return false;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void Entity::SetParent(Entity * parent)
 {
     _parent = parent;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 Entity * Entity::AddChild(std::unique_ptr<Entity> && child)
 {
     child->SetParent(this);
@@ -32,13 +32,13 @@ Entity * Entity::AddChild(std::unique_ptr<Entity> && child)
     return _childPtrs.back();
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 std::vector<Entity *> Entity::GetChildren() const
 {
     return _childPtrs;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 Component * Entity::AddComponent(std::unique_ptr<Component> && component)
 {
     component->Attach(this);
@@ -48,37 +48,37 @@ Component * Entity::AddComponent(std::unique_ptr<Component> && component)
     return _componentPtrs.back();
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 std::vector<Component *> Entity::GetComponents() const
 {
     return _componentPtrs;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void Entity::SetName(const std::string& name)
 {
     _name = name;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void Entity::SetPosition(const vec3& position)
 {
     _position = position;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void Entity::SetOrientation(const quat& orientation)
 {
     _orientation = orientation;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void Entity::SetScale(const vec3& scale)
 {
     _scale = scale;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 mat4 Entity::GetTransform() const
 {
     mat4 transform = mat4(1.0f);
@@ -88,7 +88,7 @@ mat4 Entity::GetTransform() const
     return transform;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 vec3 Entity::GetWorldPosition() const
 {
     if (_parent) {
@@ -97,7 +97,7 @@ vec3 Entity::GetWorldPosition() const
     return GetPosition();
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 quat Entity::GetWorldOrientation() const
 {
     if (_parent) {
@@ -106,7 +106,7 @@ quat Entity::GetWorldOrientation() const
     return GetOrientation();
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 vec3 Entity::GetWorldScale() const
 {
     if (_parent) {
@@ -115,7 +115,7 @@ vec3 Entity::GetWorldScale() const
     return GetScale();
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 mat4 Entity::GetWorldTransform() const
 {
     if (_parent) {
@@ -124,7 +124,7 @@ mat4 Entity::GetWorldTransform() const
     return GetTransform();
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void Entity::Update(UpdateContext * ctx)
 {
     for (auto& comp : _components) {
@@ -136,7 +136,7 @@ void Entity::Update(UpdateContext * ctx)
     }
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void Entity::Render(RenderContext * ctx)
 {
     for (auto& comp : _components) {

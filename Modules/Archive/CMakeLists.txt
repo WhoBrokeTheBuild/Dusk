@@ -1,10 +1,4 @@
 
-SET(_TARGET DuskArchive)
+SET(_target DuskArchive)
 
-DUSK_MODULE(${_TARGET} ARCHIVE)
-
-TARGET_LINK_LIBRARIES(
-    ${_TARGET}
-    PUBLIC
-        DuskEngine
-)
+DEFINE_MODULE(${_target} ARCHIVE)

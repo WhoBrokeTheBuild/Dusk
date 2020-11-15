@@ -13,11 +13,11 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API TextureData
+class DUSK_ENGINE_API TextureData
 {
 public:
 
-    enum class DUSK_CORE_API CompressionType {
+    enum class DUSK_ENGINE_API CompressionType {
         None,
 
         // S3 Texture Compression (DirectX Texture Compression)
@@ -27,7 +27,7 @@ public:
 
     }; // enum CompressionType
 
-    enum class DUSK_CORE_API DataType {
+    enum class DUSK_ENGINE_API DataType {
         UnsignedByte,
         Byte,
         UnsignedShort,
@@ -37,7 +37,7 @@ public:
 
     }; // enum DataType
 
-    enum class DUSK_CORE_API WrapType {
+    enum class DUSK_ENGINE_API WrapType {
         Repeat,
         MirroredRepeat,
         ClampToEdge,
@@ -45,7 +45,7 @@ public:
 
     }; // enum WrapType
 
-    enum class DUSK_CORE_API FilterType {
+    enum class DUSK_ENGINE_API FilterType {
         Nearest,
         Linear,
 
@@ -91,7 +91,7 @@ public:
 
 }; // class TextureData
 
-class DUSK_CORE_API Texture 
+class DUSK_ENGINE_API Texture 
 {
 public:
 

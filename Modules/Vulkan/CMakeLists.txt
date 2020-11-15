@@ -1,14 +1,10 @@
 
-SET(_TARGET DuskVulkan)
+SET(_target DuskVulkan)
 
-DUSK_MODULE(${_TARGET} VULKAN)
-
-LIST(APPEND MODULE_TARGETS ${_TARGET})
-SET(MODULE_TARGETS ${MODULE_TARGETS} PARENT_SCOPE)
+DEFINE_MODULE(${_target} VULKAN)
 
 TARGET_LINK_LIBRARIES(
-    ${_TARGET}
+    ${_target}
     PUBLIC
-        DuskEngine
         SDL2::SDL2
 )

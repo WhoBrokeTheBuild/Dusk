@@ -11,7 +11,7 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API IFile
+class DUSK_ENGINE_API IFile
 {
 public:
 
@@ -73,7 +73,7 @@ public:
 
 }; // class IFile
 
-class DUSK_CORE_API IFilesystem
+class DUSK_ENGINE_API IFilesystem
 {
 public:
 

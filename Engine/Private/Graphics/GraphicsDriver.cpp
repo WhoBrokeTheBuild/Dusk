@@ -21,25 +21,25 @@ PyObject * WindowResizedEventData::GetPyObject() const
     return dict;
 }
 
-DUSK_CORE_API 
+DUSK_ENGINE_API 
 void SetGraphicsDriver(std::unique_ptr<GraphicsDriver> && driver)
 {
     _GraphicsDriver = std::move(driver);
 }
 
-DUSK_CORE_API 
+DUSK_ENGINE_API 
 GraphicsDriver * GetGraphicsDriver()
 {
     return _GraphicsDriver.get();
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 UpdateContext * GraphicsDriver::GetUpdateContext()
 {
     return _updateContext.get();
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 RenderContext * GraphicsDriver::GetRenderContext()
 {
     return _renderContext.get();

@@ -1,4 +1,4 @@
 
-SET(_TARGET Console)
+SET(_target Console)
 
-DUSK_DEMO(${_TARGET})
+DEFINE_DEMO(${_target})

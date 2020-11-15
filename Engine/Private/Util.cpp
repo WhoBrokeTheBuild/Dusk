@@ -2,7 +2,7 @@
 
 namespace Dusk {
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 std::string GetDirname(std::string path)
 {
     size_t pivot = path.find_last_of('/');
@@ -16,7 +16,7 @@ std::string GetDirname(std::string path)
     );
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 std::string GetBasename(std::string path)
 {
     size_t pivot = path.find_last_of('/');
@@ -30,7 +30,7 @@ std::string GetBasename(std::string path)
     );
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 std::string GetExtension(std::string path)
 {
     size_t pivot = path.find_last_of('.');

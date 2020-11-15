@@ -7,13 +7,13 @@
 
 namespace Dusk {
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 std::string GetDirname(std::string);
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 std::string GetBasename(std::string);
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 std::string GetExtension(std::string);
 
 } // namespace Dusk

@@ -3,7 +3,7 @@
 
 namespace Dusk {
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 bool Texture::LoadFromFile(const std::string& filename)
 {
     const auto& importers = GetAllTextureImporters();
@@ -16,7 +16,7 @@ bool Texture::LoadFromFile(const std::string& filename)
     return false;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 bool Texture::LoadFromMemory(uint8_t * buffer, size_t length)
 {
     const auto& importers = GetAllTextureImporters();

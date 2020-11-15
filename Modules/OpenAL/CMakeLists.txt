@@ -1,14 +1,10 @@
 
-SET(_TARGET DuskOpenAL)
+SET(_target DuskOpenAL)
 
-DUSK_MODULE(${_TARGET} OPENAL)
-
-LIST(APPEND MODULE_TARGETS ${_TARGET})
-SET(MODULE_TARGETS ${MODULE_TARGETS} PARENT_SCOPE)
+DEFINE_MODULE(${_target} OPENAL)
 
 TARGET_LINK_LIBRARIES(
-    ${_TARGET}
+    ${_target}
     PUBLIC
-        DuskEngine
         OpenAL::OpenAL
 )

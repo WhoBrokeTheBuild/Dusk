@@ -10,7 +10,7 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API MeshImporter 
+class DUSK_ENGINE_API MeshImporter 
 {
 public:
 
@@ -24,13 +24,13 @@ public:
 
 }; // class MeshImporter
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void AddMeshImporter(const std::string& id, std::unique_ptr<MeshImporter> importer);
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void RemoveMeshImporter(const std::string& id);
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 const std::vector<MeshImporter *>& GetAllMeshImporters();
 
 } // namespace Dusk

@@ -11,7 +11,7 @@ void ModuleTerm() {
     RemoveMeshImporter("TinyOBJ");
 }
 
-DUSK_MODULE() {
+DEFINE_MODULE() {
     "TinyOBJ",
     ModuleInit,
     ModuleTerm,

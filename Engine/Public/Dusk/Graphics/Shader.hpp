@@ -9,7 +9,7 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API Shader 
+class DUSK_ENGINE_API Shader 
 {
 public:
 
@@ -25,7 +25,7 @@ public:
 
 };
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 std::vector<std::string> GetShaderPaths();
 
 } // namespace Dusk

@@ -14,7 +14,7 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API EventData
+class DUSK_ENGINE_API EventData
 {
 public:
 
@@ -27,7 +27,7 @@ public:
 
 }; // class EventData
 
-class DUSK_CORE_API ScriptEvent
+class DUSK_ENGINE_API ScriptEvent
 {
 public:
 

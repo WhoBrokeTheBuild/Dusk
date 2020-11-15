@@ -9,7 +9,7 @@ void ModuleTerm() {
 
 }
 
-DUSK_MODULE() {
+DEFINE_MODULE() {
     "Archive",
     ModuleInit,
     ModuleTerm,

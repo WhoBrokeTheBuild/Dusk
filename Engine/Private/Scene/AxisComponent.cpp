@@ -4,10 +4,10 @@
 
 namespace Dusk {
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 AxisMeshData AxisComponent::_MeshData;
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 AxisComponent::AxisComponent()
 {
     auto gfx = GetGraphicsDriver();
@@ -23,7 +23,7 @@ AxisComponent::AxisComponent()
     // TODO: Make GL_LINES
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void AxisComponent::Render(RenderContext * ctx)
 {
     auto gfx = GetGraphicsDriver();

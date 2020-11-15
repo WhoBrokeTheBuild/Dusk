@@ -1,17 +1,14 @@
 
-INCLUDE(DuskModule)
+INCLUDE(DefineModule)
 INCLUDE(CompileShaders)
 INCLUDE(SetSourceGroups)
 
-SET(_TARGET DuskEngine)
+SET(_target DuskEngine)
 
-DUSK_MODULE(${_TARGET} CORE)
-
-LIST(APPEND MODULE_TARGETS ${_TARGET})
-SET(MODULE_TARGETS ${MODULE_TARGETS} PARENT_SCOPE)
+DEFINE_MODULE(${_target} ENGINE)
 
 TARGET_LINK_LIBRARIES(
-    ${_TARGET}
+    ${_target}
     PUBLIC
         glm::glm
         GSL::GSL
@@ -26,27 +23,23 @@ TARGET_LINK_LIBRARIES(
 
 FILE(
     GLOB_RECURSE
-    global_shaders_in
+    _shaders_out
     Assets/Shaders/*.glsl
 )
+
+SET_SOURCE_GROUPS(${CMAKE_CURRENT_BINARY_DIR} "${_shaders_out}")
 
 LIST(APPEND SHADER_INCLUDE_PATH
     ${CMAKE_CURRENT_SOURCE_DIR}/Assets/Shaders/
     ${CMAKE_CURRENT_BINARY_DIR}/Assets/Shaders/
 )
 
-COMPILE_SHADERS("${global_shaders_in}" global_shaders_out)
+SET(SHADER_INCLUDE_PATH ${SHADER_INCLUDE_PATH} PARENT_SCOPE)
+
+COMPILE_SHADERS("${_shaders_out}" _shaders_out)
 
 TARGET_SOURCES(
-    ${_TARGET}
+    ${_target}
     PRIVATE
-    ${global_shaders_out}
+        ${_shaders_out}
 )
-
-SET_SOURCE_GROUPS(${CMAKE_CURRENT_BINARY_DIR} "${global_shaders_out}")
-
-# Update the global RUNTIME_SEARCH_PATH to include paths to the
-# module's .dll's
-SET(RUNTIME_SEARCH_PATH ${RUNTIME_SEARCH_PATH} PARENT_SCOPE)
-
-SET(SHADER_INCLUDE_PATH ${SHADER_INCLUDE_PATH} PARENT_SCOPE)

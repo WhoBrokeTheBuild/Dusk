@@ -26,7 +26,7 @@
 
 namespace Dusk {
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void Initialize(int argc, char ** argv) {
     PyImport_AppendInittab("Dusk", PyInit_Dusk);
 
@@ -45,7 +45,7 @@ void Initialize(int argc, char ** argv) {
     DuskLogVerbose("Application Version: %s", GetApplicationVersion().GetString());
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void Terminate() {
     Py_Finalize();
 
@@ -54,17 +54,17 @@ void Terminate() {
 
 static bool _Running = false;
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void SetRunning(bool running) {
     _Running = running;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 bool IsRunning() {
     return _Running;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 bool RunScriptFile(const std::string& filename) {
     FILE * file = fopen(filename.c_str(), "rt");
     if (!file) {
@@ -83,7 +83,7 @@ bool RunScriptFile(const std::string& filename) {
     return true;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 bool RunScriptString(const std::string& code)
 {
     PyObject * pyMain = PyImport_AddModule("__main__");
@@ -119,7 +119,7 @@ static struct termios _Termios;
 
 #endif
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void InitScriptConsole()
 {
 #if defined(DUSK_OS_WINDOWS)
@@ -159,7 +159,7 @@ void InitScriptConsole()
     fflush(stdout);
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void TermScriptConsole()
 {
     Py_XDECREF(_PyScriptConsoleLocals);
@@ -430,7 +430,7 @@ void _ScriptConsoleNextCharacter()
     }
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void UpdateScriptConsole()
 {
 #if defined(DUSK_OS_WINDOWS)
@@ -465,13 +465,13 @@ void UpdateScriptConsole()
 
 static std::string _ApplicationName;
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void SetApplicationName(const std::string& name)
 {
     _ApplicationName = name;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 std::string GetApplicationName()
 {
     return _ApplicationName;
@@ -479,19 +479,19 @@ std::string GetApplicationName()
 
 static Version _ApplicationVersion;
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void SetApplicationVersion(unsigned major, unsigned minor, unsigned patch)
 {
     _ApplicationVersion = Version(major, minor, patch);
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void SetApplicationVersion(const Version& version)
 {
     _ApplicationVersion = version;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 Version GetApplicationVersion()
 {
     return _ApplicationVersion;

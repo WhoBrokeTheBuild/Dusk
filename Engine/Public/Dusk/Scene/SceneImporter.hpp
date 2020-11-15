@@ -7,7 +7,7 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API ISceneImporter 
+class DUSK_ENGINE_API ISceneImporter 
 {
 public:
 
@@ -21,13 +21,13 @@ public:
 
 }; // class ISceneImporter
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void AddSceneImporter(const std::string& id, std::unique_ptr<ISceneImporter> importer);
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void RemoveSceneImporter(const std::string& id);
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 const std::vector<ISceneImporter *>& GetAllSceneImporters();
 
 } // namespace Dusk

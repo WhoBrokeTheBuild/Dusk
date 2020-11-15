@@ -8,7 +8,7 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API Camera : public Entity
+class DUSK_ENGINE_API Camera : public Entity
 {
 public:
 

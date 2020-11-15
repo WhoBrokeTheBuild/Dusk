@@ -1,11 +1,11 @@
 
-INCLUDE(DuskModule)
+INCLUDE(DefineModule)
 
 ###
 ### Include Modules
 ###
 
-FOREACH(_module ${_modules})
+FOREACH(_module ${REQUIRED_MODULES})
     ADD_SUBDIRECTORY(${_module})
 ENDFOREACH()
 

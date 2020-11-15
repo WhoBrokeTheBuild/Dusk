@@ -4,7 +4,7 @@ namespace Dusk {
 
 static IFilesystem * _Filesystem = nullptr;
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void SetFilesystem(IFilesystem * fs) {
     if (_Filesystem) {
         delete _Filesystem;
@@ -12,7 +12,7 @@ void SetFilesystem(IFilesystem * fs) {
     _Filesystem = fs;
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 IFilesystem * GetFilesystem() {
     return _Filesystem;
 }

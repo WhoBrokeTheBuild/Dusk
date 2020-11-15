@@ -16,14 +16,14 @@ void updateTextureImporterList()
     }
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void AddTextureImporter(const std::string& id, std::unique_ptr<TextureImporter> importer)
 {
     _TextureImporters[id] = std::move(importer);
     updateTextureImporterList();
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void RemoveTextureImporter(const std::string& id)
 {
     auto it = _TextureImporters.find(id);
@@ -34,7 +34,7 @@ void RemoveTextureImporter(const std::string& id)
     updateTextureImporterList();
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 const std::vector<TextureImporter *>& GetAllTextureImporters()
 {
     return _TextureImporterList;

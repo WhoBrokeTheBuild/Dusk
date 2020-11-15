@@ -9,7 +9,7 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API AxisMeshData : public MeshData
+class DUSK_ENGINE_API AxisMeshData : public MeshData
 {
 public:
 
@@ -71,7 +71,7 @@ public:
 
 }; // class MeshData
 
-class DUSK_CORE_API AxisComponent : public Component
+class DUSK_ENGINE_API AxisComponent : public Component
 {
 public:
 

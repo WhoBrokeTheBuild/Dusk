@@ -11,7 +11,7 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API MeshComponent : public Component
+class DUSK_ENGINE_API MeshComponent : public Component
 {
 public:
 

@@ -11,7 +11,7 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API Scene : public Entity 
+class DUSK_ENGINE_API Scene : public Entity 
 {
 public:
 

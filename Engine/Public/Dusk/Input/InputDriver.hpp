@@ -36,7 +36,7 @@ namespace Dusk {
 
 // }; // class MouseMovedEventData
 
-class DUSK_CORE_API InputDriver
+class DUSK_ENGINE_API InputDriver
 {
 public:
 
@@ -48,9 +48,9 @@ public:
     
 }; // class InputDriver
 
-DUSK_CORE_API void SetInputDriver(std::unique_ptr<InputDriver> && driver);
+DUSK_ENGINE_API void SetInputDriver(std::unique_ptr<InputDriver> && driver);
 
-DUSK_CORE_API InputDriver * GetInputDriver();
+DUSK_ENGINE_API InputDriver * GetInputDriver();
 
 } // namespace Dusk
 

@@ -1,14 +1,10 @@
 
-SET(_TARGET DuskFreeType)
+SET(_target DuskFreeType)
 
-DUSK_MODULE(${_TARGET} FREETYPE)
-
-LIST(APPEND MODULE_TARGETS ${_TARGET})
-SET(MODULE_TARGETS ${MODULE_TARGETS} PARENT_SCOPE)
+DEFINE_MODULE(${_target} FREETYPE)
 
 TARGET_LINK_LIBRARIES(
-    ${_TARGET}
+    ${_target}
     PUBLIC
-        DuskEngine
         freetype
 )

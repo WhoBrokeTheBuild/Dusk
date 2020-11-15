@@ -1,15 +1,11 @@
 
-SET(_TARGET HelloWorld)
+SET(_target HelloWorld)
 
-DUSK_DEMO(${_TARGET})
-
-TARGET_LINK_LIBRARIES(
-    ${_TARGET}
-    DuskOpenGL
-)
+DEFINE_DEMO(${_target})
 
 ADD_DEPENDENCIES(
-    ${_TARGET} 
-    DuskSTBI 
+    ${_target}
     DuskOpenGL
+    DuskSTBI
+    DuskTinyOBJ
 )

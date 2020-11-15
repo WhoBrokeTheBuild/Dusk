@@ -11,7 +11,7 @@ void ModuleTerm() {
     RemoveTextureImporter("STBI");
 }
 
-DUSK_MODULE() {
+DEFINE_MODULE() {
     "STBI",
     ModuleInit,
     ModuleTerm,

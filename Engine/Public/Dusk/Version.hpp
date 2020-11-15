@@ -7,7 +7,7 @@
 
 namespace Dusk {
 
-struct DUSK_CORE_API Version 
+struct DUSK_ENGINE_API Version 
 {
     int Major;
     int Minor;

@@ -17,7 +17,7 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API WindowResizedEventData : public EventData
+class DUSK_ENGINE_API WindowResizedEventData : public EventData
 {
 public:
 
@@ -28,7 +28,7 @@ public:
 
 }; // class WindowResizedEventData
 
-class DUSK_CORE_API GraphicsDriver
+class DUSK_ENGINE_API GraphicsDriver
 {
 public:
 
@@ -72,9 +72,9 @@ private:
 
 }; // class GraphicsDriver
 
-DUSK_CORE_API void SetGraphicsDriver(std::unique_ptr<GraphicsDriver> && driver);
+DUSK_ENGINE_API void SetGraphicsDriver(std::unique_ptr<GraphicsDriver> && driver);
 
-DUSK_CORE_API GraphicsDriver * GetGraphicsDriver();
+DUSK_ENGINE_API GraphicsDriver * GetGraphicsDriver();
 
 } // namespace Dusk
 

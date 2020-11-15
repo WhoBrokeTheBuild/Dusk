@@ -11,7 +11,7 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API TextureImporter
+class DUSK_ENGINE_API TextureImporter
 {
 public:
 
@@ -27,13 +27,13 @@ public:
 
 };
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void AddTextureImporter(const std::string& id, std::unique_ptr<TextureImporter> importer);
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void RemoveTextureImporter(const std::string& id);
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 const std::vector<TextureImporter *>& GetAllTextureImporters();
 
 }

@@ -10,7 +10,7 @@ void ModuleInit() {
 void ModuleTerm() {
 }
 
-DUSK_MODULE() {
+DEFINE_MODULE() {
     "FreeType",
     ModuleInit,
     ModuleTerm,

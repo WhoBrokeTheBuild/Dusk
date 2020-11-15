@@ -6,7 +6,7 @@
 
 namespace Dusk {
 
-class DUSK_CORE_API Font
+class DUSK_ENGINE_API Font
 {
 public:
 

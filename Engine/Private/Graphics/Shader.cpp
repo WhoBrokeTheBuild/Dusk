@@ -5,7 +5,7 @@
 
 namespace Dusk {
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 std::vector<std::string> GetShaderPaths()
 {
     static std::vector<std::string> paths;

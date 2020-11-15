@@ -10,51 +10,51 @@
 
 namespace Dusk {
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void Initialize(int argc, char ** argv);
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void Terminate();
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void SetRunning(bool running);
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 bool IsRunning();
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 bool RunScriptFile(const std::string& filename);
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 bool RunScriptString(const std::string& code);
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void InitScriptConsole();
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void TermScriptConsole();
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void UpdateScriptConsole();
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 inline Version GetVersion() {
     return Version(DUSK_VERSION_MAJOR, DUSK_VERSION_MINOR, DUSK_VERSION_PATCH);
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void SetApplicationName(const std::string& name);
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 std::string GetApplicationName();
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void SetApplicationVersion(unsigned major, unsigned minor, unsigned patch);
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void SetApplicationVersion(const Version& version);
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 Version GetApplicationVersion();
 
 }

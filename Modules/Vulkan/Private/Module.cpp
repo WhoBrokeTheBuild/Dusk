@@ -12,7 +12,7 @@ void ModuleTerm() {
     SetGraphicsDriver(nullptr);
 }
 
-DUSK_MODULE() {
+DEFINE_MODULE() {
     "Vulkan",
     ModuleInit,
     ModuleTerm,

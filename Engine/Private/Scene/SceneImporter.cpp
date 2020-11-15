@@ -16,14 +16,14 @@ void updateSceneImporterList()
     }
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void AddSceneImporter(const std::string& id, std::unique_ptr<ISceneImporter> importer)
 {
     _SceneImporters[id] = std::move(importer);
     updateSceneImporterList();
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 void RemoveSceneImporter(const std::string& id)
 {
     auto it = _SceneImporters.find(id);
@@ -34,7 +34,7 @@ void RemoveSceneImporter(const std::string& id)
     updateSceneImporterList();
 }
 
-DUSK_CORE_API
+DUSK_ENGINE_API
 const std::vector<ISceneImporter *>& GetAllSceneImporters()
 {
     return _SceneImporterList;

@@ -17,8 +17,7 @@
 
 void testFunc(const Dusk::WindowResizedEventData * data)
 {
-    DuskLogInfo("testFunc %s %s", 
-        glm::to_string(data->Delta), 
+    DuskLogInfo("testFunc %s", 
         glm::to_string(data->Size));
 }
 
@@ -63,7 +62,6 @@ int main(int argc, char** argv)
 
         Dusk::WindowResizedEventData testData;
         testData.Size = { 1024, 768 };
-        testData.Delta = { 0, 0 };
         gfx->WindowResizedEvent.Call(&testData);
 
         auto shader = gfx->CreateShader();

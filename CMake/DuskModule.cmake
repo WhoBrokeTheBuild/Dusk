@@ -1,4 +1,6 @@
 
+INCLUDE(SetSourceGroups)
+
 MACRO(DUSK_MODULE target prefix)
     ADD_LIBRARY(${target} SHARED "")
 
@@ -15,21 +17,6 @@ MACRO(DUSK_MODULE target prefix)
         Public/*.in
     )
 
-    FOREACH(file ${public_in})
-        STRING(REPLACE 
-            ${CMAKE_CURRENT_SOURCE_DIR}
-            ${CMAKE_CURRENT_BINARY_DIR}
-            file_out
-            ${file}
-        )
-
-        string(REGEX MATCH "^(.*)\\.[^.]*$" file_out ${file_out})
-        set(file_out ${CMAKE_MATCH_1})
-
-        CONFIGURE_FILE(${file} ${file_out})
-        LIST(APPEND public_out ${file_out})
-    ENDFOREACH()
-
     FILE(
         GLOB_RECURSE
         private
@@ -45,6 +32,23 @@ MACRO(DUSK_MODULE target prefix)
         private_in
         Private/*.in
     )
+
+    # Template Files
+
+    FOREACH(file ${public_in})
+        STRING(REPLACE 
+            ${CMAKE_CURRENT_SOURCE_DIR}
+            ${CMAKE_CURRENT_BINARY_DIR}
+            file_out
+            ${file}
+        )
+
+        string(REGEX MATCH "^(.*)\\.[^.]*$" file_out ${file_out})
+        set(file_out ${CMAKE_MATCH_1})
+
+        CONFIGURE_FILE(${file} ${file_out})
+        LIST(APPEND public_out ${file_out})
+    ENDFOREACH()
         
     FOREACH(file ${private_in})
         STRING(REPLACE 
@@ -60,6 +64,21 @@ MACRO(DUSK_MODULE target prefix)
         CONFIGURE_FILE(${file} ${file_out})
         LIST(APPEND private_out ${file_out})
     ENDFOREACH()
+
+    # Asset Processing
+
+    FILE(GLOB_RECURSE
+        assets
+        Assets/*
+    )
+
+    SET_SOURCE_FILES_PROPERTIES(
+        ${assets} 
+        PROPERTIES
+            HEADER_FILE_ONLY TRUE
+    )
+
+    # Target Configuration
     
     TARGET_INCLUDE_DIRECTORIES(
         ${target}
@@ -74,7 +93,10 @@ MACRO(DUSK_MODULE target prefix)
 
     TARGET_SOURCES(
         ${target}
-        PRIVATE ${public} ${private}
+        PRIVATE
+            ${public}
+            ${private}
+            ${assets}
     )
 
     TARGET_COMPILE_DEFINITIONS(
@@ -84,7 +106,6 @@ MACRO(DUSK_MODULE target prefix)
             $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
         PRIVATE
             DUSK_${prefix}_EXPORT
-            HAVE_SNPRINTF
     )
 
     TARGET_COMPILE_OPTIONS(
@@ -94,6 +115,13 @@ MACRO(DUSK_MODULE target prefix)
             $<$<CXX_COMPILER_ID:GNU>:-Wall -Wno-unknown-pragmas -fno-exceptions>
             $<$<CXX_COMPILER_ID:Clang>:-Wall -Wno-unknown-pragmas -fno-exceptions>
             $<$<CXX_COMPILER_ID:MSVC>:/MP /wd4068 /EHsc- /GR- /std:c++17>
+    )
+
+    TARGET_LINK_OPTIONS(
+        ${target}
+        PUBLIC
+            # Fix windows bug in looking for python38.lib
+            $<$<CXX_COMPILER_ID:MSVC>:/NODEFAULTLIB:python38.lib>
     )
 
     TARGET_COMPILE_FEATURES(
@@ -139,12 +167,14 @@ MACRO(DUSK_MODULE target prefix)
 
     SET(RUNTIME_SEARCH_PATH ${RUNTIME_SEARCH_PATH} PARENT_SCOPE)
 
-    FOREACH(file ${public} ${private})
-        FILE(RELATIVE_PATH file_path ${CMAKE_CURRENT_SOURCE_DIR} ${file})
-        GET_FILENAME_COMPONENT(folder ${file_path} DIRECTORY)
-        FILE(TO_NATIVE_PATH ${folder} folder)
-        SOURCE_GROUP(${folder} FILES ${file})
-    ENDFOREACH()
+    SET_SOURCE_GROUPS(${CMAKE_CURRENT_SOURCE_DIR} "${assets}")
+    
+    SET_SOURCE_GROUPS(${CMAKE_CURRENT_SOURCE_DIR} "${public}")
+    SET_SOURCE_GROUPS(${CMAKE_CURRENT_BINARY_DIR} "${public_out}")
+    SET_SOURCE_GROUPS(${CMAKE_CURRENT_SOURCE_DIR} "${private}")
+    SET_SOURCE_GROUPS(${CMAKE_CURRENT_BINARY_DIR} "${private_out}")
+
+    # Tests
 
     IF(BUILD_TESTS)
         FILE(GLOB_RECURSE

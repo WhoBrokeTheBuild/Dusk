@@ -17,7 +17,7 @@
 
 namespace Dusk {
 
-class WindowResizedEventData : public EventData
+class DUSK_CORE_API WindowResizedEventData : public EventData
 {
 public:
 

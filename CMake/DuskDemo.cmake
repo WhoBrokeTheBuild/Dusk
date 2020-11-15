@@ -1,4 +1,7 @@
 
+INCLUDE(CompileShaders)
+INCLUDE(SetSourceGroups)
+
 MACRO(DUSK_DEMO target)
     FILE(
         GLOB_RECURSE
@@ -34,67 +37,58 @@ MACRO(DUSK_DEMO target)
         LIST(APPEND sources_out ${file_out})
     ENDFOREACH()
 
-    # Shader Processing
+    ###
+    ### Shader Processing
+    ###
 
     FILE(
         GLOB_RECURSE
         shaders_in
-        Shaders/*.glsl
+        Assets/Shaders/*.glsl
     )
 
     LIST(INSERT SHADER_INCLUDE_PATH 0
-        ${CMAKE_CURRENT_SOURCE_DIR}/Shaders/
-        ${CMAKE_CURRENT_BINARY_DIR}/Shaders/
+        ${CMAKE_CURRENT_SOURCE_DIR}/Assets/Shaders/
+        ${CMAKE_CURRENT_BINARY_DIR}/Assets/Shaders/
     )
 
-    IF(VulkanSDK_FOUND)
-        FOREACH(file ${shaders_in})
-            GET_FILENAME_COMPONENT(shader_name ${file} NAME_WLE)
-            GET_FILENAME_COMPONENT(shader_path ${file} DIRECTORY)
-            STRING(REPLACE 
-                ${CMAKE_CURRENT_SOURCE_DIR}
-                ${CMAKE_CURRENT_BINARY_DIR}
-                shader_out_path
-                ${shader_path}
-            )
+    COMPILE_SHADERS("${shaders_in}" shaders_out)
 
-            FILE(MAKE_DIRECTORY ${shader_out_path})
+    # Asset Processing
 
-            SET(shader_cflags "")
-            FOREACH(dir ${SHADER_INCLUDE_PATH} ${shader_path})
-                SET(shader_cflags ${shader_cflags} -I${dir})
-            ENDFOREACH()
+    FILE(GLOB_RECURSE
+        assets
+        Assets/*
+    )
 
-            SET(shader_out "${shader_out_path}/${shader_name}.spv")
+    SET_SOURCE_FILES_PROPERTIES(
+        ${assets} 
+        PROPERTIES
+            HEADER_FILE_ONLY TRUE
+    )
 
-            GET_FILENAME_COMPONENT(shader_type ${shader_name} LAST_EXT)
-            STRING(SUBSTRING ${shader_type} 1 -1 shader_type)
-
-            IF(shader_type STREQUAL "inc")
-                CONTINUE()
-            ENDIF()
-
-            ADD_CUSTOM_COMMAND(
-                OUTPUT ${shader_out}
-                COMMAND ${VulkanSDK_glslc_PROGRAM} -fshader-stage=${shader_type} ${shader_cflags} -o ${shader_out} ${file}
-                DEPENDS ${file}
-                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-            )
-            LIST(APPEND shaders_out ${shader_out})
-        ENDFOREACH()
-    ENDIF()
+    # Target Configuration
 
     ADD_EXECUTABLE(
         ${target}
         ${sources}
         ${sources_out}
+        ${shaders_in}
         ${shaders_out}
+        ${assets}
     )
 
     TARGET_LINK_LIBRARIES(
         ${target}
         DuskEngine
     )
+
+    SET_SOURCE_GROUPS(${CMAKE_CURRENT_SOURCE_DIR} "${sources}")
+    SET_SOURCE_GROUPS(${CMAKE_CURRENT_BINARY_DIR} "${sources_out}")
+    
+    SET_SOURCE_GROUPS(${CMAKE_CURRENT_SOURCE_DIR} "${shaders_in}")
+    SET_SOURCE_GROUPS(${CMAKE_CURRENT_SOURCE_DIR} "${assets}")
+    SET_SOURCE_GROUPS(${CMAKE_CURRENT_BINARY_DIR} "${shaders_out}")
 
     TARGET_INCLUDE_DIRECTORIES(
         ${target}
@@ -113,11 +107,17 @@ MACRO(DUSK_DEMO target)
     TARGET_COMPILE_OPTIONS(
         ${target}
         PUBLIC
-            $<$<CXX_COMPILER_ID:MSVC>:/MT>
             # Disable unknown pragmas warning, C++ exceptions
             $<$<CXX_COMPILER_ID:GNU>:-Wall -Wno-unknown-pragmas -fno-exceptions>
             $<$<CXX_COMPILER_ID:Clang>:-Wall -Wno-unknown-pragmas -fno-exceptions>
             $<$<CXX_COMPILER_ID:MSVC>:/MP /wd4068 /EHsc- /GR->
+    )
+
+    TARGET_LINK_OPTIONS(
+        ${target}
+        PUBLIC
+            # Fix windows bug in looking for python38.lib
+            $<$<CXX_COMPILER_ID:MSVC>:/NODEFAULTLIB:python38.lib>
     )
 
     TARGET_COMPILE_FEATURES(
@@ -147,74 +147,71 @@ MACRO(DUSK_DEMO target)
             FOLDER "${folder}"
     )
 
-    IF(MSVC)
-        SET_TARGET_PROPERTIES(
-            ${target}
-            PROPERTIES 
-                VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                VS_DEBUGGER_ENVIRONMENT "PATH=%PATH%;${RUNTIME_SEARCH_PATH}"
-                # TODO SHADER_INCLUDE_PATH
-        )
-    ELSE()
-        STRING(JOIN ":" LD_LIBRARY_PATH ${RUNTIME_SEARCH_PATH})
-        STRING(JOIN ":" SHADER_INCLUDE_PATH ${SHADER_INCLUDE_PATH})
+    SET_TARGET_PROPERTIES(
+        ${target}
+        PROPERTIES 
+            VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            VS_DEBUGGER_ENVIRONMENT "PATH=%PATH%;${RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${RUNTIME_SEARCH_PATH_DEBUG}>;$<$<CONFIG:Release>:${RUNTIME_SEARCH_PATH_RELEASE}>\nDUSK_SHADER_INCLUDE_PATH=${SHADER_INCLUDE_PATH}"
+    )
 
+    STRING(JOIN ":" LD_LIBRARY_PATH ${RUNTIME_SEARCH_PATH})
+    STRING(JOIN ":" SHADER_INCLUDE_PATH ${SHADER_INCLUDE_PATH})
+
+    ADD_CUSTOM_TARGET(
+        run-${target}
+        COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_SHADER_INCLUDE_PATH=${SHADER_INCLUDE_PATH}" $<TARGET_FILE:${target}>
+        DEPENDS ${target}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+
+    SET_TARGET_PROPERTIES(
+        run-${target}
+        PROPERTIES 
+            FOLDER "Automation"
+    )
+
+    IF(GDB_COMMAND)
         ADD_CUSTOM_TARGET(
-            run-${target}
-            COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_SHADER_INCLUDE_PATH=${SHADER_INCLUDE_PATH}" $<TARGET_FILE:${target}>
+            gdb-${target}
+            COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_SHADER_INCLUDE_PATH=${SHADER_INCLUDE_PATH}" gdb --args $<TARGET_FILE:${target}>
             DEPENDS ${target}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         )
 
         SET_TARGET_PROPERTIES(
-            run-${target}
+            gdb-${target}
             PROPERTIES 
                 FOLDER "Automation"
         )
+    ENDIF()
 
-        IF(GDB_COMMAND)
-            ADD_CUSTOM_TARGET(
-                gdb-${target}
-                COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_SHADER_INCLUDE_PATH=${SHADER_INCLUDE_PATH}" gdb --args $<TARGET_FILE:${target}>
-                DEPENDS ${target}
-                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-            )
+    IF(LLDB_COMMAND)
+        ADD_CUSTOM_TARGET(
+            lldb-${target}
+            COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_SHADER_INCLUDE_PATH=${SHADER_INCLUDE_PATH}" lldb --args $<TARGET_FILE:${target}>
+            DEPENDS ${target}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        )
 
-            SET_TARGET_PROPERTIES(
-                gdb-${target}
-                PROPERTIES 
-                    FOLDER "Automation"
-            )
-        ENDIF()
+        SET_TARGET_PROPERTIES(
+            lldb-${target}
+            PROPERTIES 
+                FOLDER "Automation"
+        )
+    ENDIF()
 
-        IF(LLDB_COMMAND)
-            ADD_CUSTOM_TARGET(
-                lldb-${target}
-                COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_SHADER_INCLUDE_PATH=${SHADER_INCLUDE_PATH}" lldb --args $<TARGET_FILE:${target}>
-                DEPENDS ${target}
-                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-            )
+    IF(VALGRIND_COMMAND)
+        ADD_CUSTOM_TARGET(
+            valgrind-${target}
+            COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_SHADER_INCLUDE_PATH=${SHADER_INCLUDE_PATH}" valgrind $<TARGET_FILE:${target}>
+            DEPENDS ${target}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        )
 
-            SET_TARGET_PROPERTIES(
-                lldb-${target}
-                PROPERTIES 
-                    FOLDER "Automation"
-            )
-        ENDIF()
-
-        IF(VALGRIND_COMMAND)
-            ADD_CUSTOM_TARGET(
-                valgrind-${target}
-                COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_SHADER_INCLUDE_PATH=${SHADER_INCLUDE_PATH}" valgrind $<TARGET_FILE:${target}>
-                DEPENDS ${target}
-                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-            )
-
-            SET_TARGET_PROPERTIES(
-                valgrind-${target}
-                PROPERTIES 
-                    FOLDER "Automation"
-            )
-        ENDIF()
+        SET_TARGET_PROPERTIES(
+            valgrind-${target}
+            PROPERTIES 
+                FOLDER "Automation"
+        )
     ENDIF()
 ENDMACRO()

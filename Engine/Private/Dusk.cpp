@@ -8,7 +8,7 @@
 #include <Python.h>
 #include <frameobject.h>
 
-#if defined(_WIN32)
+#if defined(DUSK_OS_WINDOWS)
 
 #include <Windows.h>
 #include <conio.h>
@@ -18,7 +18,7 @@
 #include <termios.h>
 #include <unistd.h>
 
-#endif // defined(_WIN32)
+#endif // defined(DUSK_OS_WINDOWS)
 
 #include <string>
 #include <vector>
@@ -65,10 +65,10 @@ bool IsRunning() {
 }
 
 DUSK_CORE_API
-void RunScriptFile(const std::string& filename) {
+bool RunScriptFile(const std::string& filename) {
     FILE * file = fopen(filename.c_str(), "rt");
     if (!file) {
-        exit(1);
+        return false;
     }
 
     PyObject * pyMain = PyImport_AddModule("__main__");
@@ -80,10 +80,11 @@ void RunScriptFile(const std::string& filename) {
     PyCheckError();
 
     fclose(file);
+    return true;
 }
 
 DUSK_CORE_API
-void RunScriptString(const std::string& code)
+bool RunScriptString(const std::string& code)
 {
     PyObject * pyMain = PyImport_AddModule("__main__");
     PyObject * pyMainDict = PyModule_GetDict(pyMain);
@@ -92,6 +93,7 @@ void RunScriptString(const std::string& code)
     PyRun_String(code.c_str(), Py_single_input, pyMainDict, pyLocalDict);
 
     PyCheckError();
+    return true;
 }
 
 static PyObject * _PyScriptConsoleLocals = NULL;
@@ -106,7 +108,12 @@ void _ScriptConsoleMoveCursorLeft(int);
 void _ScriptConsoleMoveCursorRight(int);
 void _ScriptConsoleNextCharacter();
 
-#if !defined(_WIN32)
+#if defined(DUSK_OS_WINDOWS)
+
+HANDLE _StdinHandle;
+HANDLE _StdoutHandle;
+
+#else
 
 static struct termios _Termios;
 
@@ -115,7 +122,17 @@ static struct termios _Termios;
 DUSK_CORE_API
 void InitScriptConsole()
 {
-#if defined(_WIN32)
+#if defined(DUSK_OS_WINDOWS)
+
+    _StdinHandle = GetStdHandle(STD_INPUT_HANDLE);
+    _StdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    DWORD mode;
+    GetConsoleMode(_StdinHandle, &mode);
+    SetConsoleMode(_StdinHandle, mode & ~(ENABLE_PROCESSED_INPUT));
+
+    GetConsoleMode(_StdoutHandle, &mode);
+    SetConsoleMode(_StdoutHandle, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
 
 #else
 
@@ -147,7 +164,7 @@ void TermScriptConsole()
 {
     Py_XDECREF(_PyScriptConsoleLocals);
 
-#if defined(_WIN32)
+#if defined(DUSK_OS_WINDOWS)
 
 #else
 
@@ -214,9 +231,54 @@ void _ScriptConsoleNextCharacter()
     static bool inEscape = false;
 
     unsigned char c;
+
+#if defined(DUSK_OS_WINDOWS)
+
+    DWORD read;
+    struct _INPUT_RECORD record;
+    if (!ReadConsoleInput(_StdinHandle, &record, 1, &read) 
+        || record.EventType != KEY_EVENT
+        || !record.Event.KeyEvent.bKeyDown) {
+        return;
+    }
+
+    switch (record.Event.KeyEvent.wVirtualKeyCode) {
+    case VK_LEFT:
+        inEscape = true;
+        c = 'D';
+        break;
+    case VK_RIGHT:
+        inEscape = true;
+        c = 'C';
+        break;
+    case VK_UP:
+        inEscape = true;
+        c = 'A';
+        break;
+    case VK_DOWN:
+        inEscape = true;
+        c = 'B';
+        break;
+    case VK_HOME:
+        inEscape = true;
+        c = 'H';
+        break;
+    case VK_END:
+        inEscape = true;
+        c = 'F';
+        break;
+    default:
+        c = record.Event.KeyEvent.uChar.AsciiChar;
+        break;
+    };
+    
+#else
+
     if (read(STDIN_FILENO, &c, sizeof(c)) < 0) {
         return;
     }
+
+#endif
 
     if (inEscape) {
         if (c == '[' || c == '~') {
@@ -298,7 +360,8 @@ void _ScriptConsoleNextCharacter()
         case 4: // Ctrl+D
             SetRunning(false);
             break;
-        case 10: // Enter
+        case 10: // Newline
+        case 13: // Carriage Return
             printf("\n");
             fflush(stdout);
 
@@ -322,6 +385,7 @@ void _ScriptConsoleNextCharacter()
         case 27: // Escape
             inEscape = true;
             break;
+        case 8:
         case 127: // Backspace
             if (_ScriptConsoleCursor > 0) {
                 printf("\010\033[K");
@@ -369,6 +433,23 @@ void _ScriptConsoleNextCharacter()
 DUSK_CORE_API
 void UpdateScriptConsole()
 {
+#if defined(DUSK_OS_WINDOWS)
+
+    DWORD result;
+    if (!GetNumberOfConsoleInputEvents(_StdinHandle, &result)) {
+        return;
+    }
+
+    while (result > 0) {
+        _ScriptConsoleNextCharacter();
+
+        if (!GetNumberOfConsoleInputEvents(_StdinHandle, &result)) {
+            return;
+        }
+    }
+
+#else
+
     struct timeval tv = { 0L, 0L };
     fd_set fds;
 
@@ -378,6 +459,8 @@ void UpdateScriptConsole()
     while (select(1, &fds, NULL, NULL, &tv)) {
         _ScriptConsoleNextCharacter();
     }
+
+#endif
 }
 
 static std::string _ApplicationName;

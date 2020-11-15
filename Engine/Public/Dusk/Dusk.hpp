@@ -23,10 +23,10 @@ DUSK_CORE_API
 bool IsRunning();
 
 DUSK_CORE_API
-void RunScriptFile(const std::string& filename);
+bool RunScriptFile(const std::string& filename);
 
 DUSK_CORE_API
-void RunScriptString(const std::string& code);
+bool RunScriptString(const std::string& code);
 
 DUSK_CORE_API
 void InitScriptConsole();

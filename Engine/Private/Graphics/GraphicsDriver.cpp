@@ -21,7 +21,6 @@ PyObject * WindowResizedEventData::GetPyObject() const
     return dict;
 }
 
-
 DUSK_CORE_API 
 void SetGraphicsDriver(std::unique_ptr<GraphicsDriver> && driver)
 {

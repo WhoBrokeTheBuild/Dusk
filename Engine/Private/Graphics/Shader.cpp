@@ -15,11 +15,17 @@ std::vector<std::string> GetShaderPaths()
 
     paths.push_back("");
 
+#if defined(DUSK_OS_WINDOWS)
+    const char SEP = ';';
+#else
+    const char SEP = ':';
+#endif
+
     const char * path = getenv("DUSK_SHADER_INCLUDE_PATH");
     if (path) {
         std::istringstream iss(path);
         std::string p;
-        while (std::getline(iss, p, ':')) {
+        while (std::getline(iss, p, SEP)) {
             paths.push_back(p);
         }
     }

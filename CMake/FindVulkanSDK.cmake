@@ -18,6 +18,7 @@ FIND_PROGRAM(
     glslc
     PATHS
         ${VulkanSDK_ROOT_DIR}
+        $ENV{VULKAN_SDK}
     PATH_SUFFIXES
         bin
 )
@@ -27,6 +28,7 @@ FIND_PROGRAM(
     glslangValidator
     PATHS
         ${VulkanSDK_ROOT_DIR}
+        $ENV{VULKAN_SDK}
     PATH_SUFFIXES
         bin
 )

@@ -85,10 +85,11 @@ ENDIF()
 # GTest
 
 IF("GTest" IN_LIST REQUIRED_DEPENDENCIES)
-    SET(GTest_ROOT       ${CMAKE_BINARY_DIR}/GTest)
-    SET(GTest_SOURCE_DIR ${CMAKE_BINARY_DIR}/GTest_src)
-    SET(GTest_BINARY_DIR ${CMAKE_BINARY_DIR}/GTest_bin)
+    SET(GTEST_ROOT       ${CMAKE_BINARY_DIR}/GTest)
+    SET(GTEST_SOURCE_DIR ${CMAKE_BINARY_DIR}/GTest_src)
+    SET(GTEST_BINARY_DIR ${CMAKE_BINARY_DIR}/GTest_bin)
 
+    SET(GTEST_MSVC_SEARCH "MD")
     FIND_PACKAGE(GTest QUIET)
 
     IF(NOT GTEST_FOUND)
@@ -96,10 +97,11 @@ IF("GTest" IN_LIST REQUIRED_DEPENDENCIES)
             ThirdParty_GTest
             URL                 "https://github.com/google/googletest/archive/release-1.10.0.tar.gz"
             URL_HASH            MD5=ecd1fa65e7de707cd5c00bdac56022cd
-            SOURCE_DIR          ${GTest_SOURCE_DIR}
-            BINARY_DIR          ${GTest_BINARY_DIR}
-            CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${GTest_ROOT}
+            SOURCE_DIR          ${GTEST_SOURCE_DIR}
+            BINARY_DIR          ${GTEST_BINARY_DIR}
+            CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${GTEST_ROOT}
                                 -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+                                -DBUILD_SHARED_LIBS=ON
             BUILD_COMMAND       ""
             UPDATE_COMMAND      ""
             TEST_COMMAND        ""

@@ -102,7 +102,7 @@ MACRO(DEFINE_MODULE _target _prefix)
     IF(NOT _target STREQUAL "DuskEngine")
         TARGET_LINK_LIBRARIES(
             ${_target}
-            PRIVATE
+            PUBLIC
                 DuskEngine
         )
     ENDIF()
@@ -190,34 +190,27 @@ MACRO(DEFINE_MODULE _target _prefix)
 
     IF(BUILD_TESTS)
         FILE(GLOB_RECURSE
-            tests
+            _tests
             "Tests/*Test.cpp"
         )
         
-        FOREACH(test_source ${tests})
-            GET_FILENAME_COMPONENT(test__target ${test_source} NAME_WE)
+        FOREACH(_test_source ${_tests})
+            GET_FILENAME_COMPONENT(_test_target ${_test_source} NAME_WE)
             
             ADD_EXECUTABLE(
-                ${test__target}
-                ${test_source}
+                ${_test_target}
+                ${_test_source}
             )
 
-            TARGET_COMPILE_FEATURES(
-                ${test__target} 
-                PRIVATE
-                    # Enable C++17 features
-                    cxx_std_17
-            )
-        
             SET_TARGET_PROPERTIES(
-                ${test__target} PROPERTIES
+                ${_test_target} PROPERTIES
                     CXX_STANDARD 17
                     CXX_STANDARD_REQUIRED ON
                     CXX_EXTENSIONS OFF
             )
 
             TARGET_LINK_LIBRARIES(
-                ${test__target}
+                ${_test_target}
                 PRIVATE
                     ${_target}
                     GTest::GTest
@@ -225,15 +218,23 @@ MACRO(DEFINE_MODULE _target _prefix)
             )
 
             SET_TARGET_PROPERTIES(
-                ${test__target}
+                ${_test_target}
                 PROPERTIES FOLDER "${folder}/Tests"
             )
 
+            SET_TARGET_PROPERTIES(
+                ${_test_target}
+                PROPERTIES 
+                    VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                    VS_DEBUGGER_ENVIRONMENT "PATH=%PATH%;${RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${RUNTIME_SEARCH_PATH_DEBUG}>;$<$<CONFIG:Release>:${RUNTIME_SEARCH_PATH_RELEASE}>"
+            )
+
             ADD_TEST(
-                NAME ${test__target}
-                COMMAND $<TARGET_FILE:${test__target}>
+                NAME ${_test_target}
+                COMMAND $<TARGET_FILE:${_test_target}>
                 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Tests"
             )
+        
         ENDFOREACH()
     ENDIF()
 ENDMACRO()

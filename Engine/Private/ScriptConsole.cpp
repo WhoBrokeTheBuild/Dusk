@@ -19,7 +19,7 @@ int ScriptConsole::_index = 0;
 
 #else
 
-    static struct termios ScriptConsole::_termios;
+    struct termios ScriptConsole::_termios;
 
 #endif
 
@@ -41,8 +41,8 @@ void ScriptConsole::Initialize()
 
     struct termios tmp;
 
-    tcgetattr(STDIN_FILENO, &_Termios);
-    tmp = _Termios;
+    tcgetattr(STDIN_FILENO, &_termios);
+    tmp = _termios;
     tmp.c_lflag &= ~(ECHO | ICANON | ISIG | IEXTEN);
     tmp.c_cc[VMIN] = 0;
     tcsetattr(STDIN_FILENO, TCSANOW, &tmp);
@@ -155,10 +155,12 @@ void ScriptConsole::ReadNextCharacter()
         if (c == '[' || c == '~') {
             return;
         }
+        
+        // TODO: Handle Control Pressed
 
         switch (c) {
-        case 'D': HandleLeft();     return;
-        case 'C': HandleRight();    return;
+        case 'D': HandleLeft(false);    return;
+        case 'C': HandleRight(false);   return;
         case 'A': HandleUp();       return;
         case 'B': HandleDown();     return;
         case 'H': HandleHome();     return;

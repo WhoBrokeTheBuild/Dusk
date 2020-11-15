@@ -41,8 +41,12 @@ jobs:
       env: CMAKE_BUILD_TYPE=RELEASE
 
 before_install:
+  - mkdir $HOME/vulkan
+  - wget -O $HOME/vulkan/vulkan-sdk.tar.gz https://sdk.lunarg.com/sdk/download/1.2.154.0/linux/vulkansdk-linux-x86_64-1.2.154.0.tar.gz
+  - tar -C $HOME/vulkan -xzf $HOME/vulkan/vulkan-sdk.tar.gz
+  - export VULKAN_SDK="$HOME/vulkan/1.2.154.0/x86_64"
   - mkdir $HOME/cmake
-  - wget -O $HOME/cmake/install.sh https://github.com/Kitware/CMake/releases/download/v3.15.5/cmake-3.15.5-Linux-x86_64.sh
+  - wget -O $HOME/cmake/install.sh https://github.com/Kitware/CMake/releases/download/v3.18.4/cmake-3.18.4-Linux-x86_64.sh
   - bash $HOME/cmake/install.sh --prefix=$HOME/cmake --skip-license --exclude-subdir
   - export PATH="$HOME/cmake/bin:$PATH"
   - cmake --version

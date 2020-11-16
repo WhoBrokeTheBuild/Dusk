@@ -9,9 +9,7 @@ PROJECT(ThirdParty)
 
 FIND_PACKAGE(patch REQUIRED)
 
-IF(NOT REQUIRED_DEPENDENCIES)
-    MESSAGE(FATAL_ERROR "REQUIRED_DEPENDENCIES not set")
-ENDIF()
+SET(REQUIRED_DEPENDENCIES "" CACHE STRING "")
 
 # See /CMakeLists.txt for explanation
 STRING(REPLACE ":" ";" REQUIRED_DEPENDENCIES "${REQUIRED_DEPENDENCIES}")
@@ -179,7 +177,6 @@ IF("Python3" IN_LIST REQUIRED_DEPENDENCIES)
                 COMMAND             ${_Python3_INSTALL_COMMAND2}
                 TEST_COMMAND        ""
             )
-        ENDIF()
     ENDIF()
 ENDIF()
 

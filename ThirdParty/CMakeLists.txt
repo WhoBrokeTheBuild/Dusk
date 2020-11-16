@@ -145,41 +145,42 @@ ENDIF()
 # Python3
 
 IF("Python3" IN_LIST REQUIRED_DEPENDENCIES)
-IF(WIN32)
-    SET(Python3_ROOT_DIR   ${CMAKE_BINARY_DIR}/Python3)
-    SET(Python3_SOURCE_DIR ${Python3_ROOT_DIR})
-ELSE()
-    SET(Python3_ROOT_DIR   ${CMAKE_BINARY_DIR}/Python3)
-    SET(Python3_SOURCE_DIR ${CMAKE_BINARY_DIR}/Python3_src)
-ENDIF()
-
-FIND_PACKAGE(Python3 3.8 QUIET COMPONENTS Development)
-
-IF(NOT Python3_FOUND)
-    SET(_Python3_INSTALL_COMMAND1 "")
-    SET(_Python3_INSTALL_COMMAND2 "")
-
     IF(WIN32)
-        MESSAGE(SEND_ERROR "Unable to find Python3, install to continue https://www.python.org/downloads/windows/")
+        SET(Python3_ROOT_DIR   ${CMAKE_BINARY_DIR}/Python3)
+        SET(Python3_SOURCE_DIR ${Python3_ROOT_DIR})
     ELSE()
-        SET(_Python3_INSTALL_COMMAND1 ./configure --prefix=${Python3_ROOT_DIR} --enable-shared --enable-optimizations)
-        SET(_Python3_INSTALL_COMMAND2 ${CMAKE_MAKE_PROGRAM} -l libpython3.so install)
+        SET(Python3_ROOT_DIR   ${CMAKE_BINARY_DIR}/Python3)
+        SET(Python3_SOURCE_DIR ${CMAKE_BINARY_DIR}/Python3_src)
     ENDIF()
 
-    ExternalProject_Add(
-        ThirdParty_Python3
-        URL                 "https://www.python.org/ftp/python/3.8.5/Python-3.8.5.tgz"
-        URL_HASH            MD5=e2f52bcf531c8cc94732c0b6ff933ff0
-        SOURCE_DIR          ${Python3_SOURCE_DIR}
-        BUILD_IN_SOURCE     TRUE
-        CONFIGURE_COMMAND   ""
-        BUILD_COMMAND       ""
-        UPDATE_COMMAND      ""
-        INSTALL_COMMAND     ${_Python3_INSTALL_COMMAND1}
-        COMMAND             ${_Python3_INSTALL_COMMAND2}
-        TEST_COMMAND        ""
-    )
-ENDIF()
+    FIND_PACKAGE(Python3 3.8 QUIET COMPONENTS Development)
+
+    IF(NOT Python3_FOUND)
+        SET(_Python3_INSTALL_COMMAND1 "")
+        SET(_Python3_INSTALL_COMMAND2 "")
+
+            IF(WIN32)
+                MESSAGE(SEND_ERROR "Unable to find Python3, install to continue https://www.python.org/downloads/windows/")
+            ELSE()
+                SET(_Python3_INSTALL_COMMAND1 ./configure --prefix=${Python3_ROOT_DIR} --enable-shared --enable-optimizations)
+                SET(_Python3_INSTALL_COMMAND2 ${CMAKE_MAKE_PROGRAM} -l libpython3.so install)
+            ENDIF()
+
+            ExternalProject_Add(
+                ThirdParty_Python3
+                URL                 "https://www.python.org/ftp/python/3.8.5/Python-3.8.5.tgz"
+                URL_HASH            MD5=e2f52bcf531c8cc94732c0b6ff933ff0
+                SOURCE_DIR          ${Python3_SOURCE_DIR}
+                BUILD_IN_SOURCE     TRUE
+                CONFIGURE_COMMAND   ""
+                BUILD_COMMAND       ""
+                UPDATE_COMMAND      ""
+                INSTALL_COMMAND     ${_Python3_INSTALL_COMMAND1}
+                COMMAND             ${_Python3_INSTALL_COMMAND2}
+                TEST_COMMAND        ""
+            )
+        ENDIF()
+    ENDIF()
 ENDIF()
 
 # OpenAL
@@ -231,6 +232,38 @@ IF("freetype" IN_LIST REQUIRED_DEPENDENCIES)
             UPDATE_COMMAND      ""
             TEST_COMMAND        ""
             INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
+        )
+    ENDIF()
+ENDIF()
+
+# SFML
+
+IF("SFML" IN_LIST DEPENDENCIES)
+    SET(SFML_ROOT           ${CMAKE_BINARY_DIR}/SFML)
+    SET(SFML_SOURCE_DIR     ${CMAKE_BINARY_DIR}/SFML_src)
+    SET(SFML_BINARY_DIR     ${CMAKE_BINARY_DIR}/SFML_bin)
+
+    FIND_PACKAGE(SFML CONFIG COMPONENTS system window graphics)
+    
+    IF(NOT SFML_FOUND)
+        ExternalProject_Add(
+            ThirdParty_SFML
+            URL                 "https://www.sfml-dev.org/files/SFML-2.5.1-sources.zip"
+            URL_HASH            MD5=8533b22888102b4f0883311385fb1c71
+            SOURCE_DIR          ${SFML_SOURCE_DIR}
+            BINARY_DIR          ${SFML_BINARY_DIR}
+            CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${SFML_ROOT}
+                                -DSFML_BUILD_EXAMPLES=OFF
+                                -DSFML_BUILD_DOC=OFF
+                                -DSFML_BUILD_WINDOW=ON
+                                -DSFML_BUILD_GRAPHICS=ON
+                                -DSFML_BUILD_AUDIO=OFF
+                                -DSFML_BUILD_NETWORK=OFF
+                                -DSFML_DEPENDENCIES_INSTALL_PREFIX="${OpenAL_ROOT};${freetype_ROOT}"
+                                BUILD_COMMAND       ""
+                                UPDATE_COMMAND      ""
+                                TEST_COMMAND        ""
+                                INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
         )
     ENDIF()
 ENDIF()

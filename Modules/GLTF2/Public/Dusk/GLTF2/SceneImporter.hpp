@@ -1,0 +1,21 @@
+#ifndef DUSK_GLTF2_SCENE_IMPORTER_HPP
+#define DUSK_GLTF2_SCENE_IMPORTER_HPP
+
+#include <Dusk/GLTF2/Config.hpp>
+#include <Dusk/Scene/SceneImporter.hpp>
+
+namespace Dusk::GLTF2 {
+
+class DUSK_GLTF2_API SceneImporter : public Dusk::SceneImporter
+{
+public:
+
+    virtual bool LoadFromFile(Entity * root, const std::string& filename);
+
+private:
+
+}; // class SceneImporter
+
+} // namespace Dusk::GLTF2
+
+#endif // DUSK_GLTF2_SCENE_IMPORTER_HPP

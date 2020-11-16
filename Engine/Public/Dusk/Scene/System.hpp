@@ -8,21 +8,21 @@
 
 namespace Dusk {
 
-class ISystem
+class System
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(ISystem)
+    DISALLOW_COPY_AND_ASSIGN(System)
 
-    explicit ISystem() = default;
+    explicit System() = default;
 
-    virtual ~ISystem() = default;
+    virtual ~System() = default;
 
     virtual inline void Update(UpdateContext * ctx) { }
 
     virtual inline void Render(RenderContext * ctx) { }
 
-}; // class ISystem
+}; // class System
 
 } // namespace Dusk
 

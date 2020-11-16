@@ -21,15 +21,15 @@ public:
     
     virtual ~Scene() = default;
     
-    ISystem * AddSystem(std::unique_ptr<ISystem> && sys);
+    System * AddSystem(std::unique_ptr<System> && sys);
 
-    std::vector<ISystem *> GetSystems() const;
+    std::vector<System *> GetSystems() const;
 
 private:
 
-    std::vector<std::unique_ptr<ISystem>> _systems;
+    std::vector<std::unique_ptr<System>> _systems;
 
-    std::vector<ISystem *> _systemPtrs;
+    std::vector<System *> _systemPtrs;
 
 
 }; // class Scene

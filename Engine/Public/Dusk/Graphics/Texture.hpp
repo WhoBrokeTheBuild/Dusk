@@ -8,7 +8,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <string>
-#include <algorithm>
 #include <tuple>
 
 namespace Dusk {

@@ -4,9 +4,9 @@
 
 namespace Dusk {
 
-static std::unordered_map<std::string, std::unique_ptr<ISceneImporter>> _SceneImporters;
+static std::unordered_map<std::string, std::unique_ptr<SceneImporter>> _SceneImporters;
 
-static std::vector<ISceneImporter *> _SceneImporterList;
+static std::vector<SceneImporter *> _SceneImporterList;
 
 void updateSceneImporterList()
 {
@@ -17,7 +17,7 @@ void updateSceneImporterList()
 }
 
 DUSK_ENGINE_API
-void AddSceneImporter(const std::string& id, std::unique_ptr<ISceneImporter> importer)
+void AddSceneImporter(const std::string& id, std::unique_ptr<SceneImporter> importer)
 {
     _SceneImporters[id] = std::move(importer);
     updateSceneImporterList();
@@ -35,7 +35,7 @@ void RemoveSceneImporter(const std::string& id)
 }
 
 DUSK_ENGINE_API
-const std::vector<ISceneImporter *>& GetAllSceneImporters()
+const std::vector<SceneImporter *>& GetAllSceneImporters()
 {
     return _SceneImporterList;
 }

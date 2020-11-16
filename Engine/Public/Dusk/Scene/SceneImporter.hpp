@@ -7,28 +7,28 @@
 
 namespace Dusk {
 
-class DUSK_ENGINE_API ISceneImporter 
+class DUSK_ENGINE_API SceneImporter 
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(ISceneImporter)
+    DISALLOW_COPY_AND_ASSIGN(SceneImporter)
 
-    explicit ISceneImporter() = default;
+    explicit SceneImporter() = default;
 
-    virtual ~ISceneImporter() = default;
+    virtual ~SceneImporter() = default;
 
     virtual bool LoadFromFile(Entity * root, const std::string& filename) = 0;
 
-}; // class ISceneImporter
+}; // class SceneImporter
 
 DUSK_ENGINE_API
-void AddSceneImporter(const std::string& id, std::unique_ptr<ISceneImporter> importer);
+void AddSceneImporter(const std::string& id, std::unique_ptr<SceneImporter> importer);
 
 DUSK_ENGINE_API
 void RemoveSceneImporter(const std::string& id);
 
 DUSK_ENGINE_API
-const std::vector<ISceneImporter *>& GetAllSceneImporters();
+const std::vector<SceneImporter *>& GetAllSceneImporters();
 
 } // namespace Dusk
 

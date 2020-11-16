@@ -64,4 +64,14 @@
 
 #endif
 
+#if defined(DUSK_OS_WINDOWS)
+
+    #define DUSK_PATH_SEPARATOR '\\'
+
+#else
+
+    #define DUSK_PATH_SEPARATOR '/'
+
+#endif
+
 #endif // DUSK_PLATFORM_HPP

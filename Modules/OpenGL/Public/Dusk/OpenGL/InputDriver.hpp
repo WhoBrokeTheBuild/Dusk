@@ -12,6 +12,8 @@ class DUSK_OPENGL_API InputDriver : public Dusk::InputDriver
 {
 public:
 
+    DISALLOW_COPY_AND_ASSIGN(InputDriver)
+
     explicit InputDriver();
 
     virtual ~InputDriver();

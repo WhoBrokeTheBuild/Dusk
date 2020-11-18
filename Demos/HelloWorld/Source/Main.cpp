@@ -41,8 +41,10 @@ int main(int argc, char** argv)
 
     {
         Dusk::Scene scene;
-        scene.LoadFromFile("Assets/Models/SciFiHelmet/SciFiHelmet.gltf");
         scene.LoadFromFile("Assets/Models/TestScene.glb");
+        scene.LoadFromFile("Assets/Models/WaterBottle.glb");
+        scene.LoadFromFile("Assets/Models/DamagedHelmet.glb");
+        scene.LoadFromFile("Assets/Models/SciFiHelmet/SciFiHelmet.gltf");
         
         // Dusk::Camera camera;
         // camera.SetPosition({ 10, 10, 10 });

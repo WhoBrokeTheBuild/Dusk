@@ -2,8 +2,8 @@
 #define DUSK_TEXTURE_HPP
 
 #include <Dusk/Config.hpp>
-#include <Dusk/Macros.hpp>
 #include <Dusk/Math.hpp>
+#include <Dusk/Graphics/TextureImporter.hpp>
 
 #include <cstdint>
 #include <cstdlib>
@@ -12,29 +12,9 @@
 
 namespace Dusk {
 
-class DUSK_ENGINE_API TextureData
+class DUSK_ENGINE_API Texture 
 {
 public:
-
-    enum class DUSK_ENGINE_API CompressionType {
-        None,
-
-        // S3 Texture Compression (DirectX Texture Compression)
-        S3TC_DXT1, // RGB, RGBA
-        S3TC_DXT3, // RGBA
-        S3TC_DXT5, // RGBA
-
-    }; // enum CompressionType
-
-    enum class DUSK_ENGINE_API DataType {
-        UnsignedByte,
-        Byte,
-        UnsignedShort,
-        Short,
-        UnsignedInt,
-        Int,
-
-    }; // enum DataType
 
     enum class DUSK_ENGINE_API WrapType {
         Repeat,
@@ -46,53 +26,37 @@ public:
 
     enum class DUSK_ENGINE_API FilterType {
         Nearest,
+        NearestMipmapNearest,
+        NearestMipmapLinear,
         Linear,
+        LinearMipmapNearest,
+        LinearMipmapLinear,
 
     }; // enum FilterType
 
-    DISALLOW_COPY_AND_ASSIGN(TextureData)
+    struct Options
+    {
+        Options(
+            WrapType wrapS = WrapType::Repeat,
+            WrapType wrapT = WrapType::Repeat, 
+            FilterType magFilter = FilterType::Nearest, 
+            FilterType minFilter = FilterType::Nearest, 
+            bool generateMipmaps = false)
+            : WrapS(wrapS)
+            , WrapT(wrapT)
+            , MagFilter(magFilter)
+            , MinFilter(minFilter)
+            , GenerateMipmaps(generateMipmaps)
+        { }
+        
+        WrapType WrapS;
+        WrapType WrapT;
 
-    explicit TextureData() = default;
+        FilterType MagFilter;
+        FilterType MinFilter;
 
-    virtual ~TextureData() = default;
-
-    // Pointer to pixel data Buffer
-    virtual uint8_t * GetData() const = 0;
-
-    // Width and Height in pixels
-    virtual uvec2 GetSize() const = 0;
-
-    // Number of components (R, RG, RGB, RGBA)
-    virtual int GetComponents() const = 0;
-
-    // Compression of the pixels in the data
-    virtual inline CompressionType GetCompressionType() const {
-        return CompressionType::None;
-    }
-
-    // Format of the data in the buffer
-    virtual DataType GetDataType() const = 0;
-
-    // Wrap config for (s, t)
-    virtual inline std::tuple<WrapType, WrapType> GetWrapTypes() const {
-        return std::make_tuple(WrapType::Repeat, WrapType::Repeat);
-    }
-
-    // Filter config for (min, mag)
-    virtual inline std::tuple<FilterType, FilterType> GetFilterTypes() const {
-        return std::make_tuple(FilterType::Nearest, FilterType::Nearest);
-    }
-
-    // Generate Mipmaps
-    virtual inline bool GenerateMipmaps() const {
-        return true;
-    }
-
-}; // class TextureData
-
-class DUSK_ENGINE_API Texture 
-{
-public:
+        bool GenerateMipmaps;
+    };
 
     DISALLOW_COPY_AND_ASSIGN(Texture)
 
@@ -102,11 +66,11 @@ public:
 
     virtual void Bind() = 0;
 
-    virtual bool Load(const TextureData * data) = 0;
+    virtual bool Load(const TextureData * data, Options opts = Options()) = 0;
 
-    virtual bool LoadFromFile(const std::string& filename);
+    virtual bool LoadFromFile(const std::string& filename, Options opts = Options());
 
-    virtual bool LoadFromMemory(uint8_t * buffer, size_t length);
+    virtual bool LoadFromMemory(const uint8_t * buffer, size_t length, Options opts = Options());
 
 }; // class Texture
 

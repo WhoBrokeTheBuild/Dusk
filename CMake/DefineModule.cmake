@@ -118,13 +118,16 @@ MACRO(DEFINE_MODULE _target _prefix)
             ${CMAKE_CURRENT_BINARY_DIR}/Private
     )
 
+    STRING(LENGTH "${CMAKE_SOURCE_DIR}/" SOURCE_PATH_LENGTH)
+
     TARGET_COMPILE_DEFINITIONS(
         ${_target}
         PUBLIC
             # Disable Visual Studio "not secure" warnings
             $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
         PRIVATE
-            DUSK_${_prefix}_EXPORT
+            DUSK_MODULE_NAME=${_target}
+            DUSK_SOURCE_PATH_LENGTH=${SOURCE_PATH_LENGTH}
     )
 
     TARGET_COMPILE_OPTIONS(
@@ -134,8 +137,8 @@ MACRO(DEFINE_MODULE _target _prefix)
             $<$<CXX_COMPILER_ID:MSVC>: /std:c++17>
 
             # Disable unknown pragmas warning, C++ exceptions
-            $<$<CXX_COMPILER_ID:GNU>:   -Wall -Wno-unknown-pragmas -fno-exceptions>
-            $<$<CXX_COMPILER_ID:Clang>: -Wall -Wno-unknown-pragmas -fno-exceptions>
+            $<$<CXX_COMPILER_ID:GNU>:   -Wall -Wno-unknown-pragmas -fno-exceptions -Wno-string-plus-int>
+            $<$<CXX_COMPILER_ID:Clang>: -Wall -Wno-unknown-pragmas -fno-exceptions -Wno-string-plus-int>
             $<$<CXX_COMPILER_ID:MSVC>:  /MP /wd4068 /EHsc- /GR->
     )
 
@@ -152,6 +155,7 @@ MACRO(DEFINE_MODULE _target _prefix)
             CXX_STANDARD 17
             CXX_STANDARD_REQUIRED ON
             CXX_EXTENSIONS OFF
+            DEFINE_SYMBOL "DUSK_${_prefix}_EXPORT"
     )
     
     INSTALL(

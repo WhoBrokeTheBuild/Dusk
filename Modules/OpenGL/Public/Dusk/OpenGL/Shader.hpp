@@ -10,6 +10,10 @@ class DUSK_OPENGL_API Shader : public Dusk::Shader
 {
 public:
 
+    DISALLOW_COPY_AND_ASSIGN(Shader)
+
+    explicit Shader() = default;
+
     bool LoadFromFiles(const std::vector<std::string>& filenames) override;
 
     void Bind() override;

@@ -14,7 +14,7 @@ public:
 
     virtual ~Texture();
 
-    bool Load(const TextureData * data) override;
+    bool Load(const TextureData * data, Options opts = Options()) override;
 
     void Bind() override;
 

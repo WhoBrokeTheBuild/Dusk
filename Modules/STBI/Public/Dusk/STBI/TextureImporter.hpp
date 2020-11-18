@@ -42,7 +42,7 @@ public:
 
     std::unique_ptr<Dusk::TextureData> LoadFromFile(const std::string& filename) override;
 
-    std::unique_ptr<Dusk::TextureData> LoadFromMemory(uint8_t * buffer, size_t length) override;
+    std::unique_ptr<Dusk::TextureData> LoadFromMemory(const uint8_t * buffer, size_t length) override;
 
 }; // class TextureImporter
 

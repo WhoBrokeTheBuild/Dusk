@@ -10,6 +10,10 @@ class DUSK_OPENGL_API Mesh : public Dusk::Mesh
 {
 public:
 
+    DISALLOW_COPY_AND_ASSIGN(Mesh)
+
+    explicit Mesh() = default;
+
     void Render() override;
 
     bool Load(const MeshData * data) override;

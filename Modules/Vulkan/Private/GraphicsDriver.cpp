@@ -79,7 +79,7 @@ GraphicsDriver::GraphicsDriver() {
 
     const auto& version = GetVersion();
     const auto& appVersion = GetApplicationVersion();
-    const auto& appName = GetApplicationName().c_str();
+    const auto& appName = GetApplicationName();
 
     // Instance
 
@@ -90,7 +90,7 @@ GraphicsDriver::GraphicsDriver() {
         version.Major,
         version.Minor,
         version.Patch);
-    appInfo.pApplicationName = appName;
+    appInfo.pApplicationName = appName.c_str();
     appInfo.applicationVersion = VK_MAKE_VERSION(
         appVersion.Major,
         appVersion.Minor,

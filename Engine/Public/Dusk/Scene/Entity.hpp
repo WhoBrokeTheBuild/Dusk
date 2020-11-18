@@ -2,7 +2,6 @@
 #define DUSK_ENTITY_HPP
 
 #include <Dusk/Config.hpp>
-#include <Dusk/Macros.hpp>
 #include <Dusk/Math.hpp>
 #include <Dusk/Scene/Component.hpp>
 #include <Dusk/UpdateContext.hpp>

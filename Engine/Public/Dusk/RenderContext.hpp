@@ -2,7 +2,6 @@
 #define DUSK_RENDER_CONTEXT_HPP
 
 #include <Dusk/Config.hpp>
-#include <Dusk/Macros.hpp>
 #include <Dusk/Graphics/TransformData.hpp>
 
 namespace Dusk {

@@ -19,6 +19,8 @@ class DUSK_OPENGL_API GraphicsDriver : public Dusk::GraphicsDriver
 {
 public:
 
+    DISALLOW_COPY_AND_ASSIGN(GraphicsDriver)
+
     explicit GraphicsDriver();
 
     virtual ~GraphicsDriver();

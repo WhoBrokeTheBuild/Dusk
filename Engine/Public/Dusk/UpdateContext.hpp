@@ -2,7 +2,6 @@
 #define DUSK_UPDATE_CONTEXT_HPP
 
 #include <Dusk/Config.hpp>
-#include <Dusk/Macros.hpp>
 
 namespace Dusk {
 

@@ -2,7 +2,6 @@
 #define DUSK_KEYBOARD_HPP
 
 #include <Dusk/Config.hpp>
-#include <Dusk/Macros.hpp>
 
 #include <string>
 

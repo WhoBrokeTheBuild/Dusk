@@ -2,7 +2,6 @@
 #define DUSK_SCENE_HPP
 
 #include <Dusk/Config.hpp>
-#include <Dusk/Macros.hpp>
 #include <Dusk/Scene/Entity.hpp>
 #include <Dusk/Scene/System.hpp>
 

@@ -2,7 +2,6 @@
 #define DUSK_FONT_HPP
 
 #include <Dusk/Config.hpp>
-#include <Dusk/Macros.hpp>
 
 namespace Dusk {
 

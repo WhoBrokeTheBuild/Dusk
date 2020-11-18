@@ -2,7 +2,6 @@
 #define DUSK_CORE_MESH_HPP
 
 #include <Dusk/Config.hpp>
-#include <Dusk/Macros.hpp>
 
 #include <gsl/gsl>
 

@@ -2,7 +2,6 @@
 #define DUSK_SYSTEM_HPP
 
 #include <Dusk/Config.hpp>
-#include <Dusk/Macros.hpp>
 #include <Dusk/UpdateContext.hpp>
 #include <Dusk/RenderContext.hpp>
 

@@ -2,7 +2,6 @@
 #define DUSK_INPUT_DRIVER_HPP
 
 #include <Dusk/Config.hpp>
-#include <Dusk/Macros.hpp>
 #include <Dusk/Input/Keyboard.hpp>
 #include <Dusk/Input/Mouse.hpp>
 #include <Dusk/Input/Controller.hpp>

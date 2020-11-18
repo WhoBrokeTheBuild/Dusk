@@ -2,6 +2,7 @@
 
 #include <Dusk/Log.hpp>
 #include <Dusk/Math.hpp>
+#include <Dusk/Benchmark.hpp>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-function"
@@ -30,6 +31,8 @@ TextureData::~TextureData()
 DUSK_STBI_API
 std::unique_ptr<Dusk::TextureData> TextureImporter::LoadFromFile(const std::string& filename)
 {
+    DuskBenchmarkStart();
+
     ivec2 size;
     int components;
 
@@ -42,12 +45,16 @@ std::unique_ptr<Dusk::TextureData> TextureImporter::LoadFromFile(const std::stri
     tex->Data = data;
     tex->Size = size;
     tex->Components = components;
+
+    DuskBenchmarkEnd("STBI::TextureImporter::LoadFromFile");
     return tex;
 }
 
 DUSK_STBI_API
-std::unique_ptr<Dusk::TextureData> TextureImporter::LoadFromMemory(uint8_t * buffer, size_t length)
+std::unique_ptr<Dusk::TextureData> TextureImporter::LoadFromMemory(const uint8_t * buffer, size_t length)
 {
+    DuskBenchmarkStart();
+
     ivec2 size;
     int components;
 
@@ -60,6 +67,8 @@ std::unique_ptr<Dusk::TextureData> TextureImporter::LoadFromMemory(uint8_t * buf
     tex->Data = data;
     tex->Size = size;
     tex->Components = components;
+
+    DuskBenchmarkEnd("STBI::TextureImporter::LoadFromFile");
     return tex;
 }
 

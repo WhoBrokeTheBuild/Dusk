@@ -2,7 +2,6 @@
 #define DUSK_MESH_COMPONENT_HPP
 
 #include <Dusk/Config.hpp>
-#include <Dusk/Macros.hpp>
 #include <Dusk/Scene/Component.hpp>
 #include <Dusk/Graphics/Mesh.hpp>
 

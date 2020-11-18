@@ -4,12 +4,12 @@
 namespace Dusk {
 
 DUSK_ENGINE_API
-bool Texture::LoadFromFile(const std::string& filename)
+bool Texture::LoadFromFile(const std::string& filename, Options opts /*= Options()*/)
 {
     const auto& importers = GetAllTextureImporters();
     for (const auto& importer : importers) {
         auto data = importer->LoadFromFile(filename);
-        if (data && Load(data.get())) {
+        if (data && Load(data.get(), opts)) {
             return true;
         }
     }
@@ -17,12 +17,12 @@ bool Texture::LoadFromFile(const std::string& filename)
 }
 
 DUSK_ENGINE_API
-bool Texture::LoadFromMemory(uint8_t * buffer, size_t length)
+bool Texture::LoadFromMemory(const uint8_t * buffer, size_t length, Options opts /*= Options()*/)
 {
     const auto& importers = GetAllTextureImporters();
     for (const auto& importer : importers) {
         auto data = importer->LoadFromMemory(buffer, length);
-        if (data && Load(data.get())) {
+        if (data && Load(data.get(), opts)) {
             return true;
         }
     }

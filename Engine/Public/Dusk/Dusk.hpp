@@ -2,7 +2,6 @@
 #define DUSK_HPP
 
 #include <Dusk/Config.hpp>
-#include <Dusk/Macros.hpp>
 #include <Dusk/Version.hpp>
 #include <Dusk/Math.hpp>
 

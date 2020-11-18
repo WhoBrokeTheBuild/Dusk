@@ -3,7 +3,6 @@
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Math.hpp>
-#include <Dusk/Macros.hpp>
 #include <Dusk/Scene/Entity.hpp>
 
 namespace Dusk {

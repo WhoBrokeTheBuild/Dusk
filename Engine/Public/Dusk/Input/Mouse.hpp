@@ -2,7 +2,6 @@
 #define DUSK_MOUSE_HPP
 
 #include <Dusk/Config.hpp>
-#include <Dusk/Macros.hpp>
 
 #include <string>
 

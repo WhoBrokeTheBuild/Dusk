@@ -1,11 +1,11 @@
 #ifndef DUSK_AUDIO_DRIVER_HPP
 #define DUSK_AUDIO_DRIVER_HPP
 
-#include <Dusk/Macros.hpp>
+#include <Dusk/Config.hpp>
 
 namespace Dusk {
 
-class AudioDriver
+class DUSK_ENGINE_API AudioDriver
 {
 public:
 

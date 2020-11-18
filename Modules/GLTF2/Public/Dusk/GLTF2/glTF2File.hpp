@@ -3,6 +3,8 @@
 
 #include <Dusk/GLTF2/Config.hpp>
 #include <Dusk/Math.hpp>
+#include <Dusk/Graphics/Texture.hpp>
+#include <Dusk/Graphics/TextureImporter.hpp>
 
 #include <cstdint>
 #include <nlohmann/json.hpp>
@@ -13,8 +15,19 @@ using json = nlohmann::json;
 
 typedef uint32_t GLenum;
 
-#define GL_INVALID_ENUM 0x0500
+#define GL_INVALID_ENUM             0x0500
+#define GL_REPEAT                   0x2901
+#define GL_MIRRORED_REPEAT          0x8370
+#define GL_CLAMP_TO_EDGE            0x812F
+#define GL_CLAMP_TO_BORDER          0x812D
+#define GL_NEAREST                  0x2600
+#define GL_NEAREST_MIPMAP_LINEAR    0x2702
+#define GL_NEAREST_MIPMAP_NEAREST   0x2700
+#define GL_LINEAR                   0x2601
+#define GL_LINEAR_MIPMAP_LINEAR     0x2703
+#define GL_LINEAR_MIPMAP_NEAREST    0x2701
 
+DUSK_GLTF2_API
 inline vec2 ParseVec2(const json& value, vec2 def)
 {
     if (value.is_array() && value.size() == 2) {
@@ -24,6 +37,7 @@ inline vec2 ParseVec2(const json& value, vec2 def)
     return def;
 }
 
+DUSK_GLTF2_API
 inline vec3 ParseVec3(const json& value, vec3 def)
 {
     if (value.is_array() && value.size() == 3) {
@@ -33,6 +47,7 @@ inline vec3 ParseVec3(const json& value, vec3 def)
     return def;
 }
 
+DUSK_GLTF2_API
 inline vec4 ParseVec4(const json& value, vec4 def)
 {
     if (value.is_array() && value.size() == 4) {
@@ -42,6 +57,7 @@ inline vec4 ParseVec4(const json& value, vec4 def)
     return def;
 }
 
+DUSK_GLTF2_API
 inline quat ParseQuat(const json& value, quat def)
 {
     if (value.is_array() && value.size() == 4) {
@@ -49,6 +65,44 @@ inline quat ParseQuat(const json& value, quat def)
         return glm::quat(v[3], v[0], v[1], v[2]);
     }
     return def;
+}
+
+DUSK_GLTF2_API
+inline Texture::WrapType GetWrapType(const GLenum& type)
+{
+    switch (type) {
+    case GL_REPEAT:
+        return Texture::WrapType::Repeat;
+    case GL_MIRRORED_REPEAT:
+        return Texture::WrapType::MirroredRepeat;
+    case GL_CLAMP_TO_EDGE:
+        return Texture::WrapType::ClampToEdge;
+    case GL_CLAMP_TO_BORDER:
+        return Texture::WrapType::ClampToBorder;
+    }
+
+    return Texture::WrapType::Repeat;
+}
+
+DUSK_GLTF2_API
+inline Texture::FilterType GetFilterType(const GLenum& type)
+{
+    switch (type) {
+    case GL_NEAREST:
+        return Texture::FilterType::Nearest;
+    case GL_NEAREST_MIPMAP_NEAREST:
+        return Texture::FilterType::NearestMipmapNearest;
+    case GL_NEAREST_MIPMAP_LINEAR:
+        return Texture::FilterType::NearestMipmapLinear;
+    case GL_LINEAR:
+        return Texture::FilterType::Linear;
+    case GL_LINEAR_MIPMAP_NEAREST:
+        return Texture::FilterType::LinearMipmapNearest;
+    case GL_LINEAR_MIPMAP_LINEAR:
+        return Texture::FilterType::LinearMipmapLinear;
+    }
+
+    return Texture::FilterType::Nearest;
 }
 
 struct BufferViewData
@@ -73,9 +127,10 @@ struct AccessorData
 
 struct ImageData
 {
-    ivec2 size;
-    int components;
-    std::unique_ptr<uint8_t> data;
+    std::string uri;
+    
+    int bufferView;
+    std::string mimeType;
 };
 
 struct CameraData
@@ -116,6 +171,10 @@ private:
         BIN     = 0x004E4942, // BIN
     };
 
+    std::string Filename;
+
+    std::string BaseDir;
+
     json JSON;
 
     std::vector<std::vector<uint8_t>> Buffers;
@@ -126,15 +185,23 @@ private:
 
     std::vector<ImageData> Images;
 
+    std::vector<Dusk::Texture::Options> Samplers;
+
+    std::vector<std::shared_ptr<Dusk::Texture>> Textures;
+
     std::vector<CameraData> Cameras;
 
-    bool LoadBuffers(const std::string& dir);
+    bool LoadBuffers();
 
     bool LoadBufferViews();
 
     bool LoadAccessors();
 
     bool LoadImages();
+    
+    bool LoadSamplers();
+
+    bool LoadTextures();
     
     bool LoadCameras();
 

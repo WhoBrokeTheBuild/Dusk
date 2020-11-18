@@ -15,7 +15,7 @@ Texture::~Texture()
 }
 
 DUSK_VULKAN_API
-bool Texture::Load(const TextureData * data)
+bool Texture::Load(const TextureData * data, Options opts /*= Options()*/)
 {
     DuskBenchmarkStart();
 

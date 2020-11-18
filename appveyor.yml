@@ -19,9 +19,9 @@ init:
 clone_folder: C:\projects\Dusk
 
 before_build:
-  - ps: appveyor DownloadFile "https://sdk.lunarg.com/sdk/download/1.2.154.1/windows/VulkanSDK-1.2.154.1-Installer.exe"
-  - cmd: VulkanSDK-1.2.154.1-Installer.exe /S
-  - cmd: set VULKAN_SDK=C:\VulkanSDK\1.2.154.1
+  - ps: . C:\projects\Dusk\Scripts\ci-install-vulkan.ps1
+  - ps: cmake --version
+  - ps: Get-ChildItem env:
 
 build_script:
   - cmd: cd C:\projects\Dusk

@@ -2,7 +2,6 @@
 #define DUSK_EVENT_HPP
 
 #include <Dusk/Config.hpp>
-#include <Dusk/Macros.hpp>
 #include <Dusk/Math.hpp>
 #include <Dusk/Log.hpp>
 

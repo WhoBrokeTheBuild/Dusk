@@ -2,7 +2,6 @@
 #define DUSK_CORE_MESH_IMPORTER_HPP
 
 #include <Dusk/Config.hpp>
-#include <Dusk/Macros.hpp>
 #include <Dusk/Graphics/Mesh.hpp>
 
 #include <memory>

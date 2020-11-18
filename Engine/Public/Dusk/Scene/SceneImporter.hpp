@@ -2,7 +2,6 @@
 #define DUSK_SCENE_IMPORTER_HPP
 
 #include <Dusk/Config.hpp>
-#include <Dusk/Macros.hpp>
 #include <Dusk/Scene/Entity.hpp>
 
 namespace Dusk {

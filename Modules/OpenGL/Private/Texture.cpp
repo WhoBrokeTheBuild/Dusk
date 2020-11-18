@@ -4,13 +4,17 @@
 
 namespace Dusk::OpenGL {
 
+DUSK_OPENGL_API
 Texture::~Texture()
 {
-    glDeleteTextures(1, &_glID);
+    if (_glID) {
+        glDeleteTextures(1, &_glID);
+        _glID = 0;
+    }
 }
 
 DUSK_OPENGL_API
-bool Texture::Load(const TextureData * data)
+bool Texture::Load(const TextureData * data, Options opts /*= Options()*/)
 {
     DuskBenchmarkStart();
 
@@ -29,24 +33,21 @@ bool Texture::Load(const TextureData * data)
     GLenum glType = GetGLDataType(data->GetDataType());
 
     glBindTexture(GL_TEXTURE_2D, _glID);
-    
 
-    const auto& wrap = data->GetWrapTypes();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GetGLWrapType(std::get<0>(wrap)));
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GetGLWrapType(std::get<1>(wrap)));
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GetGLWrapType(opts.WrapS));
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GetGLWrapType(opts.WrapT));
 
-    const auto& filter = data->GetFilterTypes();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GetGLFilterType(std::get<0>(filter)));
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GetGLFilterType(std::get<1>(filter)));
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GetGLFilterType(opts.MagFilter));
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GetGLFilterType(opts.MinFilter));
 
     const auto& size = data->GetSize();
     glTexImage2D(GL_TEXTURE_2D, 0, (GLint)glFormat, size.x, size.y, 0, glFormat, glType, data->GetData());
 
-    if (data->GenerateMipmaps()) {
+    if (opts.GenerateMipmaps) {
         glGenerateMipmap(GL_TEXTURE_2D);
     }
 
-    DuskLogVerbose("Bound texture to %d", _glID);
+    DuskLogVerbose("Bound texture to ID %d", _glID);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -99,16 +100,16 @@ GLenum Texture::GetGLDataType(const TextureData::DataType& type)
 }
 
 DUSK_OPENGL_API
-GLenum Texture::GetGLWrapType(const TextureData::WrapType& type)
+GLenum Texture::GetGLWrapType(const Texture::WrapType& type)
 {
     switch (type) {
-    case TextureData::WrapType::Repeat:
+    case Texture::WrapType::Repeat:
         return GL_REPEAT;
-    case TextureData::WrapType::MirroredRepeat:
+    case Texture::WrapType::MirroredRepeat:
         return GL_MIRRORED_REPEAT;
-    case TextureData::WrapType::ClampToEdge:
+    case Texture::WrapType::ClampToEdge:
         return GL_CLAMP_TO_EDGE;
-    case TextureData::WrapType::ClampToBorder:
+    case Texture::WrapType::ClampToBorder:
         return GL_CLAMP_TO_BORDER;
     }
 
@@ -116,13 +117,21 @@ GLenum Texture::GetGLWrapType(const TextureData::WrapType& type)
 }
 
 DUSK_OPENGL_API
-GLenum Texture::GetGLFilterType(const TextureData::FilterType& type)
+GLenum Texture::GetGLFilterType(const Texture::FilterType& type)
 {
     switch (type) {
-    case TextureData::FilterType::Nearest:
+    case Texture::FilterType::Nearest:
         return GL_NEAREST;
-    case TextureData::FilterType::Linear:
+    case Texture::FilterType::NearestMipmapLinear:
+        return GL_NEAREST_MIPMAP_LINEAR;
+    case Texture::FilterType::NearestMipmapNearest:
+        return GL_NEAREST_MIPMAP_NEAREST;
+    case Texture::FilterType::Linear:
         return GL_LINEAR;
+    case Texture::FilterType::LinearMipmapLinear:
+        return GL_LINEAR_MIPMAP_LINEAR;
+    case Texture::FilterType::LinearMipmapNearest:
+        return GL_LINEAR_MIPMAP_NEAREST;
     }
 
     return GL_INVALID_ENUM;

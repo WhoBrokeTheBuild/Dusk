@@ -145,9 +145,22 @@ inline void Log(LogLevel level, const char * format, Args... args)
     #endif
 }
 
+#if defined(DUSK_MODULE_NAME)
+    #define DUSK_MODULE_NAME_PRINT DUSK_STRINGIFY(DUSK_MODULE_NAME) ","
+#else
+    #define DUSK_MODULE_NAME_PRINT
+#endif
+
+#if !defined(DUSK_SOURCE_PATH_LENGTH)
+    #define DUSK_SOURCE_PATH_LENGTH 0
+#endif
+
+#define DUSK_FILENAME (__FILE__ + DUSK_SOURCE_PATH_LENGTH)
+
 #if defined(DUSK_ENABLE_VERBOSE_LOGGING)
     #define DuskLogVerbose(M, ...) \
-        do { Dusk::Log(Dusk::LogLevel::Verbose, "[VERB](%s:%d) " M "\n", Dusk::GetBasename(__FILE__).c_str(), __LINE__, ##__VA_ARGS__); } while (0)
+        do { Dusk::Log(Dusk::LogLevel::Verbose, "[VERB](%s:%d) " M "\n", \
+            DUSK_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
 #else
     #define DuskLogVerbose(M, ...) do { } while (0)
 #endif
@@ -156,19 +169,24 @@ inline void Log(LogLevel level, const char * format, Args... args)
     do { Dusk::Log(Dusk::LogLevel::Info, M "\n", ##__VA_ARGS__); } while (0)
 
 #define DuskLogInfo(M, ...) \
-    do { Dusk::Log(Dusk::LogLevel::Info, "[INFO](%s:%d) " M "\n", Dusk::GetBasename(__FILE__).c_str(), __LINE__, ##__VA_ARGS__); } while (0)
+    do { Dusk::Log(Dusk::LogLevel::Info, "[INFO](%s:%d) " M "\n", \
+        DUSK_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
 
 #define DuskLogWarn(M, ...) \
-    do { Dusk::Log(Dusk::LogLevel::Warn, "[WARN](%s:%d) " M "\n", Dusk::GetBasename(__FILE__).c_str(), __LINE__, ##__VA_ARGS__); } while (0)
+    do { Dusk::Log(Dusk::LogLevel::Warn, "[WARN](%s:%d) " M "\n", \
+        DUSK_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
 
 #define DuskLogError(M, ...) \
-    do { Dusk::Log(Dusk::LogLevel::Error, "[ERRO](%s:%d) " M "\n", Dusk::GetBasename(__FILE__).c_str(), __LINE__, ##__VA_ARGS__); } while (0)
+    do { Dusk::Log(Dusk::LogLevel::Error, "[ERRO](%s:%d) " M "\n", \
+        DUSK_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
 
 #define DuskLogPerf(M, ...) \
-    do { Dusk::Log(Dusk::LogLevel::Performance, "[PERF](%s:%d) " M "\n", Dusk::GetBasename(__FILE__).c_str(), __LINE__, ##__VA_ARGS__); } while (0)
+    do { Dusk::Log(Dusk::LogLevel::Performance, "[PERF](%s:%d) " M "\n", \
+        DUSK_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
 
 #define DuskLogLoad(M, ...) \
-    do { Dusk::Log(Dusk::LogLevel::Load, "[LOAD](%s:%d) " M "\n", Dusk::GetBasename(__FILE__).c_str(), __LINE__, ##__VA_ARGS__); } while (0)
+    do { Dusk::Log(Dusk::LogLevel::Load, "[LOAD](%s:%d) " M "\n", \
+        DUSK_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
 
 } // namespace Dusk
 

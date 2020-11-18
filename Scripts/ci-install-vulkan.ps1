@@ -11,6 +11,6 @@ do {
     Start-Sleep -s 10
 } while ($n -le 10)
 
-/\VulkanSDK-Installer.exe /S
+.\VulkanSDK-Installer.exe /S
 
 $Env:VULKAN_SDK="C:\VulkanSDK\$version"

@@ -21,7 +21,7 @@ clone_folder: C:\projects\Dusk
 before_build:
   - ps: . C:\projects\Dusk\Scripts\ci-install-vulkan.ps1
   - ps: cmake --version
-  - ps: Get-ChildItem env:
+  - ps: Get-ChildItem "env:"
 
 build_script:
   - cmd: cd C:\projects\Dusk

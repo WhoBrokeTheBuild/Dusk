@@ -43,11 +43,11 @@ public:
 
     void SwapBuffers() override;
 
-    std::unique_ptr<Dusk::Texture> CreateTexture() override;
+    std::shared_ptr<Dusk::Texture> CreateTexture() override;
 
-    std::unique_ptr<Dusk::Shader> CreateShader() override;
+    std::shared_ptr<Dusk::Shader> CreateShader() override;
 
-    std::unique_ptr<Dusk::Mesh> CreateMesh() override;
+    std::shared_ptr<Dusk::Mesh> CreateMesh() override;
 
     bool SetShaderData(unsigned binding, size_t size, void * data) override;
 

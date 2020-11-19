@@ -181,21 +181,21 @@ void GraphicsDriver::SwapBuffers()
 }
 
 DUSK_OPENGL_API
-std::unique_ptr<Dusk::Texture> GraphicsDriver::CreateTexture()
+std::shared_ptr<Dusk::Texture> GraphicsDriver::CreateTexture()
 {
-    return std::make_unique<Texture>();
+    return std::make_shared<Texture>();
 }
 
 DUSK_OPENGL_API
-std::unique_ptr<Dusk::Shader> GraphicsDriver::CreateShader()
+std::shared_ptr<Dusk::Shader> GraphicsDriver::CreateShader()
 {
-    return std::make_unique<Shader>();
+    return std::make_shared<Shader>();
 }
 
 DUSK_OPENGL_API
-std::unique_ptr<Dusk::Mesh> GraphicsDriver::CreateMesh()
+std::shared_ptr<Dusk::Mesh> GraphicsDriver::CreateMesh()
 {
-    return std::make_unique<Mesh>();
+    return std::make_shared<Mesh>();
 }
 
 DUSK_OPENGL_API

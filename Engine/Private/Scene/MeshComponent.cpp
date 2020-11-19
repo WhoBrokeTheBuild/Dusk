@@ -6,16 +6,6 @@
 
 namespace Dusk {
 
-MeshComponent::MeshComponent(std::unique_ptr<Mesh> && mesh)
-{
-    AddMesh(std::move(mesh));
-}
-
-MeshComponent::MeshComponent(std::vector<std::unique_ptr<Mesh>> && meshes)
-{
-    AddMeshes(std::move(meshes));
-}
-
 bool MeshComponent::LoadFromFile(const std::string& filename)
 {
     auto gfx = GetGraphicsDriver();
@@ -42,12 +32,12 @@ bool MeshComponent::LoadFromFile(const std::string& filename)
     return false;
 }
 
-void MeshComponent::AddMesh(std::unique_ptr<Mesh> && mesh)
+void MeshComponent::AddMesh(std::shared_ptr<Mesh> && mesh)
 {
     _meshes.push_back(std::move(mesh));
 }
 
-void MeshComponent::AddMeshes(std::vector<std::unique_ptr<Mesh>> && meshes)
+void MeshComponent::AddMeshes(std::vector<std::shared_ptr<Mesh>> && meshes)
 {
     for (auto&& mesh : meshes) {
         _meshes.push_back(std::move(mesh));

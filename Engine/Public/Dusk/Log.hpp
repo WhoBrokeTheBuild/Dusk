@@ -145,17 +145,11 @@ inline void Log(LogLevel level, const char * format, Args... args)
     #endif
 }
 
-#if defined(DUSK_MODULE_NAME)
-    #define DUSK_MODULE_NAME_PRINT DUSK_STRINGIFY(DUSK_MODULE_NAME) ","
-#else
-    #define DUSK_MODULE_NAME_PRINT
-#endif
-
 #if !defined(DUSK_SOURCE_PATH_LENGTH)
     #define DUSK_SOURCE_PATH_LENGTH 0
 #endif
 
-#define DUSK_FILENAME (__FILE__ + DUSK_SOURCE_PATH_LENGTH)
+#define DUSK_FILENAME (&__FILE__[DUSK_SOURCE_PATH_LENGTH])
 
 #if defined(DUSK_ENABLE_VERBOSE_LOGGING)
     #define DuskLogVerbose(M, ...) \

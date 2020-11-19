@@ -233,17 +233,17 @@ void GraphicsDriver::SwapBuffers()
     _frameIndex = _swapChain->GetCurrentBackBufferIndex();
 }
 
-std::unique_ptr<Dusk::Texture> GraphicsDriver::CreateTexture()
+std::shared_ptr<Dusk::Texture> GraphicsDriver::CreateTexture()
 {
     return nullptr;
 }
 
-std::unique_ptr<Dusk::Shader> GraphicsDriver::CreateShader()
+std::shared_ptr<Dusk::Shader> GraphicsDriver::CreateShader()
 {
     return nullptr;
 }
 
-std::unique_ptr<Dusk::Mesh> GraphicsDriver::CreateMesh()
+std::shared_ptr<Dusk::Mesh> GraphicsDriver::CreateMesh()
 {
     return nullptr;
 }

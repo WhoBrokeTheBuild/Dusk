@@ -20,10 +20,10 @@ bool Texture::Load(const TextureData * data, Options opts /*= Options()*/)
     DuskBenchmarkStart();
 
     const auto& size = data->GetSize();
-    VkDeviceSize imageSize = size.x * size.y * data->GetComponents();
+    // VkDeviceSize imageSize = size.x * size.y * data->GetComponents();
 
     VkImage vkImage;
-    VkDeviceMemory vkDeviceMemory;
+    // VkDeviceMemory vkDeviceMemory;
 
     VkImageCreateInfo vkImageCreateInfo = {};
     vkImageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;

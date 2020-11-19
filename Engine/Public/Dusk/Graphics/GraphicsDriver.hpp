@@ -48,11 +48,11 @@ public:
     
     virtual void SwapBuffers() = 0;
 
-    virtual std::unique_ptr<Texture> CreateTexture() = 0;
+    virtual std::shared_ptr<Texture> CreateTexture() = 0;
 
-    virtual std::unique_ptr<Shader> CreateShader() = 0;
+    virtual std::shared_ptr<Shader> CreateShader() = 0;
 
-    virtual std::unique_ptr<Mesh> CreateMesh() = 0;
+    virtual std::shared_ptr<Mesh> CreateMesh() = 0;
 
     virtual UpdateContext * GetUpdateContext();
 

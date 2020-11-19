@@ -86,9 +86,9 @@ private:
 
     static AxisMeshData _MeshData;
 
-    std::unique_ptr<Shader> _shader;
+    std::shared_ptr<Shader> _shader;
 
-    std::unique_ptr<Mesh> _mesh;
+    std::shared_ptr<Mesh> _mesh;
 
 }; // class AxisComponent
 

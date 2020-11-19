@@ -18,23 +18,19 @@ public:
 
     explicit MeshComponent() = default;
 
-    explicit MeshComponent(std::unique_ptr<Mesh> && mesh);
-
-    explicit MeshComponent(std::vector<std::unique_ptr<Mesh>> && meshes);
-
     virtual ~MeshComponent() = default;
 
     bool LoadFromFile(const std::string& filename);
 
-    void AddMesh(std::unique_ptr<Mesh> && mesh);
+    void AddMesh(std::shared_ptr<Mesh> && mesh);
 
-    void AddMeshes(std::vector<std::unique_ptr<Mesh>> && meshes);
+    void AddMeshes(std::vector<std::shared_ptr<Mesh>> && meshes);
 
     void Render(RenderContext * ctx) override;
 
 private:
 
-    std::vector<std::unique_ptr<Mesh>> _meshes;
+    std::vector<std::shared_ptr<Mesh>> _meshes;
 
 }; // class MeshComponent
 

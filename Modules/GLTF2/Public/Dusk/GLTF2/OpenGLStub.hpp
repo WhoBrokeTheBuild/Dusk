@@ -1,0 +1,25 @@
+#ifndef DUSK_GLTF2_OPENGL_STUB_HPP
+#define DUSK_GLTF2_OPENGL_STUB_HPP
+
+#include <cstdint>
+
+namespace Dusk::GLTF2 {
+
+typedef uint32_t GLenum;
+
+#define GL_INVALID_ENUM             0x0500
+
+#define GL_REPEAT                   0x2901
+#define GL_MIRRORED_REPEAT          0x8370
+#define GL_CLAMP_TO_EDGE            0x812F
+#define GL_CLAMP_TO_BORDER          0x812D
+#define GL_NEAREST                  0x2600
+#define GL_NEAREST_MIPMAP_LINEAR    0x2702
+#define GL_NEAREST_MIPMAP_NEAREST   0x2700
+#define GL_LINEAR                   0x2601
+#define GL_LINEAR_MIPMAP_LINEAR     0x2703
+#define GL_LINEAR_MIPMAP_NEAREST    0x2701
+
+} // namespace Dusk::GLTF2
+
+#endif // DUSK_GLTF2_OPENGL_STUB_HPP

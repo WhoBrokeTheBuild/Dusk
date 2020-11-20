@@ -2,9 +2,11 @@
 #define DUSK_GLTF2_GLTF2_FILE_HPP
 
 #include <Dusk/GLTF2/Config.hpp>
+#include <Dusk/GLTF2/OpenGLStub.hpp>
 #include <Dusk/Math.hpp>
 #include <Dusk/Graphics/Texture.hpp>
 #include <Dusk/Graphics/TextureImporter.hpp>
+#include <Dusk/Graphics/Material.hpp>
 
 #include <cstdint>
 #include <nlohmann/json.hpp>
@@ -12,20 +14,6 @@
 namespace Dusk::GLTF2 {
 
 using json = nlohmann::json;
-
-typedef uint32_t GLenum;
-
-#define GL_INVALID_ENUM             0x0500
-#define GL_REPEAT                   0x2901
-#define GL_MIRRORED_REPEAT          0x8370
-#define GL_CLAMP_TO_EDGE            0x812F
-#define GL_CLAMP_TO_BORDER          0x812D
-#define GL_NEAREST                  0x2600
-#define GL_NEAREST_MIPMAP_LINEAR    0x2702
-#define GL_NEAREST_MIPMAP_NEAREST   0x2700
-#define GL_LINEAR                   0x2601
-#define GL_LINEAR_MIPMAP_LINEAR     0x2703
-#define GL_LINEAR_MIPMAP_NEAREST    0x2701
 
 DUSK_GLTF2_API
 inline vec2 ParseVec2(const json& value, vec2 def)
@@ -189,6 +177,8 @@ private:
 
     std::vector<std::shared_ptr<Dusk::Texture>> Textures;
 
+    std::vector<std::shared_ptr<Dusk::Material>> Materials;
+
     std::vector<CameraData> Cameras;
 
     bool LoadBuffers();
@@ -202,6 +192,8 @@ private:
     bool LoadSamplers();
 
     bool LoadTextures();
+
+    bool LoadMaterials();
     
     bool LoadCameras();
 

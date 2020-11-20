@@ -302,7 +302,10 @@ bool glTF2File::LoadTextures()
                     return false;
                 }
 
-                texture->LoadFromMemory(buffer.data() + bufferView.byteOffset, bufferView.byteLength, opts);
+                const uint8_t * ptr = buffer.data() + bufferView.byteOffset;
+                if (!texture->LoadFromMemory(ptr, bufferView.byteLength, opts)) {
+                    return false;
+                }
             }
             else if (image.uri.rfind("data:", 0) == 0) {
                 DuskLogVerbose("Loading glTF2 texture from base64 encoded uri");
@@ -326,6 +329,52 @@ bool glTF2File::LoadTextures()
     }
 
     DuskLogVerbose("Loaded %d Texture(s)", Textures.size());
+
+    return true;
+}
+
+bool glTF2File::LoadMaterials()
+{
+    const auto MATERIALS_PATH = json::json_pointer("/materials");
+
+    if (JSON.contains(MATERIALS_PATH)) {
+        for (const auto& object : JSON[MATERIALS_PATH]) {
+
+            // extensions
+            /// KHR_materials_transmission
+            /// KHR_materials_clearcoat
+            /// KHR_materials_pbrSpecularGlossiness
+            /// KHR_materials_variants
+            /// KHR_techniques_webgl
+
+            // each texture
+            /// [scale] = 1
+            /// index
+            /// [texCoord] = 0
+
+            // name
+
+            // [alphaMode] ?
+            /// OPAQUE, MASK, BLEND
+
+            // [doubleSided]
+
+            // [normal]
+            // [occlusionTexture]
+            // [emissiveTexture]
+            // [emissiveFactor]
+
+            // [pbrMetallicRoughness]
+            /// [baseColorFactor]
+            /// [baseColorTexture]
+            /// [metallicFactor]
+            /// [roughnessFactor]
+            /// [metallicRoughnessTexture]
+
+        }
+    }
+
+    DuskLogVerbose("Loaded %d Material(s)", Materials.size());
 
     return true;
 }

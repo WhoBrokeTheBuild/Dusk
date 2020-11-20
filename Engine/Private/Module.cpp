@@ -24,21 +24,29 @@ bool LoadModule(const std::string& name)
 {
     ModuleHandle module = nullptr;
 
-    DuskLogLoad("Loading %s", name);
+    DuskLogLoad("Loading '%s'", name);
 
     #if defined(DUSK_OS_WINDOWS)
+        DuskLogVerbose("Loading Module from PATH: '%s'", getenv("PATH"));
+
         module = LoadLibraryA(name.c_str());
         if (!module) {
-            DuskLogError("Failed to load %s", name);
+            char message[256];
+            FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                NULL, GetLastError(), GetUserDefaultUILanguage(), message, sizeof(message), NULL);
+
+            DuskLogError("Failed to load '%s', %s", name, message);
             return false;
         }
         
         DuskModule * def = (DuskModule *)GetProcAddress(module, "_DuskModule");
     #else
+        // DuskLogVerbose("Loading Module from LD_LIBRARY_PATH: '%s'", getenv("LD_LIBRARY_PATH"));
+
         std::string filename = "lib" + name + ".so";
         module = dlopen(filename.c_str(), RTLD_GLOBAL | RTLD_NOW);
         if (!module) {
-            DuskLogError("Failed to load %s, %s", filename, dlerror());
+            DuskLogError("Failed to load '%s', %s", filename, dlerror());
             return false;
         }
 

@@ -40,6 +40,10 @@ class DUSK_STBI_API TextureImporter : public Dusk::TextureImporter
 {
 public:
 
+    DISALLOW_COPY_AND_ASSIGN(TextureImporter)
+
+    TextureImporter() = default;
+
     std::unique_ptr<Dusk::TextureData> LoadFromFile(const std::string& filename) override;
 
     std::unique_ptr<Dusk::TextureData> LoadFromMemory(const uint8_t * buffer, size_t length) override;

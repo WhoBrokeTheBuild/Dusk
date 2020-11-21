@@ -10,6 +10,7 @@
 # The following variables can be set as arguments
 #
 #   WindowsSDK_ROOT_DIR
+#   ENV{VULKAN_SDK}
 #
 
 FIND_PROGRAM(
@@ -17,6 +18,7 @@ FIND_PROGRAM(
     dxc
     PATHS
         ${WindowsSDK_ROOT_DIR}
+        $ENV{VULKAN_SDK}
     PATH_SUFFIXES
         bin
 )

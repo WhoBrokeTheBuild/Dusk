@@ -106,6 +106,11 @@ void Shader::Bind()
     glUseProgram(_glID);
 }
 
+GLuint Shader::GetID()
+{
+    return _glID;
+}
+
 GLuint Shader::LoadSPV(const std::string& filename)
 {
     DuskLogVerbose("Looking for SPIR-V shader '%s'", filename);

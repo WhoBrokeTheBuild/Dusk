@@ -36,7 +36,7 @@ public:
     
     std::shared_ptr<Dusk::Mesh> CreateMesh() override;
 
-    bool SetShaderData(unsigned index, size_t size, void * data) override;
+    bool SetShaderData(const std::string& name, size_t size, void * data) override;
 
 private:
 

@@ -292,7 +292,7 @@ std::shared_ptr<Dusk::Mesh> GraphicsDriver::CreateMesh()
     return nullptr;
 }
 
-bool GraphicsDriver::SetShaderData(unsigned binding, size_t size, void * buffer)
+bool GraphicsDriver::SetShaderData(const std::string& name, size_t size, void * buffer)
 {
     return true;
 }

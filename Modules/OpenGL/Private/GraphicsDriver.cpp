@@ -1,7 +1,4 @@
 #include <Dusk/OpenGL/GraphicsDriver.hpp>
-#include <Dusk/OpenGL/Texture.hpp>
-#include <Dusk/OpenGL/Shader.hpp>
-#include <Dusk/OpenGL/Mesh.hpp>
 #include <Dusk/Dusk.hpp>
 #include <Dusk/Log.hpp>
 
@@ -189,7 +186,9 @@ std::shared_ptr<Dusk::Texture> GraphicsDriver::CreateTexture()
 DUSK_OPENGL_API
 std::shared_ptr<Dusk::Shader> GraphicsDriver::CreateShader()
 {
-    return std::make_shared<Shader>();
+    auto shader = std::make_shared<Shader>();
+    _shaders.push_back(shader);
+    return shader;
 }
 
 DUSK_OPENGL_API
@@ -199,29 +198,52 @@ std::shared_ptr<Dusk::Mesh> GraphicsDriver::CreateMesh()
 }
 
 DUSK_OPENGL_API
-bool GraphicsDriver::SetShaderData(unsigned binding, size_t size, void * buffer)
+bool GraphicsDriver::SetShaderData(const std::string& name, size_t size, void * buffer)
 {
-    GLuint glID;
+    GLuint glID = 0;
 
-    const auto& it = _shaderDataBindings.find(binding);
-    if (it == _shaderDataBindings.end()) {
-        glGenBuffers(1, &glID);
-        glBindBuffer(GL_UNIFORM_BUFFER, glID);
-        glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_STATIC_DRAW);
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    const auto& it = _shaderDataBindings.find(name);
+    if (it == _shaderDataBindings.cend()) {
+        DuskLogVerbose("Querying uniform block binding for '%s'", name);
 
-        glBindBufferBase(GL_UNIFORM_BUFFER, binding, glID);
+        for (int i = 0; i < _shaders.size(); ++i) {
+            if (auto shader = _shaders[i].lock()) {
+                GLuint index = glGetUniformBlockIndex(shader->GetID(), name.c_str());
+                if (index == GL_INVALID_OPERATION || index == GL_INVALID_INDEX) {
+                    continue;
+                }
 
-        _shaderDataBindings.emplace(binding, glID);
+                DuskLogVerbose("Uniform block '%s' is at index %d", name, index);
+
+                glGenBuffers(1, &glID);
+                glBindBuffer(GL_UNIFORM_BUFFER, glID);
+                glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_STATIC_DRAW);
+                glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+                glBindBufferBase(GL_UNIFORM_BUFFER, index, glID);
+
+                _shaderDataBindings.emplace(name, glID);
+                break;
+            }
+            else {
+                _shaders.erase(_shaders.begin() + i);
+                --i;
+            }
+        }
+        if (glID == 0) {
+            return false;
+        }
     }
     else {
         glID = it->second;
     }
 
     glBindBuffer(GL_UNIFORM_BUFFER, glID);
+
     GLvoid * ptr = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
     memcpy(ptr, buffer, size);
     glUnmapBuffer(GL_UNIFORM_BUFFER);
+    
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     return true;

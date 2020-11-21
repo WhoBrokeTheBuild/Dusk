@@ -21,8 +21,6 @@ public:
 
 }; // struct TransformData
 
-const unsigned TransformDataBinding = 0;
-
 } // namespace Dusk
 
 #endif // DUSK_TRANSFORM_DATA_HPP

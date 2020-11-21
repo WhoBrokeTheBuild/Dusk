@@ -8,6 +8,6 @@ layout(binding = 0, std140) uniform DuskTransformData
     mat4 Proj;
     mat4 MVP;
 
-} u_TransformData;
+};
 
 #endif // DUSK_TRANSFORM_DATA_INC_GLSL

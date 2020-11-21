@@ -3,6 +3,7 @@
 #include <Dusk/Log.hpp>
 
 #include "d3dx12.h"
+#include <d3d11shader.h>
 
 namespace Dusk::DirectX {
 
@@ -249,7 +250,16 @@ std::shared_ptr<Dusk::Mesh> GraphicsDriver::CreateMesh()
 }
 
 bool GraphicsDriver::SetShaderData(unsigned binding, size_t size, void * data)
-{
+// {
+//     ID3D11ShaderReflection * reflector = nullptr;
+//     D3DReflect()
+
+
+//     const auto& it = _constantBufferBindings.find(binding);
+//     if (it == _constantBufferBindings.cend()) {
+//         GetConstantBufferByName()
+//     }
+
     return false;
 }
 

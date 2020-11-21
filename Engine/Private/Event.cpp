@@ -52,7 +52,6 @@ void ScriptEvent::CallPython(const EventData * data)
     PyObject * dict = data->GetPyObject();
     PyObject * arg = Py_BuildValue("(O)", dict);
 
-    DuskLogInfo("Calling Python Listeners");
     for (const auto& it : _pythonListeners) {
         PyObject * result = PyEval_CallObject(it.second, arg);
         if (!result) {

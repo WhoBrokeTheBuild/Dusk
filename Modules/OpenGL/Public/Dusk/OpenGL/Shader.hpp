@@ -18,6 +18,8 @@ public:
 
     void Bind() override;
 
+    GLuint GetID();
+
 private:
 
     GLuint LoadSPV(const std::string& filename);

@@ -4,6 +4,9 @@
 #include <Dusk/OpenGL/Config.hpp>
 #include <Dusk/OpenGL/InputDriver.hpp>
 #include <Dusk/Graphics/GraphicsDriver.hpp>
+#include <Dusk/OpenGL/Texture.hpp>
+#include <Dusk/OpenGL/Shader.hpp>
+#include <Dusk/OpenGL/Mesh.hpp>
 
 #include <SDL.h>
 
@@ -43,7 +46,7 @@ public:
 
     std::shared_ptr<Dusk::Mesh> CreateMesh() override;
 
-    bool SetShaderData(unsigned binding, size_t size, void * data) override;
+    bool SetShaderData(const std::string& name, size_t size, void * data) override;
 
 private:
 
@@ -53,7 +56,9 @@ private:
 
     InputDriver * _inputDriver = nullptr;
 
-    std::unordered_map<unsigned, GLuint> _shaderDataBindings;
+    std::unordered_map<std::string, GLuint> _shaderDataBindings;
+
+    std::vector<std::weak_ptr<Shader>> _shaders;
     
 }; // class GraphicsDriver
 

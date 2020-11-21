@@ -32,38 +32,34 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    Dusk::LoadModule("DuskGLTF2");
-
-    Dusk::ScriptConsole::Initialize();
-
     Dusk::UpdateContext updateContext;
     Dusk::RenderContext renderContext;
 
     {
         Dusk::Scene scene;
-        scene.LoadFromFile("Assets/Models/TestScene.glb");
-        scene.LoadFromFile("Assets/Models/WaterBottle.glb");
-        scene.LoadFromFile("Assets/Models/DamagedHelmet.glb");
-        scene.LoadFromFile("Assets/Models/SciFiHelmet/SciFiHelmet.gltf");
+        // scene.LoadFromFile("Assets/Models/TestScene.glb");
+        // scene.LoadFromFile("Assets/Models/WaterBottle.glb");
+        // scene.LoadFromFile("Assets/Models/DamagedHelmet.glb");
+        // scene.LoadFromFile("Assets/Models/SciFiHelmet/SciFiHelmet.gltf");
         
-        // Dusk::Camera camera;
-        // camera.SetPosition({ 10, 10, 10 });
-        // camera.SetLookAt({ 0, 0, 0 });
+        Dusk::Camera camera;
+        camera.SetPosition({ 10, 10, 10 });
+        camera.SetLookAt({ 0, 0, 0 });
 
         // scene.AddComponent(std::make_unique<Dusk::AxisComponent>());
 
-        // auto transformData = renderContext.GetTransformData();
-        // transformData->View = camera.GetView();
-        // transformData->Projection = camera.GetProjection();
+        auto transformData = renderContext.GetTransformData();
+        transformData->View = camera.GetView();
+        transformData->Projection = camera.GetProjection();
 
-        // if (!scene.LoadFromFile("Models/cube.obj")) {
-        //     DuskLogError("Failed to load Models/cube.obj");
+        // if (!scene.LoadFromFile("Assets/Models/cube.obj")) {
+        //     DuskLogError("Failed to load Assets/Models/cube.obj");
         // }
 
-        // auto actor = scene.AddChild(std::make_unique<Dusk::Entity>());
-        // auto mesh = std::make_unique<Dusk::MeshComponent>();
-        // mesh->LoadFromFile("Assets/Models/crate/crate.obj");
-        // actor->AddComponent(std::move(mesh));
+        auto actor = scene.AddChild(std::make_unique<Dusk::Entity>());
+        auto mesh = std::make_unique<Dusk::MeshComponent>();
+        mesh->LoadFromFile("Assets/Models/crate/crate.obj");
+        actor->AddComponent(std::move(mesh));
 
         auto gfx = Dusk::GetGraphicsDriver();
 
@@ -71,26 +67,28 @@ int main(int argc, char** argv)
         // testData.Size = { 1024, 768 };
         // gfx->WindowResizedEvent.Call(&testData);
 
-        // auto shader = gfx->CreateShader();
-        // shader->LoadFromFiles({
-        //    "Dusk/debug-normal.vert",
-        //    "Dusk/debug-normal.frag",
-        // });
+        auto shader = gfx->CreateShader();
+        shader->LoadFromFiles({
+           "flat.vert",
+           "flat.frag",
+        });
 
-        // Dusk::SetRunning(true);
+        Dusk::ScriptConsole::Initialize();
 
-        // while (Dusk::IsRunning()) {
-        //     gfx->ProcessEvents();
+        Dusk::SetRunning(true);
 
-        //     scene.Update(&updateContext);
+        while (Dusk::IsRunning()) {
+            gfx->ProcessEvents();
 
-        //     Dusk::ScriptConsole::Update();
+            scene.Update(&updateContext);
 
-        //     // shader->Bind();
-        //     scene.Render(&renderContext);
+            Dusk::ScriptConsole::Update();
 
-        //     gfx->SwapBuffers();
-        // }
+            shader->Bind();
+            scene.Render(&renderContext);
+
+            gfx->SwapBuffers();
+        }
     }
 
     Dusk::ScriptConsole::Terminate();

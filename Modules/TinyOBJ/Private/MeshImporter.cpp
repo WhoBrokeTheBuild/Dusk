@@ -88,8 +88,6 @@ std::vector<std::unique_ptr<Dusk::MeshData>> MeshImporter::LoadFromFile(const st
         meshes.push_back(std::move(mesh));
     }
 
-    DuskLogInfo("%zu", meshes.size());
-
     DuskBenchmarkEnd("TinyOBJ::MeshImporter::LoadFromFile");
     return meshes;
 }

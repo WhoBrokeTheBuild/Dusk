@@ -58,7 +58,7 @@ public:
 
     virtual RenderContext * GetRenderContext();
 
-    virtual bool SetShaderData(unsigned binding, size_t size, void * data) = 0;
+    virtual bool SetShaderData(const std::string& name, size_t size, void * data) = 0;
 
     Event<Dusk::WindowResizedEventData> WindowResizedEvent;
 

@@ -22,6 +22,10 @@ public:
 
     virtual void Bind() = 0;
 
+    // GetSize()
+    // SetPreprocessorDefines()
+    // GetPreprocessorDefines()
+
 };
 
 DUSK_ENGINE_API

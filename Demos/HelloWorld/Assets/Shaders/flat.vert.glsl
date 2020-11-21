@@ -7,6 +7,6 @@ layout(location = 1) out vec4 v_Normal;
 
 void main()
 {
-    gl_Position = u_TransformData.MVP * a_Position;
+    gl_Position = MVP * a_Position;
     v_Normal = a_Normal;
 }

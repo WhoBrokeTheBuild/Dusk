@@ -32,7 +32,7 @@ void AxisComponent::Render(RenderContext * ctx)
     transformData->Model = GetEntity()->GetWorldTransform();
     transformData->UpdateMVP();
     
-    gfx->SetShaderData(Dusk::TransformDataBinding, sizeof(TransformData), transformData);
+    gfx->SetShaderData("DuskTransformData", sizeof(TransformData), transformData);
 
     _shader->Bind();
     _mesh->Render();

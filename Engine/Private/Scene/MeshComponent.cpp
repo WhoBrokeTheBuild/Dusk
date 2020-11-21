@@ -52,7 +52,7 @@ void MeshComponent::Render(RenderContext * ctx)
     transformData->Model = GetEntity()->GetWorldTransform();
     transformData->UpdateMVP();
     
-    gfx->SetShaderData(Dusk::TransformDataBinding, sizeof(TransformData), transformData);
+    gfx->SetShaderData("DuskTransformData", sizeof(TransformData), transformData);
 
     for (auto& mesh : _meshes) {
         mesh->Render();

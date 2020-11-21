@@ -10,6 +10,8 @@ class DUSK_ENGINE_API Material
 {
 public:
 
+    // LOD?
+
     // enum TextureID : int
     // {
     //     BASE_COLOR = 0,
@@ -19,6 +21,13 @@ public:
     //     OCCLUSION,
     // };
 
+    enum class AlphaMode
+    {
+        OPAQUE,
+        MASK,
+        BLEND,
+    };
+
     // glm::vec4 BaseColorFactor = glm::vec4(1.0f);
     // glm::vec3 EmissiveFactor  = glm::vec3(1.0f);
     
@@ -26,6 +35,10 @@ public:
     // float RoughnessFactor   = 1.0f;
     // float OcclusionStrength = 1.0f;
     // float NormalScale       = 1.0f;
+
+    // int RefractiveIndex
+    // bool DoubleSided
+    // AlphaMode AlphaMode
 
     // std::shared_ptr<Texture> BaseColorMap;
     // std::shared_ptr<Texture> NormalMap;

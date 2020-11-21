@@ -176,12 +176,14 @@ std::string GraphicsDriver::GetWindowTitle()
 
 void GraphicsDriver::SetWindowSize(const ivec2& size)
 {
-
+    SetWindowPos(_window, HWND_TOP, 0, 0, size.x, size.y, SWP_NOMOVE | SWP_NOREPOSITION);
 }
 
 ivec2 GraphicsDriver::GetWindowSize()
 {
-    return { 0, 0 };
+    RECT rect;
+    GetWindowRect(_window, &rect);
+    return { rect.right - rect.left, rect.bottom - rect.top };
 }
 
 void GraphicsDriver::ProcessEvents()
@@ -241,16 +243,16 @@ std::shared_ptr<Dusk::Texture> GraphicsDriver::CreateTexture()
 
 std::shared_ptr<Dusk::Shader> GraphicsDriver::CreateShader()
 {
-    return nullptr;
+    return std::make_shared<Shader>();
 }
 
 std::shared_ptr<Dusk::Mesh> GraphicsDriver::CreateMesh()
 {
-    return nullptr;
+    return std::make_shared<Mesh>();
 }
 
-bool GraphicsDriver::SetShaderData(unsigned binding, size_t size, void * data)
-// {
+bool GraphicsDriver::SetShaderData(const std::string& name, size_t size, void * data)
+{
 //     ID3D11ShaderReflection * reflector = nullptr;
 //     D3DReflect()
 

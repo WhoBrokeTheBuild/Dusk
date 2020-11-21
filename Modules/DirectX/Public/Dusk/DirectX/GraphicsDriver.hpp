@@ -9,6 +9,8 @@
 
 #include <Dusk/DirectX/Config.hpp>
 #include <Dusk/Graphics/GraphicsDriver.hpp>
+#include <Dusk/DirectX/Shader.hpp>
+#include <Dusk/DirectX/Mesh.hpp>
 
 #include <wrl.h>
 #include <d3d12.h>
@@ -49,7 +51,7 @@ public:
 
     std::shared_ptr<Dusk::Mesh> CreateMesh() override;
 
-    bool SetShaderData(unsigned binding, size_t size, void * data) override;
+    bool SetShaderData(const std::string& name, size_t size, void * data) override;
 
     LRESULT ProcessMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 

@@ -48,6 +48,7 @@ MACRO(DEFINE_DEMO _target)
         GLOB_RECURSE
         _shaders_in
         Assets/Shaders/*.glsl
+        Assets/Shaders/*.hlsl
     )
 
     LIST(INSERT SHADER_INCLUDE_PATH 0
@@ -166,7 +167,7 @@ MACRO(DEFINE_DEMO _target)
         )
 
         ADD_CUSTOM_TARGET(
-            run-${_target}
+            run-${_target} VERBATIM
             COMMAND ${CMAKE_COMMAND} -E env "PATH=${RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${RUNTIME_SEARCH_PATH_DEBUG};>$<$<CONFIG:Release>:${RUNTIME_SEARCH_PATH_RELEASE};>%PATH%" "DUSK_SHADER_INCLUDE_PATH=${SHADER_INCLUDE_PATH}" $<TARGET_FILE:${_target}>
             DEPENDS ${_target}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

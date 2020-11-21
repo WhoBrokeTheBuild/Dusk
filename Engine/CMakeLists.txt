@@ -25,6 +25,7 @@ FILE(
     GLOB_RECURSE
     _shaders_out
     Assets/Shaders/*.glsl
+    Assets/Shaders/*.hlsl
 )
 
 SET_SOURCE_GROUPS(${CMAKE_CURRENT_BINARY_DIR} "${_shaders_out}")

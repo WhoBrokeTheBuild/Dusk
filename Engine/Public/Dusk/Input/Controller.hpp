@@ -60,11 +60,10 @@ static inline std::string GetControllerButtonName(ControllerButton button)
         return "D-Pad Left";
     case ControllerButton::DPadRight:
         return "D-Pad Right";
-    default:
-        return "";
+    default: ;
     }
 
-    return "";
+    return std::string();
 };
 
 } // namespace Dusk

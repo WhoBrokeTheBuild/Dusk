@@ -11,6 +11,7 @@
 # The following variables can be set as arguments
 #
 #   VulkanSDK_ROOT_DIR
+#   ENV{VULKAN_SDK}
 #
 
 FIND_PROGRAM(

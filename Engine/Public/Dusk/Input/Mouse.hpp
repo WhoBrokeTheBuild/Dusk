@@ -24,9 +24,10 @@ static inline std::string GetMouseButtonName(MouseButton button)
         return "Right";
     case MouseButton::Middle:
         return "Middle";
-    default:
-        return "";
+    default: ;
     }
+
+    return std::string();
 };
 
 } // namespace Dusk

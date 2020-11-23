@@ -63,9 +63,8 @@ MACRO(COMPILE_SHADERS shaders_in shaders_out)
                     SET(shader_cflags ${shader_cflags} -I${dir})
                 ENDFOREACH()
 
-                SET(shader_out "${shader_out_path}/${shader_name}.bin")
+                SET(shader_out "${shader_out_path}/${shader_name}.dxc")
 
-                
                 GET_FILENAME_COMPONENT(shader_type ${shader_name} LAST_EXT)
                 STRING(SUBSTRING ${shader_type} 1 -1 shader_type)
 

@@ -107,6 +107,8 @@ void ScriptConsole::Update()
 
 void ScriptConsole::ReadNextCharacter()
 {
+    // TODO: Support UTF-8
+    
     unsigned char c;
     bool ctrlPressed = false;
 

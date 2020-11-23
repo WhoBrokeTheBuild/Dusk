@@ -14,7 +14,7 @@ std::vector<std::string> GetShaderPaths()
         return paths;
     }
 
-    paths.push_back("");
+    paths.push_back(std::string());
 
     const char SEP = ':';
 

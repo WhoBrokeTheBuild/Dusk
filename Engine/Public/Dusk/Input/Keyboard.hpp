@@ -364,11 +364,10 @@ static inline std::string GetKeyboardKeyName(KeyboardKey key)
         return "[";
     case KeyboardKey::RightBracket:
         return "]";
-    default:
-        return "";
+    default: ;
     }
 
-    return "";
+    return std::string();
 };
 
 } // namespace Dusk

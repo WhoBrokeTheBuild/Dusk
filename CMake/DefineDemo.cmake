@@ -119,9 +119,12 @@ MACRO(DEFINE_DEMO _target)
 
     TARGET_COMPILE_OPTIONS(
         ${_target}
-        PUBLIC
+        PRIVATE
             # Configure VS to use C++17, since it ignores CXX_STANDARD
             $<$<CXX_COMPILER_ID:MSVC>: /std:c++17>
+
+            # Force windows to use UTF-8
+            $<$<CXX_COMPILER_ID:MSVC>: /utf-8>
 
             # Disable unknown pragmas warning, C++ exceptions
             $<$<CXX_COMPILER_ID:GNU>:   -Wall -Wno-unknown-pragmas -fno-exceptions>

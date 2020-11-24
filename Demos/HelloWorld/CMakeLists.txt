@@ -9,3 +9,10 @@ ADD_DEPENDENCIES(
     DuskSTBI
     DuskTinyOBJ
 )
+
+IF(TARGET DuskDirectX)
+    ADD_DEPENDENCIES(
+        ${_target}
+        DuskDirectX
+    )
+ENDIF()

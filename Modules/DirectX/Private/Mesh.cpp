@@ -23,6 +23,20 @@ bool Mesh::Load(const MeshData * data)
     const auto& uvs = data->GetUVs();
     const auto& colors = data->GetColors();
 
+    ID3D11Buffer * pBuffer;
+
+    D3D11_BUFFER_DESC bd;
+    ZeroMemory(&bd, sizeof(bd));
+
+    bd.Usage = D3D11_USAGE_DYNAMIC;
+    bd.ByteWidth = vertices.size() * sizeof(float);
+    bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+
+
+
+
     DuskBenchmarkEnd("DirectX::Mesh::Load");
     return true;
 }

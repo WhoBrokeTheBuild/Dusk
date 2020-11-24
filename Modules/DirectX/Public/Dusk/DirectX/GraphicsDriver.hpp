@@ -55,6 +55,10 @@ public:
 
     LRESULT ProcessMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+    ID3D12Device * GetDevice() const {
+        return _device.Get();
+    }
+
 private:
 
     HWND _window = nullptr;

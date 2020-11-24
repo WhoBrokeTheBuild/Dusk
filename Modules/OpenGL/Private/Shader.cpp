@@ -120,9 +120,10 @@ GLuint Shader::LoadSPV(const std::string& filename)
     std::ifstream file;
 
     for (const auto& path : shaderPaths) {
-        DuskLogVerbose("Checking '%s'", path + filename);
+        const std::string& fullPath = path + filename;
+        DuskLogVerbose("Checking '%s'", fullPath);
         
-        file.open(path + filename, std::ios::binary);
+        file.open(fullPath, std::ios::binary);
         if (file.is_open()) {
             break;
         }

@@ -3,7 +3,6 @@
 #include <Dusk/Log.hpp>
 
 #include "d3dx12.h"
-#include <d3d11shader.h>
 
 namespace Dusk::DirectX {
 
@@ -200,20 +199,20 @@ void GraphicsDriver::SwapBuffers()
     _commandAllocator->Reset();
     _commandList->Reset(_commandAllocator.Get(), _pipelineState.Get());
 
-    _commandList->ResourceBarrier(1, 
-        &CD3DX12_RESOURCE_BARRIER::Transition(_renderTargets[_frameIndex].Get(), 
-            D3D12_RESOURCE_STATE_PRESENT,
-            D3D12_RESOURCE_STATE_RENDER_TARGET));
+    // _commandList->ResourceBarrier(1, 
+    //     &CD3DX12_RESOURCE_BARRIER::Transition(_renderTargets[_frameIndex].Get(), 
+    //         D3D12_RESOURCE_STATE_PRESENT,
+    //         D3D12_RESOURCE_STATE_RENDER_TARGET));
 
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(_rtvHeap->GetCPUDescriptorHandleForHeapStart(), _frameIndex, _rtvDescriptorSize);
 
     const float clearColor[] = { 0.392f, 0.584f, 0.929f, 1.0f };
     _commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 
-    _commandList->ResourceBarrier(1, 
-        &CD3DX12_RESOURCE_BARRIER::Transition(_renderTargets[_frameIndex].Get(),
-            D3D12_RESOURCE_STATE_RENDER_TARGET,
-            D3D12_RESOURCE_STATE_PRESENT));
+    // _commandList->ResourceBarrier(1, 
+    //     &CD3DX12_RESOURCE_BARRIER::Transition(_renderTargets[_frameIndex].Get(),
+    //         D3D12_RESOURCE_STATE_RENDER_TARGET,
+    //         D3D12_RESOURCE_STATE_PRESENT));
 
     _commandList->Close();
 
@@ -280,5 +279,6 @@ LRESULT GraphicsDriver::ProcessMessage(HWND hwnd, unsigned msg, WPARAM wParam, L
 
     return 0;
 }
+
 
 } // namespace Dusk::DirectX

@@ -2,6 +2,7 @@
 #include <Dusk/Dusk.hpp>
 #include <Dusk/Log.hpp>
 
+// DirectX 12 Extension Library
 #include "d3dx12.h"
 
 namespace Dusk::DirectX {
@@ -15,23 +16,27 @@ LRESULT CALLBACK WndProc(HWND hwnd, unsigned msg, WPARAM wParam, LPARAM lParam)
 DUSK_DIRECTX_API
 GraphicsDriver::GraphicsDriver()
 {
+    HRESULT result;
+
+    HINSTANCE inst = GetModuleHandle(nullptr);
+
     std::string name = GetApplicationName();
 
-    WNDCLASSEX wc;
-    wc.cbSize = sizeof(WNDCLASSEX);
-    wc.hInstance = (HINSTANCE)GetModuleHandle(nullptr);
-    wc.style = 0;
-    wc.lpfnWndProc = WndProc;
-    wc.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
-    wc.hIconSm = LoadIcon(nullptr, IDI_APPLICATION);
-    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-    wc.lpszMenuName = nullptr;
-    wc.lpszClassName = name.c_str();
-    wc.cbClsExtra = 0;
-    wc.cbWndExtra = 0;
+    WNDCLASSEX wndClass = { };
+    wndClass.cbSize = sizeof(WNDCLASSEX);
+    wndClass.hInstance = inst;
+    wndClass.style = CS_HREDRAW | CS_VREDRAW;
+    wndClass.lpfnWndProc = &WndProc;
+    wndClass.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
+    wndClass.hIconSm = nullptr;
+    wndClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    wndClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wndClass.lpszMenuName = nullptr;
+    wndClass.lpszClassName = name.c_str();
+    wndClass.cbClsExtra = 0;
+    wndClass.cbWndExtra = 0;
 
-    if (!RegisterClassEx(&wc)) {
+    if (!RegisterClassEx(&wndClass)) {
         DuskLogError("RegisterClassEx failed: %d", GetLastError());
         return;
     }
@@ -54,43 +59,49 @@ GraphicsDriver::GraphicsDriver()
     ShowWindow(_window, SW_SHOWNORMAL);
     UpdateWindow(_window);
 
-    unsigned factoryFlags = 0;
-    ComPtr<IDXGIFactory4> factory;
-    CreateDXGIFactory2(factoryFlags, IID_PPV_ARGS(&factory));
+    ComPtr<IDXGIFactory6> factory;
+    result = CreateDXGIFactory2(0, IID_PPV_ARGS(&factory));
+    if (FAILED(result)) {
+        DuskLogError("CreateDXGIFactory2 failed: %d", GetLastError());
+        return;
+    }
 
     ComPtr<IDXGIAdapter1> adapter = nullptr;
 
-    for (unsigned adapterIndex = 0; 
-        DXGI_ERROR_NOT_FOUND != factory->EnumAdapters1(adapterIndex, &adapter); 
-        ++adapterIndex) {
+    for (unsigned i = 0; ; ++i) {
+        result = factory->EnumAdapterByGpuPreference(i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&adapter));
+        if (result == DXGI_ERROR_NOT_FOUND) {
+            break;
+        }
 
         DXGI_ADAPTER_DESC1 desc;
         adapter->GetDesc1(&desc);
 
         if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) {
-            // Skip software render adapter
+            // Skip the Basic Render Driver adapter
             continue;
         }
 
-        HRESULT result = D3D12CreateDevice(
-            adapter.Get(),
-            D3D_FEATURE_LEVEL_11_0,
-            _uuidof(ID3D12Device), 
-            nullptr
-        );
-
+        result = D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_12_1, __uuidof(ID3D12Device), nullptr);
         if (SUCCEEDED(result)) {
             break;
         }
+
+        adapter->Release();
+    }
+
+    if (!adapter) {
+        DuskLogError("Failed to find a viable DXGI Adapter");
+        return;
     }
 
     ComPtr<IDXGIAdapter1> hardwareAdapter = adapter.Detach();
-        
-    D3D12CreateDevice(
-        hardwareAdapter.Get(),
-        D3D_FEATURE_LEVEL_11_0,
-        IID_PPV_ARGS(&_device)
-    );
+
+    result = D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&_device));
+    if (FAILED(result)) {
+        DuskLogError("Failed to create D3D12 Device");
+        return;
+    }
 
     D3D12_COMMAND_QUEUE_DESC queueDesc = { };
     queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
@@ -120,7 +131,7 @@ GraphicsDriver::GraphicsDriver()
     factory->MakeWindowAssociation(_window, DXGI_MWA_NO_ALT_ENTER);
     
     swapChain.As(&_swapChain);
-    _frameIndex = _swapChain->GetCurrentBackBufferIndex();
+    _renderTargetIndex = _swapChain->GetCurrentBackBufferIndex();
 
     D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = { };
     rtvHeapDesc.NumDescriptors = FRAME_COUNT;
@@ -204,7 +215,7 @@ void GraphicsDriver::SwapBuffers()
     //         D3D12_RESOURCE_STATE_PRESENT,
     //         D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(_rtvHeap->GetCPUDescriptorHandleForHeapStart(), _frameIndex, _rtvDescriptorSize);
+    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(_rtvHeap->GetCPUDescriptorHandleForHeapStart(), _renderTargetIndex, _rtvDescriptorSize);
 
     const float clearColor[] = { 0.392f, 0.584f, 0.929f, 1.0f };
     _commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
@@ -232,7 +243,7 @@ void GraphicsDriver::SwapBuffers()
         WaitForSingleObject(_fenceEvent, INFINITE);
     }
 
-    _frameIndex = _swapChain->GetCurrentBackBufferIndex();
+    _renderTargetIndex = _swapChain->GetCurrentBackBufferIndex();
 }
 
 std::shared_ptr<Dusk::Texture> GraphicsDriver::CreateTexture()

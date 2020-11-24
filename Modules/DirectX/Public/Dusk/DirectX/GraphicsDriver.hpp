@@ -1,29 +1,14 @@
 #ifndef DUSK_DIRECTX_GRAPHICS_DRIVER_HPP
 #define DUSK_DIRECTX_GRAPHICS_DRIVER_HPP
 
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-
-#include <Windows.h>
-
 #include <Dusk/DirectX/Config.hpp>
 #include <Dusk/Graphics/GraphicsDriver.hpp>
 #include <Dusk/DirectX/Shader.hpp>
 #include <Dusk/DirectX/Mesh.hpp>
 
-#include <wrl.h>
-#include <d3d12.h>
-#include <dxgi1_4.h>
-#include <D3Dcompiler.h>
-#include <DirectXMath.h>
-#include <shellapi.h>
-
 #define FRAME_COUNT 2
 
 namespace Dusk::DirectX {
-
-using Microsoft::WRL::ComPtr;
 
 class DUSK_DIRECTX_API GraphicsDriver : public Dusk::GraphicsDriver
 {
@@ -55,7 +40,7 @@ public:
 
     LRESULT ProcessMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-    ID3D12Device * GetDevice() const {
+    ID3D12Device2 * GetDevice() const {
         return _device.Get();
     }
 
@@ -63,26 +48,39 @@ private:
 
     HWND _window = nullptr;
 
-    ComPtr<ID3D12Device> _device = nullptr;
+    RECT _windowRect;
+
+    int _renderTargetIndex = 0;
+
+    // DirectX 12 Control
+
+    ComPtr<ID3D12Device2> _device = nullptr;
+
     ComPtr<ID3D12CommandQueue> _commandQueue = nullptr;
-    ComPtr<IDXGISwapChain3> _swapChain = nullptr;
 
-    int _frameIndex = 0;
-
-    ComPtr<ID3D12DescriptorHeap> _rtvHeap = nullptr;
-
-    unsigned _rtvDescriptorSize = 0;
+    ComPtr<IDXGISwapChain4> _swapChain = nullptr;
 
     ComPtr<ID3D12Resource> _renderTargets[FRAME_COUNT] = { nullptr };
+
     ComPtr<ID3D12CommandAllocator> _commandAllocator = nullptr;
 
     ComPtr<ID3D12PipelineState> _pipelineState = nullptr;
+
     ComPtr<ID3D12GraphicsCommandList> _commandList = nullptr;
+
+
+
+
 
     ComPtr<ID3D12Fence> _fence;
     HANDLE _fenceEvent;
     unsigned long _fenceValue;
 
+    // Render Target Views
+
+    ComPtr<ID3D12DescriptorHeap> _rtvHeap = nullptr;
+
+    unsigned _rtvDescriptorSize = 0;
 
 }; // class GraphicsDriver
 

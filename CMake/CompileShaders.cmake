@@ -16,7 +16,7 @@ MACRO(COMPILE_SHADERS shaders_in shaders_out)
                 FILE(MAKE_DIRECTORY ${shader_out_path})
 
                 SET(shader_cflags "")
-                FOREACH(dir ${SHADER_INCLUDE_PATH} ${shader_path})
+                FOREACH(dir ${SHADER_INCLUDE_PATH})
                     SET(shader_cflags ${shader_cflags} -I${dir})
                 ENDFOREACH()
 
@@ -45,6 +45,8 @@ MACRO(COMPILE_SHADERS shaders_in shaders_out)
 
     IF(WindowsSDK_FOUND)
         FOREACH(file ${shaders_in})
+            FILE(TO_NATIVE_PATH "${file}" file)
+            
             GET_FILENAME_COMPONENT(shader_ext ${file} LAST_EXT)
             IF(shader_ext STREQUAL ".hlsl")
                 GET_FILENAME_COMPONENT(shader_name ${file} NAME_WLE)
@@ -59,8 +61,9 @@ MACRO(COMPILE_SHADERS shaders_in shaders_out)
                 FILE(MAKE_DIRECTORY ${shader_out_path})
 
                 SET(shader_cflags "")
-                FOREACH(dir ${SHADER_INCLUDE_PATH} ${shader_path})
-                    SET(shader_cflags ${shader_cflags} -I${dir})
+                FOREACH(dir ${SHADER_INCLUDE_PATH})
+                    FILE(TO_NATIVE_PATH "${dir}" dir)
+                    SET(shader_cflags ${shader_cflags} -I "${dir}")
                 ENDFOREACH()
 
                 SET(shader_out "${shader_out_path}/${shader_name}.cso")
@@ -69,17 +72,17 @@ MACRO(COMPILE_SHADERS shaders_in shaders_out)
                 STRING(SUBSTRING ${shader_type} 1 -1 shader_type)
 
                 # Use row-major matricies
-                SET(shader_cflags ${shader_cflags} "-Zpc")
+                SET(shader_cflags ${shader_cflags} -Zpc -H)
 
                 IF(shader_type STREQUAL "inc")
                     CONTINUE()
-                ELSEIF(shader_type STREQUAL "vert")
+                ELSEIF(shader_type STREQUAL "vert" OR shader_type STREQUAL "vertex")
                     SET(shader_cflags ${shader_cflags} -T vs_6_0 -E VSMain)
-                ELSEIF(shader_type STREQUAL "frag")
+                ELSEIF(shader_type STREQUAL "frag" OR shader_type STREQUAL "fragment" OR shader_type STREQUAL "pixel")
                     SET(shader_cflags ${shader_cflags} -T ps_6_0 -E PSMain)
-                ELSEIF(shader_type STREQUAL "comp")
+                ELSEIF(shader_type STREQUAL "comp" OR shader_type STREQUAL "compute")
                     SET(shader_cflags ${shader_cflags} -T cs_6_0 -E CSMain)
-                ELSEIF(shader_type STREQUAL "geom")
+                ELSEIF(shader_type STREQUAL "geom" OR shader_type STREQUAL "geometry")
                     SET(shader_cflags ${shader_cflags} -T gs_6_0 -E GSMain)
                 ENDIF()
 

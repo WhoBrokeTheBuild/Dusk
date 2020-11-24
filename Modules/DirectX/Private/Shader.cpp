@@ -14,7 +14,6 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
     DuskBenchmarkStart();
 
     GraphicsDriver * gfx = (GraphicsDriver *)GetGraphicsDriver();
-    ID3D12Device * dev = gfx->GetDevice();
 
     const auto& shaderPaths = GetShaderPaths();
 
@@ -51,16 +50,6 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
             continue;
         }
         
-        const std::string& ext = GetExtension(filename.substr(0, pivot));
-        if (ext == "vert" || ext == "vertex") {
-            dev->CreateVertexShader(data.data(), data.size(), );
-        }
-        else if (ext == "frag" || ext == "fragment") {
-            // dev->CreateFragmentShader();
-        }
-        else {
-
-        }
 
     }
 

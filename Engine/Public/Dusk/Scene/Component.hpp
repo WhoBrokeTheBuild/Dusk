@@ -15,7 +15,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Component)
 
-    explicit Component() = default;
+    Component() = default;
 
     virtual ~Component() = default;
 

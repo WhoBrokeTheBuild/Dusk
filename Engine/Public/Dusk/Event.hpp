@@ -32,7 +32,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(ScriptEvent)
 
-    explicit ScriptEvent() = default;
+    ScriptEvent() = default;
 
     virtual ~ScriptEvent() = default;
 
@@ -66,7 +66,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Event)
 
-    explicit Event() = default;
+    Event() = default;
 
     virtual ~Event() = default;
 

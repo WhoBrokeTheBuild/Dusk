@@ -12,7 +12,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(RenderContext)
 
-    explicit RenderContext() = default;
+    RenderContext() = default;
 
     virtual ~RenderContext() = default;
 

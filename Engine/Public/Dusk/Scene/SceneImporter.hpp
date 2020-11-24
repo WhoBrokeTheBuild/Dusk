@@ -12,7 +12,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(SceneImporter)
 
-    explicit SceneImporter() = default;
+    SceneImporter() = default;
 
     virtual ~SceneImporter() = default;
 

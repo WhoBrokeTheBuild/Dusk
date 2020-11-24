@@ -24,7 +24,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(GraphicsDriver)
 
-    explicit GraphicsDriver();
+    GraphicsDriver();
 
     virtual ~GraphicsDriver();
 

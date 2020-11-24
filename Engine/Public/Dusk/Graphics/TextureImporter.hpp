@@ -36,7 +36,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(TextureData)
 
-    explicit TextureData() = default;
+    TextureData() = default;
 
     virtual ~TextureData() = default;
 
@@ -66,7 +66,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(TextureImporter)
 
-    explicit TextureImporter() = default;
+    TextureImporter() = default;
 
     virtual ~TextureImporter() = default;
 

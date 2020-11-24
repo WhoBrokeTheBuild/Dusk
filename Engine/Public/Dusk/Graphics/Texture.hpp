@@ -60,7 +60,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Texture)
 
-    explicit Texture() = default;
+    Texture() = default;
 
     virtual ~Texture() = default;
 

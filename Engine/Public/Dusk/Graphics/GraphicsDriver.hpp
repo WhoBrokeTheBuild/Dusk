@@ -32,7 +32,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(GraphicsDriver)
 
-    explicit GraphicsDriver() = default;
+    GraphicsDriver() = default;
 
     virtual ~GraphicsDriver() = default;
 

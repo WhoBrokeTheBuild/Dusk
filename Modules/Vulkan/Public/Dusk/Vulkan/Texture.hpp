@@ -10,7 +10,7 @@ class DUSK_VULKAN_API Texture : public Dusk::Texture
 {
 public:
 
-    explicit Texture(VkDevice vkDevice);
+    Texture(VkDevice vkDevice);
 
     virtual ~Texture();
 

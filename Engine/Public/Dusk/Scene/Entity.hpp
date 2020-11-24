@@ -30,7 +30,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Entity)
 
-    explicit Entity() = default;
+    Entity() = default;
 
     virtual ~Entity() = default;
 

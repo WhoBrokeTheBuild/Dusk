@@ -143,7 +143,7 @@ class DUSK_GLTF2_API glTF2File
 {
 public:
 
-    explicit glTF2File() = default;
+    glTF2File() = default;
 
     virtual ~glTF2File() = default;
 

@@ -15,7 +15,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(MeshImporter)
 
-    explicit MeshImporter() = default;
+    MeshImporter() = default;
 
     virtual ~MeshImporter() = default;
 

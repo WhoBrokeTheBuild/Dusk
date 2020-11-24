@@ -12,7 +12,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Shader)
 
-    explicit Shader() = default;
+    Shader() = default;
 
     bool LoadFromFiles(const std::vector<std::string>& filenames) override;
 

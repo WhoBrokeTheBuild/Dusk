@@ -11,7 +11,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(UpdateContext)
 
-    explicit UpdateContext() = default;
+    UpdateContext() = default;
 
     virtual ~UpdateContext() = default;
 

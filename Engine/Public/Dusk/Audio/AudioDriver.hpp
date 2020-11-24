@@ -11,7 +11,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(AudioDriver)
 
-    explicit AudioDriver() = default;
+    AudioDriver() = default;
 
     virtual ~AudioDriver() = default;
 

@@ -16,7 +16,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Scene)
 
-    explicit Scene() = default;
+    Scene() = default;
     
     virtual ~Scene() = default;
     

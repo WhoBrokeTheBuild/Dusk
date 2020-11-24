@@ -76,7 +76,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(AxisComponent)
 
-    explicit AxisComponent();
+    AxisComponent();
 
     virtual ~AxisComponent() = default;
 

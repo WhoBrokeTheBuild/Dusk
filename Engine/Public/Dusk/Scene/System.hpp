@@ -13,7 +13,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(System)
 
-    explicit System() = default;
+    System() = default;
 
     virtual ~System() = default;
 

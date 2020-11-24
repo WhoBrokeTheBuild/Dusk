@@ -21,7 +21,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(MeshData);
 
-    explicit MeshData() = default;
+    MeshData() = default;
 
     virtual ~MeshData() = default;
 
@@ -49,7 +49,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Mesh)
 
-    explicit Mesh() = default;
+    Mesh() = default;
 
     virtual ~Mesh() = default;
 

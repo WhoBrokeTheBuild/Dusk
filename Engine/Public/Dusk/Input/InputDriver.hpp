@@ -41,7 +41,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(InputDriver)
 
-    explicit InputDriver() = default;
+    InputDriver() = default;
     
     virtual ~InputDriver() = default;
     

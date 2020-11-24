@@ -16,7 +16,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(MeshComponent)
 
-    explicit MeshComponent() = default;
+    MeshComponent() = default;
 
     virtual ~MeshComponent() = default;
 

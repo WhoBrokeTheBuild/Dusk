@@ -29,7 +29,7 @@ class DUSK_DIRECTX_API GraphicsDriver : public Dusk::GraphicsDriver
 {
 public:
 
-    explicit GraphicsDriver();
+    GraphicsDriver();
 
     virtual ~GraphicsDriver();
 

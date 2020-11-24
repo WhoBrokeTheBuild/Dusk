@@ -26,7 +26,7 @@ class DUSK_ENGINE_API ScriptConsole
 {
 public:
 
-    explicit ScriptConsole() = delete;
+    ScriptConsole() = delete;
     ScriptConsole(const ScriptConsole&) = delete;
 
     static void Initialize();

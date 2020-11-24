@@ -84,7 +84,7 @@ public:
         Truncate    = 1 << 4,
     };
 
-    explicit IFilesystem() = default;
+    IFilesystem() = default;
 
     virtual ~IFilesystem() = default;
 

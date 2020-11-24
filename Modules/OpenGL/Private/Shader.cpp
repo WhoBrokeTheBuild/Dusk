@@ -143,7 +143,8 @@ GLuint Shader::LoadSPV(const std::string& filename)
 
     GLenum type = GetGLShaderType(filename);
     if (type == GL_INVALID_ENUM) {
-        DuskLogError("Unable to determine shader type of '%s'", filename);
+        DuskLogError("Failed to determine shader type of '%s'", filename);
+        return 0;
     }
 
     GLuint shader = glCreateShader(type);

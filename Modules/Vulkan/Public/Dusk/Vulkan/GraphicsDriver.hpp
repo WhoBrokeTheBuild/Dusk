@@ -38,6 +38,10 @@ public:
 
     bool SetShaderData(const std::string& name, size_t size, void * data) override;
 
+    VkDevice GetDevice() const {
+        return _vkDevice;
+    }
+
 private:
 
     SDL_Window * _sdlWindow = nullptr;

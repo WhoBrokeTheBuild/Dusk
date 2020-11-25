@@ -34,6 +34,9 @@ bool Mesh::Load(const MeshData * data)
 
     _glMode = GetGLMode(data->GetMode());
 
+    GLuint vbo;
+    std::vector<GLuint> vbos;
+
     if (indices.empty()) {
         _indexed = false;
         _glCount = vertices.size();
@@ -41,19 +44,12 @@ bool Mesh::Load(const MeshData * data)
     else {
         _indexed = true;
         _glCount = indices.size();
-    }
-
-    GLuint vbo;
-    std::vector<GLuint> vbos;
-
-    if (!indices.empty()) {
-        _indexed = true;
 
         glGenBuffers(1, &vbo);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned), indices.data(), GL_STATIC_DRAW);
-        
+
         vbos.push_back(vbo);
     }
 

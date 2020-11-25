@@ -158,8 +158,6 @@ MACRO(DEFINE_DEMO _target)
         PROPERTIES
             FOLDER "${folder}"
     )
-    
-    STRING(JOIN ":" SHADER_INCLUDE_PATH ${SHADER_INCLUDE_PATH})
 
     IF(MSVC)
         SET_TARGET_PROPERTIES(
@@ -170,14 +168,21 @@ MACRO(DEFINE_DEMO _target)
         )
 
         ADD_CUSTOM_TARGET(
-            run-${_target} VERBATIM
+            run-${_target}
             COMMAND ${CMAKE_COMMAND} -E env "PATH=${RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${RUNTIME_SEARCH_PATH_DEBUG};>$<$<CONFIG:Release>:${RUNTIME_SEARCH_PATH_RELEASE};>%PATH%" "DUSK_SHADER_INCLUDE_PATH=${SHADER_INCLUDE_PATH}" $<TARGET_FILE:${_target}>
             DEPENDS ${_target}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         )
 
+        SET_TARGET_PROPERTIES(
+            run-${_target}
+            PROPERTIES 
+                FOLDER "Automation"
+        )
+
     ELSE()
         STRING(JOIN ":" LD_LIBRARY_PATH ${RUNTIME_SEARCH_PATH})
+        STRING(JOIN ":" SHADER_INCLUDE_PATH ${SHADER_INCLUDE_PATH})
         
         ADD_CUSTOM_TARGET(
             run-${_target}

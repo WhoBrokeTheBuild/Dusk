@@ -23,6 +23,7 @@ public:
 private:
 
     GLuint LoadSPV(const std::string& filename);
+    
     GLuint LoadGLSL(const std::string& filename);
 
     GLenum GetGLShaderType(const std::string& filename);

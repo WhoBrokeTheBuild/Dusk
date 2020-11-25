@@ -66,11 +66,13 @@
 
 #if defined(DUSK_OS_WINDOWS)
 
-    #define DUSK_PATH_SEPARATOR '\\'
+    #define DUSK_PATH_SLASH '\\'
+    #define DUSK_PATH_SEPARATOR ';'
 
 #else
 
-    #define DUSK_PATH_SEPARATOR '/'
+    #define DUSK_PATH_SLASH '/'
+    #define DUSK_PATH_SEPARATOR ':'
 
 #endif
 

@@ -16,15 +16,13 @@ std::vector<std::string> GetShaderPaths()
 
     paths.push_back(std::string());
 
-    const char SEP = ':';
-
     const char * path = getenv("DUSK_SHADER_INCLUDE_PATH");
     DuskLogVerbose("DUSK_SHADER_INCLUDE_PATH=%s", path);
 
     if (path) {
         std::istringstream iss(path);
         std::string p;
-        while (std::getline(iss, p, SEP)) {
+        while (std::getline(iss, p, DUSK_PATH_SEPARATOR)) {
             paths.push_back(p);
         }
     }

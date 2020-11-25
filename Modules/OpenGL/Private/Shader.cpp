@@ -13,6 +13,7 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
     DuskBenchmarkStart();
 
     std::vector<GLuint> shaders;
+    const auto& shaderPaths = GetShaderPaths();
 
     for (const auto& filename : filenames) {
         GLuint shader = 0;

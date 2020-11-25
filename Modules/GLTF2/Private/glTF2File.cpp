@@ -150,7 +150,7 @@ bool glTF2File::LoadBuffers()
             else {
                 DuskLogVerbose("Loading glTF2 buffer from '%s'", uri);
 
-                std::string path = BaseDir + DUSK_PATH_SEPARATOR + uri;
+                std::string path = BaseDir + DUSK_PATH_SLASH + uri;
                 std::ifstream file(path, std::ios::in | std::ios::binary);
                 if (!file.is_open()) {
                     DuskLogError("Failed to read glTF2 buffer from '%s'", uri);
@@ -318,7 +318,7 @@ bool glTF2File::LoadTextures()
                 }
             }
             else {
-                std::string path = BaseDir + DUSK_PATH_SEPARATOR + image.uri;
+                std::string path = BaseDir + DUSK_PATH_SLASH + image.uri;
                 DuskLogVerbose("Loading glTF2 texture from file: '%s'", path);
                 
                 if (!texture->LoadFromFile(path, opts)) {

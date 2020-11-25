@@ -23,6 +23,7 @@ using Microsoft::WRL::ComPtr;
 
 // DirectX 12
 #include <d3d12.h>
+#include <dxcapi.h>
 #include <dxgi1_6.h>
 #include <D3Dcompiler.h>
 #include <DirectXMath.h>

@@ -8,5 +8,5 @@ TARGET_LINK_LIBRARIES(
     PUBLIC
         d3d12.lib
         dxgi.lib
-        d3dcompiler.lib
+        dxcompiler.lib
 )

@@ -20,6 +20,13 @@ public:
 
 private:
 
+    bool LoadCSO(const std::string& filename);
+
+    bool LoadHLSL(const std::string& filename);
+
+    const wchar_t * GetEntrypoint(const std::string& filename);
+
+    const wchar_t * GetTargetProfile(const std::string& filename);
 
 }; // class Shader
 

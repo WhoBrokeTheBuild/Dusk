@@ -72,7 +72,7 @@ MACRO(COMPILE_SHADERS shaders_in shaders_out)
                 STRING(SUBSTRING ${shader_type} 1 -1 shader_type)
 
                 # Use row-major matricies
-                SET(shader_cflags ${shader_cflags} -Zpc -H)
+                SET(shader_cflags ${shader_cflags} -Zpc)
 
                 IF(shader_type STREQUAL "inc")
                     CONTINUE()
@@ -80,10 +80,14 @@ MACRO(COMPILE_SHADERS shaders_in shaders_out)
                     SET(shader_cflags ${shader_cflags} -T vs_6_0 -E VSMain)
                 ELSEIF(shader_type STREQUAL "frag" OR shader_type STREQUAL "fragment" OR shader_type STREQUAL "pixel")
                     SET(shader_cflags ${shader_cflags} -T ps_6_0 -E PSMain)
-                ELSEIF(shader_type STREQUAL "comp" OR shader_type STREQUAL "compute")
-                    SET(shader_cflags ${shader_cflags} -T cs_6_0 -E CSMain)
+                ELSEIF(shader_type STREQUAL "hull")
+                    SET(shader_cflags ${shader_cflags} -T hs_6_0 -E HSMain)
+                ELSEIF(shader_type STREQUAL "domain")
+                    SET(shader_cflags ${shader_cflags} -T ds_6_0 -E DSMain)
                 ELSEIF(shader_type STREQUAL "geom" OR shader_type STREQUAL "geometry")
                     SET(shader_cflags ${shader_cflags} -T gs_6_0 -E GSMain)
+                ELSEIF(shader_type STREQUAL "comp" OR shader_type STREQUAL "compute")
+                    SET(shader_cflags ${shader_cflags} -T cs_6_0 -E CSMain)
                 ENDIF()
 
                 ADD_CUSTOM_COMMAND(

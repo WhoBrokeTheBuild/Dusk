@@ -15,12 +15,12 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
     GraphicsDriver * gfx = (GraphicsDriver *)GetGraphicsDriver();
     VkDevice dev = gfx->GetDevice();
 
-    const auto& shaderPaths = GetShaderPaths();
+    const auto& assetPaths = GetAssetPaths();
 
     std::ifstream file;
 
     for (const auto& filename : filenames) {
-        for (const auto& path : shaderPaths) {
+        for (const auto& path : assetPaths) {
             DuskLogVerbose("Checking '%s'", path + filename);
 
             file.open(path + filename, std::ios::binary);

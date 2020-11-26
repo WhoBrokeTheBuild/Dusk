@@ -8,12 +8,12 @@
 
 namespace Dusk::OpenGL {
 
+DUSK_OPENGL_API
 bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
 {
     DuskBenchmarkStart();
 
     std::vector<GLuint> shaders;
-    const auto& shaderPaths = GetShaderPaths();
 
     for (const auto& filename : filenames) {
         GLuint shader = 0;
@@ -102,26 +102,29 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
     return true;
 }
 
+DUSK_OPENGL_API
 void Shader::Bind()
 {
     glUseProgram(_glID);
 }
 
+DUSK_OPENGL_API
 GLuint Shader::GetID()
 {
     return _glID;
 }
 
+DUSK_OPENGL_API
 GLuint Shader::LoadSPV(const std::string& filename)
 {
     DuskLogVerbose("Looking for SPIR-V shader '%s'", filename);
 
-    const auto& shaderPaths = GetShaderPaths();
+    const auto& assetPaths = GetAssetPaths();
 
     std::ifstream file;
 
-    for (const auto& path : shaderPaths) {
-        const std::string& fullPath = path + filename;
+    for (const auto& path : assetPaths) {
+        const std::string& fullPath = path + "Shaders/" + filename;
         DuskLogVerbose("Checking '%s'", fullPath);
         
         file.open(fullPath, std::ios::binary);
@@ -158,16 +161,18 @@ GLuint Shader::LoadSPV(const std::string& filename)
     return shader;
 }
 
+DUSK_OPENGL_API
 GLuint Shader::LoadGLSL(const std::string& filename)
 {
     DuskLogVerbose("Looking for GLSL shader '%s'", filename);
 
-    const auto& shaderPaths = GetShaderPaths();
+    const auto& assetPaths = GetAssetPaths();
 
     std::ifstream file;
 
-    for (const auto& path : shaderPaths) {
-        DuskLogVerbose("Checking '%s'", path + filename);
+    for (const auto& path : assetPaths) {
+        const std::string& fullPath = path + "Shaders/" + filename;
+        DuskLogVerbose("Checking '%s'", fullPath);
         
         file.open(path + filename);
         if (file.is_open()) {
@@ -198,14 +203,19 @@ GLuint Shader::LoadGLSL(const std::string& filename)
                     size_t right = line.rfind('"');
 
                     if (left == std::string::npos || right == std::string::npos) {
-                        DuskLogError("Unable to parse filename from shader include");
-                        return "";
+                        left = line.find('<');
+                        right = line.rfind('>');
+
+                        if (left == std::string::npos || right == std::string::npos) {
+                            DuskLogError("Unable to parse filename from shader include");
+                            return "";
+                        }
                     }
 
                     std::string incFilename = line.substr(left + 1, right - left - 1);
                     std::ifstream incFile;
 
-                    for (const auto& path : shaderPaths) {
+                    for (const auto& path : assetPaths) {
                         DuskLogVerbose("Checking '%s'", path + incFilename);
                         
                         incFile.open(path + incFilename);
@@ -239,6 +249,7 @@ GLuint Shader::LoadGLSL(const std::string& filename)
     GLenum type = GetGLShaderType(filename);
     if (type == GL_INVALID_ENUM) {
         DuskLogError("Unable to determine shader type of '%s'", filename);
+        return 0;
     }
 
     GLuint shader = glCreateShader(type);
@@ -251,6 +262,7 @@ GLuint Shader::LoadGLSL(const std::string& filename)
     return shader;
 }
 
+DUSK_OPENGL_API
 GLenum Shader::GetGLShaderType(const std::string& filename)
 {
     std::string ext = GetExtension(filename);

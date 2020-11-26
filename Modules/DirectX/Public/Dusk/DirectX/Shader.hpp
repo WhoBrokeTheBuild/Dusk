@@ -20,13 +20,35 @@ public:
 
 private:
 
+    enum class Type {
+        Unknown = -1,
+
+        Vertex,
+        Pixel,
+        Domain,
+        Hull,
+        Geometry,
+        Compute,
+    };
+
     bool LoadCSO(const std::string& filename);
 
     bool LoadHLSL(const std::string& filename);
 
-    const wchar_t * GetEntrypoint(const std::string& filename);
+    Type GetType(const std::string& filename) const;
 
-    const wchar_t * GetTargetProfile(const std::string& filename);
+    const wchar_t * GetEntrypoint(const Type& type) const;
+
+    const wchar_t * GetTargetProfile(const Type& type) const;
+    
+    ComPtr<IDxcBlob>& GetBlob(const Type& type);
+
+    ComPtr<IDxcBlob> _vs; // Vertex Shader
+    ComPtr<IDxcBlob> _ps; // Pixel Shader
+    ComPtr<IDxcBlob> _ds; // Domain Shader
+    ComPtr<IDxcBlob> _hs; // Hull Shader
+    ComPtr<IDxcBlob> _gs; // Geometry Shader
+    ComPtr<IDxcBlob> _cs; // Compute Shader
 
 }; // class Shader
 

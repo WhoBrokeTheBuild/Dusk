@@ -30,14 +30,14 @@ public:
 
     HRESULT LoadSource(LPCWSTR wfilename, IDxcBlob ** source)
     {
-        const auto& shaderPaths = GetShaderPaths();
+        const auto& assetPaths = GetAssetPaths();
 
         std::string filename = ConvertWideStringToUTF8(wfilename);
         
         std::ifstream file;
 
-        for (const auto& path : shaderPaths) {
-            const std::string& fullPath = path + filename;
+        for (const auto& path : assetPaths) {
+            const std::string& fullPath = path + "Shaders/" + filename;
             DuskLogVerbose("Checking shader include '%s'", fullPath);
             
             file.open(fullPath);
@@ -117,12 +117,12 @@ bool Shader::LoadCSO(const std::string& filename)
 {
     DuskLogVerbose("Looking for Compiled Shader Object '%s'", filename);
 
-    const auto& shaderPaths = GetShaderPaths();
+    const auto& assetPaths = GetAssetPaths();
 
     std::ifstream file;
 
-    for (const auto& path : shaderPaths) {
-        const std::string& fullPath = path + filename;
+    for (const auto& path : assetPaths) {
+        const std::string& fullPath = path + "Shaders/" + filename;
         DuskLogVerbose("Checking '%s'", fullPath);
         
         file.open(fullPath, std::ios::binary);
@@ -162,9 +162,9 @@ bool Shader::LoadHLSL(const std::string& filename)
 
     std::ifstream file;
 
-    const auto& shaderPaths = GetShaderPaths();
+    const auto& assetPaths = GetAssetPaths();
 
-    for (const auto& path : shaderPaths) {
+    for (const auto& path : assetPaths) {
         const std::string& fullPath = path + filename;
         DuskLogVerbose("Checking '%s'", fullPath);
         
@@ -226,12 +226,14 @@ bool Shader::LoadHLSL(const std::string& filename)
 
     IncludeHandler inc(library.Get());
 
+    Type type = GetType(filename);
+
     ComPtr<IDxcOperationResult> compileResult;
     result = compiler->Compile(
         blob.Get(),
         wfilename.c_str(),
-        GetEntrypoint(filename),
-        GetTargetProfile(filename),
+        GetEntrypoint(type),
+        GetTargetProfile(type),
         &args[0],
         sizeof(args) / sizeof(args[0]),
         nullptr, 0,
@@ -255,74 +257,107 @@ bool Shader::LoadHLSL(const std::string& filename)
         }
     }
 
+    compileResult->GetResult(_vs.GetAddressOf());
+
     // TODO
     return true;
 }
 
-const wchar_t * Shader::GetEntrypoint(const std::string& filename)
+Shader::Type Shader::GetType(const std::string& filename) const
 {
     std::string ext = GetExtension(filename);
     if (ext == "cso" || ext == "hlsl") {
         size_t pivot = filename.find_last_of('.');
         if (pivot == std::string::npos) {
-            return L"";
+            return Type::Unknown;
         }
         ext = GetExtension(filename.substr(0, pivot));
     }
 
     if (ext == "vert" || ext == "vertex") {
-        return L"VSMain";
+        return Type::Vertex;
     }
-    else if (ext == "frag" || ext == "fragment" || ext == "pixel") {
-        return L"PSMain";
+    else if (ext == "pixel" || ext == "frag" || ext == "fragment") {
+        return Type::Pixel;
     }
     else if (ext == "hull") {
-        return L"HSMain";
+        return Type::Hull;
     }
     else if (ext == "domain") {
-        return L"DSMain";
+        return Type::Domain;
     }
     else if (ext == "geom" || ext == "geometry") {
-        return L"GSMain";
+        return Type::Geometry;
     }
     else if (ext == "comp" || ext == "compute") {
+        return Type::Compute;
+    }
+
+    return Type::Unknown;
+}
+
+const wchar_t * Shader::GetEntrypoint(const Shader::Type& type) const
+{
+    switch (type) {
+    case Type::Vertex:
+        return L"VSMain";
+    case Type::Pixel:
+        return L"PSMain";
+    case Type::Hull:
+        return L"HSMain";
+    case Type::Domain:
+        return L"DSMain";
+    case Type::Geometry:
+        return L"GSMain";
+    case Type::Compute:
         return L"CSMain";
+    default: ;
+    }
+    
+    return L"";
+}
+
+const wchar_t * Shader::GetTargetProfile(const Shader::Type& type) const
+{
+    switch (type) {
+    case Type::Vertex:
+        return L"vs_6_0";
+    case Type::Pixel:
+        return L"ps_6_0";
+    case Type::Hull:
+        return L"hs_6_0";
+    case Type::Domain:
+        return L"ds_6_0";
+    case Type::Geometry:
+        return L"gs_6_0";
+    case Type::Compute:
+        return L"cs_6_0";
+    default: ;
     }
 
     return L"";
 }
 
-const wchar_t * Shader::GetTargetProfile(const std::string& filename)
+ComPtr<IDxcBlob>& Shader::GetBlob(const Shader::Type& type)
 {
-    std::string ext = GetExtension(filename);
-    if (ext == "cso" || ext == "hlsl") {
-        size_t pivot = filename.find_last_of('.');
-        if (pivot == std::string::npos) {
-            return L"";
-        }
-        ext = GetExtension(filename.substr(0, pivot));
+    switch (type) {
+    case Type::Vertex:
+        return _vs;
+    case Type::Pixel:
+        return _ps;
+    case Type::Hull:
+        return _hs;
+    case Type::Domain:
+        return _ds;
+    case Type::Geometry:
+        return _gs;
+    case Type::Compute:
+        return _cs;
+    default: ;
     }
 
-    if (ext == "vert" || ext == "vertex") {
-        return L"vs_6_0";
-    }
-    else if (ext == "frag" || ext == "fragment" || ext == "pixel") {
-        return L"ps_6_0";
-    }
-    else if (ext == "hull") {
-        return L"hs_6_0";
-    }
-    else if (ext == "domain") {
-        return L"ds_6_0";
-    }
-    else if (ext == "geom" || ext == "geometry") {
-        return L"gs_6_0";
-    }
-    else if (ext == "comp" || ext == "compute") {
-        return L"cs_6_0";
-    }
-
-    return L"";
+    // TODO: Better "Error" return
+    return _vs;
 }
 
 } // namespace Dusk::DirectX

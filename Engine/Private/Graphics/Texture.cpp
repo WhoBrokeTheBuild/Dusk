@@ -1,5 +1,6 @@
 #include <Dusk/Graphics/Texture.hpp>
 #include <Dusk/Graphics/TextureImporter.hpp>
+#include <Dusk/Log.hpp>
 
 namespace Dusk {
 
@@ -13,6 +14,8 @@ bool Texture::LoadFromFile(const std::string& filename, Options opts /*= Options
             return true;
         }
     }
+
+    DuskLogError("Failed to load texture '%s'", filename);
     return false;
 }
 
@@ -26,6 +29,8 @@ bool Texture::LoadFromMemory(const uint8_t * buffer, size_t length, Options opts
             return true;
         }
     }
+
+    DuskLogError("Failed to load texture from memory");
     return false;
 }
 

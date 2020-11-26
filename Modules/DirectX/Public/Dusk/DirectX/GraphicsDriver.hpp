@@ -6,7 +6,7 @@
 #include <Dusk/DirectX/Shader.hpp>
 #include <Dusk/DirectX/Mesh.hpp>
 
-#define FRAME_COUNT 2
+#define BUFFER_COUNT 2
 
 namespace Dusk::DirectX {
 
@@ -60,7 +60,7 @@ private:
 
     ComPtr<IDXGISwapChain4> _swapChain = nullptr;
 
-    ComPtr<ID3D12Resource> _renderTargets[FRAME_COUNT] = { nullptr };
+    ComPtr<ID3D12Resource> _renderTargets[BUFFER_COUNT] = { nullptr };
 
     ComPtr<ID3D12CommandAllocator> _commandAllocator = nullptr;
 

@@ -1,4 +1,5 @@
 #include <Dusk/Util.hpp>
+#include <Dusk/Log.hpp>
 
 #if defined(DUSK_OS_WINDOWS)
 
@@ -10,7 +11,7 @@
 
 #endif // DUSK_OS_WINDOWS
 
-#include <vector>
+#include <sstream>
 
 namespace Dusk {
 
@@ -51,6 +52,30 @@ std::string GetExtension(std::string path)
         ? std::string()
         : path.substr(pivot + 1)
     );
+}
+
+DUSK_ENGINE_API
+std::vector<std::string> GetAssetPaths()
+{
+    static std::vector<std::string> paths;
+    if (!paths.empty()) {
+        return paths;
+    }
+
+    paths.push_back(std::string());
+
+    const char * path = getenv("DUSK_ASSET_PATH");
+    DuskLogVerbose("DUSK_ASSET_PATH=%s", path);
+
+    if (path) {
+        std::istringstream iss(path);
+        std::string p;
+        while (std::getline(iss, p, DUSK_PATH_SEPARATOR)) {
+            paths.push_back(p);
+        }
+    }
+    
+    return paths;
 }
 
 #if defined(DUSK_OS_WINDOWS)

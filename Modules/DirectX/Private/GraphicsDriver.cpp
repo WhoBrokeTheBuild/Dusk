@@ -22,6 +22,8 @@ GraphicsDriver::GraphicsDriver()
 
     std::string name = GetApplicationName();
 
+    // Create Window
+
     WNDCLASSEX wndClass = { };
     wndClass.cbSize = sizeof(WNDCLASSEX);
     wndClass.hInstance = inst;
@@ -58,6 +60,8 @@ GraphicsDriver::GraphicsDriver()
 
     ShowWindow(_window, SW_SHOWNORMAL);
     UpdateWindow(_window);
+
+    // Create Pipeline
 
     ComPtr<IDXGIFactory6> factory;
     result = CreateDXGIFactory2(0, IID_PPV_ARGS(&factory));
@@ -110,7 +114,7 @@ GraphicsDriver::GraphicsDriver()
     _device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&_commandQueue));
 
     DXGI_SWAP_CHAIN_DESC1 swapChainDesc = { };
-    swapChainDesc.BufferCount = FRAME_COUNT;
+    swapChainDesc.BufferCount = BUFFER_COUNT;
     swapChainDesc.Width = 640;
     swapChainDesc.Height = 480;
     swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -119,7 +123,7 @@ GraphicsDriver::GraphicsDriver()
     swapChainDesc.SampleDesc.Count = 1;
 
     ComPtr<IDXGISwapChain1> swapChain;
-    factory->CreateSwapChainForHwnd(
+    result = factory->CreateSwapChainForHwnd(
         _commandQueue.Get(),
         _window,
         &swapChainDesc,
@@ -127,29 +131,56 @@ GraphicsDriver::GraphicsDriver()
         nullptr,
         &swapChain
     );
+    if (FAILED(result)) {
+        DuskLogError("Failed to create swap chain");
+        return;
+    }
 
-    factory->MakeWindowAssociation(_window, DXGI_MWA_NO_ALT_ENTER);
+    // Disable Alt+Enter fullscreen command
+    result = factory->MakeWindowAssociation(_window, DXGI_MWA_NO_ALT_ENTER);
+    if (FAILED(result)) {
+        DuskLogWarn("Failed to disable Alt+Enter");
+    }
     
+    // Convert the IDXGISwapChain1 into IDXGISwapChain4
     swapChain.As(&_swapChain);
+
     _renderTargetIndex = _swapChain->GetCurrentBackBufferIndex();
 
     D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = { };
-    rtvHeapDesc.NumDescriptors = FRAME_COUNT;
+    rtvHeapDesc.NumDescriptors = BUFFER_COUNT;
     rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
     rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 
-    _device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&_rtvHeap));
+    result = _device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&_rtvHeap));
+    if (FAILED(result)) {
+        DuskLogError("Failed to create RTV descriptor heap");
+        return;
+    }
+
     _rtvDescriptorSize = _device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(_rtvHeap->GetCPUDescriptorHandleForHeapStart());
 
-    for (unsigned n = 0; n < FRAME_COUNT; ++n) {
-        _swapChain->GetBuffer(n, IID_PPV_ARGS(&_renderTargets[n]));
-        _device->CreateRenderTargetView(_renderTargets[n].Get(), nullptr, rtvHandle);
+    for (unsigned i = 0; i < BUFFER_COUNT; ++i) {
+        result = _swapChain->GetBuffer(i, IID_PPV_ARGS(&_renderTargets[i]));
+        if (FAILED(result)) {
+            DuskLogError("Failed to get buffer %d from swap chain", i);
+            return;
+        }
+
+        _device->CreateRenderTargetView(_renderTargets[i].Get(), nullptr, rtvHandle);
         rtvHandle.Offset(1, _rtvDescriptorSize);
     }
 
-    _device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&_commandAllocator));
+    result = _device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&_commandAllocator));
+    if (FAILED(result)) {
+        DuskLogError("Failed to create command allocator");
+        return;
+    }
+
+    
+
 
 
     _device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, _commandAllocator.Get(), nullptr, IID_PPV_ARGS(&_commandList));

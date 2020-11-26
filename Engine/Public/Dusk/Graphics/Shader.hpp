@@ -28,9 +28,6 @@ public:
 
 };
 
-DUSK_ENGINE_API
-std::vector<std::string> GetShaderPaths();
-
 } // namespace Dusk
 
 #endif // DUSK_SHADER_HPP

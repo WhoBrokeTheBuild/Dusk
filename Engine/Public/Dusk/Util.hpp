@@ -5,6 +5,7 @@
 #include <Dusk/Platform.hpp>
 
 #include <string>
+#include <vector>
 
 namespace Dusk {
 
@@ -16,6 +17,9 @@ std::string GetBasename(std::string path);
 
 DUSK_ENGINE_API
 std::string GetExtension(std::string path);
+
+DUSK_ENGINE_API
+std::vector<std::string> GetAssetPaths();
 
 #if defined(DUSK_OS_WINDOWS)
 

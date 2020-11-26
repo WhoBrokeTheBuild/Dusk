@@ -16,8 +16,8 @@ MACRO(COMPILE_SHADERS shaders_in shaders_out)
                 FILE(MAKE_DIRECTORY ${shader_out_path})
 
                 SET(shader_cflags "")
-                FOREACH(dir ${SHADER_INCLUDE_PATH})
-                    SET(shader_cflags ${shader_cflags} -I${dir})
+                FOREACH(dir ${ASSET_PATH})
+                    SET(shader_cflags ${shader_cflags} -I"${dir}/Shaders/")
                 ENDFOREACH()
 
                 SET(shader_out "${shader_out_path}/${shader_name}.spv")
@@ -61,9 +61,9 @@ MACRO(COMPILE_SHADERS shaders_in shaders_out)
                 FILE(MAKE_DIRECTORY ${shader_out_path})
 
                 SET(shader_cflags "")
-                FOREACH(dir ${SHADER_INCLUDE_PATH})
+                FOREACH(dir ${ASSET_PATH})
                     FILE(TO_NATIVE_PATH "${dir}" dir)
-                    SET(shader_cflags ${shader_cflags} -I "${dir}")
+                    SET(shader_cflags ${shader_cflags} -I"${dir}/Shaders/")
                 ENDFOREACH()
 
                 SET(shader_out "${shader_out_path}/${shader_name}.cso")

@@ -46,6 +46,8 @@ std::unique_ptr<Dusk::TextureData> TextureImporter::LoadFromFile(const std::stri
     tex->Size = size;
     tex->Components = components;
 
+    DuskLogLoad("Loaded texture '%s' with STBI module", filename);
+
     DuskBenchmarkEnd("STBI::TextureImporter::LoadFromFile");
     return tex;
 }
@@ -67,6 +69,8 @@ std::unique_ptr<Dusk::TextureData> TextureImporter::LoadFromMemory(const uint8_t
     tex->Data = data;
     tex->Size = size;
     tex->Components = components;
+
+    DuskLogLoad("Loaded texture from memory with STBI module");
 
     DuskBenchmarkEnd("STBI::TextureImporter::LoadFromFile");
     return tex;

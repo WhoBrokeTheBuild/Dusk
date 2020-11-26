@@ -51,9 +51,9 @@ MACRO(DEFINE_DEMO _target)
         Assets/Shaders/*.hlsl
     )
 
-    LIST(INSERT SHADER_INCLUDE_PATH 0
-        ${CMAKE_CURRENT_SOURCE_DIR}/Assets/Shaders/
-        ${CMAKE_CURRENT_BINARY_DIR}/Assets/Shaders/
+    LIST(INSERT ASSET_PATH 0
+        ${CMAKE_CURRENT_SOURCE_DIR}/Assets/
+        ${CMAKE_CURRENT_BINARY_DIR}/Assets/
     )
 
     COMPILE_SHADERS("${_shaders_in}" _shaders_out)
@@ -164,12 +164,12 @@ MACRO(DEFINE_DEMO _target)
             ${_target}
             PROPERTIES 
                 VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                VS_DEBUGGER_ENVIRONMENT "PATH=${RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${RUNTIME_SEARCH_PATH_DEBUG};>$<$<CONFIG:Release>:${RUNTIME_SEARCH_PATH_RELEASE};>%PATH%\nDUSK_SHADER_INCLUDE_PATH=${SHADER_INCLUDE_PATH}"
+                VS_DEBUGGER_ENVIRONMENT "PATH=${RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${RUNTIME_SEARCH_PATH_DEBUG};>$<$<CONFIG:Release>:${RUNTIME_SEARCH_PATH_RELEASE};>%PATH%\nDUSK_ASSET_PATH=${ASSET_PATH}"
         )
 
         ADD_CUSTOM_TARGET(
             run-${_target}
-            COMMAND ${CMAKE_COMMAND} -E env "PATH=${RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${RUNTIME_SEARCH_PATH_DEBUG};>$<$<CONFIG:Release>:${RUNTIME_SEARCH_PATH_RELEASE};>%PATH%" "DUSK_SHADER_INCLUDE_PATH=${SHADER_INCLUDE_PATH}" $<TARGET_FILE:${_target}>
+            COMMAND ${CMAKE_COMMAND} -E env "PATH=${RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${RUNTIME_SEARCH_PATH_DEBUG};>$<$<CONFIG:Release>:${RUNTIME_SEARCH_PATH_RELEASE};>%PATH%" "DUSK_ASSET_PATH=${ASSET_PATH}" $<TARGET_FILE:${_target}>
             DEPENDS ${_target}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         )
@@ -182,11 +182,11 @@ MACRO(DEFINE_DEMO _target)
 
     ELSE()
         STRING(JOIN ":" LD_LIBRARY_PATH ${RUNTIME_SEARCH_PATH})
-        STRING(JOIN ":" SHADER_INCLUDE_PATH ${SHADER_INCLUDE_PATH})
+        STRING(JOIN ":" ASSET_PATH ${ASSET_PATH})
         
         ADD_CUSTOM_TARGET(
             run-${_target}
-            COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_SHADER_INCLUDE_PATH=${SHADER_INCLUDE_PATH}" $<TARGET_FILE:${_target}>
+            COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${ASSET_PATH}" $<TARGET_FILE:${_target}>
             DEPENDS ${_target}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         )
@@ -200,7 +200,7 @@ MACRO(DEFINE_DEMO _target)
         IF(gdb_COMMAND)
             ADD_CUSTOM_TARGET(
                 gdb-${_target}
-                COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_SHADER_INCLUDE_PATH=${SHADER_INCLUDE_PATH}" gdb --args $<TARGET_FILE:${_target}>
+                COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${ASSET_PATH}" gdb --args $<TARGET_FILE:${_target}>
                 DEPENDS ${_target}
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             )
@@ -215,7 +215,7 @@ MACRO(DEFINE_DEMO _target)
         IF(valgrind_COMMAND)
             ADD_CUSTOM_TARGET(
                 valgrind-${_target}
-                COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_SHADER_INCLUDE_PATH=${SHADER_INCLUDE_PATH}" valgrind $<TARGET_FILE:${_target}>
+                COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${ASSET_PATH}" valgrind $<TARGET_FILE:${_target}>
                 DEPENDS ${_target}
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             )

@@ -63,6 +63,9 @@ int main(int argc, char** argv)
 
         auto gfx = Dusk::GetGraphicsDriver();
 
+        auto tex = gfx->CreateTexture();
+        tex->LoadFromFile("C:/Repos/Dusk/Demos/HelloWorld/Assets/Models/crate/crate.jpg");
+
         // Dusk::WindowResizedEventData testData;
         // testData.Size = { 1024, 768 };
         // gfx->WindowResizedEvent.Call(&testData);

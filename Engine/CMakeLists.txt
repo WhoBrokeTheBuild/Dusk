@@ -44,3 +44,38 @@ TARGET_SOURCES(
     PRIVATE
         ${_shaders_out}
 )
+
+
+
+
+FILE(GLOB_RECURSE
+    _shader_configs
+    Assets/Shaders/*.json
+)
+
+FOREACH(_config ${_shader_configs})
+    STRING(REPLACE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_BINARY_DIR}
+        _config_out
+        ${_config}
+    )
+
+    GET_FILENAME_COMPONENT(_workdir ${_config} DIRECTORY)
+    GET_FILENAME_COMPONENT(_binary_dir ${_config_out} DIRECTORY)
+
+    ADD_CUSTOM_COMMAND(
+        OUTPUT ${_config_out}
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Scripts/compile-shaders.py ${_config} ${_binary_dir}
+        DEPENDS ${_config}
+        WORKING_DIRECTORY ${_workdir}
+    )
+
+    TARGET_SOURCES(
+        ${_target}
+        PRIVATE
+            ${_config_out}
+    )
+    
+    
+ENDFOREACH()

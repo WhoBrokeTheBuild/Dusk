@@ -1,0 +1,104 @@
+{
+    "name": "PBR",
+    "stages": [
+        "PBR.vert.glsl",
+        "PBR.frag.glsl"
+    ],
+    "uniforms": {
+        "u_BaseColorFactor": {
+            "type": "float"
+        },
+        "u_BaseColorMap": {
+            "type": "sampler2D",
+            "optional": true,
+            "attributes": ["a_UV"]
+        },
+        "u_NormalMap": {
+            "type": "sampler2D",
+            "optional": true,
+            "attributes": ["a_UV"],
+            "uniforms": ["u_NormalScale"]
+        },
+        "u_NormalScale": {
+            "type": "float",
+            "optional": true,
+            "uniforms": ["u_NormalMap"]
+        },
+        "u_MetallicFactor": {
+            "type": "float"
+        },
+        "u_RoughnessFactor": {
+            "type": "float"
+        },
+        "u_MetallicRoughnessMap": {
+            "type": "sampler2D",
+            "optional": true,
+            "attributes": ["a_UV"]
+        },
+        "u_OcclusionMap": {
+            "type": "sampler2D",
+            "optional": true,
+            "attributes": ["a_UV"],
+            "uniforms": ["u_OcclusionStrength"]
+        },
+        "u_OcclusionStrength": {
+            "type": "float",
+            "optional": true,
+            "uniforms": ["u_OcclusionMap"]
+        },
+        "u_EmissiveMap": {
+            "type": "sampler2D",
+            "optional": true,
+            "attributes": ["a_UV"]
+        }
+    },
+    "attributes": {
+        "a_Position": {
+            "type": "vec4"
+        },
+        "a_Normal": {
+            "type": "vec4",
+            "optional": true,
+            "uniforms": ["!u_NormalMap"]
+        },
+        "a_Tangent": {
+            "type": "vec4",
+            "optional": true
+        },
+        "a_UV": {
+            "type": "vec2",
+            "optional": true
+        }
+    },
+    "defines": {
+        "TEST": {},
+        "USE_NORMAL": {
+            "attributes": ["a_Normal"]
+        },
+        "USE_TANGENT": {
+            "attributes": ["a_Tangent"]
+        },
+        "USE_UV": {
+            "attributes": ["a_UV"]
+        },
+        "USE_NORMAL_MAP": {
+            "uniforms": ["u_NormalMap", "u_NormalScale"]
+        },
+        "USE_BASE_COLOR_MAP": {
+            "attributes": ["a_UV"],
+            "uniforms": ["u_BaseColorMap"]
+        },
+        "USE_METALLIC_ROUGHNESS_MAP": {
+            "attributes": ["a_UV"],
+            "uniforms": ["u_MetallicRoughnessMap"]
+        },
+        "USE_OCCLUSION_MAP": {
+            "attributes": ["a_UV"],
+            "uniforms": ["u_OcclusionMap"]
+        },
+        "USE_EMISSIVE_MAP": {
+            "attributes": ["a_UV"],
+            "uniforms": ["u_EmissiveMap"]
+        }
+    }
+}

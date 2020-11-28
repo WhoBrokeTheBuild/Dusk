@@ -6,10 +6,6 @@
     // Windows
     #define DUSK_OS_WINDOWS
 
-    #ifndef NOMINMAX
-        #define NOMINMAX
-    #endif
-
 #elif defined(__APPLE__) && defined(__MACH__)
 
     // Apple

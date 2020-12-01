@@ -2,6 +2,7 @@
 #define DUSK_EVENT_HPP
 
 #include <Dusk/Config.hpp>
+#include <Dusk/Object.hpp>
 #include <Dusk/Math.hpp>
 #include <Dusk/Log.hpp>
 
@@ -13,9 +14,13 @@
 
 namespace Dusk {
 
-class DUSK_ENGINE_API EventData
+class DUSK_ENGINE_API EventData : public Object
 {
 public:
+
+    inline std::string GetClassID() const {
+        return "Dusk::EventData";
+    }
 
     template <class T>
     const T * GetAs() const {
@@ -26,7 +31,7 @@ public:
 
 }; // class EventData
 
-class DUSK_ENGINE_API ScriptEvent
+class DUSK_ENGINE_API ScriptEvent : public Object
 {
 public:
 
@@ -35,6 +40,10 @@ public:
     ScriptEvent() = default;
 
     virtual ~ScriptEvent() = default;
+
+    inline std::string GetClassID() const {
+        return "Dusk::ScriptEvent";
+    }
 
     unsigned AddPythonListener(PyObject * listener);
 
@@ -71,6 +80,10 @@ public:
     virtual ~Event() = default;
 
     typedef std::function<void(const EventDataType *)> Listener;
+
+    inline std::string GetClassID() const {
+        return "Dusk::Event<>";
+    }
 
     unsigned AddListener(Listener listener) {
         ++_maxListenerID;

@@ -57,9 +57,6 @@ void ScriptConsole::Initialize()
 
     _history.push_back(std::string());
     _index = _history.size() - 1;
-
-    printf(">>> ");
-    fflush(stdout);
 }
 
 void ScriptConsole::Terminate()

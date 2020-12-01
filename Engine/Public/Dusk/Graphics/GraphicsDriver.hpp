@@ -2,6 +2,7 @@
 #define DUSK_GRAPHICS_DRIVER_HPP
 
 #include <Dusk/Config.hpp>
+#include <Dusk/Object.hpp>
 #include <Dusk/Math.hpp>
 #include <Dusk/UpdateContext.hpp>
 #include <Dusk/RenderContext.hpp>
@@ -26,7 +27,7 @@ public:
 
 }; // class WindowResizedEventData
 
-class DUSK_ENGINE_API GraphicsDriver
+class DUSK_ENGINE_API GraphicsDriver : public Object
 {
 public:
 
@@ -35,6 +36,10 @@ public:
     GraphicsDriver() = default;
 
     virtual ~GraphicsDriver() = default;
+
+    inline std::string GetClassID() const {
+        return "Dusk::GraphicsDriver";
+    }
 
     virtual void SetWindowTitle(const std::string& title) = 0;
 

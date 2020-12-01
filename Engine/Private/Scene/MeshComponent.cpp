@@ -37,13 +37,6 @@ void MeshComponent::AddMesh(std::shared_ptr<Mesh> && mesh)
     _meshes.push_back(std::move(mesh));
 }
 
-void MeshComponent::AddMeshes(std::vector<std::shared_ptr<Mesh>> && meshes)
-{
-    for (auto&& mesh : meshes) {
-        _meshes.push_back(std::move(mesh));
-    }
-}
-
 void MeshComponent::Render(RenderContext * ctx)
 {
     auto gfx = GetGraphicsDriver();

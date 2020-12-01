@@ -44,6 +44,10 @@ public:
 
     TextureImporter() = default;
 
+    inline std::string GetClassID() const {
+        return "Dusk::STBI::TextureImporter";
+    }
+
     std::unique_ptr<Dusk::TextureData> LoadFromFile(const std::string& filename) override;
 
     std::unique_ptr<Dusk::TextureData> LoadFromMemory(const uint8_t * buffer, size_t length) override;

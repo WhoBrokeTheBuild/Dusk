@@ -2,10 +2,13 @@
 #define DUSK_UPDATE_CONTEXT_HPP
 
 #include <Dusk/Config.hpp>
+#include <Dusk/Object.hpp>
+
+#include <cstdint>
 
 namespace Dusk {
 
-class DUSK_ENGINE_API UpdateContext
+class DUSK_ENGINE_API UpdateContext : public Object
 {
 public:
 
@@ -14,6 +17,10 @@ public:
     UpdateContext() = default;
 
     virtual ~UpdateContext() = default;
+
+    inline std::string GetClassID() const {
+        return "Dusk::UpdateContext";
+    }
 
     // Target Frames/Second
     virtual inline float GetTargetFPS() const {
@@ -64,9 +71,9 @@ private:
 
     float _fpsRatio = 0.f;
 
-    long long _elapsedTime = 0;
+    uintmax_t _elapsedTime = 0;
 
-    long long _totalTime = 0;
+    uintmax_t _totalTime = 0;
 
 }; // class UpdateContext
 

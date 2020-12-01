@@ -2,13 +2,14 @@
 #define DUSK_SHADER_HPP
 
 #include <Dusk/Config.hpp>
+#include <Dusk/Object.hpp>
 
 #include <string>
 #include <vector>
 
 namespace Dusk {
 
-class DUSK_ENGINE_API Shader 
+class DUSK_ENGINE_API Shader : public Object
 {
 public:
 
@@ -17,6 +18,10 @@ public:
     Shader() = default;
 
     virtual ~Shader() = default;
+
+    inline std::string GetClassID() const {
+        return "Dusk::Shader";
+    }
 
     virtual bool LoadFromFiles(const std::vector<std::string>& filenames) = 0;
 

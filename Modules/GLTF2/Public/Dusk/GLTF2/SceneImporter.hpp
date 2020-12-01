@@ -10,6 +10,14 @@ class DUSK_GLTF2_API SceneImporter : public Dusk::SceneImporter
 {
 public:
 
+    DISALLOW_COPY_AND_ASSIGN(SceneImporter)
+
+    SceneImporter() = default;
+
+    inline std::string GetClassID() const {
+        return "Dusk::GLTF2::SceneImporter";
+    }
+
     virtual bool LoadFromFile(Entity * root, const std::string& filename);
 
 private:

@@ -64,6 +64,16 @@
 
 #endif
 
+#if defined(NDEBUG)
+
+    #define DUSK_BUILD_RELEASE
+
+#else
+
+    #define DUSK_BUILD_DEBUG
+
+#endif
+
 #if defined(DUSK_OS_WINDOWS)
 
     #define DUSK_PATH_SLASH '\\'

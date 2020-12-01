@@ -14,6 +14,10 @@ public:
 
     Shader() = default;
 
+    inline std::string GetClassID() const {
+        return "Dusk::DirectX::Shader";
+    }
+
     bool LoadFromFiles(const std::vector<std::string>& filenames) override;
 
     void Bind() override;

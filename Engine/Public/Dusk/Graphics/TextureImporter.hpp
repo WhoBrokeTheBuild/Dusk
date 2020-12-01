@@ -2,6 +2,7 @@
 #define DUSK_TEXTURE_IMPORTER_HPP
 
 #include <Dusk/Config.hpp>
+#include <Dusk/Object.hpp>
 #include <Dusk/Math.hpp>
 
 #include <memory>
@@ -10,7 +11,7 @@
 
 namespace Dusk {
 
-class DUSK_ENGINE_API TextureData
+class DUSK_ENGINE_API TextureData : public Object
 {
 public:
 
@@ -40,6 +41,10 @@ public:
 
     virtual ~TextureData() = default;
 
+    inline std::string GetClassID() const {
+        return "Dusk::TextureData";
+    }
+
     // Pointer to pixel data Buffer
     virtual uint8_t * GetData() const = 0;
 
@@ -60,7 +65,7 @@ public:
 
 }; // class TextureData
 
-class DUSK_ENGINE_API TextureImporter
+class DUSK_ENGINE_API TextureImporter : public Object
 {
 public:
 
@@ -69,6 +74,10 @@ public:
     TextureImporter() = default;
 
     virtual ~TextureImporter() = default;
+
+    inline std::string GetClassID() const {
+        return "Dusk::TextureImporter";
+    }
 
     virtual std::unique_ptr<TextureData> LoadFromFile(const std::string& filename) = 0;
 

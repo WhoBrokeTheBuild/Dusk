@@ -98,7 +98,7 @@ GraphicsDriver::GraphicsDriver()
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_ONE_MINUS_SRC_ALPHA);
 
-    _inputDriver = new InputDriver();
+    _inputDriver = New InputDriver();
     SetInputDriver(std::unique_ptr<Dusk::InputDriver>(_inputDriver));
 }
 

@@ -2,12 +2,13 @@
 #define DUSK_SYSTEM_HPP
 
 #include <Dusk/Config.hpp>
+#include <Dusk/Object.hpp>
 #include <Dusk/UpdateContext.hpp>
 #include <Dusk/RenderContext.hpp>
 
 namespace Dusk {
 
-class System
+class DUSK_ENGINE_API System : public Object
 {
 public:
 
@@ -16,6 +17,10 @@ public:
     System() = default;
 
     virtual ~System() = default;
+
+    inline std::string GetClassID() const {
+        return "Dusk::Entity";
+    }
 
     virtual inline void Update(UpdateContext * ctx) { }
 

@@ -24,8 +24,6 @@ public:
 
     void AddMesh(std::shared_ptr<Mesh> && mesh);
 
-    void AddMeshes(std::vector<std::shared_ptr<Mesh>> && meshes);
-
     void Render(RenderContext * ctx) override;
 
 private:

@@ -58,6 +58,14 @@ class DUSK_GLTF2_API MeshImporter : public Dusk::MeshImporter
 {
 public:
 
+    DISALLOW_COPY_AND_ASSIGN(MeshImporter)
+
+    MeshImporter() = default;
+
+    inline std::string GetClassID() const {
+        return "Dusk::GLTF2::MeshImporter";
+    }
+
     std::vector<std::unique_ptr<Dusk::MeshData>> LoadFromFile(const std::string& filename) override;
 
 }; // class MeshImporter

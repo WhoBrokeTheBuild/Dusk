@@ -16,6 +16,10 @@ public:
 
     void Render() override;
 
+    inline std::string GetClassID() const {
+        return "Dusk::OpenGL::Mesh";
+    }
+
     bool Load(const MeshData * data) override;
 
 private:

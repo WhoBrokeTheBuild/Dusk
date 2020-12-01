@@ -14,6 +14,10 @@ public:
 
     Mesh() = default;
 
+    inline std::string GetClassID() const {
+        return "Dusk::DirectX::Mesh";
+    }
+
     void Render() override;
 
     bool Load(const MeshData * data) override;

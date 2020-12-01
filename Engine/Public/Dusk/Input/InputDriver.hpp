@@ -2,6 +2,7 @@
 #define DUSK_INPUT_DRIVER_HPP
 
 #include <Dusk/Config.hpp>
+#include <Dusk/Object.hpp>
 #include <Dusk/Input/Keyboard.hpp>
 #include <Dusk/Input/Mouse.hpp>
 #include <Dusk/Input/Controller.hpp>
@@ -35,7 +36,7 @@ namespace Dusk {
 
 // }; // class MouseMovedEventData
 
-class DUSK_ENGINE_API InputDriver
+class DUSK_ENGINE_API InputDriver : public Object
 {
 public:
 
@@ -44,12 +45,18 @@ public:
     InputDriver() = default;
     
     virtual ~InputDriver() = default;
+
+    inline std::string GetClassID() const {
+        return "Dusk::InputDriver";
+    }
     
 }; // class InputDriver
 
-DUSK_ENGINE_API void SetInputDriver(std::unique_ptr<InputDriver> && driver);
+DUSK_ENGINE_API
+void SetInputDriver(std::unique_ptr<InputDriver> && driver);
 
-DUSK_ENGINE_API InputDriver * GetInputDriver();
+DUSK_ENGINE_API
+InputDriver * GetInputDriver();
 
 } // namespace Dusk
 

@@ -2,6 +2,7 @@
 
 #include <Dusk/Log.hpp>
 #include <Dusk/Module.hpp>
+#include <Dusk/Object.hpp>
 
 #include <Python/PyDusk.hpp>
 
@@ -16,6 +17,8 @@ namespace Dusk {
 
 DUSK_ENGINE_API
 void Initialize(int argc, char ** argv) {
+    InitMemoryTracking();
+
     PyImport_AppendInittab("Dusk", PyInit_Dusk);
 
     wchar_t *program = Py_DecodeLocale(argv[0], NULL);
@@ -38,6 +41,8 @@ void Terminate() {
     Py_Finalize();
 
     FreeModules();
+
+    TermMemoryTracking();
 }
 
 static bool _Running = false;

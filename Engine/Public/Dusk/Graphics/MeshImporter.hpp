@@ -2,6 +2,7 @@
 #define DUSK_CORE_MESH_IMPORTER_HPP
 
 #include <Dusk/Config.hpp>
+#include <Dusk/Object.hpp>
 #include <Dusk/Graphics/Mesh.hpp>
 
 #include <memory>
@@ -9,7 +10,7 @@
 
 namespace Dusk {
 
-class DUSK_ENGINE_API MeshImporter 
+class DUSK_ENGINE_API MeshImporter : public Object
 {
 public:
 
@@ -18,6 +19,10 @@ public:
     MeshImporter() = default;
 
     virtual ~MeshImporter() = default;
+
+    inline std::string GetClassID() const {
+        return "Dusk::MeshImporter";
+    }
 
     virtual std::vector<std::unique_ptr<MeshData>> LoadFromFile(const std::string& filename) = 0;
 

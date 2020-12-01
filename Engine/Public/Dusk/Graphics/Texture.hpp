@@ -2,6 +2,7 @@
 #define DUSK_TEXTURE_HPP
 
 #include <Dusk/Config.hpp>
+#include <Dusk/Object.hpp>
 #include <Dusk/Math.hpp>
 #include <Dusk/Graphics/TextureImporter.hpp>
 
@@ -12,7 +13,7 @@
 
 namespace Dusk {
 
-class DUSK_ENGINE_API Texture 
+class DUSK_ENGINE_API Texture : public Object
 {
 public:
 
@@ -63,6 +64,10 @@ public:
     Texture() = default;
 
     virtual ~Texture() = default;
+
+    inline std::string GetClassID() const {
+        return "Dusk::Texture";
+    }
 
     virtual void Bind() = 0;
 

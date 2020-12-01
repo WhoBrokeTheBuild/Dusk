@@ -2,11 +2,12 @@
 #define DUSK_RENDER_CONTEXT_HPP
 
 #include <Dusk/Config.hpp>
+#include <Dusk/Object.hpp>
 #include <Dusk/Graphics/TransformData.hpp>
 
 namespace Dusk {
 
-class RenderContext
+class DUSK_ENGINE_API RenderContext : public Object
 {
 public:
 
@@ -15,6 +16,10 @@ public:
     RenderContext() = default;
 
     virtual ~RenderContext() = default;
+
+    inline std::string GetClassID() const {
+        return "Dusk::UpdateContext";
+    }
 
     virtual TransformData * GetTransformData() {
         return &_transformData;

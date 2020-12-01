@@ -14,6 +14,10 @@ public:
 
     virtual ~Texture();
 
+    inline std::string GetClassID() const {
+        return "Dusk::Vulkan::Texture";
+    }
+
     bool Load(const TextureData * data, Options opts = Options()) override;
 
     void Bind() override;

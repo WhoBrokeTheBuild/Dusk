@@ -18,6 +18,10 @@ public:
 
     virtual ~InputDriver();
 
+    inline std::string GetClassID() const {
+        return "Dusk::OpenGL::InputDriver";
+    }
+
     void ProcessEvent(SDL_Event * event);
 
 private:

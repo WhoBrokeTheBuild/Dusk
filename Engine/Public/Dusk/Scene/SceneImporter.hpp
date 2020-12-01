@@ -2,11 +2,12 @@
 #define DUSK_SCENE_IMPORTER_HPP
 
 #include <Dusk/Config.hpp>
+#include <Dusk/Object.hpp>
 #include <Dusk/Scene/Entity.hpp>
 
 namespace Dusk {
 
-class DUSK_ENGINE_API SceneImporter 
+class DUSK_ENGINE_API SceneImporter : public Object
 {
 public:
 
@@ -15,6 +16,10 @@ public:
     SceneImporter() = default;
 
     virtual ~SceneImporter() = default;
+
+    inline std::string GetClassID() const {
+        return "Dusk::SceneImporter";
+    }
 
     virtual bool LoadFromFile(Entity * root, const std::string& filename) = 0;
 

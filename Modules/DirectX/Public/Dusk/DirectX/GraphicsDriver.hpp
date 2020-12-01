@@ -18,6 +18,10 @@ public:
 
     virtual ~GraphicsDriver();
 
+    inline std::string GetClassID() const {
+        return "Dusk::DirectX::UpdateContext";
+    }
+
     void SetWindowTitle(const std::string& title) override;
 
     std::string GetWindowTitle() override;

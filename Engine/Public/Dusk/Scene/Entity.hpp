@@ -2,6 +2,7 @@
 #define DUSK_ENTITY_HPP
 
 #include <Dusk/Config.hpp>
+#include <Dusk/Object.hpp>
 #include <Dusk/Math.hpp>
 #include <Dusk/Scene/Component.hpp>
 #include <Dusk/UpdateContext.hpp>
@@ -24,7 +25,7 @@ inline vec3 GetWorldForward() {
 }
 
 
-class DUSK_ENGINE_API Entity 
+class DUSK_ENGINE_API Entity : public Object
 {
 public:
 
@@ -33,6 +34,10 @@ public:
     Entity() = default;
 
     virtual ~Entity() = default;
+
+    inline std::string GetClassID() const {
+        return "Dusk::Entity";
+    }
 
     bool LoadFromFile(const std::string& filename);
 

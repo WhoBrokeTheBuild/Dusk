@@ -139,13 +139,17 @@ struct CameraData
     float znear;
 };
 
-class DUSK_GLTF2_API glTF2File 
+class DUSK_GLTF2_API glTF2File : public Object
 {
 public:
 
     glTF2File() = default;
 
     virtual ~glTF2File() = default;
+
+    inline std::string GetClassID() const {
+        return "Dusk::GLTF2::glTF2File";
+    }
 
     bool LoadFromFile(const std::string& filename);
 

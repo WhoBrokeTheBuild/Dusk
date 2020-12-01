@@ -4,7 +4,7 @@
 namespace Dusk::STBI {
 
 void ModuleInit() {
-    AddTextureImporter("STBI", std::unique_ptr<Dusk::TextureImporter>(new TextureImporter()));
+    AddTextureImporter("STBI", std::unique_ptr<Dusk::TextureImporter>(New TextureImporter()));
 }
 
 void ModuleTerm() {

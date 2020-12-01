@@ -2,12 +2,13 @@
 #define DUSK_CORE_MESH_HPP
 
 #include <Dusk/Config.hpp>
+#include <Dusk/Object.hpp>
 
 #include <gsl/gsl>
 
 namespace Dusk {
 
-class DUSK_ENGINE_API MeshData
+class DUSK_ENGINE_API MeshData : public Object
 {
 public:
 
@@ -24,6 +25,10 @@ public:
     MeshData() = default;
 
     virtual ~MeshData() = default;
+
+    inline std::string GetClassID() const {
+        return "Dusk::UpdateContext";
+    }
 
     virtual Mode GetMode() const = 0;
 
@@ -43,7 +48,7 @@ public:
 
 }; // class MeshData
 
-class DUSK_ENGINE_API Mesh 
+class DUSK_ENGINE_API Mesh : public Object
 {
 public:
 
@@ -52,6 +57,10 @@ public:
     Mesh() = default;
 
     virtual ~Mesh() = default;
+
+    inline std::string GetClassID() const {
+        return "Dusk::Mesh";
+    }
 
     virtual void Render() = 0;
 

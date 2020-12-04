@@ -57,6 +57,9 @@ void ScriptConsole::Initialize()
 
     _history.push_back(std::string());
     _index = _history.size() - 1;
+
+    printf(">>> ");
+    fflush(stdout);
 }
 
 void ScriptConsole::Terminate()
@@ -107,7 +110,7 @@ void ScriptConsole::ReadNextCharacter()
     // TODO: Support UTF-8
     
     unsigned char c;
-    bool ctrlPressed = false;
+    static bool ctrlPressed = false;
 
 #if defined(DUSK_OS_WINDOWS)
 
@@ -151,21 +154,25 @@ void ScriptConsole::ReadNextCharacter()
     }
     
     if (inEscapeSequence) {
-        if (c == '[' || c == '~') {
+        if (c == '[' || c == '~' || c == '1' || c == ';') {
             return;
         }
-        
-        // TODO: Handle Control Pressed
+
+        if (c == '5') {
+            ctrlPressed = true;
+            return;
+        }
 
         switch (c) {
-        case 'D': HandleLeft(false);    return;
-        case 'C': HandleRight(false);   return;
+        case 'D': HandleLeft(ctrlPressed);    return;
+        case 'C': HandleRight(ctrlPressed);   return;
         case 'A': HandleUp();       return;
         case 'B': HandleDown();     return;
         case 'H': HandleHome();     return;
         case 'F': HandleEnd();      return;
         }
 
+        ctrlPressed = false;
         inEscapeSequence = false;
     }
 

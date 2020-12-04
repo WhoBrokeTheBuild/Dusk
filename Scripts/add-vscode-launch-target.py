@@ -48,6 +48,17 @@ config = {
     "externalConsole": externalConsole
 }
 
+if os.name != 'nt':
+    config["MIMode"] = "gdb"
+    config["miDebuggerPath"] = "gdb"
+    config["setupCommands"] = [
+        {
+            "description": "Enable pretty printing for gdb",
+            "text": "-enable-pretty-printing",
+            "ignoreFailures": True
+        }
+    ]
+
 print('Generating launch rule for %s' % name)
 
 found = False

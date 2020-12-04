@@ -174,7 +174,7 @@ GLuint Shader::LoadGLSL(const std::string& filename)
         const std::string& fullPath = path + "Shaders/" + filename;
         DuskLogVerbose("Checking '%s'", fullPath);
         
-        file.open(path + filename);
+        file.open(fullPath);
         if (file.is_open()) {
             break;
         }
@@ -216,9 +216,10 @@ GLuint Shader::LoadGLSL(const std::string& filename)
                     std::ifstream incFile;
 
                     for (const auto& path : assetPaths) {
-                        DuskLogVerbose("Checking '%s'", path + incFilename);
+                        const std::string& fullPath = path + "Shaders/" + incFilename;
+                        DuskLogVerbose("Checking '%s'", fullPath);
                         
-                        incFile.open(path + incFilename);
+                        file.open(fullPath);
                         if (incFile.is_open()) {
                             break;
                         }

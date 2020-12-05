@@ -18,7 +18,7 @@ class DUSK_ENGINE_API EventData : public Object
 {
 public:
 
-    inline std::string GetClassID() const {
+    inline std::string GetClassID() const override {
         return "Dusk::EventData";
     }
 
@@ -41,7 +41,7 @@ public:
 
     virtual ~ScriptEvent() = default;
 
-    inline std::string GetClassID() const {
+    inline std::string GetClassID() const override {
         return "Dusk::ScriptEvent";
     }
 
@@ -81,7 +81,7 @@ public:
 
     typedef std::function<void(const EventDataType *)> Listener;
 
-    inline std::string GetClassID() const {
+    inline std::string GetClassID() const override {
         return "Dusk::Event<>";
     }
 

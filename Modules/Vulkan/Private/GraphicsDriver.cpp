@@ -1,5 +1,6 @@
 #include <Dusk/Vulkan/GraphicsDriver.hpp>
 #include <Dusk/Vulkan/Texture.hpp>
+#include <Dusk/Vulkan/Shader.hpp>
 
 #include <Dusk/Log.hpp>
 #include <Dusk/Dusk.hpp>
@@ -284,7 +285,7 @@ std::shared_ptr<Dusk::Texture> GraphicsDriver::CreateTexture()
 
 std::shared_ptr<Dusk::Shader> GraphicsDriver::CreateShader()
 {
-    return nullptr;
+    return std::make_shared<Shader>();
 }
 
 std::shared_ptr<Dusk::Mesh> GraphicsDriver::CreateMesh()

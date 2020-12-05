@@ -26,7 +26,7 @@ public:
 
     virtual ~MeshData() = default;
 
-    inline std::string GetClassID() const {
+    inline std::string GetClassID() const override {
         return "Dusk::UpdateContext";
     }
 
@@ -58,7 +58,7 @@ public:
 
     virtual ~Mesh() = default;
 
-    inline std::string GetClassID() const {
+    inline std::string GetClassID() const override {
         return "Dusk::Mesh";
     }
 

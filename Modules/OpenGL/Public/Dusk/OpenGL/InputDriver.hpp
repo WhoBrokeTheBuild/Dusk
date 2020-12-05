@@ -18,7 +18,7 @@ public:
 
     virtual ~InputDriver();
 
-    inline std::string GetClassID() const {
+    inline std::string GetClassID() const override {
         return "Dusk::OpenGL::InputDriver";
     }
 

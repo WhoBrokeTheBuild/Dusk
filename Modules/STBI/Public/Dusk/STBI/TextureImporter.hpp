@@ -44,7 +44,7 @@ public:
 
     TextureImporter() = default;
 
-    inline std::string GetClassID() const {
+    inline std::string GetClassID() const override {
         return "Dusk::STBI::TextureImporter";
     }
 

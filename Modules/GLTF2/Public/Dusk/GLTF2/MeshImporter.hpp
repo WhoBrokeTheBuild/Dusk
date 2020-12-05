@@ -62,7 +62,7 @@ public:
 
     MeshImporter() = default;
 
-    inline std::string GetClassID() const {
+    inline std::string GetClassID() const override {
         return "Dusk::GLTF2::MeshImporter";
     }
 

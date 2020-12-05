@@ -14,7 +14,7 @@ public:
 
     virtual ~Texture();
 
-    inline std::string GetClassID() const {
+    inline std::string GetClassID() const override {
         return "Dusk::Vulkan::Texture";
     }
 

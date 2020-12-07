@@ -2,10 +2,10 @@
 #include <Dusk/Log.hpp>
 #include <Dusk/Benchmark.hpp>
 
-namespace Dusk::OpenGL {
+namespace Dusk {
 
 DUSK_OPENGL_API
-Texture::~Texture()
+OpenGLTexture::~OpenGLTexture()
 {
     if (_glID) {
         glDeleteTextures(1, &_glID);
@@ -14,7 +14,7 @@ Texture::~Texture()
 }
 
 DUSK_OPENGL_API
-bool Texture::Load(const TextureData * data, Options opts /*= Options()*/)
+bool OpenGLTexture::Load(const TextureData * data, Options opts /*= Options()*/)
 {
     DuskBenchmarkStart();
 
@@ -51,18 +51,18 @@ bool Texture::Load(const TextureData * data, Options opts /*= Options()*/)
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    DuskBenchmarkEnd("OpenGL::Texture::Load");
+    DuskBenchmarkEnd("OpenGLTexture::Load");
     return true;
 }
 
 DUSK_OPENGL_API
-void Texture::Bind() 
+void OpenGLTexture::Bind() 
 {
     glBindTexture(GL_TEXTURE_2D, _glID);
 }
 
 DUSK_OPENGL_API
-GLenum Texture::GetGLDataFormat(int components)
+GLenum OpenGLTexture::GetGLDataFormat(int components)
 {
     switch (components) {
     case 1:
@@ -79,7 +79,7 @@ GLenum Texture::GetGLDataFormat(int components)
 }
 
 DUSK_OPENGL_API
-GLenum Texture::GetGLDataType(const TextureData::DataType& type)
+GLenum OpenGLTexture::GetGLDataType(const TextureData::DataType& type)
 {
     switch (type) {
     case TextureData::DataType::UnsignedByte:
@@ -100,7 +100,7 @@ GLenum Texture::GetGLDataType(const TextureData::DataType& type)
 }
 
 DUSK_OPENGL_API
-GLenum Texture::GetGLWrapType(const Texture::WrapType& type)
+GLenum OpenGLTexture::GetGLWrapType(const Texture::WrapType& type)
 {
     switch (type) {
     case Texture::WrapType::Repeat:
@@ -117,7 +117,7 @@ GLenum Texture::GetGLWrapType(const Texture::WrapType& type)
 }
 
 DUSK_OPENGL_API
-GLenum Texture::GetGLFilterType(const Texture::FilterType& type)
+GLenum OpenGLTexture::GetGLFilterType(const Texture::FilterType& type)
 {
     switch (type) {
     case Texture::FilterType::Nearest:
@@ -137,4 +137,4 @@ GLenum Texture::GetGLFilterType(const Texture::FilterType& type)
     return GL_INVALID_ENUM;
 }
 
-} // namespace Dusk::OpenGL
+} // namespace Dusk

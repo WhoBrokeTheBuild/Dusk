@@ -132,8 +132,8 @@ MACRO(DEFINE_MODULE _target _prefix)
     TARGET_COMPILE_OPTIONS(
         ${_target}
         PUBLIC
-            # Configure VS to use C++17, since it ignores CXX_STANDARD
-            $<$<CXX_COMPILER_ID:MSVC>: /std:c++17>
+            # Configure VS to use C++20, since it ignores CXX_STANDARD
+            $<$<CXX_COMPILER_ID:MSVC>: /std:c++latest>
 
             # Force windows to use UTF-8
             $<$<CXX_COMPILER_ID:MSVC>: /utf-8>
@@ -154,7 +154,7 @@ MACRO(DEFINE_MODULE _target _prefix)
     SET_TARGET_PROPERTIES(
         ${_target}
         PROPERTIES
-            CXX_STANDARD 17
+            CXX_STANDARD 20
             CXX_STANDARD_REQUIRED ON
             CXX_EXTENSIONS OFF
             DEFINE_SYMBOL "DUSK_${_prefix}_EXPORT"

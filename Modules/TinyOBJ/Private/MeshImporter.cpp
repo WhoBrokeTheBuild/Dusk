@@ -6,15 +6,15 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
-namespace Dusk::TinyOBJ {
+namespace Dusk {
 
 DUSK_TINYOBJ_API
-std::vector<std::unique_ptr<Dusk::MeshData>> MeshImporter::LoadFromFile(const std::string& filename)
+std::vector<std::unique_ptr<MeshData>> TinyOBJMeshImporter::LoadFromFile(const std::string& filename)
 {
     DuskBenchmarkStart();
 
     const std::string& dir = GetDirname(filename);
-    std::vector<std::unique_ptr<Dusk::MeshData>> meshes;
+    std::vector<std::unique_ptr<MeshData>> meshes;
 
     DuskLogInfo("%s %s", dir, filename);
 
@@ -43,53 +43,53 @@ std::vector<std::unique_ptr<Dusk::MeshData>> MeshImporter::LoadFromFile(const st
     bool hasColors = (!attrib.colors.empty());
 
     for (auto& shape : shapes) {
-        auto mesh = std::make_unique<MeshData>();
+        TinyOBJMeshData * meshData = New TinyOBJMeshData();
         
-        mesh->Vertices.reserve(shape.mesh.indices.size());
+        meshData->Vertices.reserve(shape.mesh.indices.size());
         
         if (hasNormals) {
-            mesh->Normals.reserve(shape.mesh.indices.size());
+            meshData->Normals.reserve(shape.mesh.indices.size());
         }
 
         if (hasUVs) {
-            mesh->UVs.reserve(shape.mesh.indices.size());
+            meshData->UVs.reserve(shape.mesh.indices.size());
         }
 
         if (hasColors) {
-            mesh->Colors.reserve(shape.mesh.indices.size());
+            meshData->Colors.reserve(shape.mesh.indices.size());
         }
 
         for (const auto& i : shape.mesh.indices) {
-            mesh->Vertices.push_back(attrib.vertices[3 * i.vertex_index + 0]);
-            mesh->Vertices.push_back(attrib.vertices[3 * i.vertex_index + 1]);
-            mesh->Vertices.push_back(attrib.vertices[3 * i.vertex_index + 2]);
-            mesh->Vertices.push_back(1.0f);
+            meshData->Vertices.push_back(attrib.vertices[3 * i.vertex_index + 0]);
+            meshData->Vertices.push_back(attrib.vertices[3 * i.vertex_index + 1]);
+            meshData->Vertices.push_back(attrib.vertices[3 * i.vertex_index + 2]);
+            meshData->Vertices.push_back(1.0f);
             
             if (hasNormals) {
-                mesh->Normals.push_back(attrib.normals[3 * i.normal_index + 0]);
-                mesh->Normals.push_back(attrib.normals[3 * i.normal_index + 1]);
-                mesh->Normals.push_back(attrib.normals[3 * i.normal_index + 2]);
-                mesh->Normals.push_back(1.0f);
+                meshData->Normals.push_back(attrib.normals[3 * i.normal_index + 0]);
+                meshData->Normals.push_back(attrib.normals[3 * i.normal_index + 1]);
+                meshData->Normals.push_back(attrib.normals[3 * i.normal_index + 2]);
+                meshData->Normals.push_back(1.0f);
             }
             
             if (hasUVs) {
-                mesh->UVs.push_back(attrib.texcoords[2 * i.texcoord_index + 0]);
-                mesh->UVs.push_back(attrib.texcoords[2 * i.texcoord_index + 1]);
+                meshData->UVs.push_back(attrib.texcoords[2 * i.texcoord_index + 0]);
+                meshData->UVs.push_back(attrib.texcoords[2 * i.texcoord_index + 1]);
             }
 
             if (hasColors) {
-                mesh->Colors.push_back(attrib.colors[3 * i.vertex_index + 0]);
-                mesh->Colors.push_back(attrib.colors[3 * i.vertex_index + 1]);
-                mesh->Colors.push_back(attrib.colors[3 * i.vertex_index + 2]);
-                mesh->Colors.push_back(1.0f);
+                meshData->Colors.push_back(attrib.colors[3 * i.vertex_index + 0]);
+                meshData->Colors.push_back(attrib.colors[3 * i.vertex_index + 1]);
+                meshData->Colors.push_back(attrib.colors[3 * i.vertex_index + 2]);
+                meshData->Colors.push_back(1.0f);
             }
         }
 
-        meshes.push_back(std::move(mesh));
+        meshes.push_back(std::unique_ptr<MeshData>(meshData));
     }
 
-    DuskBenchmarkEnd("TinyOBJ::MeshImporter::LoadFromFile");
+    DuskBenchmarkEnd("TinyOBJMeshImporter::LoadFromFile");
     return meshes;
 }
 
-} // namespace Dusk::TinyOBJ
+} // namespace Dusk

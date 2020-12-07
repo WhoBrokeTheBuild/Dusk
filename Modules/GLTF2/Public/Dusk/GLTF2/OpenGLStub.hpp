@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-namespace Dusk::GLTF2 {
+namespace Dusk {
 
 typedef uint32_t GLenum;
 
@@ -20,6 +20,6 @@ typedef uint32_t GLenum;
 #define GL_LINEAR_MIPMAP_LINEAR     0x2703
 #define GL_LINEAR_MIPMAP_NEAREST    0x2701
 
-} // namespace Dusk::GLTF2
+} // namespace Dusk
 
 #endif // DUSK_GLTF2_OPENGL_STUB_HPP

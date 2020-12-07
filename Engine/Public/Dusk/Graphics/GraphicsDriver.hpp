@@ -6,6 +6,7 @@
 #include <Dusk/Math.hpp>
 #include <Dusk/UpdateContext.hpp>
 #include <Dusk/RenderContext.hpp>
+#include <Dusk/Graphics/Pipeline.hpp>
 #include <Dusk/Graphics/Texture.hpp>
 #include <Dusk/Graphics/Shader.hpp>
 #include <Dusk/Graphics/Mesh.hpp>
@@ -52,6 +53,8 @@ public:
     virtual void ProcessEvents() = 0;
     
     virtual void SwapBuffers() = 0;
+
+    virtual std::shared_ptr<Pipeline> CreatePipeline() = 0;
 
     virtual std::shared_ptr<Texture> CreateTexture() = 0;
 

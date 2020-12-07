@@ -1,7 +1,4 @@
 #include <Dusk/Vulkan/GraphicsDriver.hpp>
-#include <Dusk/Vulkan/Texture.hpp>
-#include <Dusk/Vulkan/Shader.hpp>
-
 #include <Dusk/Log.hpp>
 #include <Dusk/Dusk.hpp>
 
@@ -11,12 +8,11 @@
 #undef near
 #undef far
 
-namespace Dusk::Vulkan {
+namespace Dusk {
 
-bool IsDeviceSuitable(const VkPhysicalDevice device);
 
 DUSK_VULKAN_API
-GraphicsDriver::GraphicsDriver() {
+VulkanGraphicsDriver::VulkanGraphicsDriver() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         DuskLogError("Failed to initialize SDL, %s", SDL_GetError());
         return;
@@ -231,39 +227,41 @@ GraphicsDriver::GraphicsDriver() {
 
 
 
+
+
 } 
 
 DUSK_VULKAN_API
-GraphicsDriver::~GraphicsDriver() {
+VulkanGraphicsDriver::~VulkanGraphicsDriver() {
     SDL_DestroyWindow(_sdlWindow);
     SDL_Quit();
 }
 
 DUSK_VULKAN_API
-void GraphicsDriver::SetWindowTitle(const std::string& title) {
+void VulkanGraphicsDriver::SetWindowTitle(const std::string& title) {
     SDL_SetWindowTitle(_sdlWindow, title.c_str());
 }
 
 DUSK_VULKAN_API
-std::string GraphicsDriver::GetWindowTitle() {
+std::string VulkanGraphicsDriver::GetWindowTitle() {
     return SDL_GetWindowTitle(_sdlWindow);
 }
 
 DUSK_VULKAN_API
-void GraphicsDriver::SetWindowSize(const ivec2& size) {
+void VulkanGraphicsDriver::SetWindowSize(const ivec2& size) {
     SDL_SetWindowSize(_sdlWindow, size.x, size.y);
     // glViewport(0, 0, size.x, size.y);
 }
 
 DUSK_VULKAN_API
-ivec2 GraphicsDriver::GetWindowSize() {
+ivec2 VulkanGraphicsDriver::GetWindowSize() {
     ivec2 size;
     SDL_GetWindowSize(_sdlWindow, &size.x, &size.y);
     return size;
 }
 
 DUSK_VULKAN_API
-void GraphicsDriver::ProcessEvents() {
+void VulkanGraphicsDriver::ProcessEvents() {
     SDL_Event event;
     while (SDL_PollEvent(&event) > 0) {
         if (event.type == SDL_QUIT) {
@@ -273,33 +271,97 @@ void GraphicsDriver::ProcessEvents() {
 }
 
 DUSK_VULKAN_API
-void GraphicsDriver::SwapBuffers() {
+void VulkanGraphicsDriver::SwapBuffers() {
     // glClear(GL_COLOR_BUFFER_BIT);
     SDL_GL_SwapWindow(_sdlWindow);
 }
 
-std::shared_ptr<Dusk::Texture> GraphicsDriver::CreateTexture()
+DUSK_VULKAN_API
+std::shared_ptr<Pipeline> VulkanGraphicsDriver::CreatePipeline()
 {
-    return std::make_shared<Texture>(_vkDevice);
+    return std::shared_ptr<Pipeline>(New VulkanPipeline());
 }
 
-std::shared_ptr<Dusk::Shader> GraphicsDriver::CreateShader()
+DUSK_VULKAN_API
+std::shared_ptr<Texture> VulkanGraphicsDriver::CreateTexture()
 {
-    return std::make_shared<Shader>();
+    return std::shared_ptr<Texture>(New VulkanTexture());
 }
 
-std::shared_ptr<Dusk::Mesh> GraphicsDriver::CreateMesh()
+DUSK_VULKAN_API
+std::shared_ptr<Shader> VulkanGraphicsDriver::CreateShader()
 {
-    return nullptr;
+    return std::shared_ptr<Shader>(New VulkanShader());
 }
 
-bool GraphicsDriver::SetShaderData(const std::string& name, size_t size, void * buffer)
+DUSK_VULKAN_API
+std::shared_ptr<Mesh> VulkanGraphicsDriver::CreateMesh()
+{
+    return std::shared_ptr<Mesh>(New VulkanMesh());
+}
+
+DUSK_VULKAN_API
+bool VulkanGraphicsDriver::SetShaderData(const std::string& name, size_t size, void * buffer)
 {
     return true;
 }
 
+uint32_t VulkanGraphicsDriver::FindMemoryType(uint32_t filter, VkMemoryPropertyFlags props)
+{
+    VkPhysicalDeviceMemoryProperties memoryProperties;
+    vkGetPhysicalDeviceMemoryProperties(_vkPhysicalDevice, &memoryProperties);
 
-bool IsDeviceSuitable(const VkPhysicalDevice device)
+    for (unsigned i = 0; i < memoryProperties.memoryTypeCount; ++i) {
+        if ((filter & (1 << i)) && 
+            (memoryProperties.memoryTypes[i].propertyFlags & props) == props) {
+            return i;
+        }
+    }
+
+    DuskLogError("Failed to find suitable memory type");
+    return UINT32_MAX;
+}
+
+bool VulkanGraphicsDriver::CreateBuffer(VkBuffer & buffer, VkDeviceMemory & memory, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags props)
+{
+    VkResult result;
+    
+    VkBufferCreateInfo bufferCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .size = size,
+        .usage = usage,
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+    };
+
+    result = vkCreateBuffer(_vkDevice, &bufferCreateInfo, nullptr, &buffer);
+    if (result != VK_SUCCESS) {
+        DuskLogError("Failed to create buffer");
+        return false;
+    }
+
+    VkMemoryRequirements memoryRequirements;
+    vkGetBufferMemoryRequirements(_vkDevice, buffer, &memoryRequirements);
+
+    VkMemoryAllocateInfo memoryAllocateInfo = {
+        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        .pNext = nullptr,
+        .allocationSize = memoryRequirements.size,
+        .memoryTypeIndex = FindMemoryType(memoryRequirements.memoryTypeBits, props),
+    };
+
+    result = vkAllocateMemory(_vkDevice, &memoryAllocateInfo, nullptr, &memory);
+    if (result != VK_SUCCESS) {
+        DuskLogError("Failed to allocate memory");
+        return false;
+    }
+
+    vkBindBufferMemory(_vkDevice, buffer, memory, 0);
+    return true;
+}
+
+bool VulkanGraphicsDriver::IsDeviceSuitable(const VkPhysicalDevice device)
 {
     VkPhysicalDeviceProperties deviceProperties;
     VkPhysicalDeviceFeatures deviceFeatures;
@@ -309,4 +371,4 @@ bool IsDeviceSuitable(const VkPhysicalDevice device)
     return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && deviceFeatures.geometryShader;
 }
 
-} // namespace Dusk::OpenGL
+} // namespace Dusk

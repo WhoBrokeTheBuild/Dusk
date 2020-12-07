@@ -1,18 +1,19 @@
 #include <Dusk/Module.hpp>
 
-namespace Dusk::Archive {
+using namespace Dusk;
 
-void ModuleInit() {
+void ArchiveModuleInit()
+{
+
 }
 
-void ModuleTerm() {
+void ArchiveModuleTerm()
+{
 
 }
 
 DEFINE_MODULE() {
     "Archive",
-    ModuleInit,
-    ModuleTerm,
+    ArchiveModuleInit,
+    ArchiveModuleTerm,
 };
-
-}

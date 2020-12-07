@@ -4,23 +4,21 @@
 #include <Dusk/DirectX/Config.hpp>
 #include <Dusk/Graphics/Shader.hpp>
 
-namespace Dusk::DirectX {
+namespace Dusk {
 
-class DUSK_DIRECTX_API Shader : public Dusk::Shader
+class DUSK_DIRECTX_API DirectXShader : public Shader
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(Shader)
+    DISALLOW_COPY_AND_ASSIGN(DirectXShader)
 
-    Shader() = default;
+    DirectXShader() = default;
 
     inline std::string GetClassID() const override {
-        return "Dusk::DirectX::Shader";
+        return "DuskDirectX::Shader";
     }
 
     bool LoadFromFiles(const std::vector<std::string>& filenames) override;
-
-    void Bind() override;
 
 private:
 
@@ -54,8 +52,8 @@ private:
     ComPtr<IDxcBlob> _gs; // Geometry Shader
     ComPtr<IDxcBlob> _cs; // Compute Shader
 
-}; // class Shader
+}; // class DirectXShader
 
-} // namespace Dusk::DirectX
+} // namespace Dusk
 
 #endif // DUSK_DIRECTX_SHADER_HPP

@@ -6,10 +6,10 @@
 #include <vector>
 #include <sstream>
 
-namespace Dusk::OpenGL {
+namespace Dusk {
 
 DUSK_OPENGL_API
-bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
+bool OpenGLShader::LoadFromFiles(const std::vector<std::string>& filenames)
 {
     DuskBenchmarkStart();
 
@@ -98,24 +98,24 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
         glDetachShader(_glID, shader);
     }
 
-    DuskBenchmarkEnd("OpenGL::Shader::LoadFromFiles");
+    DuskBenchmarkEnd("OpenGLShader::LoadFromFiles");
     return true;
 }
 
 DUSK_OPENGL_API
-void Shader::Bind()
+void OpenGLShader::Bind()
 {
     glUseProgram(_glID);
 }
 
 DUSK_OPENGL_API
-GLuint Shader::GetID()
+GLuint OpenGLShader::GetID()
 {
     return _glID;
 }
 
 DUSK_OPENGL_API
-GLuint Shader::LoadSPV(const std::string& filename)
+GLuint OpenGLShader::LoadSPV(const std::string& filename)
 {
     DuskLogVerbose("Looking for SPIR-V shader '%s'", filename);
 
@@ -162,7 +162,7 @@ GLuint Shader::LoadSPV(const std::string& filename)
 }
 
 DUSK_OPENGL_API
-GLuint Shader::LoadGLSL(const std::string& filename)
+GLuint OpenGLShader::LoadGLSL(const std::string& filename)
 {
     DuskLogVerbose("Looking for GLSL shader '%s'", filename);
 
@@ -264,7 +264,7 @@ GLuint Shader::LoadGLSL(const std::string& filename)
 }
 
 DUSK_OPENGL_API
-GLenum Shader::GetGLShaderType(const std::string& filename)
+GLenum OpenGLShader::GetGLShaderType(const std::string& filename)
 {
     std::string ext = GetExtension(filename);
     if (ext == "spv" || ext == "glsl") {
@@ -294,4 +294,4 @@ GLenum Shader::GetGLShaderType(const std::string& filename)
     return GL_INVALID_ENUM;
 }
 
-} // namespace Dusk::OpenGL
+} // namespace Dusk

@@ -5,7 +5,7 @@
 // DirectX 12 Extension Library
 #include "d3dx12.h"
 
-namespace Dusk::DirectX {
+namespace Dusk {
 
 LRESULT CALLBACK WndProc(HWND hwnd, unsigned msg, WPARAM wParam, LPARAM lParam)
 {
@@ -323,4 +323,4 @@ LRESULT GraphicsDriver::ProcessMessage(HWND hwnd, unsigned msg, WPARAM wParam, L
 }
 
 
-} // namespace Dusk::DirectX
+} // namespace Dusk

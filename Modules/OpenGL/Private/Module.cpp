@@ -3,20 +3,20 @@
 #include <Dusk/OpenGL/GraphicsDriver.hpp>
 #include <Dusk/OpenGL/InputDriver.hpp>
 
-namespace Dusk::OpenGL {
+using namespace Dusk;
 
-void ModuleInit() {
-    SetGraphicsDriver(std::unique_ptr<Dusk::GraphicsDriver>(New GraphicsDriver()));
+void OpenGLModuleInit()
+{
+    SetGraphicsDriver(std::unique_ptr<GraphicsDriver>(New OpenGLGraphicsDriver()));
 }
 
-void ModuleTerm() {
+void OpenGLModuleTerm()
+{
     SetGraphicsDriver(nullptr);
 }
 
 DEFINE_MODULE() {
     "OpenGL",
-    ModuleInit,
-    ModuleTerm,
+    OpenGLModuleInit,
+    OpenGLModuleTerm,
 };
-
-} // namespace Dusk::OpenGL

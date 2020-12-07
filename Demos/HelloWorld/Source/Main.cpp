@@ -15,10 +15,72 @@
 
 #include <thread>
 
-void testFunc(const Dusk::WindowResizedEventData * data)
+void run()
 {
-    DuskLogInfo("testFunc %s", 
-        glm::to_string(data->Size));
+    Dusk::UpdateContext updateContext;
+    Dusk::RenderContext renderContext;
+
+    Dusk::Scene scene;
+    // scene.LoadFromFile("Assets/Models/TestScene.glb");
+    // scene.LoadFromFile("Assets/Models/WaterBottle.glb");
+    // scene.LoadFromFile("Assets/Models/DamagedHelmet.glb");
+    // scene.LoadFromFile("Assets/Models/SciFiHelmet/SciFiHelmet.gltf");
+    
+    Dusk::Camera camera;
+    camera.SetPosition({ 10, 10, 10 });
+    camera.SetLookAt({ 0, 0, 0 });
+
+    // scene.AddComponent(std::make_unique<Dusk::AxisComponent>());
+
+    auto transformData = renderContext.GetTransformData();
+    transformData->View = camera.GetView();
+    transformData->Projection = camera.GetProjection();
+
+    // if (!scene.LoadFromFile("Assets/Models/cube.obj")) {
+    //     DuskLogError("Failed to load Assets/Models/cube.obj");
+    // }
+
+    // auto actor = scene.AddChild(std::make_unique<Dusk::Entity>());
+    // auto mesh = std::make_unique<Dusk::MeshComponent>();
+    // mesh->LoadFromFile("Assets/Models/crate/crate.obj");
+    // actor->AddComponent(std::move(mesh));
+
+    auto gfx = Dusk::GetGraphicsDriver();
+
+    // Dusk::WindowResizedEventData testData;
+    // testData.Size = { 1024, 768 };
+    // gfx->WindowResizedEvent.Call(&testData);
+
+    auto shader = gfx->CreateShader();
+    if (!shader->LoadFromFiles({
+        "flat.vert",
+        "flat.frag",
+    })) {
+        return;
+    }
+
+    auto pipeline = gfx->CreatePipeline();
+    pipeline->SetShader(shader.get());
+    pipeline->Bind();
+
+    Dusk::ScriptConsole::Initialize();
+
+    Dusk::SetRunning(true);
+
+    while (Dusk::IsRunning()) {
+        gfx->ProcessEvents();
+
+        scene.Update(&updateContext);
+
+        Dusk::ScriptConsole::Update();
+
+        // shader->Bind();
+        scene.Render(&renderContext);
+
+        gfx->SwapBuffers();
+    }
+
+    Dusk::ScriptConsole::Terminate();
 }
 
 int main(int argc, char** argv)
@@ -32,66 +94,8 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    Dusk::UpdateContext updateContext;
-    Dusk::RenderContext renderContext;
+    run();
 
-    {
-        Dusk::Scene scene;
-        // scene.LoadFromFile("Assets/Models/TestScene.glb");
-        // scene.LoadFromFile("Assets/Models/WaterBottle.glb");
-        // scene.LoadFromFile("Assets/Models/DamagedHelmet.glb");
-        // scene.LoadFromFile("Assets/Models/SciFiHelmet/SciFiHelmet.gltf");
-        
-        Dusk::Camera camera;
-        camera.SetPosition({ 10, 10, 10 });
-        camera.SetLookAt({ 0, 0, 0 });
-
-        // scene.AddComponent(std::make_unique<Dusk::AxisComponent>());
-
-        auto transformData = renderContext.GetTransformData();
-        transformData->View = camera.GetView();
-        transformData->Projection = camera.GetProjection();
-
-        // if (!scene.LoadFromFile("Assets/Models/cube.obj")) {
-        //     DuskLogError("Failed to load Assets/Models/cube.obj");
-        // }
-
-        auto actor = scene.AddChild(std::make_unique<Dusk::Entity>());
-        auto mesh = std::make_unique<Dusk::MeshComponent>();
-        mesh->LoadFromFile("Assets/Models/crate/crate.obj");
-        actor->AddComponent(std::move(mesh));
-
-        auto gfx = Dusk::GetGraphicsDriver();
-
-        // Dusk::WindowResizedEventData testData;
-        // testData.Size = { 1024, 768 };
-        // gfx->WindowResizedEvent.Call(&testData);
-
-        auto shader = gfx->CreateShader();
-        shader->LoadFromFiles({
-           "flat.vert",
-           "flat.frag",
-        });
-
-        Dusk::ScriptConsole::Initialize();
-
-        Dusk::SetRunning(true);
-
-        while (Dusk::IsRunning()) {
-            gfx->ProcessEvents();
-
-            scene.Update(&updateContext);
-
-            Dusk::ScriptConsole::Update();
-
-            shader->Bind();
-            scene.Render(&renderContext);
-
-            gfx->SwapBuffers();
-        }
-    }
-
-    Dusk::ScriptConsole::Terminate();
     Dusk::Terminate();
 
     return 0;

@@ -2,18 +2,18 @@
 
 #include <Dusk/Log.hpp>
 
-namespace Dusk::FreeType {
+using namespace Dusk;
 
-void ModuleInit() {
+void FreeTypeModuleInit()
+{
 }
 
-void ModuleTerm() {
+void FreeTypeModuleTerm()
+{
 }
 
 DEFINE_MODULE() {
     "FreeType",
-    ModuleInit,
-    ModuleTerm,
+    FreeTypeModuleInit,
+    FreeTypeModuleTerm,
 };
-
-} // namespace Dusk::FreeType

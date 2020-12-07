@@ -5,37 +5,42 @@
 #include <Dusk/Graphics/Texture.hpp>
 #include <Dusk/Graphics/TextureImporter.hpp>
 
-namespace Dusk::OpenGL {
+namespace Dusk {
 
-class DUSK_OPENGL_API Texture : public Dusk::Texture 
+#define DUSK_OPENGL_TEXTURE(x) (dynamic_cast<Dusk::OpenGLTexture *>(x))
+
+class DUSK_OPENGL_API OpenGLTexture : public Texture 
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(Texture)
+    DISALLOW_COPY_AND_ASSIGN(OpenGLTexture)
 
-    Texture() = default;
+    OpenGLTexture() = default;
 
-    virtual ~Texture();
+    virtual ~OpenGLTexture();
 
     inline std::string GetClassID() const override {
-        return "Dusk::OpenGL::Texture";
+        return "Dusk::OpenGLTexture";
     }
 
     bool Load(const TextureData * data, Options opts = Options()) override;
 
-    void Bind() override;
+    void Bind();
 
 private:
 
     GLenum GetGLDataFormat(int components);
+    
     GLenum GetGLDataType(const TextureData::DataType& type);
+
     GLenum GetGLWrapType(const WrapType& type);
+
     GLenum GetGLFilterType(const FilterType& type);
 
     GLuint _glID = 0;
 
-}; // class Texture
+}; // class OpenGLTexture
 
-} // namespace Dusk::OpenGL
+} // namespace Dusk
 
 #endif // DUSK_OPENGL_TEXTURE_HPP

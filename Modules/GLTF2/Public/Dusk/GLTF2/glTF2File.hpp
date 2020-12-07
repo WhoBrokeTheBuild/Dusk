@@ -4,16 +4,14 @@
 #include <Dusk/GLTF2/Config.hpp>
 #include <Dusk/GLTF2/OpenGLStub.hpp>
 #include <Dusk/Math.hpp>
+#include <Dusk/JSON.hpp>
 #include <Dusk/Graphics/Texture.hpp>
 #include <Dusk/Graphics/TextureImporter.hpp>
 #include <Dusk/Graphics/Material.hpp>
 
 #include <cstdint>
-#include <nlohmann/json.hpp>
 
-namespace Dusk::GLTF2 {
-
-using json = nlohmann::json;
+namespace Dusk {
 
 DUSK_GLTF2_API
 inline vec2 ParseVec2(const json& value, vec2 def)
@@ -148,7 +146,7 @@ public:
     virtual ~glTF2File() = default;
 
     inline std::string GetClassID() const override {
-        return "Dusk::GLTF2::glTF2File";
+        return "Dusk::glTF2File";
     }
 
     bool LoadFromFile(const std::string& filename);
@@ -203,6 +201,6 @@ private:
 
 };
 
-} // namespace Dusk::GLTF2
+} // namespace Dusk
 
 #endif // DUSK_GLTF2_GLTF2_FILE_HPP

@@ -4,33 +4,40 @@
 #include <Dusk/Vulkan/Config.hpp>
 #include <Dusk/Graphics/Shader.hpp>
 
-namespace Dusk::Vulkan {
+namespace Dusk {
 
-class DUSK_VULKAN_API Shader : public Dusk::Shader
+#define DUSK_VULKAN_SHADER(x) (dynamic_cast<Dusk::VulkanShader *>(x))
+
+class DUSK_VULKAN_API VulkanShader : public Dusk::Shader
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(Shader)
+    DISALLOW_COPY_AND_ASSIGN(VulkanShader)
 
-    Shader() = default;
+    VulkanShader() = default;
 
-    virtual ~Shader() = default;
+    virtual ~VulkanShader() = default;
 
     inline std::string GetClassID() const override {
-        return "Dusk::Vulkan::Shader";
+        return "Dusk::Shader";
     }
 
     bool LoadFromFiles(const std::vector<std::string>& filenames) override;
 
-    void Bind() override;
+    inline std::vector<VkPipelineShaderStageCreateInfo>& GetStages() {
+        return _shaderStages;
+    }
 
 private:
+
+    bool LoadSPV(const std::string& filename);
+
     VkShaderStageFlagBits GetVkShaderType(const std::string& filename);
 
     std::vector<VkPipelineShaderStageCreateInfo> _shaderStages;
 
-}; // class Shader
+}; // class VulkanShader
 
-} // namespace Dusk::Vulkan
+} // namespace Dusk
 
 #endif // DUSK_VULKAN_SHADER_HPP

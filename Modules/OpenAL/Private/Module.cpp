@@ -1,18 +1,18 @@
 #include <Dusk/Module.hpp>
 
-namespace Dusk::OpenAL {
+using namespace Dusk;
 
-void ModuleInit() {
+void OpenALModuleInit()
+{
 }
 
-void ModuleTerm() {
+void OpenALModuleTerm()
+{
 
 }
 
 DEFINE_MODULE() {
     "OpenAL",
-    ModuleInit,
-    ModuleTerm,
+    OpenALModuleInit,
+    OpenALModuleTerm,
 };
-
-}

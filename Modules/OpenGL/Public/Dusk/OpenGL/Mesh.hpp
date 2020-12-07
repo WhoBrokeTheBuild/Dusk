@@ -4,21 +4,23 @@
 #include <Dusk/OpenGL/Config.hpp>
 #include <Dusk/Graphics/Mesh.hpp>
 
-namespace Dusk::OpenGL {
+namespace Dusk {
 
-class DUSK_OPENGL_API Mesh : public Dusk::Mesh 
+class DUSK_OPENGL_API OpenGLMesh : public Mesh 
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(Mesh)
+    DISALLOW_COPY_AND_ASSIGN(OpenGLMesh)
 
-    Mesh() = default;
+    OpenGLMesh() = default;
 
-    void Render() override;
+    virtual ~OpenGLMesh() = default;
 
     inline std::string GetClassID() const override {
-        return "Dusk::OpenGL::Mesh";
+        return "Dusk::OpenGLMesh";
     }
+
+    void Render() override;
 
     bool Load(const MeshData * data) override;
 
@@ -32,8 +34,8 @@ private:
 
     bool _indexed;
 
-}; // class Mesh
+}; // class OpenGLMesh
 
-} // namespace Dusk::OpenGL
+} // namespace Dusk
 
 #endif // DUSK_OPENGL_MESH_HPP

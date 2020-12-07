@@ -2,20 +2,20 @@
 
 #include <Dusk/Vulkan/GraphicsDriver.hpp>
 
-namespace Dusk::Vulkan {
+using namespace Dusk;
 
-void ModuleInit() {
-    SetGraphicsDriver(std::unique_ptr<Dusk::GraphicsDriver>(New GraphicsDriver()));
+void VulkanModuleInit()
+{
+    SetGraphicsDriver(std::unique_ptr<GraphicsDriver>(New VulkanGraphicsDriver()));
 }
 
-void ModuleTerm() {
+void VulkanModuleTerm()
+{
     SetGraphicsDriver(nullptr);
 }
 
 DEFINE_MODULE() {
     "Vulkan",
-    ModuleInit,
-    ModuleTerm,
+    VulkanModuleInit,
+    VulkanModuleTerm,
 };
-
-}

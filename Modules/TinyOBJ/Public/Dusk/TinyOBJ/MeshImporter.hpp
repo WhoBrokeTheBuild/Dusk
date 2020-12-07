@@ -6,11 +6,15 @@
 
 #include <vector>
 
-namespace Dusk::TinyOBJ {
+namespace Dusk {
 
-class DUSK_TINYOBJ_API MeshData : public Dusk::MeshData
+class DUSK_TINYOBJ_API TinyOBJMeshData : public MeshData
 {
 public:
+
+    inline std::string GetClassID() const override {
+        return "Dusk::TinyOBJMeshData";
+    }
 
     std::vector<float> Vertices;
 
@@ -52,24 +56,24 @@ public:
         return gsl::span<float>();
     }
 
-}; // class MeshData
+}; // class TinyOBJMeshData
 
-class DUSK_TINYOBJ_API MeshImporter : public Dusk::MeshImporter
+class DUSK_TINYOBJ_API TinyOBJMeshImporter : public MeshImporter
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(MeshImporter)
+    DISALLOW_COPY_AND_ASSIGN(TinyOBJMeshImporter)
 
-    MeshImporter() = default;
+    TinyOBJMeshImporter() = default;
 
     inline std::string GetClassID() const override {
-        return "Dusk::TinyOBJ::MeshImporter";
+        return "Dusk::TinyOBJMeshImporter";
     }
 
     std::vector<std::unique_ptr<Dusk::MeshData>> LoadFromFile(const std::string& filename) override;
 
-}; // class MeshImporter
+}; // class TinyOBJMeshImporter
 
-} // namespace Dusk::TinyOBJ
+} // namespace Dusk
 
 #endif // DUSK_TINYOBJ_MESH_IMPORTER_HPP

@@ -2,20 +2,18 @@
 
 #include <Dusk/DirectX/GraphicsDriver.hpp>
 
-namespace Dusk::DirectX {
-
-void ModuleInit() {
+void DirectXModuleInit()
+{
     SetGraphicsDriver(std::unique_ptr<Dusk::GraphicsDriver>(New GraphicsDriver()));
 }
 
-void ModuleTerm() {
+void DirectXModuleTerm()
+{
     SetGraphicsDriver(nullptr);
 }
 
 DEFINE_MODULE() {
     "DirectX",
-    ModuleInit,
-    ModuleTerm,
+    DirectXModuleInit,
+    DirectXModuleTerm,
 };
-
-} // namespace Dusk::DirectX

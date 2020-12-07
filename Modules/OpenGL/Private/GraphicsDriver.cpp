@@ -2,10 +2,10 @@
 #include <Dusk/Dusk.hpp>
 #include <Dusk/Log.hpp>
 
-namespace Dusk::OpenGL {
+namespace Dusk {
 
 DUSK_OPENGL_API
-GraphicsDriver::GraphicsDriver()
+OpenGLGraphicsDriver::OpenGLGraphicsDriver()
 {
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
         DuskLogError("Failed to initialize SDL, %s", SDL_GetError());
@@ -98,12 +98,12 @@ GraphicsDriver::GraphicsDriver()
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_ONE_MINUS_SRC_ALPHA);
 
-    _inputDriver = New InputDriver();
-    SetInputDriver(std::unique_ptr<Dusk::InputDriver>(_inputDriver));
+    _inputDriver = New OpenGLInputDriver();
+    SetInputDriver(std::unique_ptr<InputDriver>(_inputDriver));
 }
 
 DUSK_OPENGL_API
-GraphicsDriver::~GraphicsDriver()
+OpenGLGraphicsDriver::~OpenGLGraphicsDriver()
 {
     _inputDriver = nullptr;
     SetInputDriver(nullptr);
@@ -114,26 +114,26 @@ GraphicsDriver::~GraphicsDriver()
 }
 
 DUSK_OPENGL_API
-void GraphicsDriver::SetWindowTitle(const std::string& title)
+void OpenGLGraphicsDriver::SetWindowTitle(const std::string& title)
 {
     SDL_SetWindowTitle(_sdlWindow, title.c_str());
 }
 
 DUSK_OPENGL_API
-std::string GraphicsDriver::GetWindowTitle()
+std::string OpenGLGraphicsDriver::GetWindowTitle()
 {
     return SDL_GetWindowTitle(_sdlWindow);
 }
 
 DUSK_OPENGL_API
-void GraphicsDriver::SetWindowSize(const ivec2& size)
+void OpenGLGraphicsDriver::SetWindowSize(const ivec2& size)
 {
     SDL_SetWindowSize(_sdlWindow, size.x, size.y);
     glViewport(0, 0, size.x, size.y);
 }
 
 DUSK_OPENGL_API
-ivec2 GraphicsDriver::GetWindowSize()
+ivec2 OpenGLGraphicsDriver::GetWindowSize()
 {
     ivec2 size;
     SDL_GetWindowSize(_sdlWindow, &size.x, &size.y);
@@ -141,7 +141,7 @@ ivec2 GraphicsDriver::GetWindowSize()
 }
 
 DUSK_OPENGL_API
-void GraphicsDriver::ProcessEvents()
+void OpenGLGraphicsDriver::ProcessEvents()
 {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
@@ -172,33 +172,39 @@ void GraphicsDriver::ProcessEvents()
 }
 
 DUSK_OPENGL_API
-void GraphicsDriver::SwapBuffers()
+void OpenGLGraphicsDriver::SwapBuffers()
 {
     SDL_GL_SwapWindow(_sdlWindow);
 }
 
 DUSK_OPENGL_API
-std::shared_ptr<Dusk::Texture> GraphicsDriver::CreateTexture()
+std::shared_ptr<Pipeline> OpenGLGraphicsDriver::CreatePipeline()
 {
-    return std::make_shared<Texture>();
+    return std::shared_ptr<Pipeline>(New OpenGLPipeline());
 }
 
 DUSK_OPENGL_API
-std::shared_ptr<Dusk::Shader> GraphicsDriver::CreateShader()
+std::shared_ptr<Texture> OpenGLGraphicsDriver::CreateTexture()
 {
-    auto shader = std::make_shared<Shader>();
+    return std::shared_ptr<Texture>(New OpenGLTexture());
+}
+
+DUSK_OPENGL_API
+std::shared_ptr<Shader> OpenGLGraphicsDriver::CreateShader()
+{
+    auto shader = std::shared_ptr<Shader>(New OpenGLShader());
     _shaders.push_back(shader);
     return shader;
 }
 
 DUSK_OPENGL_API
-std::shared_ptr<Dusk::Mesh> GraphicsDriver::CreateMesh()
+std::shared_ptr<Mesh> OpenGLGraphicsDriver::CreateMesh()
 {
-    return std::make_shared<Mesh>();
+    return std::shared_ptr<Mesh>(New OpenGLMesh());
 }
 
 DUSK_OPENGL_API
-bool GraphicsDriver::SetShaderData(const std::string& name, size_t size, void * buffer)
+bool OpenGLGraphicsDriver::SetShaderData(const std::string& name, size_t size, void * buffer)
 {
     GLuint glID = 0;
 
@@ -208,7 +214,8 @@ bool GraphicsDriver::SetShaderData(const std::string& name, size_t size, void * 
 
         for (int i = 0; i < _shaders.size(); ++i) {
             if (auto shader = _shaders[i].lock()) {
-                GLuint index = glGetUniformBlockIndex(shader->GetID(), name.c_str());
+                OpenGLShader * glShader = DUSK_OPENGL_SHADER(shader.get());
+                GLuint index = glGetUniformBlockIndex(glShader->GetID(), name.c_str());
                 if (index == GL_INVALID_OPERATION || index == GL_INVALID_INDEX) {
                     continue;
                 }
@@ -249,4 +256,4 @@ bool GraphicsDriver::SetShaderData(const std::string& name, size_t size, void * 
     return true;
 }
 
-} // namespace Dusk::OpenGL
+} // namespace Dusk

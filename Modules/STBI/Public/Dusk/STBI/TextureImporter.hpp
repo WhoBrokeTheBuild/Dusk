@@ -4,9 +4,9 @@
 #include <Dusk/STBI/Config.hpp>
 #include <Dusk/Graphics/TextureImporter.hpp>
 
-namespace Dusk::STBI {
+namespace Dusk {
 
-class DUSK_STBI_API TextureData : public Dusk::TextureData
+class DUSK_STBI_API STBITextureData : public TextureData
 {
 public:
 
@@ -16,7 +16,11 @@ public:
 
     int Components;
 
-    virtual ~TextureData();
+    virtual ~STBITextureData();
+
+    inline std::string GetClassID() const override {
+        return "Dusk::STBITextureData";
+    }
 
     uint8_t * GetData() const override {
         return Data;
@@ -34,25 +38,25 @@ public:
         return TextureData::DataType::UnsignedByte;
     }
 
-}; // class TextureData
+}; // class STBITextureData
 
-class DUSK_STBI_API TextureImporter : public Dusk::TextureImporter
+class DUSK_STBI_API STBITextureImporter : public TextureImporter
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(TextureImporter)
+    DISALLOW_COPY_AND_ASSIGN(STBITextureImporter)
 
-    TextureImporter() = default;
+    STBITextureImporter() = default;
 
     inline std::string GetClassID() const override {
-        return "Dusk::STBI::TextureImporter";
+        return "Dusk::STBITextureImporter";
     }
 
-    std::unique_ptr<Dusk::TextureData> LoadFromFile(const std::string& filename) override;
+    std::unique_ptr<TextureData> LoadFromFile(const std::string& filename) override;
 
-    std::unique_ptr<Dusk::TextureData> LoadFromMemory(const uint8_t * buffer, size_t length) override;
+    std::unique_ptr<TextureData> LoadFromMemory(const uint8_t * buffer, size_t length) override;
 
-}; // class TextureImporter
+}; // class STBITextureImporter
 
 } // class 
 

@@ -6,11 +6,15 @@
 
 #include <vector>
 
-namespace Dusk::GLTF2 {
+namespace Dusk {
 
-class DUSK_GLTF2_API MeshData : public Dusk::MeshData
+class DUSK_GLTF2_API GLTF2MeshData : public MeshData
 {
 public:
+
+    inline std::string GetClassID() const override {
+        return "Dusk::GLTF2MeshData";
+    }
 
     std::vector<float> Vertices;
 
@@ -54,22 +58,22 @@ public:
 
 }; // class MeshData
 
-class DUSK_GLTF2_API MeshImporter : public Dusk::MeshImporter
+class DUSK_GLTF2_API GLTF2MeshImporter : public MeshImporter
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(MeshImporter)
+    DISALLOW_COPY_AND_ASSIGN(GLTF2MeshImporter)
 
-    MeshImporter() = default;
+    GLTF2MeshImporter() = default;
 
     inline std::string GetClassID() const override {
-        return "Dusk::GLTF2::MeshImporter";
+        return "Dusk::GLTF2MeshImporter";
     }
 
-    std::vector<std::unique_ptr<Dusk::MeshData>> LoadFromFile(const std::string& filename) override;
+    std::vector<std::unique_ptr<MeshData>> LoadFromFile(const std::string& filename) override;
 
-}; // class MeshImporter
+}; // class GLTF2MeshImporter
 
-} // namespace Dusk::GLTF2
+} // namespace Dusk
 
 #endif // DUSK_GLTF2_MESH_IMPORTER_HPP

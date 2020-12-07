@@ -4,32 +4,36 @@
 #include <Dusk/Vulkan/Config.hpp>
 #include <Dusk/Graphics/Texture.hpp>
 
-namespace Dusk::Vulkan {
+namespace Dusk {
 
-class DUSK_VULKAN_API Texture : public Dusk::Texture
+#define DUSK_VULKAN_TEXTURE(x) (dynamic_cast<Dusk::VulkanTexture *>(x))
+
+class DUSK_VULKAN_API VulkanTexture : public Texture
 {
 public:
 
-    Texture(VkDevice vkDevice);
+    DISALLOW_COPY_AND_ASSIGN(VulkanTexture)
 
-    virtual ~Texture();
+    VulkanTexture() = default;
+
+    virtual ~VulkanTexture();
 
     inline std::string GetClassID() const override {
-        return "Dusk::Vulkan::Texture";
+        return "DuskTexture";
     }
 
     bool Load(const TextureData * data, Options opts = Options()) override;
 
-    void Bind() override;
+    VkImage GetVkImage() const;
 
 private:
 
     VkFormat GetVkDataFormat(int components, const TextureData::DataType& type);
 
-    VkDevice _vkDevice;
+    VkImage _vkImage;
 
-}; // class Texture
+}; // class VulkanTexture
 
-} // namespace Dusk::Vulkan
+} // namespace Dusk
 
 #endif // DUSK_VULKAN_TEXTURE_HPP

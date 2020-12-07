@@ -3,23 +3,31 @@
 
 #include <Dusk/Vulkan/Config.hpp>
 #include <Dusk/Graphics/GraphicsDriver.hpp>
+#include <Dusk/Vulkan/Pipeline.hpp>
+#include <Dusk/Vulkan/Texture.hpp>
+#include <Dusk/Vulkan/Shader.hpp>
+#include <Dusk/Vulkan/Mesh.hpp>
 
 #include <SDL.h>
 
 #include <vector>
 
-namespace Dusk::Vulkan {
+namespace Dusk {
 
-class DUSK_VULKAN_API GraphicsDriver : public Dusk::GraphicsDriver
+#define DUSK_VULKAN_GRAPHICS_DRIVER(x) (dynamic_cast<Dusk::VulkanGraphicsDriver *>(x))
+
+class DUSK_VULKAN_API VulkanGraphicsDriver : public GraphicsDriver
 {
 public:
 
-    GraphicsDriver();
+    DISALLOW_COPY_AND_ASSIGN(VulkanGraphicsDriver)
 
-    virtual ~GraphicsDriver();
+    VulkanGraphicsDriver();
+
+    virtual ~VulkanGraphicsDriver();
 
     inline std::string GetClassID() const override {
-        return "Dusk::Vulkan::GraphicsDriver";
+        return "DuskGraphicsDriver";
     }
 
     void SetWindowTitle(const std::string& title) override;
@@ -34,6 +42,8 @@ public:
 
     void SwapBuffers() override;
 
+    std::shared_ptr<Dusk::Pipeline> CreatePipeline() override;
+
     std::shared_ptr<Dusk::Texture> CreateTexture() override;
 
     std::shared_ptr<Dusk::Shader> CreateShader() override;
@@ -42,11 +52,18 @@ public:
 
     bool SetShaderData(const std::string& name, size_t size, void * data) override;
 
+
     VkDevice GetDevice() const {
         return _vkDevice;
     }
 
+    uint32_t FindMemoryType(uint32_t filter, VkMemoryPropertyFlags props);
+
+    bool CreateBuffer(VkBuffer & buffer, VkDeviceMemory & memory, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags props);
+
 private:
+
+    bool IsDeviceSuitable(const VkPhysicalDevice device);
 
     SDL_Window * _sdlWindow = nullptr;
 
@@ -72,8 +89,8 @@ private:
 
     std::vector<VkCommandBuffer> _vkCommandBuffers;
 
-}; // class GraphicsDriver
+}; // class VulkanGraphicsDriver
 
-} // namespace Dusk::Vulkan
+} // namespace Dusk
 
 #endif // DUSK_VULKAN_GRAPHICS_DRIVER_HPP

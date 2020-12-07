@@ -4,26 +4,26 @@
 #include <Dusk/GLTF2/Config.hpp>
 #include <Dusk/Scene/SceneImporter.hpp>
 
-namespace Dusk::GLTF2 {
+namespace Dusk {
 
-class DUSK_GLTF2_API SceneImporter : public Dusk::SceneImporter
+class DUSK_GLTF2_API GLTF2SceneImporter : public SceneImporter
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(SceneImporter)
+    DISALLOW_COPY_AND_ASSIGN(GLTF2SceneImporter)
 
-    SceneImporter() = default;
+    GLTF2SceneImporter() = default;
 
     inline std::string GetClassID() const override {
-        return "Dusk::GLTF2::SceneImporter";
+        return "Dusk::GLTF2SceneImporter";
     }
 
-    virtual bool LoadFromFile(Entity * root, const std::string& filename);
+    virtual bool LoadFromFile(Entity * root, const std::string& filename) override;
 
 private:
 
-}; // class SceneImporter
+}; // class GLTF2SceneImporter
 
-} // namespace Dusk::GLTF2
+} // namespace Dusk
 
 #endif // DUSK_GLTF2_SCENE_IMPORTER_HPP

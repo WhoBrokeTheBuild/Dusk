@@ -21,15 +21,15 @@
 
 #pragma GCC diagnostic pop
 
-namespace Dusk::STBI {
+namespace Dusk {
 
-TextureData::~TextureData()
+STBITextureData::~STBITextureData()
 {
     stbi_image_free(Data);
 }
 
 DUSK_STBI_API
-std::unique_ptr<Dusk::TextureData> TextureImporter::LoadFromFile(const std::string& filename)
+std::unique_ptr<TextureData> STBITextureImporter::LoadFromFile(const std::string& filename)
 {
     DuskBenchmarkStart();
 
@@ -41,19 +41,19 @@ std::unique_ptr<Dusk::TextureData> TextureImporter::LoadFromFile(const std::stri
         return nullptr;
     }
 
-    auto tex = std::make_unique<TextureData>();
-    tex->Data = data;
-    tex->Size = size;
-    tex->Components = components;
+    STBITextureData * textureData = New STBITextureData();
+    textureData->Data = data;
+    textureData->Size = size;
+    textureData->Components = components;
 
     DuskLogLoad("Loaded texture '%s' with STBI module", filename);
 
-    DuskBenchmarkEnd("STBI::TextureImporter::LoadFromFile");
-    return tex;
+    DuskBenchmarkEnd("STBITextureImporter::LoadFromFile");
+    return std::unique_ptr<TextureData>(textureData);
 }
 
 DUSK_STBI_API
-std::unique_ptr<Dusk::TextureData> TextureImporter::LoadFromMemory(const uint8_t * buffer, size_t length)
+std::unique_ptr<TextureData> STBITextureImporter::LoadFromMemory(const uint8_t * buffer, size_t length)
 {
     DuskBenchmarkStart();
 
@@ -65,15 +65,15 @@ std::unique_ptr<Dusk::TextureData> TextureImporter::LoadFromMemory(const uint8_t
         return nullptr;
     }
 
-    auto tex = std::make_unique<TextureData>();
-    tex->Data = data;
-    tex->Size = size;
-    tex->Components = components;
+    STBITextureData * textureData = New STBITextureData();
+    textureData->Data = data;
+    textureData->Size = size;
+    textureData->Components = components;
 
     DuskLogLoad("Loaded texture from memory with STBI module");
 
-    DuskBenchmarkEnd("STBI::TextureImporter::LoadFromFile");
-    return tex;
+    DuskBenchmarkEnd("STBITextureImporter::LoadFromFile");
+    return std::unique_ptr<TextureData>(textureData);
 }
 
-}
+} // namespace Dusk

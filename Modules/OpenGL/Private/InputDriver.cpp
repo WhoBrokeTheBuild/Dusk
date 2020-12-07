@@ -1,19 +1,19 @@
 #include <Dusk/OpenGL/InputDriver.hpp>
 #include <Dusk/Log.hpp>
 
-namespace Dusk::OpenGL {
+namespace Dusk {
 
 DUSK_OPENGL_API
-InputDriver::InputDriver() {
+OpenGLInputDriver::OpenGLInputDriver() {
 
 }
 
 DUSK_OPENGL_API
-InputDriver::~InputDriver() {
+OpenGLInputDriver::~OpenGLInputDriver() {
     
 }
 
-void InputDriver::ProcessEvent(SDL_Event * event)
+void OpenGLInputDriver::ProcessEvent(SDL_Event * event)
 {
     switch (event->type) {
     case SDL_KEYDOWN:
@@ -68,7 +68,7 @@ void InputDriver::ProcessEvent(SDL_Event * event)
     }
 }
 
-KeyboardKey InputDriver::GetSDLKey(int sdlKey)
+KeyboardKey OpenGLInputDriver::GetSDLKey(int sdlKey)
 {
     switch (sdlKey) {
     case SDLK_a:
@@ -308,7 +308,7 @@ KeyboardKey InputDriver::GetSDLKey(int sdlKey)
     return KeyboardKey::Unknown;
 }
 
-MouseButton InputDriver::GetSDLMouseButton(int sdlButton)
+MouseButton OpenGLInputDriver::GetSDLMouseButton(int sdlButton)
 {
     switch (sdlButton) {
     case SDL_BUTTON_LEFT:
@@ -322,7 +322,7 @@ MouseButton InputDriver::GetSDLMouseButton(int sdlButton)
     return MouseButton::Unknown;
 }
 
-ControllerButton InputDriver::GetSDLControllerButton(int sdlButton)
+ControllerButton OpenGLInputDriver::GetSDLControllerButton(int sdlButton)
 {
     switch (sdlButton) {
     case SDL_CONTROLLER_BUTTON_A:
@@ -360,4 +360,4 @@ ControllerButton InputDriver::GetSDLControllerButton(int sdlButton)
     return ControllerButton::Unknown;
 }
 
-} // namespace Dusk::OpenGL
+} // namespace Dusk

@@ -6,7 +6,7 @@
 #include <fstream>
 #include <sstream>
 
-namespace Dusk::DirectX {
+namespace Dusk {
 
 struct IncludeHandler : public IDxcIncludeHandler
 {
@@ -65,7 +65,7 @@ private:
 }; // struct IncludeHandler
 
 DUSK_DIRECTX_API
-bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
+bool DirectXShader::LoadFromFiles(const std::vector<std::string>& filenames)
 {
     DuskBenchmarkStart();
 
@@ -103,17 +103,11 @@ bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
         }
     }
         
-    DuskBenchmarkEnd("DirectX::Shader::LoadFromFiles");
+    DuskBenchmarkEnd("DirectXShader::LoadFromFiles");
     return true;
 }
 
-DUSK_DIRECTX_API
-void Shader::Bind()
-{
-
-}
-
-bool Shader::LoadCSO(const std::string& filename)
+bool DirectXShader::LoadCSO(const std::string& filename)
 {
     DuskLogVerbose("Looking for Compiled Shader Object '%s'", filename);
 
@@ -154,7 +148,7 @@ bool Shader::LoadCSO(const std::string& filename)
     return true;
 }
 
-bool Shader::LoadHLSL(const std::string& filename)
+bool DirectXShader::LoadHLSL(const std::string& filename)
 {
     DuskLogVerbose("Looking for HLSL shader '%s'", filename);
 
@@ -263,7 +257,7 @@ bool Shader::LoadHLSL(const std::string& filename)
     return true;
 }
 
-Shader::Type Shader::GetType(const std::string& filename) const
+Shader::Type DirectXShader::GetType(const std::string& filename) const
 {
     std::string ext = GetExtension(filename);
     if (ext == "cso" || ext == "hlsl") {
@@ -296,7 +290,7 @@ Shader::Type Shader::GetType(const std::string& filename) const
     return Type::Unknown;
 }
 
-const wchar_t * Shader::GetEntrypoint(const Shader::Type& type) const
+const wchar_t * DirectXShader::GetEntrypoint(const Shader::Type& type) const
 {
     switch (type) {
     case Type::Vertex:
@@ -317,7 +311,7 @@ const wchar_t * Shader::GetEntrypoint(const Shader::Type& type) const
     return L"";
 }
 
-const wchar_t * Shader::GetTargetProfile(const Shader::Type& type) const
+const wchar_t * DirectXShader::GetTargetProfile(const Shader::Type& type) const
 {
     switch (type) {
     case Type::Vertex:
@@ -338,7 +332,7 @@ const wchar_t * Shader::GetTargetProfile(const Shader::Type& type) const
     return L"";
 }
 
-ComPtr<IDxcBlob>& Shader::GetBlob(const Shader::Type& type)
+ComPtr<IDxcBlob>& DirectXShader::GetBlob(const Shader::Type& type)
 {
     switch (type) {
     case Type::Vertex:
@@ -360,4 +354,4 @@ ComPtr<IDxcBlob>& Shader::GetBlob(const Shader::Type& type)
     return _vs;
 }
 
-} // namespace Dusk::DirectX
+} // namespace Dusk

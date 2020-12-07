@@ -34,7 +34,7 @@ void AxisComponent::Render(RenderContext * ctx)
     
     gfx->SetShaderData("DuskTransformData", sizeof(TransformData), transformData);
 
-    _shader->Bind();
+    // _shader->Bind();
     _mesh->Render();
 }
 

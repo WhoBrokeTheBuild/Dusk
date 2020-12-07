@@ -4,16 +4,16 @@
 
 #include <d3d11.h>
 
-namespace Dusk::DirectX {
+namespace Dusk {
 
 DUSK_DIRECTX_API
-void Mesh::Render()
+void DirectXMesh::Render()
 {
 
 }
 
 DUSK_DIRECTX_API
-bool Mesh::Load(const MeshData * data)
+bool DirectXMesh::Load(const MeshData * data)
 {
     DuskBenchmarkStart();
 
@@ -37,8 +37,8 @@ bool Mesh::Load(const MeshData * data)
 
 
 
-    DuskBenchmarkEnd("DirectX::Mesh::Load");
+    DuskBenchmarkEnd("DirectXMesh::Load");
     return true;
 }
 
-}; // namespace Dusk::DirectX
+}; // namespace Dusk

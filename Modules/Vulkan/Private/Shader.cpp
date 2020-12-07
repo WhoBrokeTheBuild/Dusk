@@ -5,87 +5,95 @@
 
 #include <fstream>
 
-namespace Dusk::Vulkan {
+namespace Dusk {
 
 DUSK_VULKAN_API
-bool Shader::LoadFromFiles(const std::vector<std::string>& filenames)
+bool VulkanShader::LoadFromFiles(const std::vector<std::string>& filenames)
 {
     DuskBenchmarkStart();
 
-    GraphicsDriver * gfx = (GraphicsDriver *)GetGraphicsDriver();
-    VkDevice dev = gfx->GetDevice();
+    for (const auto& filename : filenames) {
+        if (!LoadSPV(filename)) {
+            if (!LoadSPV(filename + ".spv")) {
+                DuskLogError("Failed to load '%s'", filename);
+                return false;
+            }
+        }
+    }
+
+    DuskBenchmarkEnd("VulkanShader::LoadFromFiles");
+    return true;
+}
+
+DUSK_VULKAN_API
+bool VulkanShader::LoadSPV(const std::string& filename)
+{
+    VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
 
     const auto& assetPaths = GetAssetPaths();
 
     std::ifstream file;
 
-    for (const auto& filename : filenames) {
-        for (const auto& path : assetPaths) {
-            DuskLogVerbose("Checking '%s'", path + filename);
+    for (const auto& path : assetPaths) {
+        const std::string& fullPath = path + "Shaders/" + filename;
+        DuskLogVerbose("Checking '%s'", fullPath);
 
-            file.open(path + filename, std::ios::binary);
-            if (file.is_open()) {
-                break;
-            }
+        file.open(fullPath, std::ios::binary);
+        if (file.is_open()) {
+            break;
         }
-
-        if (!file.is_open()) {
-            DuskLogError("Failed to load '%s'", filename);
-            return false;
-        }
-
-        file.unsetf(std::ios::skipws);
-
-        DuskLogLoad("Loading SPIR-V shader '%s'", filename);
-
-        std::vector<uint8_t> data(
-            (std::istreambuf_iterator<char>(file)),
-            std::istreambuf_iterator<char>()
-        );
-
-        VkShaderStageFlagBits type = GetVkShaderType(filename);
-        if (type == VK_SHADER_STAGE_ALL) {
-            DuskLogError("Failed to determine shader type of '%s'", filename);
-            return false;
-        }
-
-        VkShaderModuleCreateInfo createInfo;
-        createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-        createInfo.pNext = nullptr;
-        createInfo.flags = 0;
-        createInfo.codeSize = data.size();
-        createInfo.pCode = reinterpret_cast<const uint32_t*>(data.data());
-
-        VkShaderModule shaderModule;
-        if (vkCreateShaderModule(dev, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
-            DuskLogError("Failed to create shader module");
-            return false;
-        }
-
-        VkPipelineShaderStageCreateInfo shaderStageInfo;
-        shaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        shaderStageInfo.pNext = nullptr;
-        shaderStageInfo.flags = 0;
-        shaderStageInfo.stage = type;
-        shaderStageInfo.module = shaderModule;
-        shaderStageInfo.pName = "main";
-        shaderStageInfo.pSpecializationInfo = nullptr;
-
-        _shaderStages.push_back(shaderStageInfo);
     }
 
-    DuskBenchmarkEnd("Vulkan::Shader::LoadFromFiles");
+    if (!file.is_open()) {
+        return false;
+    }
+
+    file.unsetf(std::ios::skipws);
+
+    DuskLogLoad("Loading SPIR-V shader '%s'", filename);
+
+    std::vector<uint8_t> data(
+        (std::istreambuf_iterator<char>(file)),
+        std::istreambuf_iterator<char>()
+    );
+
+    VkShaderStageFlagBits type = GetVkShaderType(filename);
+    if (type == VK_SHADER_STAGE_ALL) {
+        DuskLogError("Failed to determine shader type of '%s'", filename);
+        return false;
+    }
+
+    VkShaderModuleCreateInfo shaderModuleCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .codeSize = data.size(),
+        .pCode = reinterpret_cast<const uint32_t *>(data.data()),
+    };
+
+    VkShaderModule shaderModule;
+    if (vkCreateShaderModule(gfx->GetDevice(), &shaderModuleCreateInfo, nullptr, &shaderModule) != VK_SUCCESS) {
+        DuskLogError("Failed to create shader module");
+        return false;
+    }
+
+    VkPipelineShaderStageCreateInfo shaderStageCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .stage = type,
+        .module = shaderModule,
+        .pName = "main", // TODO: Update
+        .pSpecializationInfo = nullptr,
+    };
+
+    _shaderStages.push_back(shaderStageCreateInfo);
+
     return true;
 }
 
 DUSK_VULKAN_API
-void Shader::Bind()
-{
-
-}
-
-DUSK_VULKAN_API
-VkShaderStageFlagBits Shader::GetVkShaderType(const std::string& filename)
+VkShaderStageFlagBits VulkanShader::GetVkShaderType(const std::string& filename)
 {
     std::string ext = GetExtension(filename);
     size_t pivot = filename.find_last_of('.');
@@ -113,4 +121,4 @@ VkShaderStageFlagBits Shader::GetVkShaderType(const std::string& filename)
     return VK_SHADER_STAGE_ALL; // Invalid
 }
 
-} // namespace Dusk::Vulkan
+} // namespace Dusk

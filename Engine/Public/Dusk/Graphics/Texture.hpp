@@ -69,8 +69,6 @@ public:
         return "Dusk::Texture";
     }
 
-    virtual void Bind() = 0;
-
     virtual bool Load(const TextureData * data, Options opts = Options()) = 0;
 
     virtual bool LoadFromFile(const std::string& filename, Options opts = Options());

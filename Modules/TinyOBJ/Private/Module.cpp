@@ -1,20 +1,20 @@
 #include <Dusk/Module.hpp>
 #include <Dusk/TinyOBJ/MeshImporter.hpp>
 
-namespace Dusk::TinyOBJ {
+using namespace Dusk;
 
-void ModuleInit() {
-    AddMeshImporter("TinyOBJ", std::make_unique<MeshImporter>());
+void TinyOBJModuleInit()
+{
+    AddMeshImporter("TinyOBJ", std::unique_ptr<MeshImporter>(New TinyOBJMeshImporter));
 }
 
-void ModuleTerm() {
+void TinyOBJModuleTerm()
+{
     RemoveMeshImporter("TinyOBJ");
 }
 
 DEFINE_MODULE() {
     "TinyOBJ",
-    ModuleInit,
-    ModuleTerm,
+    TinyOBJModuleInit,
+    TinyOBJModuleTerm,
 };
-
-}

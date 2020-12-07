@@ -6,20 +6,20 @@
 
 #include <SDL.h>
 
-namespace Dusk::OpenGL {
+namespace Dusk {
 
-class DUSK_OPENGL_API InputDriver : public Dusk::InputDriver
+class DUSK_OPENGL_API OpenGLInputDriver : public InputDriver
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(InputDriver)
+    DISALLOW_COPY_AND_ASSIGN(OpenGLInputDriver)
 
-    InputDriver();
+    OpenGLInputDriver();
 
-    virtual ~InputDriver();
+    virtual ~OpenGLInputDriver();
 
     inline std::string GetClassID() const override {
-        return "Dusk::OpenGL::InputDriver";
+        return "Dusk::OpenGLInputDriver";
     }
 
     void ProcessEvent(SDL_Event * event);
@@ -32,8 +32,8 @@ private:
 
     ControllerButton GetSDLControllerButton(int button);
     
-}; // class InputDriver
+}; // class OpenGLInputDriver
 
-} // namespace Dusk::OpenGL
+} // namespace Dusk
 
 #endif // DUSK_OPENGL_INPUT_DRIVER_HPP

@@ -2,22 +2,22 @@
 #include <Dusk/GLTF2/MeshImporter.hpp>
 #include <Dusk/GLTF2/SceneImporter.hpp>
 
-namespace Dusk::GLTF2 {
+using namespace Dusk;
 
-void ModuleInit() {
-    AddMeshImporter("GLTF2", std::make_unique<MeshImporter>());
-    AddSceneImporter("GLTF2", std::make_unique<SceneImporter>());
+void GLTF2ModuleInit()
+{
+    AddMeshImporter("GLTF2", std::unique_ptr<MeshImporter>(New GLTF2MeshImporter()));
+    AddSceneImporter("GLTF2", std::unique_ptr<SceneImporter>(New GLTF2SceneImporter()));
 }
 
-void ModuleTerm() {
+void GLTF2ModuleTerm()
+{
     RemoveSceneImporter("GLTF2");
     RemoveMeshImporter("GLTF2");
 }
 
 DEFINE_MODULE() {
     "GLTF2",
-    ModuleInit,
-    ModuleTerm,
+    GLTF2ModuleInit,
+    GLTF2ModuleTerm,
 };
-
-}

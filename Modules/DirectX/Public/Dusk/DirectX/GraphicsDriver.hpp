@@ -8,18 +8,18 @@
 
 #define BUFFER_COUNT 2
 
-namespace Dusk::DirectX {
+namespace Dusk {
 
-class DUSK_DIRECTX_API GraphicsDriver : public Dusk::GraphicsDriver
+class DUSK_DIRECTX_API DirectXGraphicsDriver : public GraphicsDriver
 {
 public:
 
-    GraphicsDriver();
+    DirectXGraphicsDriver();
 
-    virtual ~GraphicsDriver();
+    virtual ~DirectXGraphicsDriver();
 
     inline std::string GetClassID() const override {
-        return "Dusk::DirectX::UpdateContext";
+        return "Dusk::DirectXUpdateContext";
     }
 
     void SetWindowTitle(const std::string& title) override;
@@ -34,11 +34,11 @@ public:
 
     void SwapBuffers() override;
 
-    std::shared_ptr<Dusk::Texture> CreateTexture() override;
+    std::shared_ptr<Texture> CreateTexture() override;
 
-    std::shared_ptr<Dusk::Shader> CreateShader() override;
+    std::shared_ptr<Shader> CreateShader() override;
 
-    std::shared_ptr<Dusk::Mesh> CreateMesh() override;
+    std::shared_ptr<Mesh> CreateMesh() override;
 
     bool SetShaderData(const std::string& name, size_t size, void * data) override;
 
@@ -86,8 +86,8 @@ private:
 
     unsigned _rtvDescriptorSize = 0;
 
-}; // class GraphicsDriver
+}; // class DirectXGraphicsDriver
 
-} // namespace Dusk::DirectX
+} // namespace Dusk
 
 #endif // DUSK_DIRECTX_GRAPHICS_DRIVER_HPP

@@ -10,6 +10,13 @@ ADD_DEPENDENCIES(
     DuskTinyOBJ
 )
 
+IF(TARGET DuskVulkan)
+    ADD_DEPENDENCIES(
+        ${_target}
+        DuskVulkan
+    )
+ENDIF()
+
 IF(TARGET DuskDirectX)
     ADD_DEPENDENCIES(
         ${_target}

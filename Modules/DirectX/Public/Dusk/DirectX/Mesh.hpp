@@ -4,18 +4,18 @@
 #include <Dusk/DirectX/Config.hpp>
 #include <Dusk/Graphics/Mesh.hpp>
 
-namespace Dusk::DirectX {
+namespace Dusk {
 
-class DUSK_DIRECTX_API Mesh : public Dusk::Mesh
+class DUSK_DIRECTX_API DirectXMesh : public Mesh
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(Mesh)
+    DISALLOW_COPY_AND_ASSIGN(DirectXMesh)
 
-    Mesh() = default;
+    DirectXMesh() = default;
 
     inline std::string GetClassID() const override {
-        return "Dusk::DirectX::Mesh";
+        return "Dusk::DirectXMesh";
     }
 
     void Render() override;
@@ -24,9 +24,8 @@ public:
 
 private:
     
+}; // class DirectXMesh
 
-}; // class Mesh
-
-}; // namespace Dusk::DirectX
+}; // namespace Dusk
 
 #endif // DUSK_DIRECTX_MESH_HPP

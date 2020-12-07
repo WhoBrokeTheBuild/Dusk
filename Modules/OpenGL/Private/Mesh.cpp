@@ -1,10 +1,10 @@
 #include <Dusk/OpenGL/Mesh.hpp>
 #include <Dusk/Benchmark.hpp>
 
-namespace Dusk::OpenGL {
+namespace Dusk {
 
 DUSK_OPENGL_API
-void Mesh::Render()
+void OpenGLMesh::Render()
 {
     glBindVertexArray(_glVAO);
 
@@ -19,7 +19,7 @@ void Mesh::Render()
 }
 
 DUSK_OPENGL_API
-bool Mesh::Load(const MeshData * data)
+bool OpenGLMesh::Load(const MeshData * data)
 {
     DuskBenchmarkStart();
 
@@ -97,12 +97,12 @@ bool Mesh::Load(const MeshData * data)
 
     glBindVertexArray(0);
 
-    DuskBenchmarkEnd("OpenGL::Mesh::Load");
+    DuskBenchmarkEnd("OpenGLMesh::Load");
     return true;
 }
 
 DUSK_OPENGL_API
-GLenum Mesh::GetGLMode(const MeshData::Mode& mode)
+GLenum OpenGLMesh::GetGLMode(const MeshData::Mode& mode)
 {
     switch (mode) {
     case MeshData::Mode::Points:
@@ -118,4 +118,4 @@ GLenum Mesh::GetGLMode(const MeshData::Mode& mode)
     return GL_INVALID_ENUM;
 }
 
-} // namespace Dusk::OpenGL
+} // namespace Dusk

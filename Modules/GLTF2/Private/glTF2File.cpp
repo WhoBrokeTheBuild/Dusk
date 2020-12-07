@@ -7,7 +7,7 @@
 #include <Base64.h>
 #include <fstream>
 
-namespace Dusk::GLTF2 {
+namespace Dusk {
 
 bool glTF2File::LoadFromFile(const std::string& filename)
 {
@@ -428,4 +428,4 @@ bool glTF2File::LoadCameras()
     return true;
 }
 
-} // namespace Dusk::GLTF2
+} // namespace Dusk

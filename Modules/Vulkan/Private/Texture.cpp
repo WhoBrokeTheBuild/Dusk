@@ -1,61 +1,60 @@
 #include <Dusk/Vulkan/Texture.hpp>
+#include <Dusk/Vulkan/GraphicsDriver.hpp>
 #include <Dusk/Benchmark.hpp>
 
-namespace Dusk::Vulkan {
+namespace Dusk {
 
 DUSK_VULKAN_API
-Texture::Texture(VkDevice vkDevice)
-    : _vkDevice(vkDevice)
-{ }
-
-DUSK_VULKAN_API
-Texture::~Texture()
+VulkanTexture::~VulkanTexture()
 {
 
 }
 
 DUSK_VULKAN_API
-bool Texture::Load(const TextureData * data, Options opts /*= Options()*/)
+bool VulkanTexture::Load(const TextureData * data, Options opts /*= Options()*/)
 {
     DuskBenchmarkStart();
+
+    VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
 
     const auto& size = data->GetSize();
     // VkDeviceSize imageSize = size.x * size.y * data->GetComponents();
 
-    VkImage vkImage;
-    // VkDeviceMemory vkDeviceMemory;
+    VkImageCreateInfo imageCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .imageType = VK_IMAGE_TYPE_2D,
+        .format = GetVkDataFormat(data->GetComponents(), data->GetDataType()),
+        .extent = {
+            .width = size.x,
+            .height = size.y,
+            .depth = 1,
+        },
+        .mipLevels = 1,
+        .arrayLayers = 1,
+        .samples = VK_SAMPLE_COUNT_1_BIT,
+        .tiling = VK_IMAGE_TILING_OPTIMAL,
+        .usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+    };
 
-    VkImageCreateInfo vkImageCreateInfo = {};
-    vkImageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-    vkImageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-    vkImageCreateInfo.extent.width = size.x;
-    vkImageCreateInfo.extent.height = size.y;
-    vkImageCreateInfo.extent.depth = 1;
-    vkImageCreateInfo.mipLevels = 1;
-    vkImageCreateInfo.arrayLayers = 1;
-    vkImageCreateInfo.format = GetVkDataFormat(data->GetComponents(), data->GetDataType());
-    vkImageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-    vkImageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    vkImageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-    vkImageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    vkImageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-    vkImageCreateInfo.flags = 0;
-
-    if (vkCreateImage(_vkDevice, &vkImageCreateInfo, nullptr, &vkImage) != VK_SUCCESS) {
+    if (vkCreateImage(gfx->GetDevice(), &imageCreateInfo, nullptr, &_vkImage) != VK_SUCCESS) {
+        DuskLogError("Failed to create image");
         return false;
     }
 
-    DuskBenchmarkEnd("Vulkan::Texture::Load");
+    VkDeviceMemory memory;
+
+    // TODO:
+
+    DuskBenchmarkEnd("VulkanTexture::Load");
     return true;
 }
 
 DUSK_VULKAN_API
-void Texture::Bind() 
-{
-}
-
-DUSK_VULKAN_API
-VkFormat Texture::GetVkDataFormat(int components, const TextureData::DataType& type)
+VkFormat VulkanTexture::GetVkDataFormat(int components, const TextureData::DataType& type)
 {
     if (components == 1) {
         switch(type) {
@@ -125,4 +124,4 @@ VkFormat Texture::GetVkDataFormat(int components, const TextureData::DataType& t
     return VK_FORMAT_UNDEFINED;
 }
 
-} // namespace Dusk::Vulkan
+} // namespace Dusk

@@ -4,23 +4,25 @@
 #include <Dusk/OpenGL/Config.hpp>
 #include <Dusk/Graphics/Shader.hpp>
 
-namespace Dusk::OpenGL {
+namespace Dusk {
 
-class DUSK_OPENGL_API Shader : public Dusk::Shader 
+#define DUSK_OPENGL_SHADER(x) (dynamic_cast<Dusk::OpenGLShader *>(x))
+
+class DUSK_OPENGL_API OpenGLShader : public Shader 
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(Shader)
+    DISALLOW_COPY_AND_ASSIGN(OpenGLShader)
 
-    Shader() = default;
+    OpenGLShader() = default;
 
     inline std::string GetClassID() const override {
-        return "Dusk::OpenGL::Shader";
+        return "Dusk::OpenGLShader";
     }
 
     bool LoadFromFiles(const std::vector<std::string>& filenames) override;
 
-    void Bind() override;
+    void Bind();
 
     GLuint GetID();
 
@@ -34,8 +36,8 @@ private:
 
     GLuint _glID = 0;
 
-}; // class Shader
+}; // class OpenGLShader
 
-} // namespace Dusk::OpenGL
+} // namespace Dusk
 
 #endif // DUSK_OPENGL_SHADER_HPP

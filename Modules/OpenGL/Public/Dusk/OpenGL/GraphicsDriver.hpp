@@ -4,13 +4,14 @@
 #include <Dusk/OpenGL/Config.hpp>
 #include <Dusk/OpenGL/InputDriver.hpp>
 #include <Dusk/Graphics/GraphicsDriver.hpp>
+#include <Dusk/OpenGL/Pipeline.hpp>
 #include <Dusk/OpenGL/Texture.hpp>
 #include <Dusk/OpenGL/Shader.hpp>
 #include <Dusk/OpenGL/Mesh.hpp>
 
 #include <SDL.h>
 
-namespace Dusk::OpenGL {
+namespace Dusk {
 
 struct ShaderDataBindingInfo
 {
@@ -18,18 +19,18 @@ struct ShaderDataBindingInfo
     size_t size;
 };
 
-class DUSK_OPENGL_API GraphicsDriver : public Dusk::GraphicsDriver
+class DUSK_OPENGL_API OpenGLGraphicsDriver : public GraphicsDriver
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(GraphicsDriver)
+    DISALLOW_COPY_AND_ASSIGN(OpenGLGraphicsDriver)
 
-    GraphicsDriver();
+    OpenGLGraphicsDriver();
 
-    virtual ~GraphicsDriver();
+    virtual ~OpenGLGraphicsDriver();
 
     inline std::string GetClassID() const override {
-        return "Dusk::OpenGL::GraphicsDriver";
+        return "Dusk::GraphicsDriver";
     }
 
     void SetWindowTitle(const std::string& title) override;
@@ -44,11 +45,13 @@ public:
 
     void SwapBuffers() override;
 
-    std::shared_ptr<Dusk::Texture> CreateTexture() override;
+    std::shared_ptr<Pipeline> CreatePipeline() override;
 
-    std::shared_ptr<Dusk::Shader> CreateShader() override;
+    std::shared_ptr<Texture> CreateTexture() override;
 
-    std::shared_ptr<Dusk::Mesh> CreateMesh() override;
+    std::shared_ptr<Shader> CreateShader() override;
+
+    std::shared_ptr<Mesh> CreateMesh() override;
 
     bool SetShaderData(const std::string& name, size_t size, void * data) override;
 
@@ -58,14 +61,14 @@ private:
 
     SDL_GLContext _glContext;
 
-    InputDriver * _inputDriver = nullptr;
+    OpenGLInputDriver * _inputDriver = nullptr;
 
     std::unordered_map<std::string, GLuint> _shaderDataBindings;
 
     std::vector<std::weak_ptr<Shader>> _shaders;
     
-}; // class GraphicsDriver
+}; // class OpenGLGraphicsDriver
 
-} // namespace Dusk::OpenGL
+} // namespace Dusk
 
 #endif // DUSK_OPENGL_GRAPHICS_DRIVER_HPP

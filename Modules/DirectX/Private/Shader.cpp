@@ -69,7 +69,7 @@ bool DirectXShader::LoadFromFiles(const std::vector<std::string>& filenames)
 {
     DuskBenchmarkStart();
 
-    GraphicsDriver * gfx = (GraphicsDriver *)GetGraphicsDriver();
+    DirectXGraphicsDriver * gfx = DUSK_DIRECTX_GRAPHICS_DRIVER(GetGraphicsDriver());
 
     for (const auto& filename : filenames) {
         const std::string& ext = GetExtension(filename);

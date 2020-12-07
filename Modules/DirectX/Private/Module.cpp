@@ -4,7 +4,7 @@
 
 void DirectXModuleInit()
 {
-    SetGraphicsDriver(std::unique_ptr<Dusk::GraphicsDriver>(New GraphicsDriver()));
+    SetGraphicsDriver(std::unique_ptr<GraphicsDriver>(New DirectXGraphicsDriver()));
 }
 
 void DirectXModuleTerm()

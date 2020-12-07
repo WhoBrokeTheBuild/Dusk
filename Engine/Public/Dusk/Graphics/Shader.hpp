@@ -13,6 +13,22 @@ class DUSK_ENGINE_API Shader : public Object
 {
 public:
 
+    enum class Type {
+        Unknown = -1,
+
+        Vertex,
+        Fragment,
+        Geometry,
+        Compute,
+        TessControl,
+        TessEvaluation,
+
+        // DirectX Aliases
+        Pixel = Fragment,
+        Hull = TessControl,
+        Domain = TessEvaluation,
+    };
+
     DISALLOW_COPY_AND_ASSIGN(Shader)
 
     Shader() = default;

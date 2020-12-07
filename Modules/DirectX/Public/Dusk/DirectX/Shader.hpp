@@ -22,17 +22,6 @@ public:
 
 private:
 
-    enum class Type {
-        Unknown = -1,
-
-        Vertex,
-        Pixel,
-        Domain,
-        Hull,
-        Geometry,
-        Compute,
-    };
-
     bool LoadCSO(const std::string& filename);
 
     bool LoadHLSL(const std::string& filename);

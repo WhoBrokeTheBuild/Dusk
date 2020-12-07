@@ -14,7 +14,7 @@ public:
 
     VulkanMesh() = default;
 
-    virtual ~VulkanMesh() = default;
+    virtual ~VulkanMesh();
 
     inline std::string GetClassID() const override {
         return "Dusk::VulkanMesh";

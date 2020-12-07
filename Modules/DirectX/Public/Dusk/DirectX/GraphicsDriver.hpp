@@ -10,6 +10,8 @@
 
 namespace Dusk {
 
+#define DUSK_DIRECTX_GRAPHICS_DRIVER(x) (dynamic_cast<Dusk::DirectXGraphicsDriver *>(x))
+
 class DUSK_DIRECTX_API DirectXGraphicsDriver : public GraphicsDriver
 {
 public:

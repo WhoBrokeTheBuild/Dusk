@@ -9,12 +9,12 @@ namespace Dusk {
 
 LRESULT CALLBACK WndProc(HWND hwnd, unsigned msg, WPARAM wParam, LPARAM lParam)
 {
-    GraphicsDriver* gfx = (GraphicsDriver*)GetGraphicsDriver();
+    DirectXGraphicsDriver * gfx = DUSK_DIRECTX_GRAPHICS_DRIVER(GetGraphicsDriver());
     return gfx->ProcessMessage(hwnd, msg, wParam, lParam);
 }
 
 DUSK_DIRECTX_API
-GraphicsDriver::GraphicsDriver()
+DirectXGraphicsDriver::DirectXGraphicsDriver()
 {
     HRESULT result;
 
@@ -194,40 +194,39 @@ GraphicsDriver::GraphicsDriver()
 }
 
 DUSK_DIRECTX_API
-GraphicsDriver::~GraphicsDriver()
+DirectXGraphicsDriver::~DirectXGraphicsDriver()
 {
-
     if (_window) {
         DestroyWindow(_window);
         _window = nullptr;
     }
 }
 
-void GraphicsDriver::SetWindowTitle(const std::string& title)
+void DirectXGraphicsDriver::SetWindowTitle(const std::string& title)
 {
     SetWindowText(_window, title.c_str());
 }
 
-std::string GraphicsDriver::GetWindowTitle()
+std::string DirectXGraphicsDriver::GetWindowTitle()
 {
     char buffer[256];
     GetWindowText(_window, buffer, sizeof(buffer));
     return std::string(buffer);
 }
 
-void GraphicsDriver::SetWindowSize(const ivec2& size)
+void DirectXGraphicsDriver::SetWindowSize(const ivec2& size)
 {
     SetWindowPos(_window, HWND_TOP, 0, 0, size.x, size.y, SWP_NOMOVE | SWP_NOREPOSITION);
 }
 
-ivec2 GraphicsDriver::GetWindowSize()
+ivec2 DirectXGraphicsDriver::GetWindowSize()
 {
     RECT rect;
     GetWindowRect(_window, &rect);
     return { rect.right - rect.left, rect.bottom - rect.top };
 }
 
-void GraphicsDriver::ProcessEvents()
+void DirectXGraphicsDriver::ProcessEvents()
 {
     MSG Msg;
     if (GetMessage(&Msg, NULL, 0, 0)) {
@@ -236,7 +235,7 @@ void GraphicsDriver::ProcessEvents()
     }
 }
 
-void GraphicsDriver::SwapBuffers()
+void DirectXGraphicsDriver::SwapBuffers()
 {
     _commandAllocator->Reset();
     _commandList->Reset(_commandAllocator.Get(), _pipelineState.Get());
@@ -277,22 +276,22 @@ void GraphicsDriver::SwapBuffers()
     _renderTargetIndex = _swapChain->GetCurrentBackBufferIndex();
 }
 
-std::shared_ptr<Dusk::Texture> GraphicsDriver::CreateTexture()
+std::shared_ptr<Texture> DirectXGraphicsDriver::CreateTexture()
 {
     return nullptr;
 }
 
-std::shared_ptr<Dusk::Shader> GraphicsDriver::CreateShader()
+std::shared_ptr<Shader> DirectXGraphicsDriver::CreateShader()
 {
-    return std::make_shared<Shader>();
+    return std::shared_ptr<Shader>(New DirectXShader());
 }
 
-std::shared_ptr<Dusk::Mesh> GraphicsDriver::CreateMesh()
+std::shared_ptr<Mesh> DirectXGraphicsDriver::CreateMesh()
 {
-    return std::make_shared<Mesh>();
+    return std::shared_ptr<Mesh>(New DirectXMesh());
 }
 
-bool GraphicsDriver::SetShaderData(const std::string& name, size_t size, void * data)
+bool DirectXGraphicsDriver::SetShaderData(const std::string& name, size_t size, void * data)
 {
 //     ID3D11ShaderReflection * reflector = nullptr;
 //     D3DReflect()
@@ -306,7 +305,7 @@ bool GraphicsDriver::SetShaderData(const std::string& name, size_t size, void * 
     return false;
 }
 
-LRESULT GraphicsDriver::ProcessMessage(HWND hwnd, unsigned msg, WPARAM wParam, LPARAM lParam)
+LRESULT DirectXGraphicsDriver::ProcessMessage(HWND hwnd, unsigned msg, WPARAM wParam, LPARAM lParam)
 {
     switch (msg) {
     case WM_CLOSE:

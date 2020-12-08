@@ -19,7 +19,7 @@ namespace Dusk {
 enum class LogLevel 
 {
     Info,
-    Warn,
+    Warning,
     Error,
     Fatal,
     Performance,
@@ -70,7 +70,7 @@ inline void Log(LogLevel level, const char * format, Args... args)
         case LogLevel::Info:
             color = 7; // White on Black
             break;
-        case LogLevel::Warn:
+        case LogLevel::Warning:
             color = 6; // Yellow on Black
             break;
         case LogLevel::Error:
@@ -103,7 +103,7 @@ inline void Log(LogLevel level, const char * format, Args... args)
         case LogLevel::Info:
             color = "0;97"; // White
             break;
-        case LogLevel::Warn:
+        case LogLevel::Warning:
             color = "0;33"; // Yellow
             break;
         case LogLevel::Error:
@@ -170,7 +170,7 @@ inline void Log(LogLevel level, const char * format, Args... args)
         DUSK_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
 
 #define DuskLogWarn(M, ...) \
-    do { Dusk::Log(Dusk::LogLevel::Warn, "[WARN](%s:%d) " M "\n", \
+    do { Dusk::Log(Dusk::LogLevel::Warning, "[WARN](%s:%d) " M "\n", \
         DUSK_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
 
 #define DuskLogError(M, ...) \

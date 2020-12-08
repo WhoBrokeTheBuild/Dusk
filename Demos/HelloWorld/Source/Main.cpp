@@ -59,9 +59,9 @@ void run()
         return;
     }
 
-    auto pipeline = gfx->CreatePipeline();
-    pipeline->SetShader(shader.get());
-    pipeline->Bind();
+    // auto pipeline = gfx->CreatePipeline();
+    // pipeline->SetShader(shader.get());
+    // pipeline->Bind();
 
     Dusk::ScriptConsole::Initialize();
 

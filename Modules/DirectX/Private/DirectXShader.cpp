@@ -306,7 +306,6 @@ const wchar_t * DirectXShader::GetEntrypoint(const Shader::Type& type) const
         return L"GSMain";
     case Type::Compute:
         return L"CSMain";
-    default: ;
     }
     
     DuskLogFatal("Unexpected Shader Type: %d", (int)type);
@@ -327,7 +326,6 @@ const wchar_t * DirectXShader::GetTargetProfile(const Shader::Type& type) const
         return L"gs_6_0";
     case Type::Compute:
         return L"cs_6_0";
-    default: ;
     }
 
     DuskLogFatal("Unexpected Shader Type: %d", (int)type);
@@ -348,7 +346,6 @@ ComPtr<IDxcBlob>& DirectXShader::GetBlob(const Shader::Type& type)
         return _gs;
     case Type::Compute:
         return _cs;
-    default: ;
     }
 
     DuskLogFatal("Unexpected Shader Type: %d", (int)type);

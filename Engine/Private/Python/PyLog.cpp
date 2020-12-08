@@ -39,7 +39,7 @@ PyObject * PyDusk_LogWarn(PyObject * self, PyObject * args)
         Py_RETURN_NONE;
     }
 
-    Log(LogLevel::Warn, "[WARN](Py): %s\n", msg);
+    Log(LogLevel::Warning, "[WARN](Py): %s\n", msg);
     Py_RETURN_NONE;
 }
 

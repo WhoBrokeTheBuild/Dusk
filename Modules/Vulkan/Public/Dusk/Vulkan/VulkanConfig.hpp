@@ -20,4 +20,8 @@
 #undef near
 #undef far
 
+#if !defined(NDEBUG)
+    #define DUSK_VULKAN_VALIDATION_LAYER
+#endif
+
 #endif // DUSK_VULKAN_CONFIG_HPP

@@ -64,9 +64,48 @@ private:
 
     bool IsDeviceSuitable(const VkPhysicalDevice device);
 
+    std::vector<const char *> GetEnabledDeviceLayers();
+
+    std::vector<const char *> GetEnabledDeviceExtensions();
+
+    std::vector<const char *> GetRequiredInstanceExtensions();
+
+    void InitWindow();
+
+    void TermWindow();
+
+    void InitDebugMessenger();
+
+    void TermDebugMessenger();
+
+    void InitInstance();
+
+    void TermInstance();
+    
+    void InitSurface();
+
+    void TermSurface();
+    
+    void InitPhysicalDevice();
+
+    void InitLogicalDevice();
+
+    void TermLogicalDevice();
+    
+    void InitSwapChain();
+
+    void TermSwapChain();
+
+    void InitRenderPass();
+
+    void TermRenderPass();
+
     SDL_Window * _sdlWindow = nullptr;
 
     VkInstance _vkInstance;
+
+    VkDebugUtilsMessengerEXT _vkDebugMessenger;
+    bool _debugMessengerInitialized = false;
 
     VkSurfaceKHR _vkWindowSurface;
 
@@ -74,15 +113,26 @@ private:
 
     VkDevice _vkDevice;
 
+    uint32_t _vkGraphicsQueueFamilyIndex;
+    uint32_t _vkPresentQueueFamilyIndex;
+
     VkQueue _vkGraphicsQueue;
     VkQueue _vkPresentQueue;
 
-    VkSemaphore _vkImageAvailableSemaphore;
-    VkSemaphore _vkRenderingFinishedSemaphore;
+    VkSurfaceFormatKHR _vkSwapChainImageFormat;
+
+    VkExtent2D _vkSwapChainExtent;
 
     VkSwapchainKHR _vkSwapChain;
 
     std::vector<VkImage> _vkSwapChainImages;
+
+    std::vector<VkImageView> _vkSwapChainImageViews;
+
+    VkRenderPass _vkRenderPass;
+
+    VkSemaphore _vkImageAvailableSemaphore;
+    VkSemaphore _vkRenderingFinishedSemaphore;
 
     VkCommandPool _vkCommandPool;
 

@@ -276,6 +276,11 @@ void DirectXGraphicsDriver::SwapBuffers()
     _renderTargetIndex = _swapChain->GetCurrentBackBufferIndex();
 }
 
+std::shared_ptr<Pipeline> DirectXGraphicsDriver::CreatePipeline()
+{
+    return nullptr;
+}
+
 std::shared_ptr<Texture> DirectXGraphicsDriver::CreateTexture()
 {
     return nullptr;

@@ -36,6 +36,8 @@ public:
 
     void SwapBuffers() override;
 
+    std::shared_ptr<Pipeline> CreatePipeline() override;
+
     std::shared_ptr<Texture> CreateTexture() override;
 
     std::shared_ptr<Shader> CreateShader() override;

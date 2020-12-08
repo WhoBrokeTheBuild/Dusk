@@ -215,6 +215,8 @@ VkPolygonMode VulkanPipeline::GetVkPolygonMode() const
     case FillMode::Fill:
         return VK_POLYGON_MODE_FILL;
     }
+
+    DuskLogFatal("Unexpected FillMode: %d", (int)_fillMode);
 }
 
 VkCullModeFlags VulkanPipeline::GetVkCullMode() const
@@ -227,6 +229,8 @@ VkCullModeFlags VulkanPipeline::GetVkCullMode() const
     case CullMode::Back:
         return VK_CULL_MODE_BACK_BIT;
     }
+    
+    DuskLogFatal("Unexpected CullMode: %d", (int)_cullMode);
 }
 
 VkFrontFace VulkanPipeline::GetVkFrontFace() const
@@ -237,11 +241,15 @@ VkFrontFace VulkanPipeline::GetVkFrontFace() const
     case FrontFace::CounterClockwise:
         return VK_FRONT_FACE_COUNTER_CLOCKWISE;
     }
+    
+    DuskLogFatal("Unexpected FrontFace: %d", (int)_frontFace);
 }
 
 VkBlendFactor VulkanPipeline::GetVkBlendFactor(BlendFactor factor) const
 {
     switch (factor) {
+    case BlendFactor::Zero:
+        return VK_BLEND_FACTOR_ZERO;
     case BlendFactor::One:
         return VK_BLEND_FACTOR_ONE;
     case BlendFactor::SrcColor:
@@ -271,6 +279,8 @@ VkBlendFactor VulkanPipeline::GetVkBlendFactor(BlendFactor factor) const
     case BlendFactor::SrcAlphaSaturated:
         return VK_BLEND_FACTOR_SRC_ALPHA_SATURATE;
     }
+    
+    DuskLogFatal("Unexpected BlendFactor: %d", (int)factor);
 }
 
 VkBlendOp VulkanPipeline::GetVkBlendOp(BlendOperation op) const
@@ -287,6 +297,8 @@ VkBlendOp VulkanPipeline::GetVkBlendOp(BlendOperation op) const
     case BlendOperation::Max:
         return VK_BLEND_OP_MAX;
     }
+    
+    DuskLogFatal("Unexpected BlendOperation: %d", (int)op);
 }
 
 } // namespace Dusk

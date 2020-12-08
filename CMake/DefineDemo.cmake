@@ -129,7 +129,7 @@ MACRO(DEFINE_DEMO _target)
             # Disable unknown pragmas warning, C++ exceptions
             $<$<CXX_COMPILER_ID:GNU>:   -Wall -Wno-unknown-pragmas -fno-exceptions>
             $<$<CXX_COMPILER_ID:Clang>: -Wall -Wno-unknown-pragmas -fno-exceptions>
-            $<$<CXX_COMPILER_ID:MSVC>:  /MP /wd4068 /EHsc- /GR->
+            $<$<CXX_COMPILER_ID:MSVC>:  /MP /wd4068 /EHsc->
     )
 
     TARGET_LINK_OPTIONS(

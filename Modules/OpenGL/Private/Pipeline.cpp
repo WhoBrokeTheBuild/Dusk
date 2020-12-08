@@ -1,6 +1,8 @@
 #include <Dusk/OpenGL/Pipeline.hpp>
 #include <Dusk/OpenGL/Shader.hpp>
 
+#include <cassert>
+
 namespace Dusk {
 
 DUSK_OPENGL_API
@@ -88,6 +90,8 @@ void OpenGLPipeline::Bind()
 GLenum OpenGLPipeline::GetGLBlendFactor(BlendFactor factor) const
 {
     switch (factor) {
+    case BlendFactor::Zero:
+        return GL_ZERO;
     case BlendFactor::One:
         return GL_ONE;
     case BlendFactor::SrcColor:
@@ -117,6 +121,8 @@ GLenum OpenGLPipeline::GetGLBlendFactor(BlendFactor factor) const
     case BlendFactor::SrcAlphaSaturated:
         return GL_SRC_ALPHA_SATURATE;
     }
+
+    assert(false);
 }
 
 GLenum OpenGLPipeline::GetGLBlendOperation(BlendOperation op) const
@@ -133,6 +139,8 @@ GLenum OpenGLPipeline::GetGLBlendOperation(BlendOperation op) const
     case BlendOperation::Max:
         return GL_MAX;
     }
+
+    assert(false);
 }
 
 } // namespace Dusk

@@ -51,6 +51,7 @@ enum class BlendOperation {
 };
 
 enum class BlendFactor {
+    Zero,
     One,
     SrcColor,
     OneMinusSrcColor,

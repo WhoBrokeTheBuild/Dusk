@@ -2,6 +2,8 @@
 
 #include <Dusk/DirectX/GraphicsDriver.hpp>
 
+using namespace Dusk;
+
 void DirectXModuleInit()
 {
     SetGraphicsDriver(std::unique_ptr<GraphicsDriver>(New DirectXGraphicsDriver()));

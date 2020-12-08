@@ -26,7 +26,7 @@ public:
 
 private:
 
-    bool AddBuffer(void * data, VkDeviceSize size, uint32_t stride, 
+    bool AddBuffer(const void * data, VkDeviceSize size, uint32_t stride, 
         VkFormat format, VkVertexInputRate inputRate, VkBufferUsageFlags usage);
 
     std::vector<VkBuffer> _buffers;

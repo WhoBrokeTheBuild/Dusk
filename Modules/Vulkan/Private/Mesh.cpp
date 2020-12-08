@@ -35,8 +35,8 @@ bool VulkanMesh::Load(const MeshData * data)
     }
 
     result = AddBuffer(
-        reinterpret_cast<void *>(data->GetVertices().data()), 
-        sizeof(float) * data->GetVertices(), 
+        reinterpret_cast<const void *>(data->GetVertices().data()), 
+        sizeof(float) * data->GetVertices().size(), 
         sizeof(float) * 4, 
         VK_FORMAT_R32G32B32A32_SFLOAT,
         VK_VERTEX_INPUT_RATE_VERTEX,
@@ -49,8 +49,8 @@ bool VulkanMesh::Load(const MeshData * data)
 
     if (!data->GetNormals().empty()) {
         result = AddBuffer(
-            reinterpret_cast<void *>(data->GetNormals().data()), 
-            sizeof(float) * data->GetNormals(), 
+            reinterpret_cast<const void *>(data->GetNormals().data()), 
+            sizeof(float) * data->GetNormals().size(), 
             sizeof(float) * 4, 
             VK_FORMAT_R32G32B32A32_SFLOAT,
             VK_VERTEX_INPUT_RATE_VERTEX,
@@ -64,8 +64,8 @@ bool VulkanMesh::Load(const MeshData * data)
 
     if (!data->GetUVs().empty()) {
         result = AddBuffer(
-            reinterpret_cast<void *>(data->GetUVs().data()), 
-            sizeof(float) * data->GetUVs(), 
+            reinterpret_cast<const void *>(data->GetUVs().data()), 
+            sizeof(float) * data->GetUVs().size(), 
             sizeof(float) * 2, 
             VK_FORMAT_R32G32_SFLOAT,
             VK_VERTEX_INPUT_RATE_VERTEX,
@@ -79,8 +79,8 @@ bool VulkanMesh::Load(const MeshData * data)
 
     if (!data->GetColors().empty()) {
         result = AddBuffer(
-            reinterpret_cast<void *>(data->GetColors().data()), 
-            sizeof(float) * data->GetColors(), 
+            reinterpret_cast<const void *>(data->GetColors().data()), 
+            sizeof(float) * data->GetColors().size(), 
             sizeof(float) * 4, 
             VK_FORMAT_R32G32B32A32_SFLOAT,
             VK_VERTEX_INPUT_RATE_VERTEX,
@@ -94,8 +94,8 @@ bool VulkanMesh::Load(const MeshData * data)
 
     if (!data->GetTangents().empty()) {
         result = AddBuffer(
-            reinterpret_cast<void *>(data->GetTangents().data()), 
-            sizeof(float) * data->GetTangents(), 
+            reinterpret_cast<const void *>(data->GetTangents().data()), 
+            sizeof(float) * data->GetTangents().size(), 
             sizeof(float) * 4, 
             VK_FORMAT_R32G32B32A32_SFLOAT,
             VK_VERTEX_INPUT_RATE_VERTEX,
@@ -109,8 +109,8 @@ bool VulkanMesh::Load(const MeshData * data)
 
     if (!data->GetBitangents().empty()) {
         result = AddBuffer(
-            reinterpret_cast<void *>(data->GetBitangents().data()), 
-            sizeof(float) * data->GetBitangents(), 
+            reinterpret_cast<const void *>(data->GetBitangents().data()), 
+            sizeof(float) * data->GetBitangents().size(), 
             sizeof(float) * 4, 
             VK_FORMAT_R32G32B32A32_SFLOAT,
             VK_VERTEX_INPUT_RATE_VERTEX,
@@ -135,7 +135,7 @@ bool VulkanMesh::Load(const MeshData * data)
     return true;
 }
 
-bool VulkanMesh::AddBuffer(void * data, VkDeviceSize size, uint32_t stride, 
+bool VulkanMesh::AddBuffer(const void * data, VkDeviceSize size, uint32_t stride, 
     VkFormat format, VkVertexInputRate inputRate, VkBufferUsageFlags usage)
 {
     VkResult result;
@@ -164,7 +164,7 @@ bool VulkanMesh::AddBuffer(void * data, VkDeviceSize size, uint32_t stride,
     }
 
     void * ptr;
-    vkMapMemory(gfx->GetDevice(), memory, 0, size, &ptr);
+    vkMapMemory(gfx->GetDevice(), memory, 0, size, 0, &ptr);
     memcpy(ptr, data, static_cast<size_t>(size));
     vkUnmapMemory(gfx->GetDevice(), memory);
 

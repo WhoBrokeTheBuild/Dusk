@@ -21,6 +21,7 @@ enum class LogLevel
     Info,
     Warn,
     Error,
+    Fatal,
     Performance,
     Verbose,
     Load,
@@ -73,6 +74,7 @@ inline void Log(LogLevel level, const char * format, Args... args)
             color = 6; // Yellow on Black
             break;
         case LogLevel::Error:
+        case LogLevel::Fatal:
             color = 4; // Red on Black
             break;
         case LogLevel::Performance:
@@ -105,6 +107,7 @@ inline void Log(LogLevel level, const char * format, Args... args)
             color = "0;33"; // Yellow
             break;
         case LogLevel::Error:
+        case LogLevel::Fatal:
             color = "0;31"; // Red
             break;
         case LogLevel::Performance:
@@ -173,6 +176,11 @@ inline void Log(LogLevel level, const char * format, Args... args)
 #define DuskLogError(M, ...) \
     do { Dusk::Log(Dusk::LogLevel::Error, "[ERRO](%s:%d) " M "\n", \
         DUSK_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
+
+#define DuskLogFatal(M, ...) \
+    do { Dusk::Log(Dusk::LogLevel::Fatal, "[FATL](%s:%d) " M "\n", \
+        DUSK_FILENAME, __LINE__, ##__VA_ARGS__); \
+        std::terminate(); } while (0)
 
 #define DuskLogPerf(M, ...) \
     do { Dusk::Log(Dusk::LogLevel::Performance, "[PERF](%s:%d) " M "\n", \

@@ -308,7 +308,7 @@ const wchar_t * DirectXShader::GetEntrypoint(const Shader::Type& type) const
     default: ;
     }
     
-    return L"";
+    DuskLogFatal("Unexpected Shader Type: %d", (int)type);
 }
 
 const wchar_t * DirectXShader::GetTargetProfile(const Shader::Type& type) const
@@ -329,7 +329,7 @@ const wchar_t * DirectXShader::GetTargetProfile(const Shader::Type& type) const
     default: ;
     }
 
-    return L"";
+    DuskLogFatal("Unexpected Shader Type: %d", (int)type);
 }
 
 ComPtr<IDxcBlob>& DirectXShader::GetBlob(const Shader::Type& type)
@@ -350,8 +350,7 @@ ComPtr<IDxcBlob>& DirectXShader::GetBlob(const Shader::Type& type)
     default: ;
     }
 
-    // TODO: Better "Error" return
-    return _vs;
+    DuskLogFatal("Unexpected Shader Type: %d", (int)type);
 }
 
 } // namespace Dusk

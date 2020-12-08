@@ -1,0 +1,126 @@
+version: 2.1
+
+commands:
+  setup:
+    parameters:
+      install-compiler:
+        type: steps
+        default: []
+    steps:
+      - run: |
+          apt update && \
+          apt install -y \
+            git git-lfs \
+            wget \
+            make \
+            xorg-dev \
+            libglu1-mesa-dev \
+            libpython3.8-dev \
+            software-properties-common
+      - steps: << parameters.install-compiler >>
+
+  build-and-test:
+    parameters:
+      cc:
+        type: string
+        default: ""
+      cxx:
+        type: string
+        default: ""
+    steps:
+      - run: |
+          source Scripts/ci-install-vulkan.sh
+          source Scripts/ci-install-cmake.sh
+          export CC="<< parameters.cc >>"
+          export CXX="<< parameters.cxx >>"
+          env
+          cmake --version
+          mkdir Build && cd Build
+          cmake \
+            -DVERBOSE_LOGGING=ON \
+            -DBUILD_DEMOS=ON \
+            -DBUILD_TESTS=ON \
+            -G"Unix Makefiles" \
+            ..
+          make -l all test
+
+jobs:
+  gcc:
+    parameters:
+      build-type:
+        type: string
+        default: Release
+      install-dependencies:
+        type: steps
+        default: []
+    environment:
+      DEBIAN_FRONTEND: noninteractive
+      CMAKE_BUILD_TYPE: << parameters.build-type >>
+    docker:
+      - image: "ubuntu:20.04"
+    steps:
+      - setup:
+          install-compiler:
+            - run: |
+                add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
+                apt update && \
+                apt install -y g++-8
+      - steps: << parameters.install-dependencies >>
+      - checkout
+      - build-and-test:
+          cc: gcc-8
+          cxx: g++-8
+  clang:
+    parameters:
+      build-type:
+        type: string
+        default: Release
+      install-dependencies:
+        type: steps
+        default: []
+    environment:
+      DEBIAN_FRONTEND: noninteractive
+      CMAKE_BUILD_TYPE: << parameters.build-type >>
+    docker:
+      - image: "ubuntu:20.04"
+    steps:
+      - setup:
+          install-compiler:
+            - run: |
+                bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+                apt install -y clang
+      - steps: << parameters.install-dependencies >>
+      - checkout
+      - build-and-test:
+          cc: clang
+          cxx: clang++
+
+workflows:
+  all:
+    jobs:
+    - gcc:
+      matrix:
+        parameters:
+          build-type: [ "Debug", "Release" ]
+          # install-dependencies:
+          #   - []
+          #   - - run: |
+          #         apt install -y \
+          #           libopenal-dev \
+          #           libogg-dev \
+          #           libvorbis-dev \
+          #           libtheora-dev \
+          #           libgtest-dev
+    - clang:
+      matrix:
+        parameters:
+          build-type: [ "Debug", "Release" ]
+          # install-dependencies:
+          #   - []
+          #   - - run: |
+          #         apt install -y \
+          #           libopenal-dev \
+          #           libogg-dev \
+          #           libvorbis-dev \
+          #           libtheora-dev \
+          #           libgtest-dev

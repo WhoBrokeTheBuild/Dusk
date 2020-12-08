@@ -406,3 +406,23 @@ ENDIF()
 IF(BUILD_PACKAGES)
     ADD_SUBDIRECTORY(Packages)
 ENDIF()
+
+###
+### CI
+###
+
+FIND_PROGRAM(circleci_COMMAND circleci)
+
+IF(circleci_COMMAND)
+    ADD_CUSTOM_TARGET(
+        circleci-gcc
+        COMMAND ${circleci_COMMAND} local execute --job gcc
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+    
+    ADD_CUSTOM_TARGET(
+        circleci-clang
+        COMMAND ${circleci_COMMAND} local execute --job clang
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+ENDIF()

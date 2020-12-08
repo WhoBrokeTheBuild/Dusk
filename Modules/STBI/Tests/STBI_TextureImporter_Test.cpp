@@ -1,10 +1,10 @@
-#include <Dusk/STBI/TextureImporter.hpp>
+#include <Dusk/STBI/STBITextureImporter.hpp>
 
 #include <gtest/gtest.h>
 
 #include "test.h"
 
-static Dusk::TextureImporter _TextureImporter;
+static Dusk::STBITextureImporter _TextureImporter;
 
 TEST(LoadFromFile, PNG_RGB) {
     auto data = _TextureImporter.LoadFromFile("test_rgb.png");

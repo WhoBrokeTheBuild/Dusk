@@ -1,7 +1,7 @@
 #include <Python/PyScriptEvent.hpp>
 #include <Dusk/Log.hpp>
 
-#include <Dusk/Graphics/GraphicsDriver.hpp>
+#include <Dusk/GraphicsDriver.hpp>
 
 namespace Dusk {
 

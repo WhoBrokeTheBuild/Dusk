@@ -3,7 +3,6 @@
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Version.hpp>
-#include <Dusk/Math.hpp>
 
 #include <string>
 

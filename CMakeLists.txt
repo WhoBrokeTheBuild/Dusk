@@ -90,7 +90,6 @@ SET(
 
 # Generate list of available modules
 SET(AVAILABLE_MODULES
-    "Archive"
     "FreeType"
     "GLTF2"
     "OpenAL"

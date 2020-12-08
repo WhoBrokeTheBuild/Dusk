@@ -3,7 +3,7 @@
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Object.hpp>
-#include <Dusk/Graphics/TransformData.hpp>
+#include <Dusk/TransformData.hpp>
 
 namespace Dusk {
 

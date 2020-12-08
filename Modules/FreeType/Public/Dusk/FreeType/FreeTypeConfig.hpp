@@ -1,0 +1,12 @@
+#ifndef DUSK_FREETYPE_CONFIG_HPP
+#define DUSK_FREETYPE_CONFIG_HPP
+
+#include <Dusk/Config.hpp>
+
+#if defined(DUSK_FREETYPE_EXPORT)
+    #define DUSK_FREETYPE_API DUSK_API_EXPORT
+#else
+    #define DUSK_FREETYPE_API DUSK_API_IMPORT
+#endif
+
+#endif // DUSK_FREETYPE_CONFIG_HPP

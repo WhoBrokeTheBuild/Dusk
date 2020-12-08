@@ -1,6 +1,6 @@
-#include <Dusk/GLTF2/glTF2File.hpp>
+#include "glTF2File.hpp"
 
-#include <Dusk/Graphics/GraphicsDriver.hpp>
+#include <Dusk/GraphicsDriver.hpp>
 #include <Dusk/Benchmark.hpp>
 #include <Dusk/Log.hpp>
 

@@ -3,13 +3,13 @@
 #include <Dusk/Log.hpp>
 #include <Dusk/Module.hpp>
 #include <Dusk/ScriptConsole.hpp>
-#include <Dusk/Graphics/GraphicsDriver.hpp>
-#include <Dusk/Graphics/TransformData.hpp>
-#include <Dusk/Scene/AxisComponent.hpp>
-#include <Dusk/Scene/MeshComponent.hpp>
-#include <Dusk/Scene/Entity.hpp>
-#include <Dusk/Scene/Scene.hpp>
-#include <Dusk/Scene/Camera.hpp>
+#include <Dusk/GraphicsDriver.hpp>
+#include <Dusk/TransformData.hpp>
+#include <Dusk/AxisComponent.hpp>
+#include <Dusk/MeshComponent.hpp>
+#include <Dusk/Entity.hpp>
+#include <Dusk/Scene.hpp>
+#include <Dusk/Camera.hpp>
 
 #include <Dusk/Event.hpp>
 

@@ -1,7 +1,7 @@
 # Dusk Game/Simulation Engine
 
-[![Build Status](https://travis-ci.com/WhoBrokeTheBuild/Dusk.svg?branch=master)](https://travis-ci.com/WhoBrokeTheBuild/Dusk)
-[![Build Status](https://ci.appveyor.com/api/projects/status/github/WhoBrokeTheBuild/Dusk?svg=true)](https://ci.appveyor.com/project/WhoBrokeTheBuild/dusk)
+[![CircleCI](https://circleci.com/gh/WhoBrokeTheBuild/Dusk.svg?style=svg)](https://circleci.com/gh/WhoBrokeTheBuild/Dusk)
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/github/WhoBrokeTheBuild/Dusk?svg=true)](https://ci.appveyor.com/project/WhoBrokeTheBuild/dusk)
 
 ## Building
 

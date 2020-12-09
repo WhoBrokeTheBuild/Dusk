@@ -5,20 +5,62 @@
 
 ## Building
 
-```
+```sh
+# Configure
+mkdir Build
 cd Build
 cmake ..
 
-make -j8
+# Build
+make -l
 # or
 cmake --build .
 ```
+
+Specify build options to CMake before building.
+
+```sh
+cd Build
+cmake -DOPTION=VALUE ..
+```
+
+### Available Build Options
+
+> `VERBOSE_LOGGING`, default `OFF`
+>
+> Enables verbose logging with the `DuskLogVerbose` function.
+
+> `BUILD_TESTS`, default `OFF`
+>
+> Build tests, which can then be run with `ctest` or `make test`.
+
+> `BUILD_DEMOS`, default `ON`
+>
+> Build demo projects, which can be run with `make run-DemoName`.
+
+> `BUILD_THIRDPARTY`, default `ON`
+>
+> Build any missing third-party dependencies.
+
+> `BUILD_PACKAGES`, default `OFF`
+>
+> Build packages for distribution (`.deb`, `.rpm`, `.tgz`, etc.).
+
+> `MODULES`, defaults to modules required by demos
+>
+> A semicolon-separated list of modules to build. Wrap in "" in order to keep
+> it from being misinterpreted by the shell. Run CMake to display a list of
+> available modules.
+>
+> e.g. `cmake -DMODULES="OpenGL;Vulkan" ..`
 
 ## Running Examples
 
 The examples are built to run from their source directories. To facilitate this, there are convenience targets prefixed with `run-`
 
 ```
+make -l run-HelloWorld
+# or
 cmake --build . --target run-HelloWorld
 ```
 
@@ -27,50 +69,3 @@ cmake --build . --target run-HelloWorld
 ### Pull Requests
 
 Use the "Branch and Pull Request" model for contributing changes.
-
-### Commit Message Format
-
-```
-<type>(<scope>): <title>
-<message>
-```
-
-**Allowed `<type>`**
-
-* `Release`: A new release, increments Major
-* `Feat`: A new feature, increments Minor
-* `Fix`: A small fix, increments Patch
-* `Chore`: A change to the build process or tooling
-* `Test`: Unit / Integration test updates
-* `Doc`: Documentation updates
-* `Nit`: A small change related to style or snytax
-* `Refactor`: A change to refactor code
-
-**Allowed `<scope>`**
-
-Scope is optional, but it should refer to a subsystem of the engine.
-
-**`<subject>`**
-
-Subject should contain a succinct description of the change.
-
-* Use present tense, "change" not "changed" or "changes"
-* Capitalize the first letter
-* Don't end with a period
-
-**`<message>`**
-
-* Use present tense, as in `<subject>`
-* Include whatever details and motivations are relevant to the change
-
-**Examples**
-
-```
-Feat(Scene): Add glTF Camera Loading
-Updated Scene loading to create Camera objects
-
-Nit: Switch to for(auto& it) from for(int i)
-
-Chore(Build): Change default compiler to GCC
-```
-

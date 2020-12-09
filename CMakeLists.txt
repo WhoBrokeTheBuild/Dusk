@@ -42,15 +42,6 @@ IF(VERBOSE_LOGGING)
 ENDIF()
 
 OPTION(
-    BINARY_SHADERS
-    "Build Dusk with Binary Shader Support"
-    OFF
-)
-IF(BINARY_SHADERS)
-    ADD_DEFINITIONS(-DDUSK_ENABLE_BINARY_SHADERS)
-ENDIF()
-
-OPTION(
     BUILD_TESTS
     "Build Tests"
     OFF

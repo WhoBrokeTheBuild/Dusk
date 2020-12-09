@@ -408,6 +408,29 @@ IF(BUILD_PACKAGES)
 ENDIF()
 
 ###
+### Docker
+###
+
+FIND_PROGRAM(docker_COMMAND docker)
+
+IF(docker_COMMAND)
+    ADD_CUSTOM_TARGET(
+        build-docker-images
+        COMMAND ${docker_COMMAND} build --target builder-minimal -t whobrokethebuild/dusk:builder-minimal .
+        COMMAND ${docker_COMMAND} build --target builder -t whobrokethebuild/dusk:builder .
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+
+    ADD_CUSTOM_TARGET(
+        push-docker-images
+        COMMAND ${docker_COMMAND} push whobrokethebuild/dusk:builder-minimal
+        COMMAND ${docker_COMMAND} push whobrokethebuild/dusk:builder
+        DEPENDS build-docker-images
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+ENDIF()
+
+###
 ### CI
 ###
 
@@ -415,14 +438,8 @@ FIND_PROGRAM(circleci_COMMAND circleci)
 
 IF(circleci_COMMAND)
     ADD_CUSTOM_TARGET(
-        circleci-gcc
-        COMMAND ${circleci_COMMAND} local execute --job gcc
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    )
-    
-    ADD_CUSTOM_TARGET(
-        circleci-clang
-        COMMAND ${circleci_COMMAND} local execute --job clang
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        test-circleci
+        COMMAND ${circleci_COMMAND} local execute --job "Clang, Release, System"
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     )
 ENDIF()

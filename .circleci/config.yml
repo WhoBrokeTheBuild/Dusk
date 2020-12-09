@@ -1,39 +1,34 @@
 version: 2.1
 
-commands:
-  setup:
+jobs:
+  build:
     parameters:
-      install-compiler:
-        type: steps
-        default: []
-    steps:
-      - run: |
-          apt update && \
-          apt install -y \
-            git git-lfs \
-            wget \
-            make \
-            xorg-dev \
-            libglu1-mesa-dev \
-            libpython3.8-dev \
-            software-properties-common
-      - steps: << parameters.install-compiler >>
-
-  build-and-test:
-    parameters:
-      cc:
+      compiler:
         type: string
-        default: ""
-      cxx:
+        default: "clang"
+      image:
         type: string
-        default: ""
+        default: "whobrokethebuild/dusk:builder"
+      build-type:
+        type: string
+        default: Release
+    environment:
+      CMAKE_BUILD_TYPE: << parameters.build-type >>
+    docker:
+      - image: << parameters.image >>
+    resource_class: small
     steps:
+      - checkout
       - run: |
-          source Scripts/ci-install-vulkan.sh
-          source Scripts/ci-install-cmake.sh
-          export CC="<< parameters.cc >>"
-          export CXX="<< parameters.cxx >>"
+          if [ "<< parameters.compiler >>" = "clang" ]; then
+            export CC="clang"
+            export CXX="clang++"
+          elif [ "<< parameters.compiler >>" = "gcc" ]; then
+            export CC="gcc-8"
+            export CXX="g++-8"
+          fi
           env
+          echo "Docker Image: << parameters.image >>"
           cmake --version
           mkdir Build && cd Build
           cmake \
@@ -44,83 +39,21 @@ commands:
             ..
           make -l all test
 
-jobs:
-  gcc:
-    parameters:
-      build-type:
-        type: string
-        default: Release
-      install-dependencies:
-        type: steps
-        default: []
-    environment:
-      DEBIAN_FRONTEND: noninteractive
-      CMAKE_BUILD_TYPE: << parameters.build-type >>
-    docker:
-      - image: "ubuntu:20.04"
-    steps:
-      - setup:
-          install-compiler:
-            - run: |
-                add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
-                apt update && \
-                apt install -y g++-8
-      - steps: << parameters.install-dependencies >>
-      - checkout
-      - build-and-test:
-          cc: gcc-8
-          cxx: g++-8
-  clang:
-    parameters:
-      build-type:
-        type: string
-        default: Release
-      install-dependencies:
-        type: steps
-        default: []
-    environment:
-      DEBIAN_FRONTEND: noninteractive
-      CMAKE_BUILD_TYPE: << parameters.build-type >>
-    docker:
-      - image: "ubuntu:20.04"
-    steps:
-      - setup:
-          install-compiler:
-            - run: |
-                bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
-                apt install -y clang
-      - steps: << parameters.install-dependencies >>
-      - checkout
-      - build-and-test:
-          cc: clang
-          cxx: clang++
-
 workflows:
   all:
     jobs:
-    - gcc:
-      matrix:
-        parameters:
-          build-type: [ "Debug", "Release" ]
-          # install-dependencies:
-          #   - []
-          #   - - run: |
-          #         apt install -y \
-          #           libopenal-dev \
-          #           libogg-dev \
-          #           libvorbis-dev \
-          #           libtheora-dev \
-          #           libgtest-dev
-    - clang:
-      matrix:
-        parameters:
-          build-type: [ "Debug", "Release" ]
-          # install-dependencies:
-          #   - []
-          #   - - run: |
-          #         apt install -y \
-          #           libopenal-dev \
-          #           libogg-dev \
-          #           libvorbis-dev \
-          #           libtheora-dev \
-          #           libgtest-dev
+      - build:
+          name: "Clang, Release, System"
+          compiler: "clang"
+          image: "whobrokethebuild/dusk:builder"
+          build-type: "Release"
+      - build:
+          name: "Clang, Debug, ThirdParty"
+          compiler: "clang"
+          image: "whobrokethebuild/dusk:builder-minimal"
+          build-type: "Debug"
+      - build:
+          name: "GCC, Release, System"
+          compiler: "gcc"
+          image: "whobrokethebuild/dusk:builder"
+          build-type: "Release"

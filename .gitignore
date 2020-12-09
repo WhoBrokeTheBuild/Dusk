@@ -157,7 +157,7 @@ UpgradeLog*.htm
 flatbuffers_common_*.h
 
 ### Custom ###
-Build/*
+[Bb]uild/*
 config.h
 #*.bin
 *.reg

@@ -4,7 +4,7 @@
 
 #include "test.h"
 
-static Dusk::STBITextureImporter _TextureImporter;
+static Dusk::STBI::STBITextureImporter _TextureImporter;
 
 TEST(LoadFromFile, PNG_RGB) {
     auto data = _TextureImporter.LoadFromFile("test_rgb.png");

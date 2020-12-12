@@ -163,7 +163,7 @@ MACRO(DEFINE_DEMO _target)
         SET_TARGET_PROPERTIES(
             ${_target}
             PROPERTIES 
-                VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                 VS_DEBUGGER_ENVIRONMENT "PATH=${RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${RUNTIME_SEARCH_PATH_DEBUG};>$<$<CONFIG:Release>:${RUNTIME_SEARCH_PATH_RELEASE};>$ENV{PATH}\nDUSK_ASSET_PATH=${ASSET_PATH}"
         )
 
@@ -171,7 +171,7 @@ MACRO(DEFINE_DEMO _target)
             run-${_target}
             COMMAND ${CMAKE_COMMAND} -E env "PATH=${RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${RUNTIME_SEARCH_PATH_DEBUG};>$<$<CONFIG:Release>:${RUNTIME_SEARCH_PATH_RELEASE};>$ENV{PATH}" "DUSK_ASSET_PATH=${ASSET_PATH}" $<TARGET_FILE:${_target}>
             DEPENDS ${_target}
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         )
 
         SET_TARGET_PROPERTIES(
@@ -186,7 +186,7 @@ MACRO(DEFINE_DEMO _target)
             ADD_CUSTOM_COMMAND(
                 TARGET ${_target} POST_BUILD
                 BYPRODUCTS ${_launch_json}
-                COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Scripts/add-vscode-launch-target.py ${_launch_json} "${_target} ($<CONFIG>)" $<TARGET_FILE:${_target}> ${CMAKE_CURRENT_SOURCE_DIR} "PATH=${RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${RUNTIME_SEARCH_PATH_DEBUG};>$<$<CONFIG:Release>:${RUNTIME_SEARCH_PATH_RELEASE};>$ENV{PATH}" "DUSK_ASSET_PATH=${ASSET_PATH}"
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Scripts/add-vscode-launch-target.py ${_launch_json} "${_target} ($<CONFIG>)" $<TARGET_FILE:${_target}> ${CMAKE_CURRENT_BINARY_DIR} "PATH=${RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${RUNTIME_SEARCH_PATH_DEBUG};>$<$<CONFIG:Release>:${RUNTIME_SEARCH_PATH_RELEASE};>$ENV{PATH}" "DUSK_ASSET_PATH=${ASSET_PATH}"
             )
         ENDIF()
     ELSE()
@@ -197,7 +197,7 @@ MACRO(DEFINE_DEMO _target)
             run-${_target}
             COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${ASSET_PATH}" $<TARGET_FILE:${_target}>
             DEPENDS ${_target}
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         )
 
         SET_TARGET_PROPERTIES(
@@ -211,7 +211,7 @@ MACRO(DEFINE_DEMO _target)
                 gdb-${_target}
                 COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${ASSET_PATH}" gdb --args $<TARGET_FILE:${_target}>
                 DEPENDS ${_target}
-                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             )
 
             SET_TARGET_PROPERTIES(
@@ -226,7 +226,7 @@ MACRO(DEFINE_DEMO _target)
                 valgrind-${_target}
                 COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${ASSET_PATH}" valgrind $<TARGET_FILE:${_target}>
                 DEPENDS ${_target}
-                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             )
 
             SET_TARGET_PROPERTIES(
@@ -241,7 +241,7 @@ MACRO(DEFINE_DEMO _target)
             ADD_CUSTOM_COMMAND(
                 TARGET ${_target} POST_BUILD
                 BYPRODUCTS ${_launch_json}
-                COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Scripts/add-vscode-launch-target.py ${_launch_json} ${_target} $<TARGET_FILE:${_target}> ${CMAKE_CURRENT_SOURCE_DIR} "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${ASSET_PATH}"
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Scripts/add-vscode-launch-target.py ${_launch_json} ${_target} $<TARGET_FILE:${_target}> ${CMAKE_CURRENT_BINARY_DIR} "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${ASSET_PATH}"
             )
         ENDIF()
     ENDIF()

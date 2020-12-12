@@ -14,7 +14,6 @@ std::vector<std::unique_ptr<MeshData>> TinyOBJMeshImporter::LoadFromFile(const s
 {
     DuskBenchmarkStart();
 
-    const std::string& dir = GetDirname(filename);
     std::vector<std::unique_ptr<MeshData>> meshes;
 
     tinyobj::attrib_t attrib;
@@ -22,15 +21,38 @@ std::vector<std::unique_ptr<MeshData>> TinyOBJMeshImporter::LoadFromFile(const s
     std::vector<tinyobj::material_t> materials;
 
     std::string warn, err;
+    bool result = false;
 
-    bool result = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filename.c_str(), dir.c_str());
+    const auto& assetPaths = GetAssetPaths();
+
+    for (const auto& path : assetPaths) {
+        std::string fullPath = path + "Models/" + filename;
+        DuskLogVerbose("Checking '%s'", fullPath);
+
+        std::string dir = GetDirname(fullPath);
+
+        warn = "";
+        err = "";
+
+        result = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, fullPath.c_str(), dir.c_str());
+
+        // If the error isn't 'Cannot open file', the .obj file is probably
+        // broken, and we should fail
+        if (!err.empty() && err.rfind("Cannot open file", 0) != 0) {
+            break;
+        }
+
+        if (result) {
+            break;
+        }
+    }
 
     if (!warn.empty()) {
-        DuskLogWarn("tinyobj: %s", warn);
+        DuskLogWarn("tinyobj::LoadObj(): %s", warn);
     }
 
     if (!err.empty()) {
-        DuskLogError("tinyobj: %s", err);
+        DuskLogError("tinyobj::LoadObj(): %s", err);
     }
 
     if (!result) {

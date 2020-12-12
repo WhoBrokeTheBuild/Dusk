@@ -62,7 +62,7 @@ std::vector<std::string> GetAssetPaths()
         return paths;
     }
 
-    paths.push_back(std::string());
+    paths.push_back("Assets/");
 
     const char * path = getenv("DUSK_ASSET_PATH");
     DuskLogVerbose("DUSK_ASSET_PATH=%s", path);

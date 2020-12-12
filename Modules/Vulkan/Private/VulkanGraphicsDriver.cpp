@@ -1288,7 +1288,10 @@ bool VulkanGraphicsDriver::InitGraphicsPipeline()
     
     _mesh = CreateMesh();
     const auto& meshImporters = GetAllMeshImporters();
-    auto meshDatas = meshImporters[0]->LoadFromFile("Assets/Models/crate/crate.obj");
+    auto meshDatas = meshImporters[0]->LoadFromFile("crate/crate.obj");
+    if (meshDatas.empty()) {
+        DuskLogFatal("Failed to init hacky code in InitGraphicsPipeline()");
+    }
     _mesh->Load(meshDatas[0].get());
 
     _pipeline = CreatePipeline();

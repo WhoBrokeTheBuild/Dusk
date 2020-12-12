@@ -44,6 +44,8 @@ void Terminate() {
     FreeAllModules();
 
     TermMemoryTracking();
+    
+    CloseAllLogFiles();
 }
 
 static bool _Running = false;
@@ -60,8 +62,22 @@ bool IsRunning() {
 
 DUSK_ENGINE_API
 bool RunScriptFile(const std::string& filename) {
-    FILE * file = fopen(filename.c_str(), "rt");
+    FILE * file = nullptr;
+    
+    const auto& assetPaths = GetAssetPaths();
+
+    for (const auto& path : assetPaths) {
+        const std::string& fullPath = path + "Scripts/" + filename;
+        DuskLogVerbose("Checking '%s'", fullPath);
+
+        file = fopen(fullPath.c_str(), "rt");
+        if (file) {
+            break;
+        }
+    }
+
     if (!file) {
+        DuskLogError("Failed to script '%s'", filename);
         return false;
     }
 

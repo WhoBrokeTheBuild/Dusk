@@ -17,6 +17,8 @@
 
 int main(int argc, char** argv)
 {
+    Dusk::AddLogFile("lastrun.log");
+
     Dusk::SetApplicationName("Console");
     Dusk::SetApplicationVersion({ 1, 0, 0 });
 

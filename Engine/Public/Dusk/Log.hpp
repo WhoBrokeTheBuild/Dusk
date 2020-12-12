@@ -18,14 +18,23 @@ namespace Dusk {
 
 enum class LogLevel 
 {
-    Info,
-    Warning,
-    Error,
     Fatal,
+    Error,
+    Warning,
+    Info,
     Performance,
-    Verbose,
     Load,
+    Verbose,
 };
+
+DUSK_ENGINE_API
+bool AddLogFile(const std::string& filename);
+
+DUSK_ENGINE_API
+std::vector<FILE *> GetAllLogFiles();
+
+DUSK_ENGINE_API
+void CloseAllLogFiles();
 
 template <class T>
 inline auto LogWrap(const T& v) {
@@ -134,6 +143,11 @@ inline void Log(LogLevel level, const char * format, Args... args)
 #pragma GCC diagnostic ignored "-Wformat-security"
         
     printf(format, LogWrap(args)...);
+
+    const auto& logFiles = GetAllLogFiles();
+    for (FILE * file : logFiles) {
+        fprintf(file, format, LogWrap(args)...);
+    }
 
 #pragma clang diagnostic pop
 

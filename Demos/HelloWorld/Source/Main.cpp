@@ -94,11 +94,13 @@ void run()
 
 int main(int argc, char** argv)
 {
+    Dusk::AddLogFile("lastrun.log");
+
     Dusk::SetApplicationName("HelloWorld");
     Dusk::SetApplicationVersion({ 1, 0, 0 });
 
     Dusk::Initialize(argc, argv);
-    if (!Dusk::RunScriptFile("Assets/Scripts/Main.py")) {
+    if (!Dusk::RunScriptFile("Main.py")) {
         DuskLogError("Failed to load Main.py");
         return 1;
     }

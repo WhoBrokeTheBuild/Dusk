@@ -2,7 +2,7 @@
 
 #include <Dusk/Log.hpp>
 
-namespace Dusk {
+namespace Dusk::OpenGL {
 
 DUSK_OPENGL_API
 OpenGLInputDriver::OpenGLInputDriver() {
@@ -361,4 +361,4 @@ ControllerButton OpenGLInputDriver::GetSDLControllerButton(int sdlButton)
     return ControllerButton::Unknown;
 }
 
-} // namespace Dusk
+} // namespace Dusk::OpenGL

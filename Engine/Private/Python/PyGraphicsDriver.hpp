@@ -24,7 +24,7 @@ PyObject * PyGraphicsDriver_SetWindowSize(PyObject * self, PyObject * args);
 
 PyObject * PyDusk_GetGraphicsDriver(PyObject * self, PyObject * args);
 
-bool PyInit_GraphicsDriver(PyObject * module);
+bool PyInit_GraphicsDriver(PyObject * mod);
 
 } // namespace Dusk
 

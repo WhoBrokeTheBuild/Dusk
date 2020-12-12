@@ -3,7 +3,7 @@
 #include <Dusk/Log.hpp>
 #include <Dusk/Benchmark.hpp>
 
-namespace Dusk {
+namespace Dusk::OpenGL {
 
 DUSK_OPENGL_API
 OpenGLTexture::~OpenGLTexture()
@@ -138,4 +138,4 @@ GLenum OpenGLTexture::GetGLFilterType(const Texture::FilterType& type)
     return GL_INVALID_ENUM;
 }
 
-} // namespace Dusk
+} // namespace Dusk::OpenGL

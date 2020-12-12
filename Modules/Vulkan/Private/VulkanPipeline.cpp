@@ -4,19 +4,22 @@
 #include <Dusk/Benchmark.hpp>
 #include <Dusk/Vulkan/VulkanGraphicsDriver.hpp>
 #include <Dusk/Vulkan/VulkanShader.hpp>
+#include <Dusk/Vulkan/VulkanMesh.hpp>
 
-namespace Dusk {
+namespace Dusk::Vulkan {
 
-void VulkanPipeline::Bind()
+VulkanPipeline::~VulkanPipeline()
 {
-    VkResult result;
+    VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
+ 
+    vkDestroyPipeline(gfx->GetDevice(), _vkPipeline, nullptr);
+}
+
+void VulkanPipeline::Create()
+{
+    VkResult vkResult;
 
     VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
-
-    // TODO: Fix
-    // swapChainExtent ?
-    unsigned WIDTH = 1024;
-    unsigned HEIGHT = 768;
 
     VulkanShader * shader = DUSK_VULKAN_SHADER(_shader);
     if (!shader) {
@@ -24,64 +27,26 @@ void VulkanPipeline::Bind()
         return;
     }
 
-    const auto& stages = shader->GetStages();
-
-
-
-    VkAttachmentDescription colorAttachmentDescription = {
-        .format = VK_FORMAT_R8G8B8A8_UINT,// ?
-        .samples = VK_SAMPLE_COUNT_1_BIT,
-        .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-        .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-        // TODO: Fix when we enable stencil buffer
-        .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-        .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-        .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, // TODO: Investigate
-    };
-
-    VkAttachmentReference colorAttachmentReference = {
-        .attachment = 0,
-        .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-    };
-
-    VkSubpassDescription subpassDescription = {
-        .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-        .colorAttachmentCount = 1,
-        .pColorAttachments = &colorAttachmentReference,
-    };
-
-    VkRenderPassCreateInfo renderPassCreateInfo = {
-        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-        .pNext = nullptr,
-        .flags = 0,
-        .attachmentCount = 1,
-        .pAttachments = &colorAttachmentDescription,
-        .subpassCount = 1,
-        .pSubpasses = &subpassDescription,
-    };
-
-    // TODO: Move
-    VkRenderPass renderPass;
-
-    result = vkCreateRenderPass(gfx->GetDevice(), &renderPassCreateInfo, nullptr, &renderPass);
-    if (result != VK_SUCCESS) {
-        DuskLogError("Failed to create render pass");
+    VulkanMesh * mesh = DUSK_VULKAN_MESH(_mesh);
+    if (!mesh) {
+        DuskLogError("Trying to bind a Vulkan VulkanPipeline with no mesh");
         return;
     }
 
+    const auto& stages = shader->GetStages();
 
+    VkExtent2D extent = gfx->GetSwapChainExtent();
 
     VkViewport viewport = {
-        .width = static_cast<float>(WIDTH),
-        .height = static_cast<float>(HEIGHT),
+        .width = static_cast<float>(extent.width),
+        .height = static_cast<float>(extent.height),
         .minDepth = 0.0f,
         .maxDepth = 1.0f,
     };
 
     VkRect2D scissor = {
         .offset = { 0, 0 },
-        .extent = { WIDTH, HEIGHT },
+        .extent = { extent.width, extent.height },
     };
 
     VkPipelineViewportStateCreateInfo viewportStateCreateInfo = {
@@ -159,23 +124,30 @@ void VulkanPipeline::Bind()
     };
 
     // TODO: Move
-    VkPipelineLayout layout;
 
-    VkPipelineLayoutCreateInfo layoutCreateInfo = {
-        .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+    // TransformData
+
+
+    const auto& bindings = mesh->GetVkVertexInputBindings();
+    const auto& attributes = mesh->GetVkVertexInputAttributes();
+
+    VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
-        .setLayoutCount = 0,
-        .pSetLayouts = nullptr,
-        .pushConstantRangeCount = 0,
-        .pPushConstantRanges = nullptr,
+        .vertexBindingDescriptionCount = static_cast<uint32_t>(bindings.size()),
+        .pVertexBindingDescriptions = bindings.data(),
+        .vertexAttributeDescriptionCount = static_cast<uint32_t>(attributes.size()),
+        .pVertexAttributeDescriptions = attributes.data(),
     };
 
-    result = vkCreatePipelineLayout(gfx->GetDevice(), &layoutCreateInfo, nullptr, &layout);
-    if (result != VK_SUCCESS) {
-        DuskLogError("Failed to create pipeline layout");
-        return;
-    }
+    VkPipelineInputAssemblyStateCreateInfo vertexInputAssemblyStateCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .topology = GetVkPrimitiveTopology(),
+        .primitiveRestartEnable = VK_FALSE,
+    };
 
     VkGraphicsPipelineCreateInfo pipelineCreateInfo = {
         .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
@@ -183,8 +155,8 @@ void VulkanPipeline::Bind()
         .flags = 0,
         .stageCount = static_cast<uint32_t>(stages.size()),
         .pStages = stages.data(),
-        .pVertexInputState = nullptr, // TODO
-        .pInputAssemblyState = nullptr, // TODO
+        .pVertexInputState = &vertexInputStateCreateInfo,
+        .pInputAssemblyState = &vertexInputAssemblyStateCreateInfo,
         .pTessellationState = nullptr,
         .pViewportState = &viewportStateCreateInfo,
         .pRasterizationState = &rasterizationStateCreateInfo,
@@ -192,18 +164,15 @@ void VulkanPipeline::Bind()
         // .pDepthStencilState = &depthStencilStateCreateInfo,
         .pColorBlendState = &colorBlendStateCreateInfo,
         .pDynamicState = nullptr,
-        .layout = layout,
-        .renderPass = renderPass,
+        .layout = gfx->GetVkPipelineLayout(),
+        .renderPass = gfx->GetRenderPass(),
         .subpass = 0,
         .basePipelineHandle = VK_NULL_HANDLE,
         .basePipelineIndex = 0,
     };
 
-    // TODO: Move
-    VkPipeline pipeline;
-
-    result = vkCreateGraphicsPipelines(gfx->GetDevice(), nullptr, 1, &pipelineCreateInfo, nullptr, &pipeline);
-    if (result != VK_SUCCESS) {
+    vkResult = vkCreateGraphicsPipelines(gfx->GetDevice(), nullptr, 1, &pipelineCreateInfo, nullptr, &_vkPipeline);
+    if (vkResult != VK_SUCCESS) {
         DuskLogError("Failed to create graphics pipeline");
         return;
     }
@@ -245,6 +214,24 @@ VkFrontFace VulkanPipeline::GetVkFrontFace() const
     }
     
     DuskLogFatal("Unexpected FrontFace: %d", (int)_frontFace);
+}
+
+VkPrimitiveTopology VulkanPipeline::GetVkPrimitiveTopology() const
+{
+    switch (_primitiveTopology) {
+    case PrimitiveTopology::Points:
+        return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+    case PrimitiveTopology::Lines:
+        return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+    case PrimitiveTopology::LineStrip:
+        return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
+    case PrimitiveTopology::Triangles:
+        return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    case PrimitiveTopology::TriangleStrip:
+        return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+    }
+
+    DuskLogFatal("Unexpected PrimitiveTopology: %d", (int)_primitiveTopology);
 }
 
 VkBlendFactor VulkanPipeline::GetVkBlendFactor(BlendFactor factor) const
@@ -303,4 +290,4 @@ VkBlendOp VulkanPipeline::GetVkBlendOp(BlendOperation op) const
     DuskLogFatal("Unexpected BlendOperation: %d", (int)op);
 }
 
-} // namespace Dusk
+} // namespace Dusk::Vulkan

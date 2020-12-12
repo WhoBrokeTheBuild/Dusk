@@ -15,7 +15,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, unsigned msg, WPARAM wParam, LPARAM lParam)
 }
 
 DUSK_DIRECTX_API
-DirectXGraphicsDriver::DirectXGraphicsDriver()
+bool DirectXGraphicsDriver::Initialize()
 {
     HRESULT result;
 
@@ -40,8 +40,7 @@ DirectXGraphicsDriver::DirectXGraphicsDriver()
     wndClass.cbWndExtra = 0;
 
     if (!RegisterClassEx(&wndClass)) {
-        DuskLogError("RegisterClassEx failed: %d", GetLastError());
-        return;
+        DuskLogFatal("RegisterClassEx failed: %d", GetLastError());
     }
 
     std::string title = name + " (" + GetApplicationVersion().GetString() + ")";
@@ -67,8 +66,7 @@ DirectXGraphicsDriver::DirectXGraphicsDriver()
     ComPtr<IDXGIFactory6> factory;
     result = CreateDXGIFactory2(0, IID_PPV_ARGS(&factory));
     if (FAILED(result)) {
-        DuskLogError("CreateDXGIFactory2 failed: %d", GetLastError());
-        return;
+        DuskLogFatal("CreateDXGIFactory2 failed: %d", GetLastError());
     }
 
     ComPtr<IDXGIAdapter1> adapter = nullptr;
@@ -96,16 +94,14 @@ DirectXGraphicsDriver::DirectXGraphicsDriver()
     }
 
     if (!adapter) {
-        DuskLogError("Failed to find a viable DXGI Adapter");
-        return;
+        DuskLogFatal("Failed to find a viable DXGI Adapter");
     }
 
     ComPtr<IDXGIAdapter1> hardwareAdapter = adapter.Detach();
 
     result = D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&_device));
     if (FAILED(result)) {
-        DuskLogError("Failed to create D3D12 Device");
-        return;
+        DuskLogFatal("Failed to create D3D12 Device");
     }
 
     D3D12_COMMAND_QUEUE_DESC queueDesc = { };
@@ -133,8 +129,7 @@ DirectXGraphicsDriver::DirectXGraphicsDriver()
         &swapChain
     );
     if (FAILED(result)) {
-        DuskLogError("Failed to create swap chain");
-        return;
+        DuskLogFatal("Failed to create swap chain");
     }
 
     // Disable Alt+Enter fullscreen command
@@ -155,8 +150,7 @@ DirectXGraphicsDriver::DirectXGraphicsDriver()
 
     result = _device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&_rtvHeap));
     if (FAILED(result)) {
-        DuskLogError("Failed to create RTV descriptor heap");
-        return;
+        DuskLogFatal("Failed to create RTV descriptor heap");
     }
 
     _rtvDescriptorSize = _device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
@@ -166,8 +160,7 @@ DirectXGraphicsDriver::DirectXGraphicsDriver()
     for (unsigned i = 0; i < BUFFER_COUNT; ++i) {
         result = _swapChain->GetBuffer(i, IID_PPV_ARGS(&_renderTargets[i]));
         if (FAILED(result)) {
-            DuskLogError("Failed to get buffer %d from swap chain", i);
-            return;
+            DuskLogFatal("Failed to get buffer %d from swap chain", i);
         }
 
         _device->CreateRenderTargetView(_renderTargets[i].Get(), nullptr, rtvHandle);
@@ -176,8 +169,7 @@ DirectXGraphicsDriver::DirectXGraphicsDriver()
 
     result = _device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&_commandAllocator));
     if (FAILED(result)) {
-        DuskLogError("Failed to create command allocator");
-        return;
+        DuskLogFatal("Failed to create command allocator");
     }
 
     
@@ -192,10 +184,11 @@ DirectXGraphicsDriver::DirectXGraphicsDriver()
 
     _fenceEvent = CreateEvent(nullptr, false, false, nullptr);
 
+    return true;
 }
 
 DUSK_DIRECTX_API
-DirectXGraphicsDriver::~DirectXGraphicsDriver()
+void DirectXGraphicsDriver::Terminate()
 {
     if (_window) {
         DestroyWindow(_window);

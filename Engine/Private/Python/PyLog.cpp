@@ -56,6 +56,19 @@ PyObject * PyDusk_LogError(PyObject * self, PyObject * args)
     Py_RETURN_NONE;
 }
 
+PyObject * PyDusk_LogFatal(PyObject * self, PyObject * args)
+{
+    const char * msg;
+
+    if (!PyArg_ParseTuple(args, "s", &msg)) {
+        PyErr_BadArgument();
+        Py_RETURN_NONE;
+    }
+
+    Log(LogLevel::Fatal, "[FATL](Py): %s\n", msg);
+    std::terminate();
+}
+
 PyObject * PyDusk_LogPerf(PyObject * self, PyObject * args)
 {
     const char * msg;

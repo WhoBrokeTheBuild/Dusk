@@ -5,7 +5,7 @@
 
 #include <Dusk/Pipeline.hpp>
 
-namespace Dusk {
+namespace Dusk::OpenGL {
 
 class DUSK_OPENGL_API OpenGLPipeline : public Pipeline
 {
@@ -21,7 +21,9 @@ public:
         return "Dusk::OpenGLPipeline";
     }
 
-    void Bind() override;
+    void Create() override;
+
+    void Bind();
 
 private:
 
@@ -31,6 +33,6 @@ private:
 
 }; // class OpenGLPipeline
 
-} // namespace Dusk
+} // namespace Dusk::OpenGL
 
 #endif // DUSK_OPENGL_PIPELINE_HPP

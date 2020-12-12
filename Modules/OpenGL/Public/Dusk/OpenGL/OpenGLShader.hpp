@@ -5,9 +5,9 @@
 
 #include <Dusk/Shader.hpp>
 
-namespace Dusk {
+namespace Dusk::OpenGL {
 
-#define DUSK_OPENGL_SHADER(x) (dynamic_cast<Dusk::OpenGLShader *>(x))
+#define DUSK_OPENGL_SHADER(x) (dynamic_cast<Dusk::OpenGL::OpenGLShader *>(x))
 
 class DUSK_OPENGL_API OpenGLShader : public Shader 
 {
@@ -39,6 +39,6 @@ private:
 
 }; // class OpenGLShader
 
-} // namespace Dusk
+} // namespace Dusk::OpenGL
 
 #endif // DUSK_OPENGL_SHADER_HPP

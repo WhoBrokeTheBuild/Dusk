@@ -10,7 +10,7 @@
 #include <Dusk/OpenGL/OpenGLShader.hpp>
 #include <Dusk/OpenGL/OpenGLMesh.hpp>
 
-namespace Dusk {
+namespace Dusk::OpenGL {
 
 struct ShaderDataBindingInfo
 {
@@ -24,13 +24,17 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(OpenGLGraphicsDriver)
 
-    OpenGLGraphicsDriver();
+    OpenGLGraphicsDriver() = default;
 
-    virtual ~OpenGLGraphicsDriver();
+    virtual ~OpenGLGraphicsDriver() = default;
 
     inline std::string GetClassID() const override {
         return "Dusk::GraphicsDriver";
     }
+
+    bool Initialize() override;
+
+    void Terminate() override;
 
     void SetWindowTitle(const std::string& title) override;
 
@@ -58,7 +62,7 @@ private:
 
     SDL_Window * _sdlWindow = nullptr;
 
-    SDL_GLContext _glContext;
+    SDL_GLContext _glContext = nullptr;
 
     OpenGLInputDriver * _inputDriver = nullptr;
 
@@ -68,6 +72,6 @@ private:
     
 }; // class OpenGLGraphicsDriver
 
-} // namespace Dusk
+} // namespace Dusk::OpenGL
 
 #endif // DUSK_OPENGL_GRAPHICS_DRIVER_HPP

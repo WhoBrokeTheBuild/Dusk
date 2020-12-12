@@ -2,7 +2,7 @@
 
 #include "glTF2File.hpp"
 
-namespace Dusk {
+namespace Dusk::GLTF2 {
 
 bool GLTF2SceneImporter::LoadFromFile(Entity * root, const std::string& filename)
 {
@@ -10,4 +10,4 @@ bool GLTF2SceneImporter::LoadFromFile(Entity * root, const std::string& filename
     return file.LoadFromFile(filename);
 }
 
-} // namespace Dusk
+} // namespace Dusk::GLTF2

@@ -3,14 +3,14 @@
 #include <Dusk/Dusk.hpp>
 #include <Dusk/Log.hpp>
 
-namespace Dusk {
+namespace Dusk::OpenGL {
 
 DUSK_OPENGL_API
-OpenGLGraphicsDriver::OpenGLGraphicsDriver()
+bool OpenGLGraphicsDriver::Initialize()
 {
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
         DuskLogError("Failed to initialize SDL, %s", SDL_GetError());
-        return;
+        return false;
     }
 
     SDL_version version;
@@ -34,6 +34,11 @@ OpenGLGraphicsDriver::OpenGLGraphicsDriver()
         640, 480, 
         SDL_WINDOW_OPENGL);
 
+    if (!_sdlWindow) {
+        DuskLogError("SDL_CreateWindow() failed, %s", SDL_GetError());
+        return false;
+    }
+
     Uint16 pixels[16 * 16] = { 0xFFFF };
     SDL_Surface * surface = SDL_CreateRGBSurfaceFrom(pixels, 16, 16, 16, 16 * 2,
                                                      0x0f00, 0x00f0, 0x000f, 0xf000);
@@ -43,12 +48,12 @@ OpenGLGraphicsDriver::OpenGLGraphicsDriver()
     _glContext = SDL_GL_CreateContext(_sdlWindow);
     if (!_glContext) {
         DuskLogError("Failed to create OpenGL context, %s", SDL_GetError());
-        return;
+        return false;
     }
 
     if (!gladLoadGL((GLADloadfunc) SDL_GL_GetProcAddress)) {
         DuskLogError("Failed to initialize OpenGL context");
-        return;
+        return false;
     }
     
     DuskLogVerbose("OpenGL Version: %s",  glGetString(GL_VERSION));
@@ -101,16 +106,19 @@ OpenGLGraphicsDriver::OpenGLGraphicsDriver()
 
     _inputDriver = New OpenGLInputDriver();
     SetInputDriver(std::unique_ptr<InputDriver>(_inputDriver));
+
+    return true;
 }
 
 DUSK_OPENGL_API
-OpenGLGraphicsDriver::~OpenGLGraphicsDriver()
+void OpenGLGraphicsDriver::Terminate()
 {
     _inputDriver = nullptr;
     SetInputDriver(nullptr);
 
     SDL_GL_DeleteContext(_glContext);
     SDL_DestroyWindow(_sdlWindow);
+    
     SDL_Quit();
 }
 
@@ -257,4 +265,4 @@ bool OpenGLGraphicsDriver::SetShaderData(const std::string& name, size_t size, v
     return true;
 }
 
-} // namespace Dusk
+} // namespace Dusk::OpenGL

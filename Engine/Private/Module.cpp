@@ -3,99 +3,175 @@
 #include <Dusk/Log.hpp>
 
 #if defined(DUSK_OS_WINDOWS)
+
     #include <Windows.h>
+
 #else
+
     #include <dlfcn.h>
+
 #endif
 
-#include <vector>
+#include <unordered_map>
 
 namespace Dusk {
     
 #if defined(DUSK_OS_WINDOWS)
+
     typedef HMODULE ModuleHandle;
+
 #else
+
     typedef void * ModuleHandle;
-#endif // __linux__
 
-std::vector<ModuleHandle> _Modules;
+#endif
 
-bool LoadModule(const std::string& name)
+std::unordered_map<std::string, ModuleHandle> _Modules;
+
+ModuleHandle _dlopen(const std::string& filename)
 {
-    ModuleHandle module = nullptr;
-
-    DuskLogLoad("Loading '%s'", name);
+    ModuleHandle handle = nullptr;
 
     #if defined(DUSK_OS_WINDOWS)
+
         DuskLogVerbose("Loading Module from PATH: '%s'", getenv("PATH"));
 
-        module = LoadLibraryA(name.c_str());
-        if (!module) {
+        handle = LoadLibraryA(filename.c_str());
+        if (!handle) {
             char message[256];
             FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
                 NULL, GetLastError(), GetUserDefaultUILanguage(), message, sizeof(message), NULL);
 
             DuskLogError("Failed to load '%s', %s", name, message);
-            return false;
+            return nullptr;
         }
         
-        DuskModule * def = (DuskModule *)GetProcAddress(module, "_DuskModule");
     #else
-        // DuskLogVerbose("Loading Module from LD_LIBRARY_PATH: '%s'", getenv("LD_LIBRARY_PATH"));
 
-        std::string filename = "lib" + name + ".so";
-        module = dlopen(filename.c_str(), RTLD_GLOBAL | RTLD_NOW);
-        if (!module) {
-            DuskLogError("Failed to load '%s', %s", filename, dlerror());
-            return false;
+        DuskLogVerbose("Loading Module from LD_LIBRARY_PATH: '%s'", getenv("LD_LIBRARY_PATH"));
+
+        #if defined(DUSK_OS_APPLE)
+
+            std::string libFilename = "lib" + filename + ".dylib";
+
+        #else
+
+            std::string libFilename = "lib" + filename + ".so";
+
+        #endif
+
+        handle = dlopen(libFilename.c_str(), RTLD_GLOBAL | RTLD_NOW);
+        if (!handle) {
+            DuskLogError("Failed to load '%s', %s", libFilename, dlerror());
+            return nullptr;
         }
 
-        DuskModule * def = (DuskModule *)dlsym(module, "_DuskModule");
     #endif
 
+    return handle;
+}
+
+void * _dlsym(ModuleHandle handle, const std::string& symbol)
+{
+    #if defined(DUSK_OS_WINDOWS)
+
+        return GetProcAddress(handle, symbol.c_str());
+
+    #else
+
+        return dlsym(handle, symbol.c_str());
+
+    #endif
+}
+
+void _dlclose(ModuleHandle handle)
+{
+    #if defined(DUSK_OS_WINDOWS)
+
+        FreeLibrary(handle);
+
+    #else
+
+        dlclose(handle);
+
+    #endif
+}
+
+bool LoadModule(const std::string& name, Version minVersion /*= Version()*/)
+{
+    DuskLogLoad("Loading module '%s'", name);
+
+    ModuleHandle handle = _dlopen(name);
+    if (!handle) {
+        return false;
+    }
+
+    DuskModuleDefinition * def = static_cast<DuskModuleDefinition *>(_dlsym(handle, "_DuskModule"));
     if (!def) {
         DuskLogError("Failed to find _DuskModule symbol");
         return false;
     }
+    
+    if (def->GetVersion) {
+        Version ver = def->GetVersion();
+        if (minVersion > ver) {
+            _dlclose(handle);
 
-    _Modules.push_back(module);
+            DuskLogError("Failed to load module '%s', found version %s but minimum version is %s", 
+                name, ver.GetString(), minVersion.GetString());
+            return false;
+        }
 
-    if (def->Init) {
-        def->Init();
+        DuskLogVerbose("Found module '%s' version %s", name, ver.GetString());
     }
 
-    return true;
-}
+    if (def->Initialize) {
+        if (!def->Initialize()) {
+            _dlclose(handle);
 
-bool LoadModuleArray(const std::initializer_list<std::string>& names)
-{
-    for (const auto& name : names) {
-        if (!LoadModule(name)) {
+            DuskLogError("Failed to initialize module '%s'", name);
             return false;
         }
     }
+
+    _Modules.emplace(name, handle);
+
     return true;
 }
 
-void FreeModules()
+DUSK_ENGINE_API
+void FreeModule(const std::string& name)
 {
-    for (auto module : _Modules) {  
-        #if defined(DUSK_OS_WINDOWS)
-            DuskModule * def = (DuskModule *)GetProcAddress(module, "_DuskModule");
-        #else
-            DuskModule * def = (DuskModule *)dlsym(module, "_DuskModule");
-        #endif
-        
-        if (def && def->Term) {
-            def->Term();
+    auto it = _Modules.find(name);
+    if (it == _Modules.end()) {
+        DuskLogWarn("Failed to free module '%s', module is not loaded", name);
+        return;
+    }
+
+    ModuleHandle handle = it->second;
+    DuskModuleDefinition * def = static_cast<DuskModuleDefinition *>(_dlsym(handle, "_DuskModule"));
+
+    if (def && def->Terminate) {
+        def->Terminate();
+    }
+
+    _dlclose(handle);
+
+    _Modules.erase(it);
+}
+
+void FreeAllModules()
+{
+    for (const auto& it : _Modules) {
+        ModuleHandle handle = it.second;
+        DuskModuleDefinition * def = static_cast<DuskModuleDefinition *>(_dlsym(handle, "_DuskModule"));
+        if (def && def->Terminate) {
+            def->Terminate();
         }
 
-        #if defined(DUSK_OS_WINDOWS)
-            FreeLibrary(module);
-        #else
-            dlclose(module);
-        #endif
+        _dlclose(handle);
     }
+
     _Modules.clear();
 }
 

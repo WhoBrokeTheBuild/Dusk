@@ -4,7 +4,7 @@
 #include <Dusk/Benchmark.hpp>
 #include <Dusk/Vulkan/VulkanGraphicsDriver.hpp>
 
-namespace Dusk {
+namespace Dusk::Vulkan {
 
 DUSK_VULKAN_API
 VulkanTexture::~VulkanTexture()
@@ -126,4 +126,4 @@ VkFormat VulkanTexture::GetVkDataFormat(int components, const TextureData::DataT
     return VK_FORMAT_UNDEFINED;
 }
 
-} // namespace Dusk
+} // namespace Dusk::Vulkan

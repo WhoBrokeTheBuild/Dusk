@@ -12,6 +12,8 @@
 
 #elif defined(__APPLE__) && defined(__MACH__)
 
+    #define DUSK_OS_APPLE
+
     // Apple
     #include "TargetConditionals.h"
 

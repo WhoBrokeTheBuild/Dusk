@@ -17,13 +17,19 @@ class DUSK_DIRECTX_API DirectXGraphicsDriver : public GraphicsDriver
 {
 public:
 
-    DirectXGraphicsDriver();
+    DISALLOW_COPY_AND_ASSIGN(DirectXGraphicsDriver)
 
-    virtual ~DirectXGraphicsDriver();
+    DirectXGraphicsDriver() = default;
+
+    virtual ~DirectXGraphicsDriver() = default;
 
     inline std::string GetClassID() const override {
         return "Dusk::DirectXUpdateContext";
     }
+
+    bool Initialize() override;
+
+    void Terminate() override;
 
     void SetWindowTitle(const std::string& title) override;
 

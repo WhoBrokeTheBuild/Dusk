@@ -5,7 +5,7 @@
 
 #include <Dusk/Mesh.hpp>
 
-namespace Dusk {
+namespace Dusk::OpenGL {
 
 class DUSK_OPENGL_API OpenGLMesh : public Mesh 
 {
@@ -37,6 +37,6 @@ private:
 
 }; // class OpenGLMesh
 
-} // namespace Dusk
+} // namespace Dusk::OpenGL
 
 #endif // DUSK_OPENGL_MESH_HPP

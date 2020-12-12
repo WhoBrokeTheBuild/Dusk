@@ -3,7 +3,7 @@
 #include <Dusk/Log.hpp>
 #include <Dusk/Benchmark.hpp>
 
-namespace Dusk {
+namespace Dusk::OpenGL {
 
 DUSK_OPENGL_API
 void OpenGLMesh::Render()
@@ -120,4 +120,4 @@ GLenum OpenGLMesh::GetGLMode(const MeshData::Mode& mode)
     return GL_INVALID_ENUM;
 }
 
-} // namespace Dusk
+} // namespace Dusk::OpenGL

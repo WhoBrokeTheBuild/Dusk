@@ -10,10 +10,15 @@
 #include <Dusk/Entity.hpp>
 #include <Dusk/Scene.hpp>
 #include <Dusk/Camera.hpp>
+#include <Dusk/MeshImporter.hpp>
 
 #include <Dusk/Event.hpp>
 
 #include <thread>
+
+#include <chrono>
+
+using namespace std::chrono;
 
 void run()
 {
@@ -47,20 +52,22 @@ void run()
 
     auto gfx = Dusk::GetGraphicsDriver();
 
+    // auto shader = gfx->CreateShader();
+    // if (!shader->LoadFromFiles({
+    //     "flat.vert",
+    //     "flat.frag",
+    // })) {
+    //     return;
+    // }
+
     // Dusk::WindowResizedEventData testData;
     // testData.Size = { 1024, 768 };
     // gfx->WindowResizedEvent.Call(&testData);
 
-    auto shader = gfx->CreateShader();
-    if (!shader->LoadFromFiles({
-        "flat.vert",
-        "flat.frag",
-    })) {
-        return;
-    }
 
     // auto pipeline = gfx->CreatePipeline();
     // pipeline->SetShader(shader.get());
+    // pipeline->SetMesh(mesh.get());
     // pipeline->Bind();
 
     Dusk::ScriptConsole::Initialize();
@@ -78,6 +85,8 @@ void run()
         scene.Render(&renderContext);
 
         gfx->SwapBuffers();
+
+        std::this_thread::sleep_for(16ms);
     }
 
     Dusk::ScriptConsole::Terminate();

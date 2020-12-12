@@ -5,7 +5,7 @@
 
 #include <Dusk/InputDriver.hpp>
 
-namespace Dusk {
+namespace Dusk::OpenGL {
 
 class DUSK_OPENGL_API OpenGLInputDriver : public InputDriver
 {
@@ -33,6 +33,6 @@ private:
     
 }; // class OpenGLInputDriver
 
-} // namespace Dusk
+} // namespace Dusk::OpenGL
 
 #endif // DUSK_OPENGL_INPUT_DRIVER_HPP

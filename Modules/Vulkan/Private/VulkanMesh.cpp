@@ -4,7 +4,7 @@
 #include <Dusk/Benchmark.hpp>
 #include <Dusk/Vulkan/VulkanGraphicsDriver.hpp>
 
-namespace Dusk {
+namespace Dusk::Vulkan {
 
 DUSK_VULKAN_API
 VulkanMesh::~VulkanMesh()
@@ -36,6 +36,8 @@ bool VulkanMesh::Load(const MeshData * data)
         return false;
     }
 
+    _vertexCount = static_cast<uint32_t>(data->GetVertices().size());
+
     result = AddBuffer(
         reinterpret_cast<const void *>(data->GetVertices().data()), 
         sizeof(float) * data->GetVertices().size(), 
@@ -44,95 +46,85 @@ bool VulkanMesh::Load(const MeshData * data)
         VK_VERTEX_INPUT_RATE_VERTEX,
         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
-    if (result) {
+    if (!result) {
         DuskLogError("Failed to create vertex buffer");
         return false;
     }
 
-    if (!data->GetNormals().empty()) {
-        result = AddBuffer(
-            reinterpret_cast<const void *>(data->GetNormals().data()), 
-            sizeof(float) * data->GetNormals().size(), 
-            sizeof(float) * 4, 
-            VK_FORMAT_R32G32B32A32_SFLOAT,
-            VK_VERTEX_INPUT_RATE_VERTEX,
-            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    // if (!data->GetNormals().empty()) {
+    //     result = AddBuffer(
+    //         reinterpret_cast<const void *>(data->GetNormals().data()), 
+    //         sizeof(float) * data->GetNormals().size(), 
+    //         sizeof(float) * 4, 
+    //         VK_FORMAT_R32G32B32A32_SFLOAT,
+    //         VK_VERTEX_INPUT_RATE_VERTEX,
+    //         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
-        if (result) {
-            DuskLogError("Failed to create normal buffer");
-            return false;
-        }
-    }
+    //     if (!result) {
+    //         DuskLogError("Failed to create normal buffer");
+    //         return false;
+    //     }
+    // }
 
-    if (!data->GetUVs().empty()) {
-        result = AddBuffer(
-            reinterpret_cast<const void *>(data->GetUVs().data()), 
-            sizeof(float) * data->GetUVs().size(), 
-            sizeof(float) * 2, 
-            VK_FORMAT_R32G32_SFLOAT,
-            VK_VERTEX_INPUT_RATE_VERTEX,
-            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    // if (!data->GetUVs().empty()) {
+    //     result = AddBuffer(
+    //         reinterpret_cast<const void *>(data->GetUVs().data()), 
+    //         sizeof(float) * data->GetUVs().size(), 
+    //         sizeof(float) * 2, 
+    //         VK_FORMAT_R32G32_SFLOAT,
+    //         VK_VERTEX_INPUT_RATE_VERTEX,
+    //         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
-        if (result) {
-            DuskLogError("Failed to create UV buffer");
-            return false;
-        }
-    }
+    //     if (!result) {
+    //         DuskLogError("Failed to create UV buffer");
+    //         return false;
+    //     }
+    // }
 
-    if (!data->GetColors().empty()) {
-        result = AddBuffer(
-            reinterpret_cast<const void *>(data->GetColors().data()), 
-            sizeof(float) * data->GetColors().size(), 
-            sizeof(float) * 4, 
-            VK_FORMAT_R32G32B32A32_SFLOAT,
-            VK_VERTEX_INPUT_RATE_VERTEX,
-            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    // if (!data->GetColors().empty()) {
+    //     result = AddBuffer(
+    //         reinterpret_cast<const void *>(data->GetColors().data()), 
+    //         sizeof(float) * data->GetColors().size(), 
+    //         sizeof(float) * 4, 
+    //         VK_FORMAT_R32G32B32A32_SFLOAT,
+    //         VK_VERTEX_INPUT_RATE_VERTEX,
+    //         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
-        if (result) {
-            DuskLogError("Failed to create color buffer");
-            return false;
-        }
-    }
+    //     if (!result) {
+    //         DuskLogError("Failed to create color buffer");
+    //         return false;
+    //     }
+    // }
 
-    if (!data->GetTangents().empty()) {
-        result = AddBuffer(
-            reinterpret_cast<const void *>(data->GetTangents().data()), 
-            sizeof(float) * data->GetTangents().size(), 
-            sizeof(float) * 4, 
-            VK_FORMAT_R32G32B32A32_SFLOAT,
-            VK_VERTEX_INPUT_RATE_VERTEX,
-            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    // if (!data->GetTangents().empty()) {
+    //     result = AddBuffer(
+    //         reinterpret_cast<const void *>(data->GetTangents().data()), 
+    //         sizeof(float) * data->GetTangents().size(), 
+    //         sizeof(float) * 4, 
+    //         VK_FORMAT_R32G32B32A32_SFLOAT,
+    //         VK_VERTEX_INPUT_RATE_VERTEX,
+    //         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
-        if (result) {
-            DuskLogError("Failed to create tangent buffer");
-            return false;
-        }
-    }
+    //     if (!result) {
+    //         DuskLogError("Failed to create tangent buffer");
+    //         return false;
+    //     }
+    // }
 
-    if (!data->GetBitangents().empty()) {
-        result = AddBuffer(
-            reinterpret_cast<const void *>(data->GetBitangents().data()), 
-            sizeof(float) * data->GetBitangents().size(), 
-            sizeof(float) * 4, 
-            VK_FORMAT_R32G32B32A32_SFLOAT,
-            VK_VERTEX_INPUT_RATE_VERTEX,
-            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    // if (!data->GetBitangents().empty()) {
+    //     result = AddBuffer(
+    //         reinterpret_cast<const void *>(data->GetBitangents().data()), 
+    //         sizeof(float) * data->GetBitangents().size(), 
+    //         sizeof(float) * 4, 
+    //         VK_FORMAT_R32G32B32A32_SFLOAT,
+    //         VK_VERTEX_INPUT_RATE_VERTEX,
+    //         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
-        if (result) {
-            DuskLogError("Failed to create bitangent buffer");
-            return false;
-        }
-    }
-
-    VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = {
-        .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-        .pNext = nullptr,
-        .flags = 0,
-        .vertexBindingDescriptionCount = static_cast<uint32_t>(_bindings.size()),
-        .pVertexBindingDescriptions = _bindings.data(),
-        .vertexAttributeDescriptionCount = static_cast<uint32_t>(_attributes.size()),
-        .pVertexAttributeDescriptions = _attributes.data(),
-    };
+    //     if (!result) {
+    //         DuskLogError("Failed to create bitangent buffer");
+    //         return false;
+    //     }
+    // }
 
     return true;
 }
@@ -140,8 +132,6 @@ bool VulkanMesh::Load(const MeshData * data)
 bool VulkanMesh::AddBuffer(const void * data, VkDeviceSize size, uint32_t stride, 
     VkFormat format, VkVertexInputRate inputRate, VkBufferUsageFlags usage)
 {
-    VkResult result;
-
     VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
 
     _bindings.push_back({
@@ -179,4 +169,4 @@ bool VulkanMesh::AddBuffer(const void * data, VkDeviceSize size, uint32_t stride
     return true;
 }
 
-} // namespace Dusk
+} // namespace Dusk::Vulkan

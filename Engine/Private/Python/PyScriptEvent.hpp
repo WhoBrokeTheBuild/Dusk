@@ -15,7 +15,7 @@ PyObject * PyScriptEvent_RemoveAllListeners(PyObject * self, PyObject * args);
 
 // PyObject * PyDusk_Call(PyObject * self, PyObject * args);
 
-bool PyInit_ScriptEvent(PyObject * module);
+bool PyInit_ScriptEvent(PyObject * mod);
 
 } // namespace Dusk
 

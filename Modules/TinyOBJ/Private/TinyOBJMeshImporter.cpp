@@ -7,7 +7,7 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
-namespace Dusk {
+namespace Dusk::TinyOBJ {
 
 DUSK_TINYOBJ_API
 std::vector<std::unique_ptr<MeshData>> TinyOBJMeshImporter::LoadFromFile(const std::string& filename)
@@ -16,8 +16,6 @@ std::vector<std::unique_ptr<MeshData>> TinyOBJMeshImporter::LoadFromFile(const s
 
     const std::string& dir = GetDirname(filename);
     std::vector<std::unique_ptr<MeshData>> meshes;
-
-    DuskLogInfo("%s %s", dir, filename);
 
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
@@ -93,4 +91,4 @@ std::vector<std::unique_ptr<MeshData>> TinyOBJMeshImporter::LoadFromFile(const s
     return meshes;
 }
 
-} // namespace Dusk
+} // namespace Dusk::TinyOBJ

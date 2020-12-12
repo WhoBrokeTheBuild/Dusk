@@ -42,6 +42,10 @@ public:
         return "Dusk::GraphicsDriver";
     }
 
+    virtual bool Initialize() = 0;
+
+    virtual void Terminate() = 0;
+
     virtual void SetWindowTitle(const std::string& title) = 0;
 
     virtual std::string GetWindowTitle() = 0;

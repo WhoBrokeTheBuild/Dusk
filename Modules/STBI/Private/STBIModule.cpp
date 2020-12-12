@@ -2,20 +2,30 @@
 
 #include <Dusk/STBI/STBITextureImporter.hpp>
 
-using namespace Dusk;
+namespace Dusk::STBI {
 
-void STBIModuleInit()
+bool ModuleInit()
 {
     AddTextureImporter("STBI", std::unique_ptr<TextureImporter>(New STBITextureImporter()));
+
+    return true;
 }
 
-void STBIModuleTerm()
+void ModuleTerm()
 {
     RemoveTextureImporter("STBI");
 }
 
-DEFINE_MODULE() {
-    "STBI",
-    STBIModuleInit,
-    STBIModuleTerm,
+Version GetVersion()
+{
+    return Version(DUSK_VERSION_MAJOR, DUSK_VERSION_MINOR, DUSK_VERSION_PATCH);
+}
+
+DUSK_DEFINE_MODULE {
+    .Name       = "DuskSTBI",
+    .Initialize = ModuleInit,
+    .Terminate  = ModuleTerm,
+    .GetVersion = GetVersion,
 };
+
+} // namespace Dusk::STBI

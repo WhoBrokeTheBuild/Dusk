@@ -27,9 +27,7 @@ DUSK_ENGINE_API
 bool RunScriptString(const std::string& code);
 
 DUSK_ENGINE_API
-inline Version GetVersion() {
-    return Version(DUSK_VERSION_MAJOR, DUSK_VERSION_MINOR, DUSK_VERSION_PATCH);
-}
+Version GetVersion();
 
 DUSK_ENGINE_API
 void SetApplicationName(const std::string& name);

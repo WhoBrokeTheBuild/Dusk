@@ -19,6 +19,9 @@ PyObject * WindowResizedEventData::GetPyObject() const
 DUSK_ENGINE_API 
 void SetGraphicsDriver(std::unique_ptr<GraphicsDriver> && driver)
 {
+    if (_GraphicsDriver) {
+        _GraphicsDriver->Terminate();
+    }
     _GraphicsDriver = std::move(driver);
 }
 

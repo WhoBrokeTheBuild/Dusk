@@ -76,25 +76,24 @@ struct DUSK_ENGINE_API Version
 
     inline static int Compare(const Version& a, const Version& b)
     {
-        int result = CompareSingle(a.Major, b.Major);
+        auto cmp = [](int a, int b) {
+            if (a == b) {
+                return 0;
+            }
+            if (a > b) {
+                return 1;
+            }
+            return -1;
+        };
+
+        int result = cmp(a.Major, b.Major);
         if (result == 0) {
-            result = CompareSingle(a.Minor, b.Minor);
+            result = cmp(a.Minor, b.Minor);
             if (result == 0) {
-                result = CompareSingle(a.Patch, b.Patch);
+                result = cmp(a.Patch, b.Patch);
             }
         }
         return result;
-    }
-
-    inline static int CompareSingle(int a, int b)
-    {
-        if (a == b) {
-            return 0;
-        }
-        if (a > b) {
-            return 1;
-        }
-        return -1;
     }
 
 }; // struct Version

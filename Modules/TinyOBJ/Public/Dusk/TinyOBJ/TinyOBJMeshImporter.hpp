@@ -7,7 +7,7 @@
 
 #include <vector>
 
-namespace Dusk {
+namespace Dusk::TinyOBJ {
 
 class DUSK_TINYOBJ_API TinyOBJMeshData : public MeshData
 {
@@ -75,6 +75,6 @@ public:
 
 }; // class TinyOBJMeshImporter
 
-} // namespace Dusk
+} // namespace Dusk::TinyOBJ
 
 #endif // DUSK_TINYOBJ_MESH_IMPORTER_HPP

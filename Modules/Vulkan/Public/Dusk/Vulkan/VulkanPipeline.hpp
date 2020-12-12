@@ -5,7 +5,9 @@
 
 #include <Dusk/Pipeline.hpp>
 
-namespace Dusk {
+namespace Dusk::Vulkan {
+
+#define DUSK_VULKAN_PIPELINE(x) (dynamic_cast<Dusk::Vulkan::VulkanPipeline *>(x))
 
 class DUSK_VULKAN_API VulkanPipeline : public Pipeline
 {
@@ -15,13 +17,17 @@ public:
 
     VulkanPipeline() = default;
 
-    virtual ~VulkanPipeline() = default;
+    virtual ~VulkanPipeline();
 
     inline std::string GetClassID() const override {
         return "Dusk::VulkanPipeline";
     }
 
-    void Bind() override;
+    void Create() override;
+
+    inline VkPipeline GetVkPipeline() const {
+        return _vkPipeline;
+    }
 
 private:
 
@@ -31,12 +37,16 @@ private:
 
     VkFrontFace GetVkFrontFace() const;
 
+    VkPrimitiveTopology GetVkPrimitiveTopology() const;
+
     VkBlendFactor GetVkBlendFactor(BlendFactor factor) const;
 
     VkBlendOp GetVkBlendOp(BlendOperation op) const;
 
+    VkPipeline _vkPipeline;
+
 }; // class VulkanPipeline
 
-} // namespace Dusk
+} // namespace Dusk::Vulkan
 
 #endif // DUSK_VULKAN_PIPELINE_HPP

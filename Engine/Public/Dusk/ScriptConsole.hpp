@@ -58,6 +58,7 @@ private:
     static void HandleHome();
     static void HandleEnd();
     static void HandleBackspace();
+    static void HandleDelete();
 
     static PyObject * _locals;
 

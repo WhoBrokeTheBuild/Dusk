@@ -5,7 +5,7 @@
 
 #include <Dusk/SceneImporter.hpp>
 
-namespace Dusk {
+namespace Dusk::GLTF2 {
 
 class DUSK_GLTF2_API GLTF2SceneImporter : public SceneImporter
 {
@@ -25,6 +25,6 @@ private:
 
 }; // class GLTF2SceneImporter
 
-} // namespace Dusk
+} // namespace Dusk::GLTF2
 
 #endif // DUSK_GLTF2_SCENE_IMPORTER_HPP

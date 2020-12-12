@@ -5,9 +5,9 @@
 
 #include <Dusk/Texture.hpp>
 
-namespace Dusk {
+namespace Dusk::Vulkan {
 
-#define DUSK_VULKAN_TEXTURE(x) (dynamic_cast<Dusk::VulkanTexture *>(x))
+#define DUSK_VULKAN_TEXTURE(x) (dynamic_cast<Dusk::Vulkan::VulkanTexture *>(x))
 
 class DUSK_VULKAN_API VulkanTexture : public Texture
 {
@@ -35,6 +35,6 @@ private:
 
 }; // class VulkanTexture
 
-} // namespace Dusk
+} // namespace Dusk::Vulkan
 
 #endif // DUSK_VULKAN_TEXTURE_HPP

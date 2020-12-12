@@ -15,6 +15,8 @@ PyObject * PyDusk_LogWarn(PyObject * self, PyObject * args);
 
 PyObject * PyDusk_LogError(PyObject * self, PyObject * args);
 
+PyObject * PyDusk_LogFatal(PyObject * self, PyObject * args);
+
 PyObject * PyDusk_LogPerf(PyObject * self, PyObject * args);
 
 PyObject * PyDusk_LogLoad(PyObject * self, PyObject * args);

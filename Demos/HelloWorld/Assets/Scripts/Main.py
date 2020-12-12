@@ -8,6 +8,9 @@ Dusk.LoadModule("DuskTinyOBJ")
 Dusk.LoadModule("DuskVulkan")
 
 gfx = Dusk.GetGraphicsDriver()
+if gfx == None:
+    quit()
+
 gfx.SetWindowSize(( 1024, 768 ))
 
 # def onWindowResize(data):

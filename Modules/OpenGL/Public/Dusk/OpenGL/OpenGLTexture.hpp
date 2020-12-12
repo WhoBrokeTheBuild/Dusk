@@ -6,9 +6,9 @@
 #include <Dusk/Texture.hpp>
 #include <Dusk/TextureImporter.hpp>
 
-namespace Dusk {
+namespace Dusk::OpenGL {
 
-#define DUSK_OPENGL_TEXTURE(x) (dynamic_cast<Dusk::OpenGLTexture *>(x))
+#define DUSK_OPENGL_TEXTURE(x) (dynamic_cast<Dusk::OpenGL::OpenGLTexture *>(x))
 
 class DUSK_OPENGL_API OpenGLTexture : public Texture 
 {
@@ -42,6 +42,6 @@ private:
 
 }; // class OpenGLTexture
 
-} // namespace Dusk
+} // namespace Dusk::OpenGL
 
 #endif // DUSK_OPENGL_TEXTURE_HPP

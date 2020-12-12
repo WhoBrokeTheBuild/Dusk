@@ -2,20 +2,34 @@
 
 #include <Dusk/OpenGL/OpenGLGraphicsDriver.hpp>
 
-using namespace Dusk;
+namespace Dusk::OpenGL {
 
-void OpenGLModuleInit()
+bool ModuleInit()
 {
     SetGraphicsDriver(std::unique_ptr<GraphicsDriver>(New OpenGLGraphicsDriver()));
+    if (!GetGraphicsDriver()->Initialize()) {
+        SetGraphicsDriver(nullptr);
+        return false;
+    }
+
+    return true;
 }
 
-void OpenGLModuleTerm()
+void ModuleTerm()
 {
     SetGraphicsDriver(nullptr);
 }
 
-DEFINE_MODULE() {
-    "OpenGL",
-    OpenGLModuleInit,
-    OpenGLModuleTerm,
+Version GetVersion()
+{
+    return Version(DUSK_VERSION_MAJOR, DUSK_VERSION_MINOR, DUSK_VERSION_PATCH);
+}
+
+DUSK_DEFINE_MODULE {
+    .Name       = "DuskOpenGL",
+    .Initialize = ModuleInit,
+    .Terminate  = ModuleTerm,
+    .GetVersion = GetVersion,
 };
+
+} // namespace Dusk::OpenGL

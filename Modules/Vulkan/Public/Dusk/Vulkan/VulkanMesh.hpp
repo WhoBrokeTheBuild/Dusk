@@ -5,7 +5,9 @@
 
 #include <Dusk/Mesh.hpp>
 
-namespace Dusk {
+namespace Dusk::Vulkan {
+
+#define DUSK_VULKAN_MESH(x) (dynamic_cast<Dusk::Vulkan::VulkanMesh *>(x))
 
 class DUSK_VULKAN_API VulkanMesh : public Mesh
 {
@@ -25,6 +27,22 @@ public:
 
     bool Load(const MeshData * data) override;
 
+    inline std::vector<VkVertexInputBindingDescription> GetVkVertexInputBindings() {
+        return _bindings;
+    }
+
+    inline std::vector<VkVertexInputAttributeDescription> GetVkVertexInputAttributes() {
+        return _attributes;
+    }
+
+    inline std::vector<VkBuffer> GetVkBuffers() {
+        return _buffers;
+    }
+
+    inline uint32_t GetVertexCount() {
+        return _vertexCount;
+    }
+
 private:
 
     bool AddBuffer(const void * data, VkDeviceSize size, uint32_t stride, 
@@ -42,8 +60,10 @@ private:
 
     unsigned _nextBinding = 0;
 
+    uint32_t _vertexCount = 0;
+
 }; // class VulkanMesh
 
-} // namespace Dusk
+} // namespace Dusk::Vulkan
 
 #endif // DUSK_VULKAN_MESH_HPP

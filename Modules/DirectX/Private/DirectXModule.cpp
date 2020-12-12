@@ -7,6 +7,10 @@ using namespace Dusk;
 void DirectXModuleInit()
 {
     SetGraphicsDriver(std::unique_ptr<GraphicsDriver>(New DirectXGraphicsDriver()));
+    if (!GetGraphicsDriver()->Initialize()) {
+        SetGraphicsDriver(nullptr);
+        return false;
+    }
 }
 
 void DirectXModuleTerm()
@@ -14,7 +18,7 @@ void DirectXModuleTerm()
     SetGraphicsDriver(nullptr);
 }
 
-DEFINE_MODULE() {
+DUSK_DEFINE_MODULE {
     "DirectX",
     DirectXModuleInit,
     DirectXModuleTerm,

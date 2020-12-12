@@ -150,20 +150,19 @@ PyObject * PyDusk_GetGraphicsDriver(PyObject * self, PyObject * args)
 {
     auto gfx = GetGraphicsDriver();
     if (!gfx) {
-        PyErr_SetString(PyExc_RuntimeError, "No Graphics Driver found.");
         Py_RETURN_NONE;
     }
 
     return New_PyGraphicsDriver(gfx);
 }
 
-bool PyInit_GraphicsDriver(PyObject * module) 
+bool PyInit_GraphicsDriver(PyObject * mod) 
 {
     if (PyType_Ready(&PyGraphicsDriver_type) == 0) {
         Py_INCREF(&PyGraphicsDriver_type);
-        if (PyModule_AddObject(module, "GraphicsDriver", (PyObject *)&PyGraphicsDriver_type) < 0) {
+        if (PyModule_AddObject(mod, "GraphicsDriver", (PyObject *)&PyGraphicsDriver_type) < 0) {
             Py_DECREF(&PyGraphicsDriver_type);
-            Py_DECREF(module);
+            Py_DECREF(mod);
             return false;
         }
     }

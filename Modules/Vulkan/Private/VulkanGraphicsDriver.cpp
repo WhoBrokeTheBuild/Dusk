@@ -2,27 +2,58 @@
 
 #include <Dusk/Dusk.hpp>
 #include <Dusk/Log.hpp>
+#include <Dusk/Benchmark.hpp>
+#include <Dusk/MeshImporter.hpp>
+#include <Dusk/Camera.hpp>
 
 #include <set>
 
-namespace Dusk {
+namespace Dusk::Vulkan {
 
 DUSK_VULKAN_API
-VulkanGraphicsDriver::VulkanGraphicsDriver()
+bool VulkanGraphicsDriver::Initialize()
 {
-    InitWindow();
-    InitInstance();
+    DuskBenchmarkStart();
+    
+    if (!InitWindow() ||
+        !InitInstance()) {
+        return false;
+    }
+
     InitDebugMessenger();
-    InitSurface();
-    InitPhysicalDevice();
-    InitLogicalDevice();
-    InitSwapChain();
-    InitRenderPass();
-} 
+
+    if (!InitSurface() ||
+        !InitPhysicalDevice() ||
+        !InitLogicalDevice() ||
+        !InitSwapChain() ||
+        !InitRenderPass() ||
+        !InitDescriptorPool() ||
+        !InitGraphicsPipeline() ||
+        !InitFramebuffers() ||
+        !InitCommandPool() ||
+        !InitCommandBuffers() ||
+        !InitSyncObjects()) {
+        return false;
+    }
+
+    DuskBenchmarkEnd("VulkanGraphicsDriver::Initialize");
+    return true;
+}
 
 DUSK_VULKAN_API
-VulkanGraphicsDriver::~VulkanGraphicsDriver()
+void VulkanGraphicsDriver::Terminate()
 {
+    DuskBenchmarkStart();
+
+    _shader = nullptr;
+    _mesh = nullptr;
+    _pipeline = nullptr;
+
+    vkDeviceWaitIdle(_vkDevice);
+
+    TermCommandPool();
+    TermFramebuffers();
+    TermGraphicsPipeline();
     TermRenderPass();
     TermSwapChain();
     TermLogicalDevice();
@@ -30,6 +61,8 @@ VulkanGraphicsDriver::~VulkanGraphicsDriver()
     TermDebugMessenger();
     TermInstance();
     TermWindow();
+
+    DuskBenchmarkEnd("VulkanGraphicsDriver::Terminate");
 }
 
 DUSK_VULKAN_API
@@ -71,9 +104,80 @@ void VulkanGraphicsDriver::ProcessEvents()
 }
 
 DUSK_VULKAN_API
-void VulkanGraphicsDriver::SwapBuffers() {
-    // glClear(GL_COLOR_BUFFER_BIT);
-    SDL_GL_SwapWindow(_sdlWindow);
+void VulkanGraphicsDriver::SwapBuffers()
+{
+    // VkResult vkResult;
+
+    // vkWaitForFences(_vkDevice, 1, &_vkInFlightFences[_currentFrame], VK_TRUE, UINT64_MAX);
+
+    // uint32_t imageIndex = 0;
+    // vkAcquireNextImageKHR(_vkDevice, _vkSwapChain, UINT64_MAX, _vkImageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE, &imageIndex);
+
+
+    // Camera camera;
+    // camera.SetPosition({ 10, 10, 10 });
+    // camera.SetLookAt({ 0, 0, 0 });
+
+    // TransformData transform = {
+    //     .Model = glm::mat4(1.0f),
+    //     .View = camera.GetView(),
+    //     .Projection = camera.GetProjection(),
+    // };
+
+    // transform.UpdateMVP();
+
+    // void * data;
+    // vkMapMemory(_vkDevice, _vkUniformBuffersMemory[imageIndex], 0, sizeof(transform), 0, &data);
+    // memcpy(data, &transform, sizeof(transform));
+    // vkUnmapMemory(_vkDevice, _vkUniformBuffersMemory[imageIndex]);
+
+
+
+    // if (_vkImagesInFlight[imageIndex] != VK_NULL_HANDLE) {
+    //     vkWaitForFences(_vkDevice, 1, &_vkImagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
+    // }
+
+    // _vkImagesInFlight[imageIndex] = _vkInFlightFences[_currentFrame];
+
+    // VkSemaphore waitSemaphores[] = { _vkImageAvailableSemaphores[_currentFrame] };
+    // VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+
+    // VkSemaphore signalSemaphores[] = { _vkRenderingFinishedSemaphores[_currentFrame] };
+
+    // VkSubmitInfo submitInfo = {
+    //     .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+    //     .pNext = nullptr,
+    //     .waitSemaphoreCount = 1,
+    //     .pWaitSemaphores = waitSemaphores,
+    //     .pWaitDstStageMask = waitStages,
+    //     .commandBufferCount = 1,
+    //     .pCommandBuffers = &_vkCommandBuffers[imageIndex],
+    //     .signalSemaphoreCount = 1,
+    //     .pSignalSemaphores = signalSemaphores,
+    // };
+
+    // vkResetFences(_vkDevice, 1, &_vkInFlightFences[_currentFrame]);
+
+    // vkResult = vkQueueSubmit(_vkGraphicsQueue, 1, &submitInfo, _vkInFlightFences[_currentFrame]);
+    // if (vkResult != VK_SUCCESS) {
+    //     DuskLogFatal("vkQueueSubmit() failed");
+    // }
+
+    // VkSwapchainKHR swapChains[] = { _vkSwapChain };
+
+    // VkPresentInfoKHR presentInfo = {
+    //     .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+    //     .pNext = 0,
+    //     .waitSemaphoreCount = 1,
+    //     .pWaitSemaphores = signalSemaphores,
+    //     .swapchainCount = 1,
+    //     .pSwapchains = swapChains,
+    //     .pImageIndices = &imageIndex,
+    // };
+
+    // vkQueuePresentKHR(_vkPresentQueue, &presentInfo);
+
+    // _currentFrame = (_currentFrame + 1) % 2;
 }
 
 DUSK_VULKAN_API
@@ -103,6 +207,9 @@ std::shared_ptr<Mesh> VulkanGraphicsDriver::CreateMesh()
 DUSK_VULKAN_API
 bool VulkanGraphicsDriver::SetShaderData(const std::string& name, size_t size, void * buffer)
 {
+
+
+
     return true;
 }
 
@@ -163,19 +270,16 @@ bool VulkanGraphicsDriver::CreateBuffer(VkBuffer & buffer, VkDeviceMemory & memo
 
 bool VulkanGraphicsDriver::IsDeviceSuitable(const VkPhysicalDevice device)
 {
-    VkPhysicalDeviceProperties properties;
-    vkGetPhysicalDeviceProperties(device, &properties);
-
-    VkPhysicalDeviceFeatures features;
-    vkGetPhysicalDeviceFeatures(device, &features);
+    vkGetPhysicalDeviceProperties(device, &_vkPhysicalDeviceProperties);
+    vkGetPhysicalDeviceFeatures(device, &_vkPhysicalDeviceFeatures);
 
     // TODO:
     // * Queue Families
     // * Device Extensions
     // * Swap Chain Support
 
-    return properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU 
-        && features.geometryShader;
+    return _vkPhysicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU 
+        && _vkPhysicalDeviceFeatures.geometryShader;
 }
 
 std::vector<const char *> VulkanGraphicsDriver::GetEnabledDeviceLayers()
@@ -223,7 +327,8 @@ std::vector<const char *> VulkanGraphicsDriver::GetRequiredInstanceExtensions()
     std::vector<const char *> requiredExtensions(requiredExtensionCount);
     sdlResult = SDL_Vulkan_GetInstanceExtensions(_sdlWindow, &requiredExtensionCount, requiredExtensions.data());
     if (!sdlResult) {
-        DuskLogFatal("SDL_Vulkan_GetInstanceExtensions() failed, %s", SDL_GetError());
+        DuskLogError("SDL_Vulkan_GetInstanceExtensions() failed, %s", SDL_GetError());
+        return std::vector<const char *>();
     }
 
     #if defined(DUSK_VULKAN_VALIDATION_LAYER)
@@ -253,10 +358,11 @@ std::vector<const char *> VulkanGraphicsDriver::GetRequiredInstanceExtensions()
     return requiredExtensions;
 }
 
-void VulkanGraphicsDriver::InitWindow()
+bool VulkanGraphicsDriver::InitWindow()
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        DuskLogFatal("SDL_Init() failed, %s", SDL_GetError());
+        DuskLogError("SDL_Init() failed, %s", SDL_GetError());
+        return false;
     }
 
     SDL_version sdlVersion;
@@ -282,12 +388,14 @@ void VulkanGraphicsDriver::InitWindow()
     SDL_SetWindowIcon(_sdlWindow, surface);
     SDL_FreeSurface(surface);
 
-    int vkVersion = gladLoaderLoadVulkan(NULL, NULL, NULL);
+    int vkVersion = gladLoaderLoadVulkan(nullptr, nullptr, nullptr);
     if (vkVersion == 0) {
         DuskLogFatal("gladLoaderLoadVulkan() failed");
     }
     
     DuskLogVerbose("Vulkan %d.%d", GLAD_VERSION_MAJOR(vkVersion), GLAD_VERSION_MINOR(vkVersion));
+
+    return true; 
 }
 
 void VulkanGraphicsDriver::TermWindow()
@@ -296,7 +404,7 @@ void VulkanGraphicsDriver::TermWindow()
     SDL_Quit();
 }
 
-void VulkanGraphicsDriver::InitInstance()
+bool VulkanGraphicsDriver::InitInstance()
 {
     VkResult vkResult;
 
@@ -305,6 +413,10 @@ void VulkanGraphicsDriver::InitInstance()
     const auto& appName = GetApplicationName();
 
     const auto& requiredExtensions = GetRequiredInstanceExtensions();
+    if (requiredExtensions.empty()) {
+        DuskLogError("Failed to get Required Instance Expansions");
+        return false;
+    }
 
     VkApplicationInfo applicationInfo = {
         .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
@@ -337,15 +449,18 @@ void VulkanGraphicsDriver::InitInstance()
 
     vkResult = vkCreateInstance(&createInfo, nullptr, &_vkInstance);
     if (vkResult != VK_SUCCESS) {
-        DuskLogFatal("vkCreateInstance() failed");
-        return;
+        DuskLogError("vkCreateInstance() failed");
+        return false;
     }
 
     // Reload glad to load instance pointers and populate available extensions
-    int vkVersion = gladLoaderLoadVulkan(_vkInstance, _vkPhysicalDevice, NULL);
+    int vkVersion = gladLoaderLoadVulkan(_vkInstance, nullptr, nullptr);
     if (vkVersion == 0) {
-        DuskLogFatal("gladLoaderLoadVulkan() failed, unable to reload symbols with VkInstance and VkPhysicalDevice");
+        DuskLogError("gladLoaderLoadVulkan() failed, unable to reload symbols with VkInstance");
+        return false;
     }
+
+    return true;
 }
 
 void VulkanGraphicsDriver::TermInstance()
@@ -382,10 +497,10 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL _VulkanDebugMessageCallback(
     return VK_FALSE;
 }
 
-void VulkanGraphicsDriver::InitDebugMessenger()
+bool VulkanGraphicsDriver::InitDebugMessenger()
 {
 #if !defined(DUSK_VULKAN_VALIDATION_LAYER)
-    return;
+    return true;
 #endif
 
     VkResult vkResult;
@@ -405,7 +520,7 @@ void VulkanGraphicsDriver::InitDebugMessenger()
     }
 
     if (!validationLayerFound) {
-        return;
+        return false;
     }
 
     VkDebugUtilsMessageSeverityFlagsEXT messageSeverity = 
@@ -434,15 +549,18 @@ void VulkanGraphicsDriver::InitDebugMessenger()
 
     if (!vkCreateDebugUtilsMessengerEXT) {
         DuskLogWarn("vkCreateDebugUtilsMessengerEXT() is not bound");
-        return;
+        return false;
     }
 
     vkResult = vkCreateDebugUtilsMessengerEXT(_vkInstance, &debugUtilsMessengerCreateInfo, nullptr, &_vkDebugMessenger);
     if (vkResult != VK_SUCCESS) {
-        DuskLogFatal("vkCreateDebugUtilsMessengerEXT() failed");
+        DuskLogError("vkCreateDebugUtilsMessengerEXT() failed");
+        return false;
     }
 
     _debugMessengerInitialized = true;
+
+    return true;
 }
 
 void VulkanGraphicsDriver::TermDebugMessenger()
@@ -460,28 +578,32 @@ void VulkanGraphicsDriver::TermDebugMessenger()
     _debugMessengerInitialized = false;
 }
 
-void VulkanGraphicsDriver::InitSurface()
+bool VulkanGraphicsDriver::InitSurface()
 {
     SDL_bool sdlResult;
 
-    sdlResult = SDL_Vulkan_CreateSurface(_sdlWindow, _vkInstance, &_vkWindowSurface);
+    sdlResult = SDL_Vulkan_CreateSurface(_sdlWindow, _vkInstance, &_vkSurface);
     if (!sdlResult) {
-        DuskLogFatal("SDL_Vulkan_CreateSurface() failed, %s", SDL_GetError());
+        DuskLogError("SDL_Vulkan_CreateSurface() failed, %s", SDL_GetError());
+        return false;
     }
+
+    return true;
 }
 
 void VulkanGraphicsDriver::TermSurface()
 {
-    vkDestroySurfaceKHR(_vkInstance, _vkWindowSurface, nullptr);
+    vkDestroySurfaceKHR(_vkInstance, _vkSurface, nullptr);
 }
 
-void VulkanGraphicsDriver::InitPhysicalDevice()
+bool VulkanGraphicsDriver::InitPhysicalDevice()
 {
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(_vkInstance, &deviceCount, nullptr);
 
     if (deviceCount == 0) {
-        DuskLogFatal("vkEnumeratePhysicalDevices() failed, no devices found");
+        DuskLogError("vkEnumeratePhysicalDevices() failed, no devices found");
+        return false;
     }
 
     std::vector<VkPhysicalDevice> devices(deviceCount);
@@ -494,18 +616,31 @@ void VulkanGraphicsDriver::InitPhysicalDevice()
     }
 
     if (_vkPhysicalDevice == VK_NULL_HANDLE) {
-        DuskLogFatal("No suitable graphics device found");
+        DuskLogError("No suitable graphics device found");
+        return false;
     }
+
+    DuskLogVerbose("Physical Device Name: %s", _vkPhysicalDeviceProperties.deviceName);
+
+    // Reload glad to load instance pointers and populate available extensions
+    int vkVersion = gladLoaderLoadVulkan(_vkInstance, _vkPhysicalDevice, nullptr);
+    if (vkVersion == 0) {
+        DuskLogError("gladLoaderLoadVulkan() failed, unable to reload symbols with VkInstance and VkPhysicalDevice");
+        return false;
+    }
+
+    return true;
 }
 
-void VulkanGraphicsDriver::InitLogicalDevice()
+bool VulkanGraphicsDriver::InitLogicalDevice()
 {
     VkResult vkResult;
 
     uint32_t queueFamilyCount;
     vkGetPhysicalDeviceQueueFamilyProperties(_vkPhysicalDevice, &queueFamilyCount, nullptr);
     if (queueFamilyCount == 0) {
-        DuskLogFatal("vkGetPhysicalDeviceQueueFamilyProperties(), no queues found");
+        DuskLogError("vkGetPhysicalDeviceQueueFamilyProperties(), no queues found");
+        return false;
     }
 
     std::vector<VkQueueFamilyProperties> queueFamilyProps(queueFamilyCount);
@@ -514,6 +649,25 @@ void VulkanGraphicsDriver::InitLogicalDevice()
     _vkGraphicsQueueFamilyIndex = UINT32_MAX;
     _vkPresentQueueFamilyIndex = UINT32_MAX;
     
+    for (const auto& prop : queueFamilyProps) {
+        std::string types;
+        if (prop.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+            types += "Graphics ";
+        }
+        if (prop.queueFlags & VK_QUEUE_COMPUTE_BIT) {
+            types += "Compute ";
+        }
+        if (prop.queueFlags & VK_QUEUE_TRANSFER_BIT) {
+            types += "Transfer ";
+        }
+        if (prop.queueFlags & VK_QUEUE_SPARSE_BINDING_BIT) {
+            types += "SparseBinding ";
+        }
+
+        DuskLogVerbose("Queue Number: %d", prop.queueCount);
+        DuskLogVerbose("Queue Flags: %s", types);
+    }
+
     uint32_t index = 0;
     for (const auto& prop : queueFamilyProps) {
         if (prop.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
@@ -521,7 +675,7 @@ void VulkanGraphicsDriver::InitLogicalDevice()
         }
 
         VkBool32 presentSupported = VK_FALSE;
-        vkGetPhysicalDeviceSurfaceSupportKHR(_vkPhysicalDevice, index, _vkWindowSurface, &presentSupported);
+        vkGetPhysicalDeviceSurfaceSupportKHR(_vkPhysicalDevice, index, _vkSurface, &presentSupported);
 
         if (presentSupported) {
             _vkPresentQueueFamilyIndex = index;
@@ -535,11 +689,13 @@ void VulkanGraphicsDriver::InitLogicalDevice()
     }
 
     if (_vkGraphicsQueueFamilyIndex == UINT32_MAX) {
-        DuskLogFatal("No suitable graphics queue found");
+        DuskLogError("No suitable graphics queue found");
+        return false;
     }
 
     if (_vkPresentQueueFamilyIndex == UINT32_MAX) {
-        DuskLogFatal("No suitable graphics queue found");
+        DuskLogError("No suitable graphics queue found");
+        return false;
     }
 
     const float queuePriorities = 1.0f;
@@ -580,17 +736,21 @@ void VulkanGraphicsDriver::InitLogicalDevice()
 
     vkResult = vkCreateDevice(_vkPhysicalDevice, &deviceCreateInfo, nullptr, &_vkDevice);
     if (vkResult != VK_SUCCESS) {
-        DuskLogFatal("vkCreateDevice() failed");
+        DuskLogError("vkCreateDevice() failed");
+        return false;
     }
 
     // Reload glad to load instance pointers and populate available extensions
     int vkVersion = gladLoaderLoadVulkan(_vkInstance, _vkPhysicalDevice, _vkDevice);
     if (vkVersion == 0) {
-        DuskLogFatal("gladLoaderLoadVulkan() failed, unable to reload symbols with VkInstance, VkPhysicalDevice, and VkDevice");
+        DuskLogError("gladLoaderLoadVulkan() failed, unable to reload symbols with VkInstance, VkPhysicalDevice, and VkDevice");
+        return false;
     }
 
     vkGetDeviceQueue(_vkDevice, _vkGraphicsQueueFamilyIndex, 0, &_vkGraphicsQueue);
     vkGetDeviceQueue(_vkDevice, _vkPresentQueueFamilyIndex, 0, &_vkPresentQueue);
+
+    return true;
 }
 
 void VulkanGraphicsDriver::TermLogicalDevice()
@@ -598,24 +758,24 @@ void VulkanGraphicsDriver::TermLogicalDevice()
     vkDestroyDevice(_vkDevice, nullptr);
 }
 
-void VulkanGraphicsDriver::InitSwapChain()
+bool VulkanGraphicsDriver::InitSwapChain()
 {
     VkResult vkResult;
 
     VkSurfaceCapabilitiesKHR surfaceCapabilities;
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_vkPhysicalDevice, _vkWindowSurface, &surfaceCapabilities);
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_vkPhysicalDevice, _vkSurface, &surfaceCapabilities);
 
     uint32_t formatCount;
-    vkGetPhysicalDeviceSurfaceFormatsKHR(_vkPhysicalDevice, _vkWindowSurface, &formatCount, nullptr);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(_vkPhysicalDevice, _vkSurface, &formatCount, nullptr);
 
     std::vector<VkSurfaceFormatKHR> formats(formatCount);
-    vkGetPhysicalDeviceSurfaceFormatsKHR(_vkPhysicalDevice, _vkWindowSurface, &formatCount, formats.data());
+    vkGetPhysicalDeviceSurfaceFormatsKHR(_vkPhysicalDevice, _vkSurface, &formatCount, formats.data());
 
     uint32_t presentModeCount;
-    vkGetPhysicalDeviceSurfacePresentModesKHR(_vkPhysicalDevice, _vkWindowSurface, &presentModeCount, nullptr);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(_vkPhysicalDevice, _vkSurface, &presentModeCount, nullptr);
 
     std::vector<VkPresentModeKHR> presentModes(presentModeCount);
-    vkGetPhysicalDeviceSurfacePresentModesKHR(_vkPhysicalDevice, _vkWindowSurface, &presentModeCount, presentModes.data());
+    vkGetPhysicalDeviceSurfacePresentModesKHR(_vkPhysicalDevice, _vkSurface, &presentModeCount, presentModes.data());
 
     _vkSwapChainImageFormat = formats[0];
     for (const auto& format : formats) {
@@ -635,6 +795,9 @@ void VulkanGraphicsDriver::InitSwapChain()
             swapChainPresentMode = presentMode;
         }
     }
+
+    // TODO: Remove
+    swapChainPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
 
     _vkSwapChainExtent = surfaceCapabilities.currentExtent;
     if (_vkSwapChainExtent.width == UINT32_MAX) {
@@ -657,7 +820,7 @@ void VulkanGraphicsDriver::InitSwapChain()
         .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
         .pNext = nullptr,
         .flags = 0,
-        .surface = _vkWindowSurface,
+        .surface = _vkSurface,
         .minImageCount = imageCount,
         .imageFormat = _vkSwapChainImageFormat.format,
         .imageColorSpace = _vkSwapChainImageFormat.colorSpace,
@@ -687,7 +850,8 @@ void VulkanGraphicsDriver::InitSwapChain()
 
     vkResult = vkCreateSwapchainKHR(_vkDevice, &swapChainCreateInfo, nullptr, &_vkSwapChain);
     if (vkResult != VK_SUCCESS) {
-        DuskLogFatal("vkCreateSwapchainKHR failed");
+        DuskLogError("vkCreateSwapchainKHR() failed");
+        return false;
     }
 
     vkGetSwapchainImagesKHR(_vkDevice, _vkSwapChain, &imageCount, nullptr);
@@ -716,15 +880,33 @@ void VulkanGraphicsDriver::InitSwapChain()
         VkImageView imageView;
         vkResult = vkCreateImageView(_vkDevice, &imageViewCreateInfo, nullptr, &imageView);
         if (vkResult != VK_SUCCESS) {
-            DuskLogFatal("vkCreateImageView failed");
+            DuskLogError("vkCreateImageView() failed");
+            return false;
         }
 
         _vkSwapChainImageViews.push_back(imageView);
     }
+
+    _vkUniformBuffers.resize(_vkSwapChainImages.size());
+    _vkUniformBuffersMemory.resize(_vkSwapChainImages.size());
+
+    for (size_t i = 0; i < _vkSwapChainImages.size(); ++i) {
+        CreateBuffer(_vkUniformBuffers[i], _vkUniformBuffersMemory[i], 
+            sizeof(TransformData), 
+            VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    }
+
+    return true;
 }
 
 void VulkanGraphicsDriver::TermSwapChain()
 {
+    for (size_t i = 0; i < _vkSwapChainImages.size(); i++) {
+        vkDestroyBuffer(_vkDevice, _vkUniformBuffers[i], nullptr);
+        vkFreeMemory(_vkDevice, _vkUniformBuffersMemory[i], nullptr);
+    }
+
     for (const auto& imageView : _vkSwapChainImageViews) {
         vkDestroyImageView(_vkDevice, imageView, nullptr);
     }
@@ -732,7 +914,7 @@ void VulkanGraphicsDriver::TermSwapChain()
     vkDestroySwapchainKHR(_vkDevice, _vkSwapChain, nullptr);
 }
 
-void VulkanGraphicsDriver::InitRenderPass()
+bool VulkanGraphicsDriver::InitRenderPass()
 {
     VkResult vkResult;
 
@@ -789,8 +971,11 @@ void VulkanGraphicsDriver::InitRenderPass()
 
     vkResult = vkCreateRenderPass(_vkDevice, &renderPassCreateInfo, nullptr, &_vkRenderPass);
     if (vkResult != VK_SUCCESS) {
-        DuskLogFatal("vkCreateRenderPass failed");
+        DuskLogError("vkCreateRenderPass() failed");
+        return false;
     }
+
+    return true;
 }
 
 void VulkanGraphicsDriver::TermRenderPass()
@@ -798,4 +983,332 @@ void VulkanGraphicsDriver::TermRenderPass()
     vkDestroyRenderPass(_vkDevice, _vkRenderPass, nullptr);
 }
 
-} // namespace Dusk
+bool VulkanGraphicsDriver::InitFramebuffers()
+{
+    VkResult vkResult;
+
+    _vkFramebuffers.reserve(_vkSwapChainImageViews.size());
+
+    for (const auto& imageView : _vkSwapChainImageViews) {
+        VkImageView attachments[] = {
+            imageView,
+        };
+
+        VkFramebufferCreateInfo framebufferCreateInfo = {
+            .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+            .pNext = nullptr,
+            .flags = 0,
+            .renderPass = _vkRenderPass,
+            .attachmentCount = 1,
+            .pAttachments = attachments,
+            .width = _vkSwapChainExtent.width,
+            .height = _vkSwapChainExtent.height,
+            .layers = 1,
+        };
+
+        VkFramebuffer framebuffer;
+        vkResult = vkCreateFramebuffer(_vkDevice, &framebufferCreateInfo, nullptr, &framebuffer);
+        if (vkResult != VK_SUCCESS) {
+            DuskLogError("vkCreateFramebuffer() failed");
+            return false;
+        }
+
+        _vkFramebuffers.push_back(framebuffer);
+    }
+
+    return true;
+}
+
+void VulkanGraphicsDriver::TermFramebuffers()
+{
+    for (const auto& framebuffer : _vkFramebuffers) {
+        vkDestroyFramebuffer(_vkDevice, framebuffer, nullptr);
+    }
+}
+
+bool VulkanGraphicsDriver::InitCommandPool()
+{
+    VkResult vkResult;
+
+    VkCommandPoolCreateInfo commandPoolCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .queueFamilyIndex = _vkGraphicsQueueFamilyIndex,
+    };
+
+    vkResult = vkCreateCommandPool(_vkDevice, &commandPoolCreateInfo, nullptr, &_vkCommandPool);
+    if (vkResult != VK_SUCCESS) {
+        DuskLogError("vkCreateCommandPool() failed");
+        return false;
+    }
+
+    return true;
+}
+
+void VulkanGraphicsDriver::TermCommandPool()
+{
+    vkDestroyCommandPool(_vkDevice, _vkCommandPool, nullptr);
+}
+
+bool VulkanGraphicsDriver::InitCommandBuffers()
+{
+    VkResult vkResult;
+
+    VulkanPipeline * pipeline = DUSK_VULKAN_PIPELINE(_pipeline.get());
+
+    _vkCommandBuffers.resize(_vkFramebuffers.size());
+
+    VkCommandBufferAllocateInfo commandBufferAllocateInfo = {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+        .pNext = nullptr,
+        .commandPool = _vkCommandPool,
+        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+        .commandBufferCount = static_cast<uint32_t>(_vkFramebuffers.size()),
+    };
+
+    vkResult = vkAllocateCommandBuffers(_vkDevice, &commandBufferAllocateInfo, _vkCommandBuffers.data());
+    if (vkResult != VK_SUCCESS) {
+        DuskLogError("vkAllocateCommandBuffers() failed");
+        return false;
+    }
+
+    for (size_t i = 0; i < _vkCommandBuffers.size(); ++i) {
+        VkCommandBufferBeginInfo commandBufferBeginInfo = {
+            .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+            .pNext = nullptr,
+            .flags = 0,
+            .pInheritanceInfo = nullptr,
+        };
+
+        vkResult = vkBeginCommandBuffer(_vkCommandBuffers[i], &commandBufferBeginInfo);
+        if (vkResult != VK_SUCCESS) {
+            DuskLogError("vkBeginCommandBuffer() failed");
+            return false;
+        }
+
+        VkClearValue clearColor = { 
+            .color = {{ 0.392f, 0.584f, 0.929f, 1.0f }},
+        };
+
+        VkRenderPassBeginInfo renderPassBeginInfo = {
+            .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+            .renderPass = _vkRenderPass,
+            .framebuffer = _vkFramebuffers[i],
+            .renderArea = {
+                .offset = { 0, 0 },
+                .extent = _vkSwapChainExtent,
+            },
+            .clearValueCount = 1,
+            .pClearValues = &clearColor,
+        };
+
+        // TODO: Refactor/Move
+        vkCmdBeginRenderPass(_vkCommandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+        vkCmdBindPipeline(_vkCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetVkPipeline());
+
+        VulkanMesh * mesh = DUSK_VULKAN_MESH(_mesh.get());
+        const auto& buffers = mesh->GetVkBuffers();
+        VkDeviceSize offsets[] = { 0 };
+
+        vkCmdBindVertexBuffers(_vkCommandBuffers[i], 0, static_cast<uint32_t>(buffers.size()), buffers.data(), offsets);
+
+        vkCmdBindDescriptorSets(_vkCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _vkPipelineLayout, 0, 1, &_vkDescriptorSets[i], 0, nullptr);
+
+        vkCmdDraw(_vkCommandBuffers[i], mesh->GetVertexCount(), 1, 0, 0);
+
+        vkCmdEndRenderPass(_vkCommandBuffers[i]);
+
+        vkResult = vkEndCommandBuffer(_vkCommandBuffers[i]);
+        if (vkResult != VK_SUCCESS) {
+            DuskLogError("vkEndCommandBuffer() failed");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool VulkanGraphicsDriver::InitSyncObjects()
+{
+    VkResult vkResult;
+
+    _vkImageAvailableSemaphores.resize(2);
+    _vkRenderingFinishedSemaphores.resize(2);
+    _vkInFlightFences.resize(2);
+    _vkImagesInFlight.resize(_vkSwapChainImages.size(), VK_NULL_HANDLE);
+
+    VkSemaphoreCreateInfo semaphoreCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+    };
+
+    VkFenceCreateInfo fenceCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = VK_FENCE_CREATE_SIGNALED_BIT,
+    };
+
+    for (size_t i = 0; i < 2; ++i) {
+        vkResult = vkCreateSemaphore(_vkDevice, &semaphoreCreateInfo, nullptr, &_vkImageAvailableSemaphores[i]);
+        if (vkResult != VK_SUCCESS) {
+            DuskLogError("vkCreateSemaphore() failed");
+            return false;
+        }
+        else {
+            vkResult = vkCreateSemaphore(_vkDevice, &semaphoreCreateInfo, nullptr, &_vkRenderingFinishedSemaphores[i]);
+            if (vkResult != VK_SUCCESS) {
+                DuskLogError("vkCreateSemaphore() failed");
+                return false;
+            }
+            else {
+                vkResult = vkCreateFence(_vkDevice, &fenceCreateInfo, nullptr, &_vkInFlightFences[i]);
+                if (vkResult != VK_SUCCESS) {
+                    DuskLogError("vkCreateFence() failed");
+                    return false;
+                }   
+            }
+        }
+    }
+
+    return true;
+}
+
+bool VulkanGraphicsDriver::InitDescriptorPool()
+{
+    VkResult vkResult;
+
+    VkDescriptorPoolSize descriptorPoolSize = {
+        .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        .descriptorCount = static_cast<uint32_t>(_vkSwapChainImages.size()),
+    };
+
+    VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .maxSets = static_cast<uint32_t>(_vkSwapChainImages.size()),
+        .poolSizeCount = 1,
+        .pPoolSizes = &descriptorPoolSize,
+    };
+
+    vkResult = vkCreateDescriptorPool(_vkDevice, &descriptorPoolCreateInfo, nullptr, &_vkDescriptorPool);
+    if (vkResult != VK_SUCCESS) {
+        DuskLogError("vkCreateDescriptorPool() failed");
+        return false;
+    }
+
+    // TODO: Move
+    VkDescriptorSetLayoutBinding layoutBinding = {
+        .binding = 0,
+        .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        .descriptorCount = 1,
+        .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+        .pImmutableSamplers = nullptr,
+    };
+
+    VkDescriptorSetLayoutCreateInfo descriptorLayoutCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .bindingCount = 1,
+        .pBindings = &layoutBinding,
+    };
+
+    vkResult = vkCreateDescriptorSetLayout(_vkDevice, &descriptorLayoutCreateInfo, nullptr, &_vkDescriptorSetLayout);
+    if (vkResult != VK_SUCCESS) {
+        DuskLogError("vkCreateDescriptorSetLayout() failed");
+        return false;
+    }
+
+    VkDescriptorSetLayout setLayouts[] = { _vkDescriptorSetLayout };
+
+    VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .setLayoutCount = 1,
+        .pSetLayouts = setLayouts,
+        .pushConstantRangeCount = 0,
+        .pPushConstantRanges = nullptr,
+    };
+
+    vkResult = vkCreatePipelineLayout(_vkDevice, &pipelineLayoutCreateInfo, nullptr, &_vkPipelineLayout);
+    if (vkResult != VK_SUCCESS) {
+        DuskLogFatal("vkCreatePipelineLayout() failed");
+    }
+
+
+    std::vector<VkDescriptorSetLayout> layouts(_vkSwapChainImages.size(), _vkDescriptorSetLayout);
+    VkDescriptorSetAllocateInfo allocateInfo = {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+        .pNext = nullptr,
+        .descriptorPool = _vkDescriptorPool,
+        .descriptorSetCount = static_cast<uint32_t>(_vkSwapChainImages.size()),
+        .pSetLayouts = layouts.data(),
+    };
+
+    _vkDescriptorSets.resize(_vkSwapChainImages.size());
+    vkResult = vkAllocateDescriptorSets(_vkDevice, &allocateInfo, _vkDescriptorSets.data());
+    if (vkResult != VK_SUCCESS) {
+        DuskLogError("vkAllocateDescriptorSets() failed");
+        return false;
+    }
+
+    for (size_t i = 0; i < _vkSwapChainImages.size(); ++i) {
+        VkDescriptorBufferInfo bufferInfo = {
+            .buffer = _vkUniformBuffers[i],
+            .offset = 0,
+            .range = sizeof(TransformData),
+        };
+
+        VkWriteDescriptorSet writeDescriptorSet = {
+            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .dstSet = _vkDescriptorSets[i],
+            .dstBinding = 0,
+            .dstArrayElement = 0,
+            .descriptorCount = 1,
+            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .pBufferInfo = &bufferInfo,
+        };
+
+        vkUpdateDescriptorSets(_vkDevice, 1, &writeDescriptorSet, 0, nullptr);
+    }
+
+    return true;
+}
+
+bool VulkanGraphicsDriver::InitGraphicsPipeline()
+{
+    _shader = CreateShader();
+    _shader->LoadFromFiles({
+        "flat.vert",
+        "flat.frag",
+    });
+    
+    _mesh = CreateMesh();
+    const auto& meshImporters = GetAllMeshImporters();
+    auto meshDatas = meshImporters[0]->LoadFromFile("Assets/Models/crate/crate.obj");
+    _mesh->Load(meshDatas[0].get());
+
+    _pipeline = CreatePipeline();
+
+    _pipeline->SetCullMode(CullMode::Back);
+    _pipeline->SetFrontFace(FrontFace::CounterClockwise);
+    _pipeline->SetPrimitiveTopology(PrimitiveTopology::Triangles);
+
+    _pipeline->SetShader(_shader.get());
+    _pipeline->SetMesh(_mesh.get());
+    _pipeline->Create();
+
+    return true;
+}
+
+void VulkanGraphicsDriver::TermGraphicsPipeline()
+{
+    _pipeline = nullptr;
+    _mesh = nullptr;
+    _shader = nullptr;
+}
+
+} // namespace Dusk::Vulkan

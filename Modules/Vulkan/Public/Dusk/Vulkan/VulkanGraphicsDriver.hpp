@@ -11,9 +11,9 @@
 
 #include <vector>
 
-namespace Dusk {
+namespace Dusk::Vulkan {
 
-#define DUSK_VULKAN_GRAPHICS_DRIVER(x) (dynamic_cast<Dusk::VulkanGraphicsDriver *>(x))
+#define DUSK_VULKAN_GRAPHICS_DRIVER(x) (dynamic_cast<Dusk::Vulkan::VulkanGraphicsDriver *>(x))
 
 class DUSK_VULKAN_API VulkanGraphicsDriver : public GraphicsDriver
 {
@@ -21,13 +21,17 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(VulkanGraphicsDriver)
 
-    VulkanGraphicsDriver();
+    VulkanGraphicsDriver() = default;
 
-    virtual ~VulkanGraphicsDriver();
+    virtual ~VulkanGraphicsDriver() = default;
 
     inline std::string GetClassID() const override {
         return "DuskGraphicsDriver";
     }
+
+    bool Initialize() override;
+
+    void Terminate() override;
 
     void SetWindowTitle(const std::string& title) override;
 
@@ -41,24 +45,36 @@ public:
 
     void SwapBuffers() override;
 
-    std::shared_ptr<Dusk::Pipeline> CreatePipeline() override;
+    std::shared_ptr<Pipeline> CreatePipeline() override;
 
-    std::shared_ptr<Dusk::Texture> CreateTexture() override;
+    std::shared_ptr<Texture> CreateTexture() override;
 
-    std::shared_ptr<Dusk::Shader> CreateShader() override;
+    std::shared_ptr<Shader> CreateShader() override;
     
-    std::shared_ptr<Dusk::Mesh> CreateMesh() override;
+    std::shared_ptr<Mesh> CreateMesh() override;
 
     bool SetShaderData(const std::string& name, size_t size, void * data) override;
 
 
-    VkDevice GetDevice() const {
+    inline VkDevice GetDevice() const {
         return _vkDevice;
+    }
+
+    inline VkExtent2D GetSwapChainExtent() const {
+        return _vkSwapChainExtent;
+    }
+
+    inline VkRenderPass GetRenderPass() const {
+        return _vkRenderPass;
     }
 
     uint32_t FindMemoryType(uint32_t filter, VkMemoryPropertyFlags props);
 
     bool CreateBuffer(VkBuffer & buffer, VkDeviceMemory & memory, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags props);
+
+    VkPipelineLayout GetVkPipelineLayout() {
+        return _vkPipelineLayout;
+    }
 
 private:
 
@@ -70,35 +86,51 @@ private:
 
     std::vector<const char *> GetRequiredInstanceExtensions();
 
-    void InitWindow();
+    bool InitWindow();
 
     void TermWindow();
 
-    void InitDebugMessenger();
+    bool InitDebugMessenger();
 
     void TermDebugMessenger();
 
-    void InitInstance();
+    bool InitInstance();
 
     void TermInstance();
     
-    void InitSurface();
+    bool InitSurface();
 
     void TermSurface();
     
-    void InitPhysicalDevice();
+    bool InitPhysicalDevice();
 
-    void InitLogicalDevice();
+    bool InitLogicalDevice();
 
     void TermLogicalDevice();
     
-    void InitSwapChain();
+    bool InitSwapChain();
 
     void TermSwapChain();
 
-    void InitRenderPass();
+    bool InitRenderPass();
 
     void TermRenderPass();
+
+    bool InitFramebuffers();
+
+    void TermFramebuffers();
+
+    bool InitCommandPool();
+
+    void TermCommandPool();
+
+    bool InitCommandBuffers();
+
+    void TermCommandBuffers();
+
+    bool InitSyncObjects();
+
+    bool InitDescriptorPool();
 
     SDL_Window * _sdlWindow = nullptr;
 
@@ -107,7 +139,11 @@ private:
     VkDebugUtilsMessengerEXT _vkDebugMessenger;
     bool _debugMessengerInitialized = false;
 
-    VkSurfaceKHR _vkWindowSurface;
+    VkSurfaceKHR _vkSurface;
+
+    VkPhysicalDeviceProperties _vkPhysicalDeviceProperties;
+    
+    VkPhysicalDeviceFeatures _vkPhysicalDeviceFeatures;
 
     VkPhysicalDevice _vkPhysicalDevice;
 
@@ -131,15 +167,46 @@ private:
 
     VkRenderPass _vkRenderPass;
 
-    VkSemaphore _vkImageAvailableSemaphore;
-    VkSemaphore _vkRenderingFinishedSemaphore;
+    std::vector<VkFramebuffer> _vkFramebuffers;
 
     VkCommandPool _vkCommandPool;
 
     std::vector<VkCommandBuffer> _vkCommandBuffers;
 
+    std::vector<VkSemaphore> _vkImageAvailableSemaphores;
+    
+    std::vector<VkSemaphore> _vkRenderingFinishedSemaphores;
+
+    std::vector<VkFence> _vkInFlightFences;
+
+    std::vector<VkFence> _vkImagesInFlight;
+
+    std::vector<VkBuffer> _vkUniformBuffers;
+    std::vector<VkDeviceMemory> _vkUniformBuffersMemory;
+
+    VkDescriptorPool _vkDescriptorPool;
+
+    VkDescriptorSetLayout _vkDescriptorSetLayout;
+
+    VkPipelineLayout _vkPipelineLayout;
+
+    std::vector<VkDescriptorSet> _vkDescriptorSets;
+
+    int _currentFrame = 0;
+
+    bool InitGraphicsPipeline();
+
+    void TermGraphicsPipeline();
+
+    std::shared_ptr<Shader> _shader;
+
+    std::shared_ptr<Mesh> _mesh;
+
+    std::shared_ptr<Pipeline> _pipeline;
+    
+
 }; // class VulkanGraphicsDriver
 
-} // namespace Dusk
+} // namespace Dusk::Vulkan
 
 #endif // DUSK_VULKAN_GRAPHICS_DRIVER_HPP

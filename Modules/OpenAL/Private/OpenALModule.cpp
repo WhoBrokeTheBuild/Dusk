@@ -1,18 +1,27 @@
 #include <Dusk/Module.hpp>
 
-using namespace Dusk;
+namespace Dusk::OpenAL {
 
-void OpenALModuleInit()
+bool ModuleInit()
 {
+    return true;
 }
 
-void OpenALModuleTerm()
+void ModuleTerm()
 {
 
 }
 
-DEFINE_MODULE() {
-    "OpenAL",
-    OpenALModuleInit,
-    OpenALModuleTerm,
+Version GetVersion()
+{
+    return Version(DUSK_VERSION_MAJOR, DUSK_VERSION_MINOR, DUSK_VERSION_PATCH);
+}
+
+DUSK_DEFINE_MODULE {
+    .Name       = "DuskOpenAL",
+    .Initialize = ModuleInit,
+    .Terminate  = ModuleTerm,
+    .GetVersion = GetVersion,
 };
+
+} // namespace Dusk::OpenAL

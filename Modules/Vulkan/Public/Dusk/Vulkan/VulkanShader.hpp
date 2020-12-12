@@ -5,9 +5,9 @@
 
 #include <Dusk/Shader.hpp>
 
-namespace Dusk {
+namespace Dusk::Vulkan {
 
-#define DUSK_VULKAN_SHADER(x) (dynamic_cast<Dusk::VulkanShader *>(x))
+#define DUSK_VULKAN_SHADER(x) (dynamic_cast<Dusk::Vulkan::VulkanShader *>(x))
 
 class DUSK_VULKAN_API VulkanShader : public Dusk::Shader
 {
@@ -39,6 +39,6 @@ private:
 
 }; // class VulkanShader
 
-} // namespace Dusk
+} // namespace Dusk::Vulkan
 
 #endif // DUSK_VULKAN_SHADER_HPP

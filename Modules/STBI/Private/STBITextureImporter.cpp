@@ -21,7 +21,7 @@
 
 #pragma GCC diagnostic pop
 
-namespace Dusk {
+namespace Dusk::STBI {
 
 STBITextureData::~STBITextureData()
 {
@@ -46,7 +46,7 @@ std::unique_ptr<TextureData> STBITextureImporter::LoadFromFile(const std::string
     textureData->Size = size;
     textureData->Components = components;
 
-    DuskLogLoad("Loaded texture '%s' with STBI module", filename);
+    DuskLogLoad("Loaded texture '%s'", filename);
 
     DuskBenchmarkEnd("STBITextureImporter::LoadFromFile");
     return std::unique_ptr<TextureData>(textureData);
@@ -70,10 +70,10 @@ std::unique_ptr<TextureData> STBITextureImporter::LoadFromMemory(const uint8_t *
     textureData->Size = size;
     textureData->Components = components;
 
-    DuskLogLoad("Loaded texture from memory with STBI module");
+    DuskLogLoad("Loaded texture from memory");
 
     DuskBenchmarkEnd("STBITextureImporter::LoadFromFile");
     return std::unique_ptr<TextureData>(textureData);
 }
 
-} // namespace Dusk
+} // namespace Dusk::STBI

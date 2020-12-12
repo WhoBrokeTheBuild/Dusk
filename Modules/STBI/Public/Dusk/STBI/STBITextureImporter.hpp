@@ -5,7 +5,7 @@
 
 #include <Dusk/TextureImporter.hpp>
 
-namespace Dusk {
+namespace Dusk::STBI {
 
 class DUSK_STBI_API STBITextureData : public TextureData
 {
@@ -59,6 +59,6 @@ public:
 
 }; // class STBITextureImporter
 
-} // class 
+} // namespace Dusk::STBI
 
 #endif // DUSK_STBI_TEXTURE_IMPORTER_HPP

@@ -13,7 +13,7 @@
 
 #include <cstdint>
 
-namespace Dusk {
+namespace Dusk::GLTF2 {
 
 DUSK_GLTF2_API
 inline vec2 ParseVec2(const json& value, vec2 def)
@@ -203,6 +203,6 @@ private:
 
 };
 
-} // namespace Dusk
+} // namespace Dusk::GLTF2
 
 #endif // DUSK_GLTF2_GLTF2_FILE_HPP

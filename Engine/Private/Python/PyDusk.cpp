@@ -86,47 +86,62 @@ PyObject * PyDusk_GetApplicationVersion(PyObject * self, PyObject * args)
 
 PyObject * PyDusk_SetApplicationVersion(PyObject * self, PyObject * args) 
 {
-    Version version;
+    Version ver;
 
-    if (!PyArg_ParseTuple(args, "(iii)", &version.Major, &version.Minor, &version.Patch)) {
+    if (!PyArg_ParseTuple(args, "(iii)",  &ver.Major, &ver.Minor, &ver.Patch)) {
         PyErr_BadArgument();
         Py_RETURN_NONE;
     }
 
-    SetApplicationVersion(version);
+    SetApplicationVersion(ver);
     Py_RETURN_NONE;
 }
 
 PyObject * PyDusk_LoadModule(PyObject * self, PyObject * args)
 {
-    const char * module;
+    const char * name;
+    Version minVer = Version();
 
-    if (!PyArg_ParseTuple(args, "s", &module)) {
+    if (!PyArg_ParseTuple(args, "s|(iii)", &name, &minVer.Major, &minVer.Minor, &minVer.Patch)) {
         PyErr_BadArgument();
         Py_RETURN_NONE;
     }
 
-    LoadModule(module);
+    return PyBool_FromLong(LoadModule(name, minVer));
+}
+
+PyObject * PyDusk_FreeModule(PyObject * self, PyObject * args)
+{
+    const char * name;
+
+    if (!PyArg_ParseTuple(args, "s", &name)) {
+        PyErr_BadArgument();
+        Py_RETURN_NONE;
+    }
+
+    FreeModule(name);
     Py_RETURN_NONE;
 }
 
 static struct PyMethodDef PyDusk_methods[] = {
-    { "RunScriptFile",          PyDusk_RunScriptFile,           METH_VARARGS,   nullptr },
-    { "SetRunning",             PyDusk_SetRunning,              METH_VARARGS,   nullptr },
-    { "IsRunning",              PyDusk_IsRunning,               METH_NOARGS,    nullptr },
-    { "GetVersion",             PyDusk_GetVersion,              METH_NOARGS,    "Get Dusk's version as a tuple, e.g. (1, 0, 0)" },
-    { "GetApplicationName",     PyDusk_GetApplicationName,      METH_NOARGS,    nullptr },
-    { "SetApplicationName",     PyDusk_SetApplicationName,      METH_VARARGS,   nullptr },
-    { "GetApplicationVersion",  PyDusk_GetApplicationVersion,   METH_NOARGS,    nullptr },
-    { "SetApplicationVersion",  PyDusk_SetApplicationVersion,   METH_VARARGS,   nullptr },
-    { "LogVerbose",             PyDusk_LogVerbose,              METH_VARARGS,   nullptr },
-    { "LogInfo",                PyDusk_LogInfo,                 METH_VARARGS,   nullptr },
-    { "LogWarn",                PyDusk_LogWarn,                 METH_VARARGS,   nullptr },
-    { "LogError",               PyDusk_LogError,                METH_VARARGS,   nullptr },
-    { "LogPerf",                PyDusk_LogPerf,                 METH_VARARGS,   nullptr },
-    { "LogLoad",                PyDusk_LogLoad,                 METH_VARARGS,   nullptr },
-    { "LoadModule",             PyDusk_LoadModule,              METH_VARARGS,   nullptr },
-    { "GetGraphicsDriver",      PyDusk_GetGraphicsDriver,       METH_NOARGS,    nullptr },
+    { "RunScriptFile",          PyDusk_RunScriptFile,           METH_VARARGS,   "Dusk::RunScriptFile(filename)" },
+    { "SetRunning",             PyDusk_SetRunning,              METH_VARARGS,   "Dusk::SetRunning(running)" },
+    { "IsRunning",              PyDusk_IsRunning,               METH_NOARGS,    "Dusk::IsRunning()" },
+    { "GetVersion",             PyDusk_GetVersion,              METH_NOARGS,    "Dusk::GetVersion(), returns a tuple of (Major, Minor, Patch)" },
+    { "GetApplicationName",     PyDusk_GetApplicationName,      METH_NOARGS,    "Dusk::GetApplicationName()" },
+    { "SetApplicationName",     PyDusk_SetApplicationName,      METH_VARARGS,   "Dusk::SetApplicationName(string)" },
+    { "GetApplicationVersion",  PyDusk_GetApplicationVersion,   METH_NOARGS,    "Dusk::GetApplicationVersion(), returns a tuple of (Major, Minor, Patch)" },
+    { "SetApplicationVersion",  PyDusk_SetApplicationVersion,   METH_VARARGS,   "Dusk::SetApplicationVersion(version), version must be a tuple of (Major, Minor, Patch)" },
+    { "LogVerbose",             PyDusk_LogVerbose,              METH_VARARGS,   "DuskLogVerbose()" },
+    { "LogInfo",                PyDusk_LogInfo,                 METH_VARARGS,   "DuskLogInfo()" },
+    { "LogWarn",                PyDusk_LogWarn,                 METH_VARARGS,   "DuskLogWarn()" },
+    { "LogError",               PyDusk_LogError,                METH_VARARGS,   "DuskLogError()" },
+    { "LogFatal",               PyDusk_LogFatal,                METH_VARARGS,   "DuskLogFatal()" },
+    { "LogPerf",                PyDusk_LogPerf,                 METH_VARARGS,   "DuskLogPerf()" },
+    { "LogLoad",                PyDusk_LogLoad,                 METH_VARARGS,   "DuskLogLoad()" },
+    { "LoadModule",             PyDusk_LoadModule,              METH_VARARGS,   "Dusk::LoadModule(name, [minVersion]), minVersion must be a tuple of (Major, Minor, Patch)" },
+    { "FreeModule",             PyDusk_FreeModule,              METH_VARARGS,   "Dusk::FreeModule(name)" },
+    { "GetGraphicsDriver",      PyDusk_GetGraphicsDriver,       METH_NOARGS,    "Dusk::GetGraphicsDriver()" },
     { nullptr, nullptr, 0, nullptr },
 };
 
@@ -140,22 +155,22 @@ static struct PyModuleDef PyDuskModule = {
 
 PyMODINIT_FUNC PyInit_Dusk()
 {
-    PyObject * module = nullptr;
+    PyObject * mod = nullptr;
 
-    module = PyModule_Create(&PyDuskModule);
-    if (!module) {
+    mod = PyModule_Create(&PyDuskModule);
+    if (!mod) {
         return nullptr;
     }
 
-    if (!PyInit_ScriptEvent(module)) {
+    if (!PyInit_ScriptEvent(mod)) {
         return nullptr;
     }
 
-    if (!PyInit_GraphicsDriver(module)) {
+    if (!PyInit_GraphicsDriver(mod)) {
         return nullptr;
     }
 
-    return module;
+    return mod;
 }
 
 bool PyCheckError()

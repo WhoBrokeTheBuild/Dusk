@@ -5,7 +5,12 @@
 
 #include <cassert>
 
-namespace Dusk {
+namespace Dusk::OpenGL {
+
+DUSK_OPENGL_API
+void OpenGLPipeline::Create()
+{
+}
 
 DUSK_OPENGL_API
 void OpenGLPipeline::Bind()
@@ -145,4 +150,4 @@ GLenum OpenGLPipeline::GetGLBlendOperation(BlendOperation op) const
     assert(false);
 }
 
-} // namespace Dusk
+} // namespace Dusk::OpenGL

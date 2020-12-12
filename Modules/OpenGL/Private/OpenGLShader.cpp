@@ -7,7 +7,7 @@
 #include <vector>
 #include <sstream>
 
-namespace Dusk {
+namespace Dusk::OpenGL {
 
 DUSK_OPENGL_API
 bool OpenGLShader::LoadFromFiles(const std::vector<std::string>& filenames)
@@ -295,4 +295,4 @@ GLenum OpenGLShader::GetGLShaderType(const std::string& filename)
     return GL_INVALID_ENUM;
 }
 
-} // namespace Dusk
+} // namespace Dusk::OpenGL

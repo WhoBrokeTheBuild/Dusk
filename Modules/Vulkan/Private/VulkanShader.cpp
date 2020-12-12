@@ -6,7 +6,7 @@
 
 #include <fstream>
 
-namespace Dusk {
+namespace Dusk::Vulkan {
 
 DUSK_VULKAN_API
 bool VulkanShader::LoadFromFiles(const std::vector<std::string>& filenames)
@@ -83,7 +83,7 @@ bool VulkanShader::LoadSPV(const std::string& filename)
         .pNext = nullptr,
         .flags = 0,
         .stage = type,
-        .module = shaderModule,
+        .module = shaderModule, // This conflicts with the `module` keyword in C++20
         .pName = "main", // TODO: Update
         .pSpecializationInfo = nullptr,
     };
@@ -122,4 +122,4 @@ VkShaderStageFlagBits VulkanShader::GetVkShaderType(const std::string& filename)
     return VK_SHADER_STAGE_ALL; // Invalid
 }
 
-} // namespace Dusk
+} // namespace Dusk::Vulkan

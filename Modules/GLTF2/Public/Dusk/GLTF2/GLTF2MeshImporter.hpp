@@ -7,7 +7,7 @@
 
 #include <vector>
 
-namespace Dusk {
+namespace Dusk::GLTF2 {
 
 class DUSK_GLTF2_API GLTF2MeshData : public MeshData
 {
@@ -75,6 +75,6 @@ public:
 
 }; // class GLTF2MeshImporter
 
-} // namespace Dusk
+} // namespace Dusk::GLTF2
 
 #endif // DUSK_GLTF2_MESH_IMPORTER_HPP

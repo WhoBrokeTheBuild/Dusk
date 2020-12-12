@@ -3,6 +3,7 @@
 #include <Dusk/Log.hpp>
 #include <Dusk/Module.hpp>
 #include <Dusk/Object.hpp>
+#include <Dusk/GraphicsDriver.hpp>
 
 #include <Python/PyDusk.hpp>
 
@@ -40,7 +41,7 @@ DUSK_ENGINE_API
 void Terminate() {
     Py_Finalize();
 
-    FreeModules();
+    FreeAllModules();
 
     TermMemoryTracking();
 }
@@ -87,6 +88,12 @@ bool RunScriptString(const std::string& code)
 
     PyCheckError();
     return true;
+}
+
+DUSK_ENGINE_API
+Version GetVersion()
+{
+    return Version(DUSK_VERSION_MAJOR, DUSK_VERSION_MINOR, DUSK_VERSION_PATCH);
 }
 
 static std::string _ApplicationName;

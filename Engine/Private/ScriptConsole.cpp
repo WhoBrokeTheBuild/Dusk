@@ -1,6 +1,7 @@
 #include <Dusk/ScriptConsole.hpp>
 #include <Dusk/Dusk.hpp>
 
+#include <Dusk/Log.hpp>
 #include <Python/PyDusk.hpp>
 
 namespace Dusk {
@@ -110,7 +111,6 @@ void ScriptConsole::ReadNextCharacter()
     // TODO: Support UTF-8
     
     unsigned char c;
-    static bool ctrlPressed = false;
 
 #if defined(DUSK_OS_WINDOWS)
 
@@ -127,7 +127,7 @@ void ScriptConsole::ReadNextCharacter()
         return;
     }
 
-    ctrlPressed = ((record.Event.KeyEvent.dwControlKeyState & CTRL_MASK) > 0);
+    bool ctrlPressed = ((record.Event.KeyEvent.dwControlKeyState & CTRL_MASK) > 0);
     
     switch (record.Event.KeyEvent.wVirtualKeyCode) {
     case VK_LEFT:   HandleLeft(ctrlPressed);    return;
@@ -152,28 +152,57 @@ void ScriptConsole::ReadNextCharacter()
         inEscapeSequence = true;
         return;
     }
+
+    static char modifier = '\0';
     
-    if (inEscapeSequence) {
-        if (c == '[' || c == '~' || c == '1' || c == ';') {
+    if (inEscapeSequence) {       
+        // static std::string escapeSequence;
+        // escapeSequence += c;
+
+        if (c == '[' || c == ';') {
             return;
         }
 
-        if (c == '5') {
-            ctrlPressed = true;
+        if (isdigit(c)) {
+            modifier = c;
             return;
         }
 
         switch (c) {
-        case 'D': HandleLeft(ctrlPressed);    return;
-        case 'C': HandleRight(ctrlPressed);   return;
-        case 'A': HandleUp();       return;
-        case 'B': HandleDown();     return;
-        case 'H': HandleHome();     return;
-        case 'F': HandleEnd();      return;
+        case 'D': 
+            HandleLeft(modifier == '5');
+            break;
+        case 'C':
+            HandleRight(modifier == '5');
+            break;
+        case 'A':
+            HandleUp();
+            break;
+        case 'B':
+            HandleDown();
+            break;
+        case 'H':
+            HandleHome();
+            break;
+        case 'F':
+            HandleEnd();
+            break;
+        case '~':
+            if (modifier == '3') {
+                HandleDelete();
+            }
+            break;
         }
 
-        ctrlPressed = false;
+        modifier = '\0';
         inEscapeSequence = false;
+
+        // for (char c : escapeSequence) {
+        //     DuskLogVerbose("%c", c);
+        // }
+        // escapeSequence.clear();
+
+        return;
     }
 
 #endif
@@ -221,14 +250,15 @@ void ScriptConsole::ReadNextCharacter()
             _index = _history.size() - 1;
         }
 
-        _history.back().insert(_cursor, 1, c);
+        GetCurrentLine().insert(_cursor, 1, c);
         ++_cursor;
 
-        printf("%s", _history.back().c_str() + _cursor);
+        printf("%s", GetCurrentLine().c_str() + _cursor);
         fflush(stdout);
 
-        if (_cursor < _history.back().size()) {
-            MoveCursorLeft(_history.back().size() - _cursor);
+        if (_cursor < GetCurrentLine().size()) {
+            printf("\033[%luD", GetCurrentLine().size() - _cursor);
+            fflush(stdout);
         }
     }
 
@@ -323,6 +353,7 @@ void ScriptConsole::JumpCursorRight()
 
 void ScriptConsole::MoveCursorLeft(int amount)
 {
+    amount = std::clamp(amount, 0, _cursor);
     if (amount > 0) {
         printf("\033[%dD", amount);
         fflush(stdout);
@@ -332,6 +363,8 @@ void ScriptConsole::MoveCursorLeft(int amount)
 
 void ScriptConsole::MoveCursorRight(int amount)
 {
+    int maxLen = static_cast<int>(GetCurrentLine().size());
+    amount = std::clamp(amount, 0, maxLen - _cursor);
     if (amount > 0) {
         printf("\033[%dC", amount);
         fflush(stdout);
@@ -427,13 +460,39 @@ void ScriptConsole::HandleBackspace()
         }
 
         --_cursor;
-        _history.back().erase(_cursor, 1);
+        GetCurrentLine().erase(_cursor, 1);
 
-        printf("%s", _history.back().c_str() + _cursor);
+        printf("%s", GetCurrentLine().c_str() + _cursor);
         fflush(stdout);
 
-        if (_cursor < _history.back().size()) {
-            MoveCursorLeft(_history.back().size() - _cursor);
+        if (_cursor < GetCurrentLine().size()) {
+            printf("\033[%luD", GetCurrentLine().size() - _cursor);
+            fflush(stdout);
+        }
+    }
+}
+
+void ScriptConsole::HandleDelete()
+{
+    // Helo
+    //   ^ 
+    if (_cursor < GetCurrentLine().size()) {
+        printf("\033[K");
+        fflush(stdout);
+        
+        if (_index < _history.size() - 1) {
+            _history.back() = GetCurrentLine();
+            _index = _history.size() - 1;
+        }
+
+        GetCurrentLine().erase(_cursor, 1);
+
+        printf("%s", GetCurrentLine().c_str() + _cursor);
+        fflush(stdout);
+
+        if (_cursor < GetCurrentLine().size()) {
+            printf("\033[%luD", GetCurrentLine().size() - _cursor);
+            fflush(stdout);
         }
     }
 }

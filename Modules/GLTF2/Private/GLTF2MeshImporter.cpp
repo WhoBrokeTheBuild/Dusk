@@ -4,7 +4,7 @@
 #include <Dusk/Benchmark.hpp>
 #include <Dusk/Util.hpp>
 
-namespace Dusk {
+namespace Dusk::GLTF2 {
 
 DUSK_GLTF2_API
 std::vector<std::unique_ptr<MeshData>> GLTF2MeshImporter::LoadFromFile(const std::string& filename)
@@ -21,4 +21,4 @@ std::vector<std::unique_ptr<MeshData>> GLTF2MeshImporter::LoadFromFile(const std
     return { };
 }
 
-} // namespace Dusk
+} // namespace Dusk::GLTF2

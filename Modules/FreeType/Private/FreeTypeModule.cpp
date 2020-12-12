@@ -1,17 +1,26 @@
 #include <Dusk/Module.hpp>
 
-using namespace Dusk;
+namespace Dusk::FreeType {
 
-void FreeTypeModuleInit()
+bool ModuleInit()
+{
+    return true;
+}
+
+void ModuleTerm()
 {
 }
 
-void FreeTypeModuleTerm()
+Version GetVersion()
 {
+    return Version(DUSK_VERSION_MAJOR, DUSK_VERSION_MINOR, DUSK_VERSION_PATCH);
 }
 
-DEFINE_MODULE() {
-    "FreeType",
-    FreeTypeModuleInit,
-    FreeTypeModuleTerm,
+DUSK_DEFINE_MODULE {
+    .Name       = "DuskFreeType",
+    .Initialize = ModuleInit,
+    .Terminate  = ModuleTerm,
+    .GetVersion = GetVersion,
 };
+
+} // namespace Dusk::FreeType

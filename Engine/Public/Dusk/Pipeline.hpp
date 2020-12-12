@@ -5,6 +5,7 @@
 #include <Dusk/Object.hpp>
 
 #include <Dusk/Shader.hpp>
+#include <Dusk/Mesh.hpp>
 
 namespace Dusk {
 
@@ -86,6 +87,10 @@ public:
         _shader = shader;
     }
 
+    inline void SetMesh(Mesh * mesh) {
+        _mesh = mesh;
+    }
+
     inline void SetFrontFace(FrontFace frontFace) {
         _frontFace = frontFace;
     }
@@ -118,11 +123,13 @@ public:
         _primitiveTopology = topology;
     }
 
-    virtual void Bind() = 0;
+    virtual void Create() = 0;
 
 protected:
 
     Shader * _shader = nullptr;
+
+    Mesh * _mesh = nullptr;
 
     FrontFace _frontFace = FrontFace::CounterClockwise;
 

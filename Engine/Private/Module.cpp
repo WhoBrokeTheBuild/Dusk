@@ -6,6 +6,8 @@
 
     #include <Windows.h>
 
+    #undef FreeModule
+
 #else
 
     #include <dlfcn.h>
@@ -42,7 +44,7 @@ ModuleHandle _dlopen(const std::string& filename)
             FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
                 NULL, GetLastError(), GetUserDefaultUILanguage(), message, sizeof(message), NULL);
 
-            DuskLogError("Failed to load '%s', %s", name, message);
+            DuskLogError("Failed to load '%s', %s", filename, message);
             return nullptr;
         }
         

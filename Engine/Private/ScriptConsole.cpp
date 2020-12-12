@@ -257,7 +257,7 @@ void ScriptConsole::ReadNextCharacter()
         fflush(stdout);
 
         if (_cursor < GetCurrentLine().size()) {
-            printf("\033[%luD", GetCurrentLine().size() - _cursor);
+            printf("\033[%zuD", GetCurrentLine().size() - _cursor);
             fflush(stdout);
         }
     }

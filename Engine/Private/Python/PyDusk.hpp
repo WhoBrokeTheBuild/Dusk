@@ -1,8 +1,16 @@
 #ifndef DUSK_PY_DUSK_HPP
 #define DUSK_PY_DUSK_HPP
 
+#include <Dusk/Config.hpp>
+
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
+
+#if defined(DUSK_OS_WINDOWS)
+
+    #undef FreeModule
+
+#endif
 
 namespace Dusk {
 

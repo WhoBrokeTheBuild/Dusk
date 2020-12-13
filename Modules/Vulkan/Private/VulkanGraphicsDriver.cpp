@@ -111,18 +111,32 @@ void VulkanGraphicsDriver::SwapBuffers()
     vkWaitForFences(_vkDevice, 1, &_vkInFlightFences[_currentFrame], VK_TRUE, UINT64_MAX);
 
     uint32_t imageIndex = 0;
-    vkAcquireNextImageKHR(_vkDevice, _vkSwapChain, UINT64_MAX, _vkImageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE, &imageIndex);
+    vkResult = vkAcquireNextImageKHR(_vkDevice, _vkSwapChain, UINT64_MAX, _vkImageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE, &imageIndex);
+    if (vkResult == VK_ERROR_OUT_OF_DATE_KHR) {
+        if (!ResizeSwapChain()) {
+            DuskLogFatal("Failed to resize swap chain");
+        }
+    }
+    else if (vkResult != VK_SUCCESS && vkResult != VK_SUBOPTIMAL_KHR) {
+        DuskLogFatal("vkAcquireNextImageKHR() failed");
+    }
 
 
     Camera camera;
     camera.SetPosition({ 10, 10, 10 });
     camera.SetLookAt({ 0, 0, 0 });
 
+    static float rotation = 0.0f;
+    rotation += 0.01f;
+
     TransformData transform = {
-        .Model = glm::mat4(1.0f),
+        .Model = glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 1.0f, 0.0f)),
         .View = camera.GetView(),
         .Projection = camera.GetProjection(),
     };
+
+    // OpenGL, and thus glm are upside-down
+    transform.Projection[1][1] *= -1;
 
     transform.UpdateMVP();
 
@@ -178,7 +192,9 @@ void VulkanGraphicsDriver::SwapBuffers()
     vkResult = vkQueuePresentKHR(_vkPresentQueue, &presentInfo);
 
     if (vkResult == VK_ERROR_OUT_OF_DATE_KHR || vkResult == VK_SUBOPTIMAL_KHR) {
-        ResizeSwapChain();
+        if (!ResizeSwapChain()) {
+            DuskLogFatal("Failed to resize swap chain");
+        }
     }
     else if (vkResult != VK_SUCCESS) {
         DuskLogFatal("vkQueuePresentKHR() failed");
@@ -1137,7 +1153,8 @@ bool VulkanGraphicsDriver::InitCommandBuffers()
 
         vkCmdBindDescriptorSets(_vkCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _vkPipelineLayout, 0, 1, &_vkDescriptorSets[i], 0, nullptr);
 
-        vkCmdDraw(_vkCommandBuffers[i], mesh->GetVertexCount(), 1, 0, 0);
+        // Triangles = / 3
+        vkCmdDraw(_vkCommandBuffers[i], mesh->GetVertexCount() / 3, 1, 0, 0);
 
         vkCmdEndRenderPass(_vkCommandBuffers[i]);
 

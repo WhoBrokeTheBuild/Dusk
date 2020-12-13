@@ -11,7 +11,7 @@ gfx = Dusk.GetGraphicsDriver()
 if gfx == None:
     quit()
 
-gfx.SetWindowSize(( 1024, 768 ))
+# gfx.SetWindowSize(( 1024, 768 ))
 
 # def onWindowResize(data):
 #     print(data['Size'])

@@ -112,6 +112,8 @@ private:
 
     void TermSwapChain();
 
+    bool ResizeSwapChain();
+
     bool InitRenderPass();
 
     void TermRenderPass();

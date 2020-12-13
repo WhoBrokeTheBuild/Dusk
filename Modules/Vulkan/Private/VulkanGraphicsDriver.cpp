@@ -106,78 +106,85 @@ void VulkanGraphicsDriver::ProcessEvents()
 DUSK_VULKAN_API
 void VulkanGraphicsDriver::SwapBuffers()
 {
-    // VkResult vkResult;
+    VkResult vkResult;
 
-    // vkWaitForFences(_vkDevice, 1, &_vkInFlightFences[_currentFrame], VK_TRUE, UINT64_MAX);
+    vkWaitForFences(_vkDevice, 1, &_vkInFlightFences[_currentFrame], VK_TRUE, UINT64_MAX);
 
-    // uint32_t imageIndex = 0;
-    // vkAcquireNextImageKHR(_vkDevice, _vkSwapChain, UINT64_MAX, _vkImageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE, &imageIndex);
-
-
-    // Camera camera;
-    // camera.SetPosition({ 10, 10, 10 });
-    // camera.SetLookAt({ 0, 0, 0 });
-
-    // TransformData transform = {
-    //     .Model = glm::mat4(1.0f),
-    //     .View = camera.GetView(),
-    //     .Projection = camera.GetProjection(),
-    // };
-
-    // transform.UpdateMVP();
-
-    // void * data;
-    // vkMapMemory(_vkDevice, _vkUniformBuffersMemory[imageIndex], 0, sizeof(transform), 0, &data);
-    // memcpy(data, &transform, sizeof(transform));
-    // vkUnmapMemory(_vkDevice, _vkUniformBuffersMemory[imageIndex]);
+    uint32_t imageIndex = 0;
+    vkAcquireNextImageKHR(_vkDevice, _vkSwapChain, UINT64_MAX, _vkImageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE, &imageIndex);
 
 
+    Camera camera;
+    camera.SetPosition({ 10, 10, 10 });
+    camera.SetLookAt({ 0, 0, 0 });
 
-    // if (_vkImagesInFlight[imageIndex] != VK_NULL_HANDLE) {
-    //     vkWaitForFences(_vkDevice, 1, &_vkImagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
-    // }
+    TransformData transform = {
+        .Model = glm::mat4(1.0f),
+        .View = camera.GetView(),
+        .Projection = camera.GetProjection(),
+    };
 
-    // _vkImagesInFlight[imageIndex] = _vkInFlightFences[_currentFrame];
+    transform.UpdateMVP();
 
-    // VkSemaphore waitSemaphores[] = { _vkImageAvailableSemaphores[_currentFrame] };
-    // VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+    void * data;
+    vkMapMemory(_vkDevice, _vkUniformBuffersMemory[imageIndex], 0, sizeof(transform), 0, &data);
+    memcpy(data, &transform, sizeof(transform));
+    vkUnmapMemory(_vkDevice, _vkUniformBuffersMemory[imageIndex]);
 
-    // VkSemaphore signalSemaphores[] = { _vkRenderingFinishedSemaphores[_currentFrame] };
 
-    // VkSubmitInfo submitInfo = {
-    //     .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-    //     .pNext = nullptr,
-    //     .waitSemaphoreCount = 1,
-    //     .pWaitSemaphores = waitSemaphores,
-    //     .pWaitDstStageMask = waitStages,
-    //     .commandBufferCount = 1,
-    //     .pCommandBuffers = &_vkCommandBuffers[imageIndex],
-    //     .signalSemaphoreCount = 1,
-    //     .pSignalSemaphores = signalSemaphores,
-    // };
 
-    // vkResetFences(_vkDevice, 1, &_vkInFlightFences[_currentFrame]);
+    if (_vkImagesInFlight[imageIndex] != VK_NULL_HANDLE) {
+        vkWaitForFences(_vkDevice, 1, &_vkImagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
+    }
 
-    // vkResult = vkQueueSubmit(_vkGraphicsQueue, 1, &submitInfo, _vkInFlightFences[_currentFrame]);
-    // if (vkResult != VK_SUCCESS) {
-    //     DuskLogFatal("vkQueueSubmit() failed");
-    // }
+    _vkImagesInFlight[imageIndex] = _vkInFlightFences[_currentFrame];
 
-    // VkSwapchainKHR swapChains[] = { _vkSwapChain };
+    VkSemaphore waitSemaphores[] = { _vkImageAvailableSemaphores[_currentFrame] };
+    VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 
-    // VkPresentInfoKHR presentInfo = {
-    //     .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-    //     .pNext = 0,
-    //     .waitSemaphoreCount = 1,
-    //     .pWaitSemaphores = signalSemaphores,
-    //     .swapchainCount = 1,
-    //     .pSwapchains = swapChains,
-    //     .pImageIndices = &imageIndex,
-    // };
+    VkSemaphore signalSemaphores[] = { _vkRenderingFinishedSemaphores[_currentFrame] };
 
-    // vkQueuePresentKHR(_vkPresentQueue, &presentInfo);
+    VkSubmitInfo submitInfo = {
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        .pNext = nullptr,
+        .waitSemaphoreCount = 1,
+        .pWaitSemaphores = waitSemaphores,
+        .pWaitDstStageMask = waitStages,
+        .commandBufferCount = 1,
+        .pCommandBuffers = &_vkCommandBuffers[imageIndex],
+        .signalSemaphoreCount = 1,
+        .pSignalSemaphores = signalSemaphores,
+    };
 
-    // _currentFrame = (_currentFrame + 1) % 2;
+    vkResetFences(_vkDevice, 1, &_vkInFlightFences[_currentFrame]);
+
+    vkResult = vkQueueSubmit(_vkGraphicsQueue, 1, &submitInfo, _vkInFlightFences[_currentFrame]);
+    if (vkResult != VK_SUCCESS) {
+        DuskLogFatal("vkQueueSubmit() failed");
+    }
+
+    VkSwapchainKHR swapChains[] = { _vkSwapChain };
+
+    VkPresentInfoKHR presentInfo = {
+        .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+        .pNext = 0,
+        .waitSemaphoreCount = 1,
+        .pWaitSemaphores = signalSemaphores,
+        .swapchainCount = 1,
+        .pSwapchains = swapChains,
+        .pImageIndices = &imageIndex,
+    };
+
+    vkResult = vkQueuePresentKHR(_vkPresentQueue, &presentInfo);
+
+    if (vkResult == VK_ERROR_OUT_OF_DATE_KHR || vkResult == VK_SUBOPTIMAL_KHR) {
+        ResizeSwapChain();
+    }
+    else if (vkResult != VK_SUCCESS) {
+        DuskLogFatal("vkQueuePresentKHR() failed");
+    }
+
+    _currentFrame = (_currentFrame + 1) % 2;
 }
 
 DUSK_VULKAN_API
@@ -859,13 +866,14 @@ bool VulkanGraphicsDriver::InitSwapChain()
     _vkSwapChainImages.resize(imageCount);
     vkGetSwapchainImagesKHR(_vkDevice, _vkSwapChain, &imageCount, _vkSwapChainImages.data());
 
-    _vkSwapChainImageViews.reserve(imageCount);
-    for (const auto& image : _vkSwapChainImages) {
+    _vkSwapChainImageViews.resize(imageCount);
+
+    for (size_t i = 0; i < _vkSwapChainImages.size(); ++i) {
         VkImageViewCreateInfo imageViewCreateInfo = {
             .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
             .pNext = nullptr,
             .flags = 0,
-            .image = image,
+            .image = _vkSwapChainImages[i],
             .viewType = VK_IMAGE_VIEW_TYPE_2D,
             .format = _vkSwapChainImageFormat.format,
             .subresourceRange = {
@@ -877,14 +885,11 @@ bool VulkanGraphicsDriver::InitSwapChain()
             },
         };
 
-        VkImageView imageView;
-        vkResult = vkCreateImageView(_vkDevice, &imageViewCreateInfo, nullptr, &imageView);
+        vkResult = vkCreateImageView(_vkDevice, &imageViewCreateInfo, nullptr, &_vkSwapChainImageViews[i]);
         if (vkResult != VK_SUCCESS) {
             DuskLogError("vkCreateImageView() failed");
             return false;
         }
-
-        _vkSwapChainImageViews.push_back(imageView);
     }
 
     _vkUniformBuffers.resize(_vkSwapChainImages.size());
@@ -912,6 +917,25 @@ void VulkanGraphicsDriver::TermSwapChain()
     }
 
     vkDestroySwapchainKHR(_vkDevice, _vkSwapChain, nullptr);
+}
+
+bool VulkanGraphicsDriver::ResizeSwapChain()
+{
+    vkDeviceWaitIdle(_vkDevice);
+
+    TermSwapChain();
+
+    if (!InitSwapChain() ||
+        !InitRenderPass() ||
+        !InitDescriptorPool() ||
+        !InitGraphicsPipeline() ||
+        !InitFramebuffers() ||
+        !InitCommandPool() ||
+        !InitCommandBuffers()) {
+        return false;
+    }
+
+    return true;
 }
 
 bool VulkanGraphicsDriver::InitRenderPass()
@@ -987,11 +1011,11 @@ bool VulkanGraphicsDriver::InitFramebuffers()
 {
     VkResult vkResult;
 
-    _vkFramebuffers.reserve(_vkSwapChainImageViews.size());
+    _vkFramebuffers.resize(_vkSwapChainImageViews.size());
 
-    for (const auto& imageView : _vkSwapChainImageViews) {
+    for (size_t i = 0; i < _vkSwapChainImageViews.size(); ++i) {
         VkImageView attachments[] = {
-            imageView,
+            _vkSwapChainImageViews[i],
         };
 
         VkFramebufferCreateInfo framebufferCreateInfo = {
@@ -1006,14 +1030,11 @@ bool VulkanGraphicsDriver::InitFramebuffers()
             .layers = 1,
         };
 
-        VkFramebuffer framebuffer;
-        vkResult = vkCreateFramebuffer(_vkDevice, &framebufferCreateInfo, nullptr, &framebuffer);
+        vkResult = vkCreateFramebuffer(_vkDevice, &framebufferCreateInfo, nullptr, &_vkFramebuffers[i]);
         if (vkResult != VK_SUCCESS) {
             DuskLogError("vkCreateFramebuffer() failed");
             return false;
         }
-
-        _vkFramebuffers.push_back(framebuffer);
     }
 
     return true;

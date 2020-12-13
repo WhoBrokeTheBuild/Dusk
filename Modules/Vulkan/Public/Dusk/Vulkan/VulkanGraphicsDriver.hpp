@@ -125,6 +125,8 @@ private:
 
     bool InitCommandPool();
 
+    bool InitDepthBuffer();
+
     bool InitCommandBuffers();
 
     bool InitSyncObjects();
@@ -163,6 +165,14 @@ private:
     std::vector<VkImageView> _vkSwapChainImageViews;
 
     VkRenderPass _vkRenderPass;
+
+    VkFormat _vkDepthImageFormat;
+
+    VkImage _vkDepthImage;
+
+    VkDeviceMemory _vkDepthImageMemory;
+
+    VkImageView _vkDepthImageView;
 
     std::vector<VkFramebuffer> _vkFramebuffers;
 

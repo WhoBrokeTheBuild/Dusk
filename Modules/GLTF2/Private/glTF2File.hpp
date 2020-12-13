@@ -153,8 +153,6 @@ public:
 
     bool LoadFromFile(const std::string& filename);
 
-private:
-
     const uint32_t MAGIC = 0x46546C67; // glTF
 
     enum class ChunkType : uint32_t

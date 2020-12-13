@@ -85,20 +85,20 @@ bool VulkanPipeline::Initialize()
         .sampleShadingEnable = VK_FALSE,
     };
 
-    // VkPipelineDepthStencilStateCreateInfo depthStencilStateCreateInfo = {
-    //     .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
-    //     .pNext = nullptr,
-    //     .flags = 0,
-    //     .depthTestEnable,
-    //     .depthWriteEnable,
-    //     .depthCompareOp,
-    //     .depthBoundsTestEnable,
-    //     .stencilTestEnable,
-    //     .front,
-    //     .back,
-    //     .minDepthBounds,
-    //     .maxDepthBounds,
-    // };
+    VkPipelineDepthStencilStateCreateInfo depthStencilStateCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .depthTestEnable = (_depthCompareOperation != CompareOperation::Always),
+        .depthWriteEnable = VK_TRUE,
+        .depthCompareOp = GetVkCompareOp(_depthCompareOperation),
+        .depthBoundsTestEnable = VK_FALSE,
+        .stencilTestEnable = VK_FALSE,
+        // .front,
+        // .back,
+        // .minDepthBounds,
+        // .maxDepthBounds,
+    };
 
     VkPipelineColorBlendAttachmentState colorBlendAttachmentState = {
         .blendEnable = _blendEnabled,
@@ -124,11 +124,6 @@ bool VulkanPipeline::Initialize()
         .pAttachments = &colorBlendAttachmentState,
         .blendConstants = { 0.0f, 0.0f, 0.0f, 0.0f },
     };
-
-    // TODO: Move
-
-    // TransformData
-
 
     const auto& bindings = mesh->GetVkVertexInputBindings();
     const auto& attributes = mesh->GetVkVertexInputAttributes();
@@ -163,7 +158,7 @@ bool VulkanPipeline::Initialize()
         .pViewportState = &viewportStateCreateInfo,
         .pRasterizationState = &rasterizationStateCreateInfo,
         .pMultisampleState = &multisampleStateCreateInfo,
-        // .pDepthStencilState = &depthStencilStateCreateInfo,
+        .pDepthStencilState = &depthStencilStateCreateInfo,
         .pColorBlendState = &colorBlendStateCreateInfo,
         .pDynamicState = nullptr,
         .layout = gfx->GetVkPipelineLayout(),
@@ -305,6 +300,30 @@ VkBlendOp VulkanPipeline::GetVkBlendOp(BlendOperation op) const
     }
     
     DuskLogFatal("Unexpected BlendOperation: %d", (int)op);
+}
+
+VkCompareOp VulkanPipeline::GetVkCompareOp(CompareOperation op) const
+{
+    switch (op) {
+    case CompareOperation::Never:
+        return VK_COMPARE_OP_NEVER;
+    case CompareOperation::Less:
+        return VK_COMPARE_OP_LESS;
+    case CompareOperation::Equal:
+        return VK_COMPARE_OP_EQUAL;
+    case CompareOperation::LessOrEqual:
+        return VK_COMPARE_OP_LESS_OR_EQUAL;
+    case CompareOperation::Greater:
+        return VK_COMPARE_OP_GREATER;
+    case CompareOperation::NotEqual:
+        return VK_COMPARE_OP_NOT_EQUAL;
+    case CompareOperation::GreaterOrEqual:
+        return VK_COMPARE_OP_GREATER_OR_EQUAL;
+    case CompareOperation::Always:
+        return VK_COMPARE_OP_ALWAYS;
+    }
+
+    DuskLogFatal("Unexpected CompareOperation: %d", (int)op);
 }
 
 } // namespace Dusk::Vulkan

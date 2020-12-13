@@ -33,11 +33,11 @@ bool VulkanMesh::Load(const MeshData * data)
 
     const auto& indices = data->GetIndices();
     const auto& vertices = data->GetVertices();
-    // const auto& normals = data->GetNormals();
-    // const auto& uvs = data->GetUVs();
-    // const auto& colors = data->GetColors();
-    // const auto& tangents = data->GetTangents();
-    // const auto& bitangents = data->GetBitangents();
+    const auto& normals = data->GetNormals();
+    const auto& uvs = data->GetUVs();
+    const auto& colors = data->GetColors();
+    const auto& tangents = data->GetTangents();
+    const auto& bitangents = data->GetBitangents();
 
     switch (data->GetMode()) {
     case MeshData::Mode::Points:
@@ -82,8 +82,6 @@ bool VulkanMesh::Load(const MeshData * data)
         }
     }
 
-    DuskLogInfo("Adding Vertex Buffer");
-    
     result = AddBuffer(
         static_cast<const void *>(vertices.data()), 
         sizeof(float) * vertices.size(), 
@@ -97,82 +95,80 @@ bool VulkanMesh::Load(const MeshData * data)
         return false;
     }
 
-    // if (!normals.empty()) {
-    //     DuskLogInfo("Adding Normal Buffer");
-    
-    //     result = AddBuffer(
-    //         static_cast<const void *>(normals.data()), 
-    //         sizeof(float) * normals.size(), 
-    //         sizeof(float) * 4, 
-    //         VK_FORMAT_R32G32B32A32_SFLOAT,
-    //         VK_VERTEX_INPUT_RATE_VERTEX,
-    //         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    if (!normals.empty()) {
+        result = AddBuffer(
+            static_cast<const void *>(normals.data()), 
+            sizeof(float) * normals.size(), 
+            sizeof(float) * 4, 
+            VK_FORMAT_R32G32B32A32_SFLOAT,
+            VK_VERTEX_INPUT_RATE_VERTEX,
+            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
-    //     if (!result) {
-    //         DuskLogError("Failed to create normal buffer");
-    //         return false;
-    //     }
-    // }
+        if (!result) {
+            DuskLogError("Failed to create normal buffer");
+            return false;
+        }
+    }
 
-    // if (!uvs.empty()) {
-    //     result = AddBuffer(
-    //         static_cast<const void *>(uvs.data()), 
-    //         sizeof(float) * uvs.size(), 
-    //         sizeof(float) * 2, 
-    //         VK_FORMAT_R32G32_SFLOAT,
-    //         VK_VERTEX_INPUT_RATE_VERTEX,
-    //         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    if (!uvs.empty()) {
+        result = AddBuffer(
+            static_cast<const void *>(uvs.data()), 
+            sizeof(float) * uvs.size(), 
+            sizeof(float) * 2, 
+            VK_FORMAT_R32G32_SFLOAT,
+            VK_VERTEX_INPUT_RATE_VERTEX,
+            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
-    //     if (!result) {
-    //         DuskLogError("Failed to create UV buffer");
-    //         return false;
-    //     }
-    // }
+        if (!result) {
+            DuskLogError("Failed to create UV buffer");
+            return false;
+        }
+    }
 
-    // if (!colors.empty()) {
-    //     result = AddBuffer(
-    //         static_cast<const void *>(colors.data()), 
-    //         sizeof(float) * colors.size(), 
-    //         sizeof(float) * 4, 
-    //         VK_FORMAT_R32G32B32A32_SFLOAT,
-    //         VK_VERTEX_INPUT_RATE_VERTEX,
-    //         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    if (!colors.empty()) {
+        result = AddBuffer(
+            static_cast<const void *>(colors.data()), 
+            sizeof(float) * colors.size(), 
+            sizeof(float) * 4, 
+            VK_FORMAT_R32G32B32A32_SFLOAT,
+            VK_VERTEX_INPUT_RATE_VERTEX,
+            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
-    //     if (!result) {
-    //         DuskLogError("Failed to create color buffer");
-    //         return false;
-    //     }
-    // }
+        if (!result) {
+            DuskLogError("Failed to create color buffer");
+            return false;
+        }
+    }
 
-    // if (!tangents.empty()) {
-    //     result = AddBuffer(
-    //         static_cast<const void *>(tangents.data()), 
-    //         sizeof(float) * tangents.size(), 
-    //         sizeof(float) * 4, 
-    //         VK_FORMAT_R32G32B32A32_SFLOAT,
-    //         VK_VERTEX_INPUT_RATE_VERTEX,
-    //         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    if (!tangents.empty()) {
+        result = AddBuffer(
+            static_cast<const void *>(tangents.data()), 
+            sizeof(float) * tangents.size(), 
+            sizeof(float) * 4, 
+            VK_FORMAT_R32G32B32A32_SFLOAT,
+            VK_VERTEX_INPUT_RATE_VERTEX,
+            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
-    //     if (!result) {
-    //         DuskLogError("Failed to create tangent buffer");
-    //         return false;
-    //     }
-    // }
+        if (!result) {
+            DuskLogError("Failed to create tangent buffer");
+            return false;
+        }
+    }
 
-    // if (!bitangents.empty()) {
-    //     result = AddBuffer(
-    //         static_cast<const void *>(bitangents.data()), 
-    //         sizeof(float) * bitangents.size(), 
-    //         sizeof(float) * 4, 
-    //         VK_FORMAT_R32G32B32A32_SFLOAT,
-    //         VK_VERTEX_INPUT_RATE_VERTEX,
-    //         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    if (!bitangents.empty()) {
+        result = AddBuffer(
+            static_cast<const void *>(bitangents.data()), 
+            sizeof(float) * bitangents.size(), 
+            sizeof(float) * 4, 
+            VK_FORMAT_R32G32B32A32_SFLOAT,
+            VK_VERTEX_INPUT_RATE_VERTEX,
+            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
-    //     if (!result) {
-    //         DuskLogError("Failed to create bitangent buffer");
-    //         return false;
-    //     }
-    // }
+        if (!result) {
+            DuskLogError("Failed to create bitangent buffer");
+            return false;
+        }
+    }
 
     return true;
 }
@@ -194,8 +190,6 @@ bool VulkanMesh::AddBuffer(const void * data, VkDeviceSize size, uint32_t stride
         .format = format,
         .offset = 0,
     });
-
-    DuskLogInfo("Binding location %u to binding %u", _nextLocation, _nextBinding);
 
     VkBuffer buffer;
     VkDeviceMemory memory;
@@ -221,7 +215,9 @@ bool VulkanMesh::AddBuffer(const void * data, VkDeviceSize size, uint32_t stride
 
 void VulkanMesh::GenerateBindCommands(VkCommandBuffer vkCommandBuffer)
 {
-    VkDeviceSize offsets[] = { 0 };
+    // Must be >= the size of _vkBuffers
+    VkDeviceSize offsets[] = { 0, 0, 0, 0, 0, 0, 0 };
+
     vkCmdBindVertexBuffers(vkCommandBuffer, 0, static_cast<uint32_t>(_vkBuffers.size()), _vkBuffers.data(), offsets);
 }
 

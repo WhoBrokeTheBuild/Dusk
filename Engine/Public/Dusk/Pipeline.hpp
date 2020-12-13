@@ -9,33 +9,39 @@
 
 namespace Dusk {
 
-enum class FrontFace {
+enum class FrontFace
+{
     Clockwise,
     CounterClockwise,
 };
 
-enum class CullMode {
+enum class CullMode
+{
     None,
     Front,
     Back,
 };
 
-enum class FillMode {
+enum class FillMode
+{
     Fill,
     Line,
 };
 
-enum class DepthBiasMode {
+enum class DepthBiasMode
+{
     Clamp,
     Clip,
 };
 
-enum class StepRate {
+enum class StepRate
+{
     Vertex,
     Instance,
 };
 
-enum class BlendOperation {
+enum class BlendOperation
+{
     Add,
     Subtract,
     ReverseSubtract,
@@ -43,7 +49,8 @@ enum class BlendOperation {
     Max,
 };
 
-enum class BlendFactor {
+enum class BlendFactor
+{
     Zero,
     One,
     SrcColor,
@@ -59,6 +66,18 @@ enum class BlendFactor {
     ConstantAlpha,
     OneMinusConstantAlpha,
     SrcAlphaSaturated, // TODO: Investigate
+};
+
+enum class CompareOperation
+{
+    Never,
+    Less,
+    LessOrEqual,
+    Greater,
+    GreaterOrEqual,
+    Equal,
+    NotEqual,
+    Always,
 };
 
 class DUSK_ENGINE_API Pipeline : public Object
@@ -111,6 +130,10 @@ public:
         _depthBiasMode = mode;
     }
 
+    inline void SetDepthCompareOperation(CompareOperation op) {
+        _depthCompareOperation = op;
+    }
+
     virtual bool Initialize() = 0;
 
     virtual void Terminate() = 0;
@@ -135,6 +158,7 @@ protected:
 
     DepthBiasMode _depthBiasMode = DepthBiasMode::Clamp;
 
+    CompareOperation _depthCompareOperation = CompareOperation::Less;
 
     bool _blendEnabled = false;
 

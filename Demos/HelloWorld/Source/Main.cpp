@@ -61,7 +61,10 @@ void run()
     }
 
     auto meshImporters = Dusk::GetAllMeshImporters();
+    // auto meshDatas = meshImporters[0]->LoadFromFile("sphere.obj");
     auto meshDatas = meshImporters[0]->LoadFromFile("monkey.obj");
+    // auto meshDatas = meshImporters[0]->LoadFromFile("crate/crate.obj");
+    // auto meshDatas = meshImporters[0]->LoadFromFile("BoomBox.glb");
     auto mesh = gfx->CreateMesh();
     mesh->Load(meshDatas[0].get());
 

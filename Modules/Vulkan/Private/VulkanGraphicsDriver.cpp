@@ -29,6 +29,7 @@ bool VulkanGraphicsDriver::Initialize()
         !InitRenderPass() ||
         !InitDescriptorPool() ||
         !InitGraphicsPipelines() ||
+        !InitDepthBuffer() ||
         !InitFramebuffers() ||
         !InitCommandPool() ||
         !InitCommandBuffers() ||
@@ -117,7 +118,7 @@ void VulkanGraphicsDriver::SwapBuffers()
 
 
     Camera camera;
-    camera.SetPosition({ 5, 5, 5 });
+    camera.SetPosition({ 3, 3, 3 });
     camera.SetLookAt({ 0, 0, 0 });
 
     static float rotation = 0.0f;
@@ -925,6 +926,11 @@ bool VulkanGraphicsDriver::InitSwapChain()
 void VulkanGraphicsDriver::TermSwapChain()
 {
     // TODO: Move
+    vkDestroyImageView(_vkDevice, _vkDepthImageView, nullptr);
+    vkDestroyImage(_vkDevice, _vkDepthImage, nullptr);
+    vkFreeMemory(_vkDevice, _vkDepthImageMemory, nullptr);
+
+    // TODO: Move
     for (const auto& framebuffer : _vkFramebuffers) {
         vkDestroyFramebuffer(_vkDevice, framebuffer, nullptr);
     }
@@ -965,6 +971,7 @@ bool VulkanGraphicsDriver::ResetSwapChain()
         !InitRenderPass() ||
         !InitDescriptorPool() ||
         !InitGraphicsPipelines() ||
+        !InitDepthBuffer() ||
         !InitFramebuffers() ||
         !InitCommandPool() ||
         !InitCommandBuffers()) {
@@ -991,9 +998,26 @@ bool VulkanGraphicsDriver::InitRenderPass()
         .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
     };
 
+    VkAttachmentDescription depthAttachmentDescription = {
+        .flags = 0,
+        .format = _vkDepthImageFormat,
+        .samples = VK_SAMPLE_COUNT_1_BIT,
+        .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+        .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+        .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+        .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+        .finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+    };
+
     VkAttachmentReference colorAttachmentReference = {
         .attachment = 0,
         .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    };
+
+    VkAttachmentReference detphAttachmentReference = {
+        .attachment = 1,
+        .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
     };
 
     VkSubpassDescription subpassDescription = {
@@ -1004,7 +1028,7 @@ bool VulkanGraphicsDriver::InitRenderPass()
         .colorAttachmentCount = 1,
         .pColorAttachments = &colorAttachmentReference,
         .pResolveAttachments = nullptr,
-        .pDepthStencilAttachment = nullptr,
+        .pDepthStencilAttachment = &detphAttachmentReference,
         .preserveAttachmentCount = 0,
         .pPreserveAttachments = nullptr,
     };
@@ -1012,18 +1036,23 @@ bool VulkanGraphicsDriver::InitRenderPass()
     VkSubpassDependency subpassDependency = {
         .srcSubpass = VK_SUBPASS_EXTERNAL,
         .dstSubpass = 0,
-        .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+        .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
         .srcAccessMask = 0,
-        .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+        .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+    };
+
+    std::array<VkAttachmentDescription, 2> attachments = {
+        colorAttachmentDescription,
+        depthAttachmentDescription,
     };
 
     VkRenderPassCreateInfo renderPassCreateInfo = {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
-        .attachmentCount = 1,
-        .pAttachments = &colorAttachmentDescription,
+        .attachmentCount = static_cast<uint32_t>(attachments.size()),
+        .pAttachments = attachments.data(),
         .subpassCount = 1,
         .pSubpasses = &subpassDescription,
         .dependencyCount = 1,
@@ -1159,8 +1188,9 @@ bool VulkanGraphicsDriver::InitFramebuffers()
     _vkFramebuffers.resize(_vkSwapChainImageViews.size());
 
     for (size_t i = 0; i < _vkSwapChainImageViews.size(); ++i) {
-        VkImageView attachments[] = {
+        std::array<VkImageView, 2> attachments = {
             _vkSwapChainImageViews[i],
+            _vkDepthImageView,
         };
 
         VkFramebufferCreateInfo framebufferCreateInfo = {
@@ -1168,8 +1198,8 @@ bool VulkanGraphicsDriver::InitFramebuffers()
             .pNext = nullptr,
             .flags = 0,
             .renderPass = _vkRenderPass,
-            .attachmentCount = 1,
-            .pAttachments = attachments,
+            .attachmentCount = static_cast<uint32_t>(attachments.size()),
+            .pAttachments = attachments.data(),
             .width = _vkSwapChainExtent.width,
             .height = _vkSwapChainExtent.height,
             .layers = 1,
@@ -1199,6 +1229,99 @@ bool VulkanGraphicsDriver::InitCommandPool()
     vkResult = vkCreateCommandPool(_vkDevice, &commandPoolCreateInfo, nullptr, &_vkCommandPool);
     if (vkResult != VK_SUCCESS) {
         DuskLogError("vkCreateCommandPool() failed");
+        return false;
+    }
+
+    return true;
+}
+
+bool VulkanGraphicsDriver::InitDepthBuffer()
+{
+    std::vector<VkFormat> potentialDepthFormats = {
+        VK_FORMAT_D32_SFLOAT,
+        VK_FORMAT_D32_SFLOAT_S8_UINT,
+        VK_FORMAT_D24_UNORM_S8_UINT,
+    };
+
+    _vkDepthImageFormat = VK_FORMAT_UNDEFINED;
+
+    for (VkFormat format : potentialDepthFormats) {
+        VkFormatProperties formatProperties;
+        vkGetPhysicalDeviceFormatProperties(_vkPhysicalDevice, format, &formatProperties);
+
+        VkFormatFeatureFlags features = (formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+        if (features == VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) {
+            _vkDepthImageFormat = format;
+            break;
+        }
+    }
+
+    if (_vkDepthImageFormat == VK_FORMAT_UNDEFINED) {
+        DuskLogError("Failed to find suitable depth buffer image format");
+        return false;
+    }
+
+    VkImageCreateInfo imageCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .imageType = VK_IMAGE_TYPE_2D,
+        .format = _vkDepthImageFormat,
+        .extent = {
+            .width = _vkSwapChainExtent.width,
+            .height = _vkSwapChainExtent.height,
+            .depth = 1,
+        },
+        .mipLevels = 1,
+        .arrayLayers = 1,
+        .samples = VK_SAMPLE_COUNT_1_BIT,
+        .tiling = VK_IMAGE_TILING_OPTIMAL,
+        .usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+    };
+
+    if (vkCreateImage(_vkDevice, &imageCreateInfo, nullptr, &_vkDepthImage) != VK_SUCCESS) {
+        DuskLogError("Failed to create depth buffer image");
+        return false;
+    }
+
+    VkMemoryRequirements memoryRequirements;
+    vkGetImageMemoryRequirements(_vkDevice, _vkDepthImage, &memoryRequirements);
+
+    VkMemoryAllocateInfo memoryAllocateInfo = {
+        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        .pNext = nullptr,
+        .allocationSize = memoryRequirements.size,
+        .memoryTypeIndex = FindMemoryType(memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT),
+    };
+
+    if (vkAllocateMemory(_vkDevice, &memoryAllocateInfo, nullptr, &_vkDepthImageMemory) != VK_SUCCESS) {
+        DuskLogError("Failed to allocate depth buffer image memory");
+        return false;
+    }
+
+    vkBindImageMemory(_vkDevice, _vkDepthImage, _vkDepthImageMemory, 0);
+
+    VkImageViewCreateInfo imageViewCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .image = _vkDepthImage,
+        .viewType = VK_IMAGE_VIEW_TYPE_2D,
+        .format = VK_FORMAT_D32_SFLOAT,
+        // .components
+        .subresourceRange = {
+            .aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
+            .baseMipLevel = 0,
+            .levelCount = 1,
+            .baseArrayLayer = 0,
+            .layerCount = 1,
+        },
+    };
+
+    if (vkCreateImageView(_vkDevice, &imageViewCreateInfo, nullptr, &_vkDepthImageView) != VK_SUCCESS) {
+        DuskLogError("Failed to create depth buffer image view");
         return false;
     }
 
@@ -1239,8 +1362,13 @@ bool VulkanGraphicsDriver::InitCommandBuffers()
             return false;
         }
 
-        VkClearValue clearColor = { 
-            .color = {{ 0.392f, 0.584f, 0.929f, 1.0f }},
+        std::array<VkClearValue, 2> clearValues = { };
+        clearValues[0].color = {
+            .float32 = { 0.392f, 0.584f, 0.929f, 1.0f }
+        };
+        clearValues[1].depthStencil = { 
+            .depth = 1.0f, 
+            .stencil = 0,
         };
 
         VkRenderPassBeginInfo renderPassBeginInfo = {
@@ -1251,8 +1379,8 @@ bool VulkanGraphicsDriver::InitCommandBuffers()
                 .offset = { 0, 0 },
                 .extent = _vkSwapChainExtent,
             },
-            .clearValueCount = 1,
-            .pClearValues = &clearColor,
+            .clearValueCount = static_cast<uint32_t>(clearValues.size()),
+            .pClearValues = clearValues.data(),
         };
 
         vkCmdBeginRenderPass(_vkCommandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);

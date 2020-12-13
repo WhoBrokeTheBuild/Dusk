@@ -43,6 +43,8 @@ private:
 
     VkBlendOp GetVkBlendOp(BlendOperation op) const;
 
+    VkCompareOp GetVkCompareOp(CompareOperation op) const;
+
     VkPipeline _vkPipeline;
 
 }; // class VulkanPipeline

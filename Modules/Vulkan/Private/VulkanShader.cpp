@@ -73,7 +73,7 @@ bool VulkanShader::LoadSPV(const std::string& filename)
     };
 
     VkShaderModule shaderModule;
-    if (vkCreateShaderModule(gfx->GetDevice(), &shaderModuleCreateInfo, nullptr, &shaderModule) != VK_SUCCESS) {
+    if (vkCreateShaderModule(gfx->GetVkDevice(), &shaderModuleCreateInfo, nullptr, &shaderModule) != VK_SUCCESS) {
         DuskLogError("Failed to create shader module");
         return false;
     }

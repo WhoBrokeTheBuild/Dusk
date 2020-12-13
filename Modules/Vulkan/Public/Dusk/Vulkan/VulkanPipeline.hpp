@@ -17,17 +17,19 @@ public:
 
     VulkanPipeline() = default;
 
-    virtual ~VulkanPipeline();
+    virtual ~VulkanPipeline() = default;
 
     inline std::string GetClassID() const override {
         return "Dusk::VulkanPipeline";
     }
 
-    void Create() override;
+    bool Initialize() override;
 
-    inline VkPipeline GetVkPipeline() const {
-        return _vkPipeline;
-    }
+    void Terminate() override;
+
+    void GenerateBindCommands(VkCommandBuffer vkCommandBuffer);
+
+    void GenerateDrawCommands(VkCommandBuffer vkCommandBuffer);
 
 private:
 
@@ -36,8 +38,6 @@ private:
     VkCullModeFlags GetVkCullMode() const;
 
     VkFrontFace GetVkFrontFace() const;
-
-    VkPrimitiveTopology GetVkPrimitiveTopology() const;
 
     VkBlendFactor GetVkBlendFactor(BlendFactor factor) const;
 

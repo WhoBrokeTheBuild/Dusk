@@ -16,8 +16,9 @@ public:
     {
         Points,
         Lines,
+        LineStrip,
         Triangles,
-        TriangleFan,
+        TriangleStrip,
     };
 
     DISALLOW_COPY_AND_ASSIGN(MeshData);

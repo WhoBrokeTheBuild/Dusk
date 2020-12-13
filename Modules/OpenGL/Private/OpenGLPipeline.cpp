@@ -2,24 +2,31 @@
 
 #include <Dusk/Benchmark.hpp>
 #include <Dusk/OpenGL/OpenGLShader.hpp>
+#include <Dusk/OpenGL/OpenGLMesh.hpp>
 
 #include <cassert>
 
 namespace Dusk::OpenGL {
 
 DUSK_OPENGL_API
-void OpenGLPipeline::Create()
+bool OpenGLPipeline::Initialize()
+{
+    return true;
+}
+
+DUSK_OPENGL_API
+void OpenGLPipeline::Terminate()
 {
 }
 
 DUSK_OPENGL_API
-void OpenGLPipeline::Bind()
+bool OpenGLPipeline::Bind()
 {
     // TODO: Fix
     float WIDTH = 1024.0f;
     float HEIGHT = 768.0f;
 
-    OpenGLShader * shader = DUSK_OPENGL_SHADER(_shader);
+    OpenGLShader * shader = DUSK_OPENGL_SHADER(_shader.get());
     if (shader) {
         shader->Bind();
     }
@@ -92,6 +99,13 @@ void OpenGLPipeline::Bind()
     else {
         glDisable(GL_BLEND);
     }
+
+    OpenGLMesh * mesh = DUSK_OPENGL_MESH(_mesh.get());
+    if (mesh) {
+        mesh->Render();
+    }
+
+    return true;
 }
 
 GLenum OpenGLPipeline::GetGLBlendFactor(BlendFactor factor) const

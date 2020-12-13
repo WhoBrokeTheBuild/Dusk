@@ -42,7 +42,7 @@ bool VulkanTexture::Load(const TextureData * data, Options opts /*= Options()*/)
         .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
     };
 
-    if (vkCreateImage(gfx->GetDevice(), &imageCreateInfo, nullptr, &_vkImage) != VK_SUCCESS) {
+    if (vkCreateImage(gfx->GetVkDevice(), &imageCreateInfo, nullptr, &_vkImage) != VK_SUCCESS) {
         DuskLogError("Failed to create image");
         return false;
     }

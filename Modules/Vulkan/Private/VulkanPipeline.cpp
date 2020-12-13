@@ -8,34 +8,36 @@
 
 namespace Dusk::Vulkan {
 
-VulkanPipeline::~VulkanPipeline()
+DUSK_VULKAN_API
+void VulkanPipeline::Terminate()
 {
     VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
  
-    vkDestroyPipeline(gfx->GetDevice(), _vkPipeline, nullptr);
+    vkDestroyPipeline(gfx->GetVkDevice(), _vkPipeline, nullptr);
 }
 
-void VulkanPipeline::Create()
+DUSK_VULKAN_API
+bool VulkanPipeline::Initialize()
 {
     VkResult vkResult;
 
     VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
 
-    VulkanShader * shader = DUSK_VULKAN_SHADER(_shader);
+    VulkanShader * shader = DUSK_VULKAN_SHADER(_shader.get());
     if (!shader) {
         DuskLogError("Trying to bind a Vulkan VulkanPipeline with no shader");
-        return;
+        return false;
     }
 
-    VulkanMesh * mesh = DUSK_VULKAN_MESH(_mesh);
+    VulkanMesh * mesh = DUSK_VULKAN_MESH(_mesh.get());
     if (!mesh) {
         DuskLogError("Trying to bind a Vulkan VulkanPipeline with no mesh");
-        return;
+        return false;
     }
 
     const auto& stages = shader->GetStages();
 
-    VkExtent2D extent = gfx->GetSwapChainExtent();
+    VkExtent2D extent = gfx->GetVkSwapChainExtent();
 
     VkViewport viewport = {
         .width = static_cast<float>(extent.width),
@@ -145,7 +147,7 @@ void VulkanPipeline::Create()
         .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
-        .topology = GetVkPrimitiveTopology(),
+        .topology = mesh->GetVkPrimitiveTopology(),
         .primitiveRestartEnable = VK_FALSE,
     };
 
@@ -165,19 +167,48 @@ void VulkanPipeline::Create()
         .pColorBlendState = &colorBlendStateCreateInfo,
         .pDynamicState = nullptr,
         .layout = gfx->GetVkPipelineLayout(),
-        .renderPass = gfx->GetRenderPass(),
+        .renderPass = gfx->GetVkRenderPass(),
         .subpass = 0,
         .basePipelineHandle = VK_NULL_HANDLE,
         .basePipelineIndex = 0,
     };
 
-    vkResult = vkCreateGraphicsPipelines(gfx->GetDevice(), nullptr, 1, &pipelineCreateInfo, nullptr, &_vkPipeline);
+    vkResult = vkCreateGraphicsPipelines(gfx->GetVkDevice(), nullptr, 1, &pipelineCreateInfo, nullptr, &_vkPipeline);
     if (vkResult != VK_SUCCESS) {
         DuskLogError("Failed to create graphics pipeline");
-        return;
+        return false;
     }
+
+    return true;
 }
 
+DUSK_VULKAN_API
+void VulkanPipeline::GenerateBindCommands(VkCommandBuffer vkCommandBuffer)
+{
+    vkCmdBindPipeline(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _vkPipeline);
+
+    // TODO: Move to local variable post-conversion
+    VulkanMesh * mesh = DUSK_VULKAN_MESH(_mesh.get());
+    if (!mesh) {
+        return;
+    }
+
+    mesh->GenerateBindCommands(vkCommandBuffer);
+}
+
+DUSK_VULKAN_API
+void VulkanPipeline::GenerateDrawCommands(VkCommandBuffer vkCommandBuffer)
+{
+    // TODO: Move to local variable post-conversion
+    VulkanMesh * mesh = DUSK_VULKAN_MESH(_mesh.get());
+    if (!mesh) {
+        return;
+    }
+
+    mesh->GenerateDrawCommands(vkCommandBuffer);
+}
+
+DUSK_VULKAN_API
 VkPolygonMode VulkanPipeline::GetVkPolygonMode() const
 {
     switch (_fillMode) {
@@ -190,6 +221,7 @@ VkPolygonMode VulkanPipeline::GetVkPolygonMode() const
     DuskLogFatal("Unexpected FillMode: %d", (int)_fillMode);
 }
 
+DUSK_VULKAN_API
 VkCullModeFlags VulkanPipeline::GetVkCullMode() const
 {
     switch (_cullMode) {
@@ -204,6 +236,7 @@ VkCullModeFlags VulkanPipeline::GetVkCullMode() const
     DuskLogFatal("Unexpected CullMode: %d", (int)_cullMode);
 }
 
+DUSK_VULKAN_API
 VkFrontFace VulkanPipeline::GetVkFrontFace() const
 {
     switch (_frontFace) {
@@ -216,24 +249,7 @@ VkFrontFace VulkanPipeline::GetVkFrontFace() const
     DuskLogFatal("Unexpected FrontFace: %d", (int)_frontFace);
 }
 
-VkPrimitiveTopology VulkanPipeline::GetVkPrimitiveTopology() const
-{
-    switch (_primitiveTopology) {
-    case PrimitiveTopology::Points:
-        return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
-    case PrimitiveTopology::Lines:
-        return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
-    case PrimitiveTopology::LineStrip:
-        return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
-    case PrimitiveTopology::Triangles:
-        return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-    case PrimitiveTopology::TriangleStrip:
-        return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
-    }
-
-    DuskLogFatal("Unexpected PrimitiveTopology: %d", (int)_primitiveTopology);
-}
-
+DUSK_VULKAN_API
 VkBlendFactor VulkanPipeline::GetVkBlendFactor(BlendFactor factor) const
 {
     switch (factor) {
@@ -272,6 +288,7 @@ VkBlendFactor VulkanPipeline::GetVkBlendFactor(BlendFactor factor) const
     DuskLogFatal("Unexpected BlendFactor: %d", (int)factor);
 }
 
+DUSK_VULKAN_API
 VkBlendOp VulkanPipeline::GetVkBlendOp(BlendOperation op) const
 {
     switch (op) {

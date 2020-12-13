@@ -11,12 +11,12 @@ VulkanMesh::~VulkanMesh()
 {
     VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
 
-    for (VkBuffer buffer : _buffers) {
-        vkDestroyBuffer(gfx->GetDevice(), buffer, nullptr);
+    for (VkBuffer buffer : _vkBuffers) {
+        vkDestroyBuffer(gfx->GetVkDevice(), buffer, nullptr);
     }
 
-    for (VkDeviceMemory memory : _bufferMemories) {
-        vkFreeMemory(gfx->GetDevice(), memory, nullptr);
+    for (VkDeviceMemory memory : _vkBufferMemories) {
+        vkFreeMemory(gfx->GetVkDevice(), memory, nullptr);
     }
 }
 
@@ -31,16 +31,62 @@ bool VulkanMesh::Load(const MeshData * data)
 {
     bool result;
 
-    if (!data->GetIndices().empty()) {
-        DuskLogError("Indexed drawing with vulkan ???");
-        return false;
+    const auto& indices = data->GetIndices();
+    const auto& vertices = data->GetVertices();
+    // const auto& normals = data->GetNormals();
+    // const auto& uvs = data->GetUVs();
+    // const auto& colors = data->GetColors();
+    // const auto& tangents = data->GetTangents();
+    // const auto& bitangents = data->GetBitangents();
+
+    switch (data->GetMode()) {
+    case MeshData::Mode::Points:
+        _vkPrimitiveTopology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+        break;
+    case MeshData::Mode::Lines:
+        _vkPrimitiveTopology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+        break;
+    case MeshData::Mode::LineStrip:
+        _vkPrimitiveTopology = VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
+        break;
+    case MeshData::Mode::Triangles:
+        _vkPrimitiveTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        break;
+    case MeshData::Mode::TriangleStrip:
+        _vkPrimitiveTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+        break;
     }
 
-    _vertexCount = static_cast<uint32_t>(data->GetVertices().size());
+    if (indices.empty()) {
+        _indexed = false;
+        // We need to convert the number of floats, into the number of vec4s
+        _count = vertices.size() / 4;
+    }
+    else {
+        DuskLogFatal("UNTESTED");
 
+        _indexed = true;
+        _count = indices.size();
+
+        result = AddBuffer(
+            static_cast<const void *>(data->GetIndices().data()), 
+            sizeof(unsigned) * data->GetIndices().size(), 
+            sizeof(unsigned), 
+            VK_FORMAT_R32_UINT,
+            VK_VERTEX_INPUT_RATE_VERTEX,
+            VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+
+        if (!result) {
+            DuskLogError("Failed to create index buffer");
+            return false;
+        }
+    }
+
+    DuskLogInfo("Adding Vertex Buffer");
+    
     result = AddBuffer(
-        reinterpret_cast<const void *>(data->GetVertices().data()), 
-        sizeof(float) * data->GetVertices().size(), 
+        static_cast<const void *>(vertices.data()), 
+        sizeof(float) * vertices.size(), 
         sizeof(float) * 4, 
         VK_FORMAT_R32G32B32A32_SFLOAT,
         VK_VERTEX_INPUT_RATE_VERTEX,
@@ -51,10 +97,12 @@ bool VulkanMesh::Load(const MeshData * data)
         return false;
     }
 
-    // if (!data->GetNormals().empty()) {
+    // if (!normals.empty()) {
+    //     DuskLogInfo("Adding Normal Buffer");
+    
     //     result = AddBuffer(
-    //         reinterpret_cast<const void *>(data->GetNormals().data()), 
-    //         sizeof(float) * data->GetNormals().size(), 
+    //         static_cast<const void *>(normals.data()), 
+    //         sizeof(float) * normals.size(), 
     //         sizeof(float) * 4, 
     //         VK_FORMAT_R32G32B32A32_SFLOAT,
     //         VK_VERTEX_INPUT_RATE_VERTEX,
@@ -66,10 +114,10 @@ bool VulkanMesh::Load(const MeshData * data)
     //     }
     // }
 
-    // if (!data->GetUVs().empty()) {
+    // if (!uvs.empty()) {
     //     result = AddBuffer(
-    //         reinterpret_cast<const void *>(data->GetUVs().data()), 
-    //         sizeof(float) * data->GetUVs().size(), 
+    //         static_cast<const void *>(uvs.data()), 
+    //         sizeof(float) * uvs.size(), 
     //         sizeof(float) * 2, 
     //         VK_FORMAT_R32G32_SFLOAT,
     //         VK_VERTEX_INPUT_RATE_VERTEX,
@@ -81,10 +129,10 @@ bool VulkanMesh::Load(const MeshData * data)
     //     }
     // }
 
-    // if (!data->GetColors().empty()) {
+    // if (!colors.empty()) {
     //     result = AddBuffer(
-    //         reinterpret_cast<const void *>(data->GetColors().data()), 
-    //         sizeof(float) * data->GetColors().size(), 
+    //         static_cast<const void *>(colors.data()), 
+    //         sizeof(float) * colors.size(), 
     //         sizeof(float) * 4, 
     //         VK_FORMAT_R32G32B32A32_SFLOAT,
     //         VK_VERTEX_INPUT_RATE_VERTEX,
@@ -96,10 +144,10 @@ bool VulkanMesh::Load(const MeshData * data)
     //     }
     // }
 
-    // if (!data->GetTangents().empty()) {
+    // if (!tangents.empty()) {
     //     result = AddBuffer(
-    //         reinterpret_cast<const void *>(data->GetTangents().data()), 
-    //         sizeof(float) * data->GetTangents().size(), 
+    //         static_cast<const void *>(tangents.data()), 
+    //         sizeof(float) * tangents.size(), 
     //         sizeof(float) * 4, 
     //         VK_FORMAT_R32G32B32A32_SFLOAT,
     //         VK_VERTEX_INPUT_RATE_VERTEX,
@@ -111,10 +159,10 @@ bool VulkanMesh::Load(const MeshData * data)
     //     }
     // }
 
-    // if (!data->GetBitangents().empty()) {
+    // if (!bitangents.empty()) {
     //     result = AddBuffer(
-    //         reinterpret_cast<const void *>(data->GetBitangents().data()), 
-    //         sizeof(float) * data->GetBitangents().size(), 
+    //         static_cast<const void *>(bitangents.data()), 
+    //         sizeof(float) * bitangents.size(), 
     //         sizeof(float) * 4, 
     //         VK_FORMAT_R32G32B32A32_SFLOAT,
     //         VK_VERTEX_INPUT_RATE_VERTEX,
@@ -134,18 +182,20 @@ bool VulkanMesh::AddBuffer(const void * data, VkDeviceSize size, uint32_t stride
 {
     VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
 
-    _bindings.push_back({
+    _vkBindings.push_back({
         .binding = _nextBinding,
         .stride = stride,
         .inputRate = inputRate,
     });
 
-    _attributes.push_back({
+    _vkAttributes.push_back({
         .location = _nextLocation,
         .binding = _nextBinding,
         .format = format,
         .offset = 0,
     });
+
+    DuskLogInfo("Binding location %u to binding %u", _nextLocation, _nextBinding);
 
     VkBuffer buffer;
     VkDeviceMemory memory;
@@ -156,17 +206,33 @@ bool VulkanMesh::AddBuffer(const void * data, VkDeviceSize size, uint32_t stride
     }
 
     void * ptr;
-    vkMapMemory(gfx->GetDevice(), memory, 0, size, 0, &ptr);
+    vkMapMemory(gfx->GetVkDevice(), memory, 0, size, 0, &ptr);
     memcpy(ptr, data, static_cast<size_t>(size));
-    vkUnmapMemory(gfx->GetDevice(), memory);
+    vkUnmapMemory(gfx->GetVkDevice(), memory);
 
-    _buffers.push_back(buffer);
-    _bufferMemories.push_back(memory);
+    _vkBuffers.push_back(buffer);
+    _vkBufferMemories.push_back(memory);
 
     ++_nextBinding;
     ++_nextLocation;
 
     return true;
+}
+
+void VulkanMesh::GenerateBindCommands(VkCommandBuffer vkCommandBuffer)
+{
+    VkDeviceSize offsets[] = { 0 };
+    vkCmdBindVertexBuffers(vkCommandBuffer, 0, static_cast<uint32_t>(_vkBuffers.size()), _vkBuffers.data(), offsets);
+}
+
+void VulkanMesh::GenerateDrawCommands(VkCommandBuffer vkCommandBuffer)
+{
+    if (_indexed) {
+        vkCmdDrawIndexed(vkCommandBuffer, _count, 1, 0, 0, 0);
+    }
+    else {
+        vkCmdDraw(vkCommandBuffer, _count, 1, 0, 0);
+    }
 }
 
 } // namespace Dusk::Vulkan

@@ -187,9 +187,12 @@ void OpenGLGraphicsDriver::SwapBuffers()
 }
 
 DUSK_OPENGL_API
-std::shared_ptr<Pipeline> OpenGLGraphicsDriver::CreatePipeline()
+std::shared_ptr<Pipeline> OpenGLGraphicsDriver::CreatePipeline(std::shared_ptr<Shader> shader, std::shared_ptr<Mesh> mesh)
 {
-    return std::shared_ptr<Pipeline>(New OpenGLPipeline());
+    auto ptr = std::shared_ptr<Pipeline>(New OpenGLPipeline());
+    ptr->SetShader(shader);
+    ptr->SetMesh(mesh);
+    return ptr;
 }
 
 DUSK_OPENGL_API

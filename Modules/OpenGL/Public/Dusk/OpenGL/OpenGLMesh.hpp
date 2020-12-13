@@ -7,6 +7,8 @@
 
 namespace Dusk::OpenGL {
 
+#define DUSK_OPENGL_MESH(x) (dynamic_cast<Dusk::OpenGL::OpenGLMesh *>(x))
+
 class DUSK_OPENGL_API OpenGLMesh : public Mesh 
 {
 public:

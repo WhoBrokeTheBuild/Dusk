@@ -45,7 +45,7 @@ public:
 
     void SwapBuffers() override;
 
-    std::shared_ptr<Pipeline> CreatePipeline() override;
+    std::shared_ptr<Pipeline> CreatePipeline(std::shared_ptr<Shader> shader, std::shared_ptr<Mesh> mesh) override;
 
     std::shared_ptr<Texture> CreateTexture() override;
 
@@ -56,15 +56,19 @@ public:
     bool SetShaderData(const std::string& name, size_t size, void * data) override;
 
 
-    inline VkDevice GetDevice() const {
+    inline VkDevice GetVkDevice() const {
         return _vkDevice;
     }
 
-    inline VkExtent2D GetSwapChainExtent() const {
+    inline VkExtent2D GetVkSwapChainExtent() const {
         return _vkSwapChainExtent;
     }
 
-    inline VkRenderPass GetRenderPass() const {
+    inline VkPipelineLayout GetVkPipelineLayout() {
+        return _vkPipelineLayout;
+    }
+
+    inline VkRenderPass GetVkRenderPass() const {
         return _vkRenderPass;
     }
 
@@ -72,9 +76,6 @@ public:
 
     bool CreateBuffer(VkBuffer & buffer, VkDeviceMemory & memory, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags props);
 
-    VkPipelineLayout GetVkPipelineLayout() {
-        return _vkPipelineLayout;
-    }
 
 private:
 
@@ -112,27 +113,21 @@ private:
 
     void TermSwapChain();
 
-    bool ResizeSwapChain();
+    bool ResetSwapChain();
 
     bool InitRenderPass();
 
-    void TermRenderPass();
+    bool InitDescriptorPool();
+
+    bool InitGraphicsPipelines();
 
     bool InitFramebuffers();
 
-    void TermFramebuffers();
-
     bool InitCommandPool();
-
-    void TermCommandPool();
 
     bool InitCommandBuffers();
 
-    void TermCommandBuffers();
-
     bool InitSyncObjects();
-
-    bool InitDescriptorPool();
 
     SDL_Window * _sdlWindow = nullptr;
 
@@ -196,15 +191,14 @@ private:
 
     int _currentFrame = 0;
 
-    bool InitGraphicsPipeline();
+    std::vector<std::shared_ptr<Pipeline>> _pipelines;
 
-    void TermGraphicsPipeline();
 
-    std::shared_ptr<Shader> _shader;
 
-    std::shared_ptr<Mesh> _mesh;
+    // bool InitGraphicsPipeline();
 
-    std::shared_ptr<Pipeline> _pipeline;
+    // void TermGraphicsPipeline();
+
     
 
 }; // class VulkanGraphicsDriver

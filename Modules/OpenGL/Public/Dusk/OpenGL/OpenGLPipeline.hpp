@@ -21,9 +21,11 @@ public:
         return "Dusk::OpenGLPipeline";
     }
 
-    void Create() override;
+    bool Initialize() override;
 
-    void Bind();
+    void Terminate() override;
+
+    bool Bind();
 
 private:
 

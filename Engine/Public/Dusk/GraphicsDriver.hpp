@@ -58,7 +58,7 @@ public:
     
     virtual void SwapBuffers() = 0;
 
-    virtual std::shared_ptr<Pipeline> CreatePipeline() = 0;
+    virtual std::shared_ptr<Pipeline> CreatePipeline(std::shared_ptr<Shader> shader, std::shared_ptr<Mesh> mesh) = 0;
 
     virtual std::shared_ptr<Texture> CreateTexture() = 0;
 

@@ -35,14 +35,6 @@ enum class StepRate {
     Instance,
 };
 
-enum class PrimitiveTopology {
-    Points,
-    Lines,
-    LineStrip,
-    Triangles,
-    TriangleStrip,
-};
-
 enum class BlendOperation {
     Add,
     Subtract,
@@ -83,11 +75,11 @@ public:
         return "Dusk::Pipeline";
     }
 
-    inline void SetShader(Shader * shader) {
+    inline void SetShader(std::shared_ptr<Shader> shader) {
         _shader = shader;
     }
 
-    inline void SetMesh(Mesh * mesh) {
+    inline void SetMesh(std::shared_ptr<Mesh> mesh) {
         _mesh = mesh;
     }
 
@@ -119,21 +111,19 @@ public:
         _depthBiasMode = mode;
     }
 
-    inline void SetPrimitiveTopology(PrimitiveTopology topology) {
-        _primitiveTopology = topology;
-    }
+    virtual bool Initialize() = 0;
 
-    virtual void Create() = 0;
+    virtual void Terminate() = 0;
 
 protected:
 
-    Shader * _shader = nullptr;
+    std::shared_ptr<Shader> _shader = nullptr;
 
-    Mesh * _mesh = nullptr;
+    std::shared_ptr<Mesh> _mesh = nullptr;
 
     FrontFace _frontFace = FrontFace::CounterClockwise;
 
-    CullMode _cullMode = CullMode::None;
+    CullMode _cullMode = CullMode::Back;
 
     FillMode _fillMode = FillMode::Fill;
 
@@ -144,8 +134,6 @@ protected:
     float _depthBiasClamp = 0.0f;
 
     DepthBiasMode _depthBiasMode = DepthBiasMode::Clamp;
-
-    PrimitiveTopology _primitiveTopology = PrimitiveTopology::Triangles;
 
 
     bool _blendEnabled = false;

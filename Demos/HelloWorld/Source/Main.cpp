@@ -52,23 +52,20 @@ void run()
 
     auto gfx = Dusk::GetGraphicsDriver();
 
-    // auto shader = gfx->CreateShader();
-    // if (!shader->LoadFromFiles({
-    //     "flat.vert",
-    //     "flat.frag",
-    // })) {
-    //     return;
-    // }
+    auto shader = gfx->CreateShader();
+    if (!shader->LoadFromFiles({
+        "flat.vert",
+        "flat.frag",
+    })) {
+        return;
+    }
 
-    // Dusk::WindowResizedEventData testData;
-    // testData.Size = { 1024, 768 };
-    // gfx->WindowResizedEvent.Call(&testData);
+    auto meshImporters = Dusk::GetAllMeshImporters();
+    auto meshDatas = meshImporters[0]->LoadFromFile("monkey.obj");
+    auto mesh = gfx->CreateMesh();
+    mesh->Load(meshDatas[0].get());
 
-
-    // auto pipeline = gfx->CreatePipeline();
-    // pipeline->SetShader(shader.get());
-    // pipeline->SetMesh(mesh.get());
-    // pipeline->Bind();
+    auto pipeline = gfx->CreatePipeline(shader, mesh);
 
     Dusk::ScriptConsole::Initialize();
 

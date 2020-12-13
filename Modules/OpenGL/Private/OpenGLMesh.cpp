@@ -45,7 +45,8 @@ bool OpenGLMesh::Load(const MeshData * data)
     }
     else {
         _indexed = true;
-        _glCount = indices.size();
+        // We need to convert the number of floats, into the number of vec4s
+        _glCount = vertices.size() / 4;
 
         glGenBuffers(1, &vbo);
 
@@ -111,10 +112,12 @@ GLenum OpenGLMesh::GetGLMode(const MeshData::Mode& mode)
         return GL_POINTS;
     case MeshData::Mode::Lines:
         return GL_LINES;
+    case MeshData::Mode::LineStrip:
+        return GL_LINE_STRIP;
     case MeshData::Mode::Triangles:
         return GL_TRIANGLES;
-    case MeshData::Mode::TriangleFan:
-        return GL_TRIANGLE_FAN;
+    case MeshData::Mode::TriangleStrip:
+        return GL_TRIANGLE_STRIP;
     }
 
     return GL_INVALID_ENUM;

@@ -28,39 +28,43 @@ public:
     bool Load(const MeshData * data) override;
 
     inline std::vector<VkVertexInputBindingDescription> GetVkVertexInputBindings() {
-        return _bindings;
+        return _vkBindings;
     }
 
     inline std::vector<VkVertexInputAttributeDescription> GetVkVertexInputAttributes() {
-        return _attributes;
+        return _vkAttributes;
     }
 
-    inline std::vector<VkBuffer> GetVkBuffers() {
-        return _buffers;
+    VkPrimitiveTopology GetVkPrimitiveTopology() {
+        return _vkPrimitiveTopology;
     }
 
-    inline uint32_t GetVertexCount() {
-        return _vertexCount;
-    }
+    void GenerateBindCommands(VkCommandBuffer vkCommandBuffer);
+    
+    void GenerateDrawCommands(VkCommandBuffer vkCommandBuffer);
 
 private:
 
     bool AddBuffer(const void * data, VkDeviceSize size, uint32_t stride, 
         VkFormat format, VkVertexInputRate inputRate, VkBufferUsageFlags usage);
 
-    std::vector<VkBuffer> _buffers;
+    std::vector<VkBuffer> _vkBuffers;
 
-    std::vector<VkDeviceMemory> _bufferMemories;
+    std::vector<VkDeviceMemory> _vkBufferMemories;
 
-    std::vector<VkVertexInputBindingDescription> _bindings;
+    std::vector<VkVertexInputBindingDescription> _vkBindings;
 
-    std::vector<VkVertexInputAttributeDescription> _attributes;
+    std::vector<VkVertexInputAttributeDescription> _vkAttributes;
+
+    VkPrimitiveTopology _vkPrimitiveTopology;
 
     unsigned _nextLocation = 0;
 
     unsigned _nextBinding = 0;
 
-    uint32_t _vertexCount = 0;
+    bool _indexed = 0;
+
+    uint32_t _count = 0;
 
 }; // class VulkanMesh
 

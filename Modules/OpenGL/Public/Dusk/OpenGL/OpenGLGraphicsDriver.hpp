@@ -3,8 +3,7 @@
 
 #include <Dusk/OpenGL/OpenGLConfig.hpp>
 
-#include <Dusk/GraphicsDriver.hpp>
-#include <Dusk/OpenGL/OpenGLInputDriver.hpp>
+#include <Dusk/SDL2/SDL2GraphicsDriver.hpp>
 #include <Dusk/OpenGL/OpenGLPipeline.hpp>
 #include <Dusk/OpenGL/OpenGLTexture.hpp>
 #include <Dusk/OpenGL/OpenGLShader.hpp>
@@ -18,7 +17,7 @@ struct ShaderDataBindingInfo
     size_t size;
 };
 
-class DUSK_OPENGL_API OpenGLGraphicsDriver : public GraphicsDriver
+class DUSK_OPENGL_API OpenGLGraphicsDriver : public SDL2::SDL2GraphicsDriver
 {
 public:
 
@@ -28,23 +27,9 @@ public:
 
     virtual ~OpenGLGraphicsDriver() = default;
 
-    inline std::string GetClassID() const override {
-        return "Dusk::GraphicsDriver";
-    }
-
     bool Initialize() override;
 
     void Terminate() override;
-
-    void SetWindowTitle(const std::string& title) override;
-
-    std::string GetWindowTitle() override;
-
-    void SetWindowSize(const ivec2& size) override;
-
-    ivec2 GetWindowSize() override;
-
-    void ProcessEvents() override;
 
     void SwapBuffers() override;
 
@@ -60,11 +45,7 @@ public:
 
 private:
 
-    SDL_Window * _sdlWindow = nullptr;
-
     SDL_GLContext _glContext = nullptr;
-
-    OpenGLInputDriver * _inputDriver = nullptr;
 
     std::unordered_map<std::string, GLuint> _shaderDataBindings;
 

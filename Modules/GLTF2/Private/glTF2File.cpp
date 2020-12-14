@@ -128,6 +128,10 @@ bool glTF2File::LoadFromFile(const std::string& filename)
         return false;
     }
 
+    if (!LoadMeshes()) {
+        return false;
+    }
+
     DuskLogLoad("glTF2 file '%s'", Filename);
 
     DuskBenchmarkEnd("glTF2File::LoadFromFile");
@@ -287,9 +291,6 @@ bool glTF2File::LoadTextures()
                 opts = Samplers[sampler];
             }
 
-            Textures.push_back(gfx->CreateTexture());
-            auto& texture = Textures.back();
-
             const auto& image = Images[source];
             if (image.bufferView >= 0) {
                 DuskLogVerbose("Loading glTF2 texture from bufferView");
@@ -303,9 +304,13 @@ bool glTF2File::LoadTextures()
                 }
 
                 const uint8_t * ptr = buffer.data() + bufferView.byteOffset;
-                if (!texture->LoadFromMemory(ptr, bufferView.byteLength, opts)) {
+
+                auto texture = LoadTextureFromMemory(ptr, bufferView.byteLength, opts);
+                if (!texture) {
                     return false;
                 }
+
+                Textures.push_back(texture);
             }
             else if (image.uri.rfind("data:", 0) == 0) {
                 DuskLogVerbose("Loading glTF2 texture from base64 encoded uri");
@@ -313,17 +318,23 @@ bool glTF2File::LoadTextures()
                 size_t pivot = image.uri.find(',');
                 const auto& data = macaron::Base64::Decode(image.uri.substr(pivot + 1));
 
-                if (!texture->LoadFromMemory(data.data(), data.size(), opts)) {
+                auto texture = LoadTextureFromMemory(data.data(), data.size(), opts);
+                if (!texture) {
                     return false;
                 }
+
+                Textures.push_back(texture);
             }
             else {
                 std::string path = BaseDir + DUSK_PATH_SLASH + image.uri;
                 DuskLogVerbose("Loading glTF2 texture from file: '%s'", path);
                 
-                if (!texture->LoadFromFile(path, opts)) {
+                auto texture = LoadTextureFromFile(path, opts);
+                if (!texture) {
                     return false;
                 }
+
+                Textures.push_back(texture);
             }
         }
     }
@@ -337,8 +348,8 @@ bool glTF2File::LoadMaterials()
 {
     const auto MATERIALS_PATH = json::json_pointer("/materials");
 
-    if (JSON.contains(MATERIALS_PATH)) {
-        for (const auto& object : JSON[MATERIALS_PATH]) {
+    // if (JSON.contains(MATERIALS_PATH)) {
+    //     for (const auto& object : JSON[MATERIALS_PATH]) {
 
             // extensions
             /// KHR_materials_transmission
@@ -371,8 +382,8 @@ bool glTF2File::LoadMaterials()
             /// [roughnessFactor]
             /// [metallicRoughnessTexture]
 
-        }
-    }
+    //     }
+    // }
 
     DuskLogVerbose("Loaded %d Material(s)", Materials.size());
 
@@ -392,30 +403,30 @@ bool glTF2File::LoadCameras()
             auto& camera = Cameras.back();
 
             if (camera.type == "perspective") {
-                if (auto it = object.find("perspective"); it != object.end()) {
-                    const auto& perspective = it.value();
-                    camera.aspectRatio = perspective.value<float>("aspectRatio", 0.0f);
-                    camera.yfov = perspective.value<float>("yfov", 0.0f);
-                    camera.zfar = perspective.value<float>("zfar", 0.0f);
-                    camera.znear = perspective.value<float>("znear", 0.0f);
-                }
-                else {
+                auto it = object.find("perspective");
+                if (it == object.end()) {
                     DuskLogError("Invalid glTF2 perspective camera");
                     return false;
                 }
+
+                const auto& perspective = it.value();
+                camera.aspectRatio = perspective.value<float>("aspectRatio", 0.0f);
+                camera.yfov = perspective.value<float>("yfov", 0.0f);
+                camera.zfar = perspective.value<float>("zfar", 0.0f);
+                camera.znear = perspective.value<float>("znear", 0.0f);
             }
             else if (camera.type == "orthographic") {
-                if (auto it = object.find("orthographic"); it != object.end()) {
-                    const auto& orthographic = it.value();
-                    camera.xmag = orthographic.value("xmag", 0.0f);
-                    camera.ymag = orthographic.value("ymag", 0.0f);
-                    camera.zfar = orthographic.value("zfar", 0.0f);
-                    camera.znear = orthographic.value("znear", 0.0f);
-                }
-                else {
+                auto it = object.find("orthographic");
+                if (it == object.end()) {
                     DuskLogError("Invalid glTF2 orthographic camera");
                     return false;
                 }
+
+                const auto& orthographic = it.value();
+                camera.xmag = orthographic.value("xmag", 0.0f);
+                camera.ymag = orthographic.value("ymag", 0.0f);
+                camera.zfar = orthographic.value("zfar", 0.0f);
+                camera.znear = orthographic.value("znear", 0.0f);
             }
             else {
                 DuskLogWarn("Unknown glTF2 camera type: '%s'", camera.type);
@@ -424,6 +435,85 @@ bool glTF2File::LoadCameras()
     }
 
     DuskLogVerbose("Loaded %d Camera(s)", Cameras.size());
+
+    return true;
+}
+
+// gltf2 Node
+    // camera (Camera Component?)
+    // children[]
+    // skin (needs mesh)
+    // matrix (rip apart into TRS? Error out instead)
+    // mesh (Mesh Component)
+    // translate
+    // rotation
+    // scale
+    // weights (needs mesh)
+
+// gltf2 
+
+// Entity -> glft2 Node
+// Mesh -> gltf2 Primitive
+// MeshComponent -> gltf2 Mesh
+
+bool glTF2File::LoadMeshes()
+{
+    const auto MESHES_PATH = json::json_pointer("/meshes");
+
+    if (JSON.contains(MESHES_PATH)) {
+        for (const auto& object : JSON[MESHES_PATH]) {
+            // std::vector<GLTF2MeshData>
+
+            auto it = object.find("primitives");
+            if (it != object.end()) {
+                const auto& primitives = it.value();
+                if (!primitives.is_array()) {
+                    DuskLogError("Invalid glTF2 mesh, missing primitives array");
+                    return false;
+                }
+
+                for (const auto& primitive : primitives) {
+                    int indicesIndex = primitives.value("indices", -1);
+                    
+                    if (indicesIndex >= 0) {
+                        // const auto& indexAccessor = Accessors[indicesIndex];
+                        // const auto& indexBufferView = BufferViews[indexAccessor.bufferView];
+                        // const auto& indexBuffer = Buffers[indexBufferView.buffer];
+
+
+                    }
+
+                    it = primitive.find("attributes");
+                    if (it != object.end()) {
+                        const auto& attributes = it.value();
+                        if (!attributes.is_object()) {
+                            DuskLogError("Invalid glTF2 primitive, missing attributes dictionary");
+                            return false;
+                        }
+
+                        // for (const auto& [name, index] : attributes.items()) {
+
+                        // }
+                    }
+                }
+
+                if (auto it = object.find("attributes"); it != primitives.end()) {
+                    // const auto& attributes = it.value();
+
+                }
+
+
+
+
+                // attributes
+                // material
+                // mode
+                // targets (animation)
+            }
+
+            // Meshes.push_back()
+        }
+    }
 
     return true;
 }

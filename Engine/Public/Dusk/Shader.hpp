@@ -35,10 +35,6 @@ public:
 
     virtual ~Shader() = default;
 
-    inline std::string GetClassID() const override {
-        return "Dusk::Shader";
-    }
-
     virtual bool LoadFromFiles(const std::vector<std::string>& filenames) = 0;
 
     // GetSize()

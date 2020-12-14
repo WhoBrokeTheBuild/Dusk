@@ -14,26 +14,70 @@ DUSK_VULKAN_API
 bool VulkanGraphicsDriver::Initialize()
 {
     DuskBenchmarkStart();
+
+    SDL2GraphicsDriver::Initialize();
     
-    if (!InitWindow() ||
-        !InitInstance()) {
+    SDL2GraphicsDriver::CreateWindow(SDL_WINDOW_VULKAN);
+
+    int vkVersion = gladLoaderLoadVulkan(nullptr, nullptr, nullptr);
+    if (vkVersion == 0) {
+        DuskLogError("gladLoaderLoadVulkan() failed");
+        return false;
+    }
+    
+    DuskLogVerbose("Vulkan %d.%d", GLAD_VERSION_MAJOR(vkVersion), GLAD_VERSION_MINOR(vkVersion));
+
+    if (!InitInstance()) {
         return false;
     }
 
     InitDebugMessenger();
 
-    if (!InitSurface() ||
-        !InitPhysicalDevice() ||
-        !InitLogicalDevice() ||
-        !InitSwapChain() ||
-        !InitRenderPass() ||
-        !InitDescriptorPool() ||
-        !InitGraphicsPipelines() ||
-        !InitDepthBuffer() ||
-        !InitFramebuffers() ||
-        !InitCommandPool() ||
-        !InitCommandBuffers() ||
-        !InitSyncObjects()) {
+    if (!InitSurface()) {
+        return false;
+    }
+
+    if (!InitPhysicalDevice()) {
+        return false;
+    }
+
+    if (!InitLogicalDevice()) {
+        return false;
+    }
+
+    if (!InitSwapChain()) {
+        return false;
+    }
+
+    if (!InitRenderPass()) {
+        return false;
+    }
+
+    if (!InitDescriptorPool()) {
+        return false;
+    }
+
+    if (!InitGraphicsPipelines()) {
+        return false;
+    }
+
+    if (!InitDepthBuffer()) {
+        return false;
+    }
+
+    if (!InitFramebuffers()) {
+        return false;
+    }
+
+    if (!InitCommandPool()) {
+        return false;
+    }
+
+    if (!InitCommandBuffers()) {
+        return false;
+    }
+
+    if (!InitSyncObjects()) {
         return false;
     }
 
@@ -55,47 +99,10 @@ void VulkanGraphicsDriver::Terminate()
     TermSurface();
     TermDebugMessenger();
     TermInstance();
-    TermWindow();
+
+    SDL2GraphicsDriver::Terminate();
 
     DuskBenchmarkEnd("VulkanGraphicsDriver::Terminate");
-}
-
-DUSK_VULKAN_API
-void VulkanGraphicsDriver::SetWindowTitle(const std::string& title)
-{
-    SDL_SetWindowTitle(_sdlWindow, title.c_str());
-}
-
-DUSK_VULKAN_API
-std::string VulkanGraphicsDriver::GetWindowTitle()
-{
-    return SDL_GetWindowTitle(_sdlWindow);
-}
-
-DUSK_VULKAN_API
-void VulkanGraphicsDriver::SetWindowSize(const ivec2& size)
-{
-    SDL_SetWindowSize(_sdlWindow, size.x, size.y);
-    // glViewport(0, 0, size.x, size.y);
-}
-
-DUSK_VULKAN_API
-ivec2 VulkanGraphicsDriver::GetWindowSize()
-{
-    ivec2 size;
-    SDL_GetWindowSize(_sdlWindow, &size.x, &size.y);
-    return size;
-}
-
-DUSK_VULKAN_API
-void VulkanGraphicsDriver::ProcessEvents()
-{
-    SDL_Event event;
-    while (SDL_PollEvent(&event) > 0) {
-        if (event.type == SDL_QUIT) {
-            SetRunning(false);
-        }
-    }
 }
 
 DUSK_VULKAN_API
@@ -347,10 +354,10 @@ std::vector<const char *> VulkanGraphicsDriver::GetRequiredInstanceExtensions()
     }
 
     uint32_t requiredExtensionCount;
-    SDL_Vulkan_GetInstanceExtensions(_sdlWindow, &requiredExtensionCount, nullptr);
+    SDL_Vulkan_GetInstanceExtensions(GetSDL2Window(), &requiredExtensionCount, nullptr);
 
     std::vector<const char *> requiredExtensions(requiredExtensionCount);
-    sdlResult = SDL_Vulkan_GetInstanceExtensions(_sdlWindow, &requiredExtensionCount, requiredExtensions.data());
+    sdlResult = SDL_Vulkan_GetInstanceExtensions(GetSDL2Window(), &requiredExtensionCount, requiredExtensions.data());
     if (!sdlResult) {
         DuskLogError("SDL_Vulkan_GetInstanceExtensions() failed, %s", SDL_GetError());
         return std::vector<const char *>();
@@ -381,52 +388,6 @@ std::vector<const char *> VulkanGraphicsDriver::GetRequiredInstanceExtensions()
     }
 
     return requiredExtensions;
-}
-
-bool VulkanGraphicsDriver::InitWindow()
-{
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        DuskLogError("SDL_Init() failed, %s", SDL_GetError());
-        return false;
-    }
-
-    SDL_version sdlVersion;
-    SDL_GetVersion(&sdlVersion);
-    DuskLogVerbose("SDL Version: %d.%d.%d", 
-        (int)sdlVersion.major, 
-        (int)sdlVersion.minor, 
-        (int)sdlVersion.patch);
-
-    std::string title = GetApplicationName() + " (" + GetApplicationVersion().GetString() + ")";
-
-    _sdlWindow = SDL_CreateWindow(title.c_str(), 
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
-        640, 480, 
-        SDL_WINDOW_VULKAN);
-
-    uint16_t pixels[16 * 16] = { 0xFFFF };
-    SDL_Surface * surface = SDL_CreateRGBSurfaceFrom(
-        pixels, 16, 16, 16, 16 * 2,
-        0x0f00, 0x00f0, 0x000f, 0xf000);
-
-    SDL_SetWindowIcon(_sdlWindow, surface);
-    SDL_FreeSurface(surface);
-
-    int vkVersion = gladLoaderLoadVulkan(nullptr, nullptr, nullptr);
-    if (vkVersion == 0) {
-        DuskLogFatal("gladLoaderLoadVulkan() failed");
-    }
-    
-    DuskLogVerbose("Vulkan %d.%d", GLAD_VERSION_MAJOR(vkVersion), GLAD_VERSION_MINOR(vkVersion));
-
-    return true; 
-}
-
-void VulkanGraphicsDriver::TermWindow()
-{
-    SDL_DestroyWindow(_sdlWindow);
-    SDL_Quit();
 }
 
 bool VulkanGraphicsDriver::InitInstance()
@@ -607,7 +568,7 @@ bool VulkanGraphicsDriver::InitSurface()
 {
     SDL_bool sdlResult;
 
-    sdlResult = SDL_Vulkan_CreateSurface(_sdlWindow, _vkInstance, &_vkSurface);
+    sdlResult = SDL_Vulkan_CreateSurface(GetSDL2Window(), _vkInstance, &_vkSurface);
     if (!sdlResult) {
         DuskLogError("SDL_Vulkan_CreateSurface() failed, %s", SDL_GetError());
         return false;
@@ -967,14 +928,35 @@ bool VulkanGraphicsDriver::ResetSwapChain()
 
     TermSwapChain();
 
-    if (!InitSwapChain() ||
-        !InitRenderPass() ||
-        !InitDescriptorPool() ||
-        !InitGraphicsPipelines() ||
-        !InitDepthBuffer() ||
-        !InitFramebuffers() ||
-        !InitCommandPool() ||
-        !InitCommandBuffers()) {
+    if (!InitSwapChain()) {
+        return false;
+    }
+
+    if (!InitRenderPass()) {
+        return false;
+    }
+
+    if (!InitDescriptorPool()) {
+        return false;
+    }
+
+    if (!InitGraphicsPipelines()) {
+        return false;
+    }
+
+    if (!InitDepthBuffer()) {
+        return false;
+    }
+
+    if (!InitFramebuffers()) {
+        return false;
+    }
+
+    if (!InitCommandPool()) {
+        return false;
+    }
+
+    if (!InitCommandBuffers()) {
         return false;
     }
 
@@ -1363,9 +1345,12 @@ bool VulkanGraphicsDriver::InitCommandBuffers()
         }
 
         std::array<VkClearValue, 2> clearValues = { };
+
+        const vec4& cc = GetClearColor();
         clearValues[0].color = {
-            .float32 = { 0.392f, 0.584f, 0.929f, 1.0f }
+            .float32 = { cc.r, cc.g, cc.b, cc.a }
         };
+        
         clearValues[1].depthStencil = { 
             .depth = 1.0f, 
             .stencil = 0,

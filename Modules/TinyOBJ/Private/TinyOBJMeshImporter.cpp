@@ -3,6 +3,7 @@
 #include <Dusk/Benchmark.hpp>
 #include <Dusk/Log.hpp>
 #include <Dusk/Util.hpp>
+#include <Dusk/TinyOBJ/TinyOBJMeshData.hpp>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>

@@ -139,6 +139,11 @@ struct CameraData
     float znear;
 };
 
+struct MeshData
+{
+    std::vector<std::unique_ptr<MeshData>> Primitives;
+};
+
 class DUSK_GLTF2_API glTF2File : public Object
 {
 public:
@@ -146,10 +151,6 @@ public:
     glTF2File() = default;
 
     virtual ~glTF2File() = default;
-
-    inline std::string GetClassID() const override {
-        return "Dusk::glTF2File";
-    }
 
     bool LoadFromFile(const std::string& filename);
 
@@ -182,6 +183,8 @@ public:
     std::vector<std::shared_ptr<Dusk::Material>> Materials;
 
     std::vector<CameraData> Cameras;
+    
+    // std::vector<>
 
     bool LoadBuffers();
 
@@ -198,6 +201,8 @@ public:
     bool LoadMaterials();
     
     bool LoadCameras();
+
+    bool LoadMeshes();
 
 };
 

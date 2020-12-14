@@ -17,10 +17,6 @@ public:
 
     virtual ~DirectXMesh() = default;
 
-    inline std::string GetClassID() const override {
-        return "Dusk::DirectXMesh";
-    }
-
     void Render() override;
 
     bool Load(const MeshData * data) override;

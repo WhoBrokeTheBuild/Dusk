@@ -19,10 +19,6 @@ public:
 
     virtual ~OpenGLMesh() = default;
 
-    inline std::string GetClassID() const override {
-        return "Dusk::OpenGLMesh";
-    }
-
     void Render() override;
 
     bool Load(const MeshData * data) override;

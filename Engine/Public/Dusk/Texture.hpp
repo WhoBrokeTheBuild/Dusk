@@ -4,12 +4,13 @@
 #include <Dusk/Config.hpp>
 #include <Dusk/Object.hpp>
 #include <Dusk/Math.hpp>
-#include <Dusk/TextureImporter.hpp>
+#include <Dusk/TextureData.hpp>
 
 #include <cstdint>
 #include <cstdlib>
 #include <string>
 #include <tuple>
+#include <memory>
 
 namespace Dusk {
 
@@ -17,7 +18,7 @@ class DUSK_ENGINE_API Texture : public Object
 {
 public:
 
-    enum class DUSK_ENGINE_API WrapType {
+    enum class WrapType {
         Repeat,
         MirroredRepeat,
         ClampToEdge,
@@ -25,7 +26,7 @@ public:
 
     }; // enum WrapType
 
-    enum class DUSK_ENGINE_API FilterType {
+    enum class FilterType {
         Nearest,
         NearestMipmapNearest,
         NearestMipmapLinear,
@@ -65,17 +66,15 @@ public:
 
     virtual ~Texture() = default;
 
-    inline std::string GetClassID() const override {
-        return "Dusk::Texture";
-    }
-
     virtual bool Load(const TextureData * data, Options opts = Options()) = 0;
 
-    virtual bool LoadFromFile(const std::string& filename, Options opts = Options());
-
-    virtual bool LoadFromMemory(const uint8_t * buffer, size_t length, Options opts = Options());
-
 }; // class Texture
+
+DUSK_ENGINE_API
+std::shared_ptr<Texture> LoadTextureFromFile(const std::string& filename, Texture::Options opts = Texture::Options());
+
+DUSK_ENGINE_API
+std::shared_ptr<Texture> LoadTextureFromMemory(const uint8_t * buffer, size_t length, Texture::Options opts = Texture::Options());
 
 } // namespace Dusk
 

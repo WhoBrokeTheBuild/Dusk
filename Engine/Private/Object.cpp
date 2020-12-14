@@ -12,6 +12,8 @@ struct ObjectAllocation
     size_t Size;
 
     std::string Filename;
+
+    std::string ClassID;
 };
 
 bool _trackingAllocations = false;
@@ -85,14 +87,11 @@ void TermMemoryTracking()
             void * ptr = it.first;
             const ObjectAllocation& allocation = it.second;
 
-            Object * object = static_cast<Object*>(ptr);
-
-            DuskLogError("(%s:%d) %zu byte(s) @ %p, %s",
-                allocation.Filename,
-                allocation.Line,
-                allocation.Size,
+            DuskLogError("%p: %zu byte(s) allocated at %s:%d",
                 ptr,
-                object->GetClassID());
+                allocation.Size,
+                allocation.Filename,
+                allocation.Line);
         }
     }
 

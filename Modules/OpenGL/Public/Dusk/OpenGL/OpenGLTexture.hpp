@@ -20,10 +20,6 @@ public:
 
     virtual ~OpenGLTexture();
 
-    inline std::string GetClassID() const override {
-        return "Dusk::OpenGLTexture";
-    }
-
     bool Load(const TextureData * data, Options opts = Options()) override;
 
     void Bind();

@@ -18,10 +18,6 @@ public:
 
     virtual ~System() = default;
 
-    inline std::string GetClassID() const override {
-        return "Dusk::Entity";
-    }
-
     virtual inline void Update(UpdateContext * ctx) { }
 
     virtual inline void Render(RenderContext * ctx) { }

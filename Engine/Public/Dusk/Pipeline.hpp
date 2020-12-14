@@ -90,10 +90,6 @@ public:
 
     virtual ~Pipeline() = default;
 
-    inline std::string GetClassID() const override {
-        return "Dusk::Pipeline";
-    }
-
     inline void SetShader(std::shared_ptr<Shader> shader) {
         _shader = shader;
     }

@@ -3,51 +3,11 @@
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Object.hpp>
+#include <Dusk/MeshData.hpp>
 
-#include <gsl/gsl>
+#include <vector>
 
 namespace Dusk {
-
-class DUSK_ENGINE_API MeshData : public Object
-{
-public:
-
-    enum class Mode 
-    {
-        Points,
-        Lines,
-        LineStrip,
-        Triangles,
-        TriangleStrip,
-    };
-
-    DISALLOW_COPY_AND_ASSIGN(MeshData);
-
-    MeshData() = default;
-
-    virtual ~MeshData() = default;
-
-    inline std::string GetClassID() const override {
-        return "Dusk::UpdateContext";
-    }
-
-    virtual Mode GetMode() const = 0;
-
-    virtual gsl::span<const unsigned> GetIndices() const = 0;
-
-    virtual gsl::span<const float> GetVertices() const = 0;
-
-    virtual gsl::span<const float> GetNormals() const = 0;
-
-    virtual gsl::span<const float> GetUVs() const = 0;
-
-    virtual gsl::span<const float> GetColors() const = 0;
-
-    virtual gsl::span<const float> GetTangents() const = 0;
-
-    virtual gsl::span<const float> GetBitangents() const = 0;
-
-}; // class MeshData
 
 class DUSK_ENGINE_API Mesh : public Object
 {
@@ -58,10 +18,6 @@ public:
     Mesh() = default;
 
     virtual ~Mesh() = default;
-
-    inline std::string GetClassID() const override {
-        return "Dusk::Mesh";
-    }
 
     virtual void Render() = 0;
 
@@ -85,6 +41,8 @@ protected:
     };
 
 }; // class Mesh
+
+std::vector<std::shared_ptr<Mesh>> LoadMeshListFromFile(const std::string& filename);
 
 } // namespace Dusk
 

@@ -19,10 +19,6 @@ public:
 
     virtual ~VulkanShader() = default;
 
-    inline std::string GetClassID() const override {
-        return "Dusk::Shader";
-    }
-
     bool LoadFromFiles(const std::vector<std::string>& filenames) override;
 
     inline std::vector<VkPipelineShaderStageCreateInfo>& GetStages() {

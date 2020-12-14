@@ -19,10 +19,6 @@ public:
 
     virtual ~VulkanTexture();
 
-    inline std::string GetClassID() const override {
-        return "DuskTexture";
-    }
-
     bool Load(const TextureData * data, Options opts = Options()) override;
 
     VkImage GetVkImage() const;

@@ -13,11 +13,7 @@
 
 #include <glad/gl.h>
 
-#include <SDL.h>
+#include <Dusk/SDL2/SDL2Config.hpp>
 #include <SDL_opengl.h>
-
-#undef CreateWindow
-#undef near
-#undef far
 
 #endif // DUSK_OPENGL_CONFIG_HPP

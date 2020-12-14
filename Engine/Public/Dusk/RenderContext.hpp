@@ -17,10 +17,6 @@ public:
 
     virtual ~RenderContext() = default;
 
-    inline std::string GetClassID() const override {
-        return "Dusk::UpdateContext";
-    }
-
     virtual TransformData * GetTransformData() {
         return &_transformData;
     }

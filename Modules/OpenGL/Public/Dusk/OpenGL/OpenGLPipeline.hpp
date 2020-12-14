@@ -17,10 +17,6 @@ public:
 
     virtual ~OpenGLPipeline() = default;
 
-    inline std::string GetClassID() const override {
-        return "Dusk::OpenGLPipeline";
-    }
-
     bool Initialize() override;
 
     void Terminate() override;

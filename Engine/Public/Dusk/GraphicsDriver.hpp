@@ -38,10 +38,6 @@ public:
 
     virtual ~GraphicsDriver() = default;
 
-    inline std::string GetClassID() const override {
-        return "Dusk::GraphicsDriver";
-    }
-
     virtual bool Initialize() = 0;
 
     virtual void Terminate() = 0;
@@ -53,6 +49,14 @@ public:
     virtual void SetWindowSize(const ivec2& size) = 0;
 
     virtual ivec2 GetWindowSize() = 0;
+
+    virtual void SetClearColor(const vec4& color) {
+        _clearColor = color;
+    }
+
+    virtual vec4 GetClearColor() const {
+        return _clearColor;
+    }
 
     virtual void ProcessEvents() = 0;
     
@@ -75,6 +79,8 @@ public:
     Event<Dusk::WindowResizedEventData> WindowResizedEvent;
 
 private:
+
+    vec4 _clearColor = vec4(0.392f, 0.584f, 0.929f, 1.0f);
 
     std::unique_ptr<UpdateContext> _updateContext = std::make_unique<UpdateContext>();
 

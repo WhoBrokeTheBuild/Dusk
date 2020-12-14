@@ -20,10 +20,6 @@ public:
 
     virtual ~MeshImporter() = default;
 
-    inline std::string GetClassID() const override {
-        return "Dusk::MeshImporter";
-    }
-
     virtual std::vector<std::unique_ptr<MeshData>> LoadFromFile(const std::string& filename) = 0;
 
 }; // class MeshImporter

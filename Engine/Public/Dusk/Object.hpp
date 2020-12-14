@@ -13,8 +13,6 @@ public:
 
     virtual ~Object() = default;
 
-    virtual std::string GetClassID() const = 0;
-
     // Normal new operator
 
     void * operator new(size_t size);

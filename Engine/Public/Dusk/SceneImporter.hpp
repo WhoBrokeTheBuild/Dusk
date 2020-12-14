@@ -17,10 +17,6 @@ public:
 
     virtual ~SceneImporter() = default;
 
-    inline std::string GetClassID() const override {
-        return "Dusk::SceneImporter";
-    }
-
     virtual bool LoadFromFile(Entity * root, const std::string& filename) = 0;
 
 }; // class SceneImporter

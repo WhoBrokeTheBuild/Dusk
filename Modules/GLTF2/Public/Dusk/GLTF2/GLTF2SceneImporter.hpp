@@ -15,10 +15,6 @@ public:
 
     GLTF2SceneImporter() = default;
 
-    inline std::string GetClassID() const override {
-        return "Dusk::GLTF2SceneImporter";
-    }
-
     virtual bool LoadFromFile(Entity * root, const std::string& filename) override;
 
 private:

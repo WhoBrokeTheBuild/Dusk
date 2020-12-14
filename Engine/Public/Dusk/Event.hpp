@@ -18,10 +18,6 @@ class DUSK_ENGINE_API EventData : public Object
 {
 public:
 
-    inline std::string GetClassID() const override {
-        return "Dusk::EventData";
-    }
-
     template <class T>
     const T * GetAs() const {
         return dynamic_cast<const T *>(this);
@@ -40,10 +36,6 @@ public:
     ScriptEvent() = default;
 
     virtual ~ScriptEvent() = default;
-
-    inline std::string GetClassID() const override {
-        return "Dusk::ScriptEvent";
-    }
 
     unsigned AddPythonListener(PyObject * listener);
 
@@ -80,10 +72,6 @@ public:
     virtual ~Event() = default;
 
     typedef std::function<void(const EventDataType *)> Listener;
-
-    inline std::string GetClassID() const override {
-        return "Dusk::Event<>";
-    }
 
     unsigned AddListener(Listener listener) {
         ++_maxListenerID;

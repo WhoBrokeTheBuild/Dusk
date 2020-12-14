@@ -35,10 +35,6 @@ public:
 
     virtual ~Entity() = default;
 
-    inline std::string GetClassID() const override {
-        return "Dusk::Entity";
-    }
-
     bool LoadFromFile(const std::string& filename);
 
     void SetParent(Entity * parent);

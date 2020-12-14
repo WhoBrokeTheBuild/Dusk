@@ -8,14 +8,9 @@ namespace Dusk::OpenGL {
 DUSK_OPENGL_API
 bool OpenGLGraphicsDriver::Initialize()
 {
-    if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
-        DuskLogError("Failed to initialize SDL, %s", SDL_GetError());
+    if (!SDL2GraphicsDriver::Initialize()) {
         return false;
     }
-
-    SDL_version version;
-    SDL_GetVersion(&version);
-    DuskLogVerbose("SDL Version: %d.%d.%d", (int)version.major, (int)version.minor, (int)version.patch);
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
@@ -26,26 +21,11 @@ bool OpenGLGraphicsDriver::Initialize()
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
-    std::string title = GetApplicationName() + " (" + GetApplicationVersion().GetString() + ")";
-
-    _sdlWindow = SDL_CreateWindow(title.c_str(), 
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
-        640, 480, 
-        SDL_WINDOW_OPENGL);
-
-    if (!_sdlWindow) {
-        DuskLogError("SDL_CreateWindow() failed, %s", SDL_GetError());
+    if (!SDL2GraphicsDriver::CreateWindow(SDL_WINDOW_OPENGL)) {
         return false;
     }
 
-    Uint16 pixels[16 * 16] = { 0xFFFF };
-    SDL_Surface * surface = SDL_CreateRGBSurfaceFrom(pixels, 16, 16, 16, 16 * 2,
-                                                     0x0f00, 0x00f0, 0x000f, 0xf000);
-    SDL_SetWindowIcon(_sdlWindow, surface);
-    SDL_FreeSurface(surface);
-
-    _glContext = SDL_GL_CreateContext(_sdlWindow);
+    _glContext = SDL_GL_CreateContext(GetSDL2Window());
     if (!_glContext) {
         DuskLogError("Failed to create OpenGL context, %s", SDL_GetError());
         return false;
@@ -104,86 +84,21 @@ bool OpenGLGraphicsDriver::Initialize()
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_ONE_MINUS_SRC_ALPHA);
 
-    _inputDriver = New OpenGLInputDriver();
-    SetInputDriver(std::unique_ptr<InputDriver>(_inputDriver));
-
     return true;
 }
 
 DUSK_OPENGL_API
 void OpenGLGraphicsDriver::Terminate()
 {
-    _inputDriver = nullptr;
-    SetInputDriver(nullptr);
-
     SDL_GL_DeleteContext(_glContext);
-    SDL_DestroyWindow(_sdlWindow);
-    
-    SDL_Quit();
-}
 
-DUSK_OPENGL_API
-void OpenGLGraphicsDriver::SetWindowTitle(const std::string& title)
-{
-    SDL_SetWindowTitle(_sdlWindow, title.c_str());
-}
-
-DUSK_OPENGL_API
-std::string OpenGLGraphicsDriver::GetWindowTitle()
-{
-    return SDL_GetWindowTitle(_sdlWindow);
-}
-
-DUSK_OPENGL_API
-void OpenGLGraphicsDriver::SetWindowSize(const ivec2& size)
-{
-    SDL_SetWindowSize(_sdlWindow, size.x, size.y);
-    glViewport(0, 0, size.x, size.y);
-}
-
-DUSK_OPENGL_API
-ivec2 OpenGLGraphicsDriver::GetWindowSize()
-{
-    ivec2 size;
-    SDL_GetWindowSize(_sdlWindow, &size.x, &size.y);
-    return size;
-}
-
-DUSK_OPENGL_API
-void OpenGLGraphicsDriver::ProcessEvents()
-{
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_QUIT) {
-            SetRunning(false);
-        }
-
-        _inputDriver->ProcessEvent(&event);
-
-        if (event.type == SDL_WINDOWEVENT)
-        {
-            switch (event.window.event) {
-            case SDL_WINDOWEVENT_RESIZED:
-            {
-                WindowResizedEventData data;
-                data.Size = { event.window.data1, event.window.data2 };
-                WindowResizedEvent.Call(&data);
-
-                glViewport(0, 0, event.window.data1, event.window.data2);
-                break;
-            }
-            }
-        }
-    }
-    
-    // TODO: Move
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    SDL2GraphicsDriver::Terminate();
 }
 
 DUSK_OPENGL_API
 void OpenGLGraphicsDriver::SwapBuffers()
 {
-    SDL_GL_SwapWindow(_sdlWindow);
+    SDL_GL_SwapWindow(GetSDL2Window());
 }
 
 DUSK_OPENGL_API

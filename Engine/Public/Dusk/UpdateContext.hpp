@@ -18,10 +18,6 @@ public:
 
     virtual ~UpdateContext() = default;
 
-    inline std::string GetClassID() const override {
-        return "Dusk::UpdateContext";
-    }
-
     // Target Frames/Second
     virtual inline float GetTargetFPS() const {
         return _targetFPS;

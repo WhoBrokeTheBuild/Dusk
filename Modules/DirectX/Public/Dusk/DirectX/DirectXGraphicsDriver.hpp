@@ -23,10 +23,6 @@ public:
 
     virtual ~DirectXGraphicsDriver() = default;
 
-    inline std::string GetClassID() const override {
-        return "Dusk::DirectXUpdateContext";
-    }
-
     bool Initialize() override;
 
     void Terminate() override;

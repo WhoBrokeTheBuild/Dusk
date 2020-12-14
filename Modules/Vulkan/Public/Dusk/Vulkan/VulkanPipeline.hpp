@@ -19,10 +19,6 @@ public:
 
     virtual ~VulkanPipeline() = default;
 
-    inline std::string GetClassID() const override {
-        return "Dusk::VulkanPipeline";
-    }
-
     bool Initialize() override;
 
     void Terminate() override;

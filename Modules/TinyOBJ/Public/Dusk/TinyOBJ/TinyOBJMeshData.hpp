@@ -1,15 +1,13 @@
-#ifndef DUSK_GLTF2_MESH_IMPORTER_HPP
-#define DUSK_GLTF2_MESH_IMPORTER_HPP
+#ifndef DUSK_TINYOBJ_MESH_DATA_HPP
+#define DUSK_TINYOBJ_MESH_DATA_HPP
 
-#include <Dusk/GLTF2/GLTF2Config.hpp>
+#include <Dusk/TinyOBJ/TinyOBJConfig.hpp>
 
-#include <Dusk/MeshImporter.hpp>
+#include <Dusk/MeshData.hpp>
 
-#include <vector>
+namespace Dusk::TinyOBJ {
 
-namespace Dusk::GLTF2 {
-
-class DUSK_GLTF2_API GLTF2MeshData : public MeshData
+class DUSK_TINYOBJ_API TinyOBJMeshData : public MeshData
 {
 public:
 
@@ -53,20 +51,8 @@ public:
         return gsl::span<float>();
     }
 
-}; // class MeshData
+}; // class TinyOBJMeshData
 
-class DUSK_GLTF2_API GLTF2MeshImporter : public MeshImporter
-{
-public:
+} // namespace Dusk::TinyOBJ
 
-    DISALLOW_COPY_AND_ASSIGN(GLTF2MeshImporter)
-
-    GLTF2MeshImporter() = default;
-
-    std::vector<std::unique_ptr<MeshData>> LoadFromFile(const std::string& filename) override;
-
-}; // class GLTF2MeshImporter
-
-} // namespace Dusk::GLTF2
-
-#endif // DUSK_GLTF2_MESH_IMPORTER_HPP
+#endif // DUSK_TINYOBJ_MESH_DATA_HPP

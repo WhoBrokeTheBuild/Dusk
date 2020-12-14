@@ -17,10 +17,6 @@ public:
 
     OpenGLShader() = default;
 
-    inline std::string GetClassID() const override {
-        return "Dusk::OpenGLShader";
-    }
-
     bool LoadFromFiles(const std::vector<std::string>& filenames) override;
 
     void Bind();

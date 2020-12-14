@@ -46,10 +46,6 @@ public:
     
     virtual ~InputDriver() = default;
 
-    inline std::string GetClassID() const override {
-        return "Dusk::InputDriver";
-    }
-    
 }; // class InputDriver
 
 DUSK_ENGINE_API

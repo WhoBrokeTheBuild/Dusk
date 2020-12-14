@@ -19,10 +19,6 @@ public:
 
     virtual ~VulkanMesh();
 
-    inline std::string GetClassID() const override {
-        return "Dusk::VulkanMesh";
-    }
-
     void Render() override;
 
     bool Load(const MeshData * data) override;

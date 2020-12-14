@@ -3,7 +3,7 @@
 
 #include <Dusk/Vulkan/VulkanConfig.hpp>
 
-#include <Dusk/GraphicsDriver.hpp>
+#include <Dusk/SDL2/SDL2GraphicsDriver.hpp>
 #include <Dusk/Vulkan/VulkanPipeline.hpp>
 #include <Dusk/Vulkan/VulkanTexture.hpp>
 #include <Dusk/Vulkan/VulkanShader.hpp>
@@ -15,7 +15,7 @@ namespace Dusk::Vulkan {
 
 #define DUSK_VULKAN_GRAPHICS_DRIVER(x) (dynamic_cast<Dusk::Vulkan::VulkanGraphicsDriver *>(x))
 
-class DUSK_VULKAN_API VulkanGraphicsDriver : public GraphicsDriver
+class DUSK_VULKAN_API VulkanGraphicsDriver : public SDL2::SDL2GraphicsDriver
 {
 public:
 
@@ -25,23 +25,9 @@ public:
 
     virtual ~VulkanGraphicsDriver() = default;
 
-    inline std::string GetClassID() const override {
-        return "DuskGraphicsDriver";
-    }
-
     bool Initialize() override;
 
     void Terminate() override;
-
-    void SetWindowTitle(const std::string& title) override;
-
-    std::string GetWindowTitle() override;
-
-    void SetWindowSize(const ivec2& size) override;
-
-    ivec2 GetWindowSize() override;
-
-    void ProcessEvents() override;
 
     void SwapBuffers() override;
 
@@ -130,8 +116,6 @@ private:
     bool InitCommandBuffers();
 
     bool InitSyncObjects();
-
-    SDL_Window * _sdlWindow = nullptr;
 
     VkInstance _vkInstance;
 

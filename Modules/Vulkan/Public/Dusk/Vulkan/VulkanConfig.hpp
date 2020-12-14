@@ -13,12 +13,8 @@
 
 #include <glad/vulkan.h>
 
-#include <SDL.h>
+#include <Dusk/SDL2/SDL2Config.hpp>
 #include <SDL_vulkan.h>
-
-#undef CreateWindow
-#undef near
-#undef far
 
 #if !defined(NDEBUG)
     #define DUSK_VULKAN_VALIDATION_LAYER

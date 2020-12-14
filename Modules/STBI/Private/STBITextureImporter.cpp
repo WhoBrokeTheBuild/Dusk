@@ -3,6 +3,8 @@
 #include <Dusk/Log.hpp>
 #include <Dusk/Math.hpp>
 #include <Dusk/Benchmark.hpp>
+#include <Dusk/GraphicsDriver.hpp>
+#include <Dusk/STBI/STBITextureData.hpp>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-function"
@@ -10,10 +12,6 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
 
-#define STB_NO_HDR
-#define STB_NO_PSD
-#define STB_NO_PIC
-#define STB_NO_PNM
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
@@ -22,11 +20,6 @@
 #pragma GCC diagnostic pop
 
 namespace Dusk::STBI {
-
-STBITextureData::~STBITextureData()
-{
-    stbi_image_free(Data);
-}
 
 DUSK_STBI_API
 std::unique_ptr<TextureData> STBITextureImporter::LoadFromFile(const std::string& filename)
@@ -41,12 +34,12 @@ std::unique_ptr<TextureData> STBITextureImporter::LoadFromFile(const std::string
         return nullptr;
     }
 
+    DuskLogLoad("Loaded texture from '%s'", filename);
+
     STBITextureData * textureData = New STBITextureData();
     textureData->Data = data;
     textureData->Size = size;
     textureData->Components = components;
-
-    DuskLogLoad("Loaded texture '%s'", filename);
 
     DuskBenchmarkEnd("STBITextureImporter::LoadFromFile");
     return std::unique_ptr<TextureData>(textureData);
@@ -65,14 +58,14 @@ std::unique_ptr<TextureData> STBITextureImporter::LoadFromMemory(const uint8_t *
         return nullptr;
     }
 
+    DuskLogLoad("Loaded texture from memory");
+
     STBITextureData * textureData = New STBITextureData();
     textureData->Data = data;
     textureData->Size = size;
     textureData->Components = components;
 
-    DuskLogLoad("Loaded texture from memory");
-
-    DuskBenchmarkEnd("STBITextureImporter::LoadFromFile");
+    DuskBenchmarkEnd("STBITextureImporter::LoadFromMemory");
     return std::unique_ptr<TextureData>(textureData);
 }
 

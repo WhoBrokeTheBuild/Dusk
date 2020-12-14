@@ -8,7 +8,7 @@
 
 namespace Dusk::SDL2 {
 
-class SDL2GraphicsDriver : public GraphicsDriver
+class DUSK_SDL2_API SDL2GraphicsDriver : public GraphicsDriver
 {
 public:
 

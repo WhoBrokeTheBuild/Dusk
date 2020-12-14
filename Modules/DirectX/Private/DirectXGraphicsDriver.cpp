@@ -270,7 +270,7 @@ void DirectXGraphicsDriver::SwapBuffers()
     _renderTargetIndex = _swapChain->GetCurrentBackBufferIndex();
 }
 
-std::shared_ptr<Pipeline> DirectXGraphicsDriver::CreatePipeline()
+std::shared_ptr<Pipeline> DirectXGraphicsDriver::CreatePipeline(std::shared_ptr<Shader> shader, std::shared_ptr<Mesh> mesh)
 {
     return nullptr;
 }

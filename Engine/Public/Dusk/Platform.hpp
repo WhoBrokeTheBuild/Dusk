@@ -7,7 +7,7 @@
     #define DUSK_PLATFORM_WINDOWS
 
     #ifdef __has_include
-        #if __has_incldue(<winapifamily.h>)
+        #if __has_include(<winapifamily.h>)
             #include <winapifamily.h>
             #if !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
                 #define DUSK_PLATFORM_UWP
@@ -99,6 +99,8 @@
 
     #undef FreeModule
     #undef CreateWindow
+    
+    #undef OPAQUE
 
 #else
 

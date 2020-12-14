@@ -1,7 +1,7 @@
 #ifndef DUSK_PY_LOG_HPP
 #define DUSK_PY_LOG_HPP
 
-#include <Dusk/Python/PyDusk.hpp>
+#include "Python/PyDusk.hpp"
 #include <Dusk/Log.hpp>
 
 namespace Dusk {

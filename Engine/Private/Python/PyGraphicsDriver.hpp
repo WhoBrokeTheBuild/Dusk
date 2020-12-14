@@ -1,7 +1,7 @@
 #ifndef DUSK_PY_GRAPHICS_DRIVER_HPP
 #define DUSK_PY_GRAPHICS_DRIVER_HPP
 
-#include <Dusk/Python/PyDusk.hpp>
+#include "Python/PyDusk.hpp"
 #include <Dusk/GraphicsDriver.hpp>
 
 namespace Dusk {

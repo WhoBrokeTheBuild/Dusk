@@ -1,24 +1,18 @@
 #include <Dusk/Module.hpp>
 
-#include <Dusk/Log.hpp>
-
-#if defined(DUSK_OS_WINDOWS)
-
-    #include <Windows.h>
-
-    #undef FreeModule
-
-#else
+#if !defined(DUSK_PLATFORM_WINDOWS)
 
     #include <dlfcn.h>
 
 #endif
 
+#include <Dusk/Log.hpp>
+
 #include <unordered_map>
 
 namespace Dusk {
     
-#if defined(DUSK_OS_WINDOWS)
+#if defined(DUSK_PLATFORM_WINDOWS)
 
     typedef HMODULE ModuleHandle;
 
@@ -34,7 +28,7 @@ ModuleHandle _dlopen(const std::string& filename)
 {
     ModuleHandle handle = nullptr;
 
-    #if defined(DUSK_OS_WINDOWS)
+    #if defined(DUSK_PLATFORM_WINDOWS)
 
         DuskLogVerbose("Loading Module from PATH: '%s'", getenv("PATH"));
 
@@ -52,7 +46,7 @@ ModuleHandle _dlopen(const std::string& filename)
 
         DuskLogVerbose("Loading Module from LD_LIBRARY_PATH: '%s'", getenv("LD_LIBRARY_PATH"));
 
-        #if defined(DUSK_OS_APPLE)
+        #if defined(DUSK_PLATFORM_APPLE)
 
             std::string libFilename = "lib" + filename + ".dylib";
 
@@ -75,7 +69,7 @@ ModuleHandle _dlopen(const std::string& filename)
 
 void * _dlsym(ModuleHandle handle, const std::string& symbol)
 {
-    #if defined(DUSK_OS_WINDOWS)
+    #if defined(DUSK_PLATFORM_WINDOWS)
 
         return GetProcAddress(handle, symbol.c_str());
 
@@ -88,7 +82,7 @@ void * _dlsym(ModuleHandle handle, const std::string& symbol)
 
 void _dlclose(ModuleHandle handle)
 {
-    #if defined(DUSK_OS_WINDOWS)
+    #if defined(DUSK_PLATFORM_WINDOWS)
 
         FreeLibrary(handle);
 

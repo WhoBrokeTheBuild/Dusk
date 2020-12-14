@@ -1,16 +1,6 @@
 #include <Dusk/Util.hpp>
 #include <Dusk/Log.hpp>
 
-#if defined(DUSK_OS_WINDOWS)
-
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-
-#include <Windows.h>
-
-#endif // DUSK_OS_WINDOWS
-
 #include <sstream>
 
 namespace Dusk {
@@ -78,7 +68,7 @@ std::vector<std::string> GetAssetPaths()
     return paths;
 }
 
-#if defined(DUSK_OS_WINDOWS)
+#if defined(DUSK_PLATFORM_WINDOWS)
 
 DUSK_ENGINE_API
 std::wstring ConvertUTF8ToWideString(std::string str)
@@ -121,6 +111,6 @@ std::string ConvertWideStringToUTF8(std::wstring wstr)
     return std::string(utf8.data());
 }
 
-#endif // DUSK_OS_WINDOWS
+#endif // defined(DUSK_PLATFORM_WINDOWS)
 
 } // namespace Dusk

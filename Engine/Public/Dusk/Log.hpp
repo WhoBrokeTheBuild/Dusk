@@ -8,10 +8,10 @@
 #include <string>
 #include <cstdio>
 
-#if defined(DUSK_OS_WINDOWS)
-    #include <Windows.h>
-#else
+#if !defined(DUSK_PLATFORM_WINDOWS)
+
     #include <unistd.h>
+
 #endif
 
 namespace Dusk {
@@ -66,7 +66,7 @@ inline auto LogWrap<json>(const json& v) {
 template <class ...Args>
 inline void Log(LogLevel level, const char * format, Args... args)
 {
-    #if defined(DUSK_OS_WINDOWS)
+    #if defined(DUSK_PLATFORM_WINDOWS)
 
         static HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
         
@@ -153,12 +153,16 @@ inline void Log(LogLevel level, const char * format, Args... args)
 
 #pragma GCC diagnostic pop
 
-    #if defined(DUSK_OS_WINDOWS)
+    #if defined(DUSK_PLATFORM_WINDOWS)
+
         SetConsoleTextAttribute(hConsole, Default);
+
     #else
+
         if (isTTY) {
             printf("\033[%sm", Default);
         }
+        
     #endif
 }
 

@@ -1,9 +1,8 @@
 #ifndef DUSK_PY_SCRIPT_EVENT_HPP
 #define DUSK_PY_SCRIPT_EVENT_HPP
 
+#include <Dusk/Python/PyDusk.hpp>
 #include <Dusk/Event.hpp>
-
-#include <Python.h>
 
 namespace Dusk {
 

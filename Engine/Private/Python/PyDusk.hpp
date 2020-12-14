@@ -5,12 +5,7 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
-
-#if defined(DUSK_OS_WINDOWS)
-
-    #undef FreeModule
-
-#endif
+#include <structmember.h>
 
 namespace Dusk {
 

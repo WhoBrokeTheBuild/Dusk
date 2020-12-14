@@ -13,7 +13,7 @@ std::vector<std::string> ScriptConsole::_history;
 int ScriptConsole::_cursor = 0;
 int ScriptConsole::_index = 0;
 
-#if defined(DUSK_OS_WINDOWS)
+#if defined(DUSK_PLATFORM_WINDOWS)
 
     HANDLE ScriptConsole::_stdinHandle;
     HANDLE ScriptConsole::_stdoutHandle;
@@ -26,7 +26,7 @@ int ScriptConsole::_index = 0;
 
 void ScriptConsole::Initialize()
 {
-#if defined(DUSK_OS_WINDOWS)
+#if defined(DUSK_PLATFORM_WINDOWS)
 
     _stdinHandle = GetStdHandle(STD_INPUT_HANDLE);
     _stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -67,7 +67,7 @@ void ScriptConsole::Terminate()
 {
     Py_XDECREF(_locals);
 
-#if !defined(DUSK_OS_WINDOWS)
+#if !defined(DUSK_PLATFORM_WINDOWS)
 
     tcsetattr(STDIN_FILENO, TCSANOW, &_termios);
 
@@ -76,7 +76,7 @@ void ScriptConsole::Terminate()
 
 void ScriptConsole::Update()
 {
-#if defined(DUSK_OS_WINDOWS)
+#if defined(DUSK_PLATFORM_WINDOWS)
 
     DWORD result;
     if (!GetNumberOfConsoleInputEvents(_stdinHandle, &result)) {
@@ -112,7 +112,7 @@ void ScriptConsole::ReadNextCharacter()
     
     unsigned char c;
 
-#if defined(DUSK_OS_WINDOWS)
+#if defined(DUSK_PLATFORM_WINDOWS)
 
     const DWORD CTRL_MASK = (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED);
     

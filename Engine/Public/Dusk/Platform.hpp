@@ -4,35 +4,40 @@
 #if defined(_WIN32)
 
     // Windows
-    #define DUSK_OS_WINDOWS
+    #define DUSK_PLATFORM_WINDOWS
 
-    #ifndef NOMINMAX
-        #define NOMINMAX
+    #ifdef __has_include
+        #if __has_incldue(<winapifamily.h>)
+            #include <winapifamily.h>
+            #if !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
+                #define DUSK_PLATFORM_UWP
+            #endif
+        #endif
     #endif
 
 #elif defined(__APPLE__) && defined(__MACH__)
 
-    #define DUSK_OS_APPLE
+    #define DUSK_PLATFORM_APPLE
 
     // Apple
     #include "TargetConditionals.h"
 
     #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
         // iPhone iOS
-        #define DUSK_OS_IOS
+        #define DUSK_PLATFORM_IOS
     #elif TARGET_OS_MAC
         // Mac OSX
-        #define DUSK_OS_OSX
+        #define DUSK_PLATFORM_OSX
     #endif
 
 #elif defined(__unix__)
 
     #if defined(__ANDROID__)
         // Android
-        #define DUSK_OS_ANDROID
+        #define DUSK_PLATFORM_ANDROID
     #elif defined(__linux__)
         // Linux
-        #define DUSK_OS_LINUX
+        #define DUSK_PLATFORM_LINUX
     #else
         #error Unsupported UNIX Operating System
     #endif
@@ -76,10 +81,24 @@
 
 #endif
 
-#if defined(DUSK_OS_WINDOWS)
+#if defined(DUSK_PLATFORM_WINDOWS)
 
     #define DUSK_PATH_SLASH '\\'
     #define DUSK_PATH_SEPARATOR ';'
+
+    // Disable min/max defines
+    #define NOMINMAX
+
+    // Disable python defines for snprintf/vsnprintf
+    #define HAVE_SNPRINTF
+
+    // Disable extra includes from Windows.h
+    #define VC_EXTRALEAN
+
+    #include <Windows.h>
+
+    #undef FreeModule
+    #undef CreateWindow
 
 #else
 

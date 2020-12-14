@@ -3,17 +3,16 @@
 
 #include <Dusk/Config.hpp>
 
-#if defined(DUSK_OS_WINDOWS)
+#if defined(DUSK_PLATFORM_WINDOWS)
 
-#include <Windows.h>
-#include <conio.h>
+    #include <conio.h>
 
 #else
 
-#include <termios.h>
-#include <unistd.h>
+    #include <termios.h>
+    #include <unistd.h>
 
-#endif // defined(DUSK_OS_WINDOWS)
+#endif // defined(DUSK_PLATFORM_WINDOWS)
 
 #include <vector>
 #include <string>
@@ -67,7 +66,7 @@ private:
     static int _cursor;
     static int _index;
 
-#if defined(DUSK_OS_WINDOWS)
+#if defined(DUSK_PLATFORM_WINDOWS)
 
     static HANDLE _stdinHandle;
     static HANDLE _stdoutHandle;

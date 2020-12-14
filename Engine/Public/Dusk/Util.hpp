@@ -21,7 +21,7 @@ std::string GetExtension(std::string path);
 DUSK_ENGINE_API
 std::vector<std::string> GetAssetPaths();
 
-#if defined(DUSK_OS_WINDOWS)
+#if defined(DUSK_PLATFORM_WINDOWS)
 
 DUSK_ENGINE_API
 std::wstring ConvertUTF8ToWideString(std::string str);
@@ -29,7 +29,7 @@ std::wstring ConvertUTF8ToWideString(std::string str);
 DUSK_ENGINE_API
 std::string ConvertWideStringToUTF8(std::wstring str);
 
-#endif // DUSK_OS_WINDOWS
+#endif // defined(DUSK_PLATFORM_WINDOWS)
 
 } // namespace Dusk
 

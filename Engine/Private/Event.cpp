@@ -53,11 +53,12 @@ void ScriptEvent::CallPython(const EventData * data)
     PyObject * arg = Py_BuildValue("(O)", dict);
 
     for (const auto& it : _pythonListeners) {
-        PyObject * result = PyEval_CallObject(it.second, arg);
+        PyObject * result = PyObject_Call(it.second, arg, nullptr);
         if (!result) {
             DuskLogError("Failed to call Python Event Listener");
             PyCheckError();
         }
+        Py_XDECREF(result);
     }
 
     Py_DECREF(arg);

@@ -40,8 +40,8 @@ bool VulkanPrimitive::Load(const std::unique_ptr<PrimitiveData>& data)
         break;
     }
 
-    const auto& indexList = data->GetIndexList();
-    const auto& vertexList = data->GetVertexList();
+    // const auto& indexList = data->GetIndexList();
+    // const auto& vertexList = data->GetVertexList();
 
     // std::vector<Primitive::Vertex> vertexList(positionList.size() / 4);
 

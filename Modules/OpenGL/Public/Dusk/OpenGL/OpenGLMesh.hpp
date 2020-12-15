@@ -20,7 +20,7 @@ public:
 
     virtual ~OpenGLMesh() = default;
 
-    void Render();
+    void Render() override;
 
     bool Load(const std::vector<std::unique_ptr<PrimitiveData>>& data) override;
 

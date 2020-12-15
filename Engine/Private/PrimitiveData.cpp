@@ -22,8 +22,6 @@ void PrimitiveData::CalculateTBN()
             dir = -1.0f;
         }
 
-        float f = 1.0f / (s.x * t.y - t.x * s.y);
-
         glm::vec3 tangent = {
             dir * (w.x * s.y - v.x * t.y),
             dir * (w.y * s.y - v.y * t.y),

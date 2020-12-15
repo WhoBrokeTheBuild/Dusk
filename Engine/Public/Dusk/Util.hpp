@@ -19,7 +19,7 @@ DUSK_ENGINE_API
 std::string GetExtension(std::string path);
 
 DUSK_ENGINE_API
-std::vector<std::string> GetAssetPaths();
+std::vector<std::string> GetAssetPathList();
 
 #if defined(DUSK_PLATFORM_WINDOWS)
 

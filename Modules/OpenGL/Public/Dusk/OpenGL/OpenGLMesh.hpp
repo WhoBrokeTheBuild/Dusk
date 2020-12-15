@@ -4,6 +4,7 @@
 #include <Dusk/OpenGL/OpenGLConfig.hpp>
 
 #include <Dusk/Mesh.hpp>
+#include <Dusk/OpenGL/OpenGLPrimitive.hpp>
 
 namespace Dusk::OpenGL {
 
@@ -19,19 +20,13 @@ public:
 
     virtual ~OpenGLMesh() = default;
 
-    void Render() override;
+    void Render();
 
-    bool Load(const MeshData * data) override;
+    bool Load(const std::vector<std::unique_ptr<PrimitiveData>>& data) override;
 
 private:
 
-    GLenum GetGLMode(const MeshData::Mode& mode);
-
-    GLuint _glVAO;
-    GLenum _glMode;
-    GLsizei _glCount;
-
-    bool _indexed;
+    std::vector<std::unique_ptr<OpenGLPrimitive>> _primitives;
 
 }; // class OpenGLMesh
 

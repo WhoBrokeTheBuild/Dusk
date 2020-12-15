@@ -120,7 +120,7 @@ GLuint OpenGLShader::LoadSPV(const std::string& filename)
 {
     DuskLogVerbose("Looking for SPIR-V shader '%s'", filename);
 
-    const auto& assetPaths = GetAssetPaths();
+    const auto& assetPaths = GetAssetPathList();
 
     std::ifstream file;
 
@@ -167,7 +167,7 @@ GLuint OpenGLShader::LoadGLSL(const std::string& filename)
 {
     DuskLogVerbose("Looking for GLSL shader '%s'", filename);
 
-    const auto& assetPaths = GetAssetPaths();
+    const auto& assetPaths = GetAssetPathList();
 
     std::ifstream file;
 

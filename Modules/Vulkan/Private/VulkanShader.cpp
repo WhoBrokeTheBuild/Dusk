@@ -31,7 +31,7 @@ bool VulkanShader::LoadSPV(const std::string& filename)
 {
     VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
 
-    const auto& assetPaths = GetAssetPaths();
+    const auto& assetPaths = GetAssetPathList();
 
     std::ifstream file;
 

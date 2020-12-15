@@ -64,7 +64,7 @@ DUSK_ENGINE_API
 bool RunScriptFile(const std::string& filename) {
     FILE * file = nullptr;
     
-    const auto& assetPaths = GetAssetPaths();
+    const auto& assetPaths = GetAssetPathList();
 
     for (const auto& path : assetPaths) {
         const std::string& fullPath = path + "Scripts/" + filename;

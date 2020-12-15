@@ -8,119 +8,22 @@ namespace Dusk::OpenGL {
 DUSK_OPENGL_API
 void OpenGLMesh::Render()
 {
-    glBindVertexArray(_glVAO);
-
-    if (_indexed) {
-        glDrawElements(_glMode, _glCount, GL_UNSIGNED_INT, NULL);
+    for (const auto& primitive : _primitives) {
+        primitive->Render();
     }
-    else {
-        glDrawArrays(_glMode, 0, _glCount);
-    }
-
-    glBindVertexArray(0);
 }
 
 DUSK_OPENGL_API
-bool OpenGLMesh::Load(const MeshData * data)
+bool OpenGLMesh::Load(const std::vector<std::unique_ptr<PrimitiveData>>& data)
 {
-    DuskBenchmarkStart();
-
-    glGenVertexArrays(1, &_glVAO);
-    glBindVertexArray(_glVAO);
-
-    const auto& indices = data->GetIndices();
-    const auto& vertices = data->GetVertices();
-    const auto& normals = data->GetNormals();
-    const auto& uvs = data->GetUVs();
-    const auto& colors = data->GetColors();
-
-    _glMode = GetGLMode(data->GetMode());
-
-    GLuint vbo;
-    std::vector<GLuint> vbos;
-
-    if (indices.empty()) {
-        _indexed = false;
-        _glCount = vertices.size();
-    }
-    else {
-        _indexed = true;
-        // We need to convert the number of floats, into the number of vec4s
-        _glCount = vertices.size() / 4;
-
-        glGenBuffers(1, &vbo);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned), indices.data(), GL_STATIC_DRAW);
-
-        vbos.push_back(vbo);
+    for (const auto& primitiveData : data) {
+        _primitives.push_back(std::make_unique<OpenGLPrimitive>());
+        if (!_primitives.back()->Load(primitiveData)) {
+            return false;
+        }
     }
 
-    glGenBuffers(1, &vbo);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-    glEnableVertexAttribArray((GLuint)VertexAttributeLocation::Position);
-    glVertexAttribPointer((GLuint)VertexAttributeLocation::Position, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    vbos.push_back(vbo);
-
-    if (!normals.empty()) {
-        glGenBuffers(1, &vbo);
-        
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(float), normals.data(), GL_STATIC_DRAW);
-        glEnableVertexAttribArray((GLuint)VertexAttributeLocation::Normal);
-        glVertexAttribPointer((GLuint)VertexAttributeLocation::Normal, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-        vbos.push_back(vbo);
-    }
-
-    if (!colors.empty()) {
-        glGenBuffers(1, &vbo);
-        
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(float), colors.data(), GL_STATIC_DRAW);
-        glEnableVertexAttribArray((GLuint)VertexAttributeLocation::Color1);
-        glVertexAttribPointer((GLuint)VertexAttributeLocation::Color1, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-        vbos.push_back(vbo);
-    }
-    
-    if (!uvs.empty()) {
-        glGenBuffers(1, &vbo);
-        
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(float), uvs.data(), GL_STATIC_DRAW);
-        glEnableVertexAttribArray((GLuint)VertexAttributeLocation::UV1);
-        glVertexAttribPointer((GLuint)VertexAttributeLocation::UV1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
-
-        vbos.push_back(vbo);
-    }
-
-    glBindVertexArray(0);
-
-    DuskBenchmarkEnd("OpenGLMesh::Load");
     return true;
-}
-
-DUSK_OPENGL_API
-GLenum OpenGLMesh::GetGLMode(const MeshData::Mode& mode)
-{
-    switch (mode) {
-    case MeshData::Mode::Points:
-        return GL_POINTS;
-    case MeshData::Mode::Lines:
-        return GL_LINES;
-    case MeshData::Mode::LineStrip:
-        return GL_LINE_STRIP;
-    case MeshData::Mode::Triangles:
-        return GL_TRIANGLES;
-    case MeshData::Mode::TriangleStrip:
-        return GL_TRIANGLE_STRIP;
-    }
-
-    return GL_INVALID_ENUM;
 }
 
 } // namespace Dusk::OpenGL

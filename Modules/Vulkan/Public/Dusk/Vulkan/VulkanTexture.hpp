@@ -19,7 +19,7 @@ public:
 
     virtual ~VulkanTexture();
 
-    bool Load(const TextureData * data, Options opts = Options()) override;
+    bool Load(const std::unique_ptr<TextureData>& data, Options opts = Options()) override;
 
     VkImage GetVkImage() const;
 

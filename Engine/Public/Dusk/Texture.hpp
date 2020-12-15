@@ -18,7 +18,8 @@ class DUSK_ENGINE_API Texture : public Object
 {
 public:
 
-    enum class WrapType {
+    enum class WrapType
+    {
         Repeat,
         MirroredRepeat,
         ClampToEdge,
@@ -26,7 +27,8 @@ public:
 
     }; // enum WrapType
 
-    enum class FilterType {
+    enum class FilterType
+    {
         Nearest,
         NearestMipmapNearest,
         NearestMipmapLinear,
@@ -38,27 +40,17 @@ public:
 
     struct Options
     {
-        Options(
-            WrapType wrapS = WrapType::Repeat,
-            WrapType wrapT = WrapType::Repeat, 
-            FilterType magFilter = FilterType::Nearest, 
-            FilterType minFilter = FilterType::Nearest, 
-            bool generateMipmaps = false)
-            : WrapS(wrapS)
-            , WrapT(wrapT)
-            , MagFilter(magFilter)
-            , MinFilter(minFilter)
-            , GenerateMipmaps(generateMipmaps)
-        { }
-        
-        WrapType WrapS;
-        WrapType WrapT;
+        Options() { }
 
-        FilterType MagFilter;
-        FilterType MinFilter;
+        WrapType WrapS = WrapType::Repeat;
+        WrapType WrapT = WrapType::Repeat;
 
-        bool GenerateMipmaps;
-    };
+        FilterType MagFilter = FilterType::Nearest;
+        FilterType MinFilter = FilterType::Nearest;
+
+        bool GenerateMipmaps = false;
+
+    }; // struct Options
 
     DISALLOW_COPY_AND_ASSIGN(Texture)
 
@@ -66,7 +58,7 @@ public:
 
     virtual ~Texture() = default;
 
-    virtual bool Load(const TextureData * data, Options opts = Options()) = 0;
+    virtual bool Load(const std::unique_ptr<TextureData>& data, Options opts = Options()) = 0;
 
 }; // class Texture
 

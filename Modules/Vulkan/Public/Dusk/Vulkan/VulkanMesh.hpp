@@ -21,19 +21,7 @@ public:
 
     void Render() override;
 
-    bool Load(const MeshData * data) override;
-
-    inline std::vector<VkVertexInputBindingDescription> GetVkVertexInputBindings() {
-        return _vkBindings;
-    }
-
-    inline std::vector<VkVertexInputAttributeDescription> GetVkVertexInputAttributes() {
-        return _vkAttributes;
-    }
-
-    VkPrimitiveTopology GetVkPrimitiveTopology() {
-        return _vkPrimitiveTopology;
-    }
+    bool Load(const std::vector<std::unique_ptr<PrimitiveData>>& data) override;
 
     void GenerateBindCommands(VkCommandBuffer vkCommandBuffer);
     
@@ -41,26 +29,6 @@ public:
 
 private:
 
-    bool AddBuffer(const void * data, VkDeviceSize size, uint32_t stride, 
-        VkFormat format, VkVertexInputRate inputRate, VkBufferUsageFlags usage);
-
-    std::vector<VkBuffer> _vkBuffers;
-
-    std::vector<VkDeviceMemory> _vkBufferMemories;
-
-    std::vector<VkVertexInputBindingDescription> _vkBindings;
-
-    std::vector<VkVertexInputAttributeDescription> _vkAttributes;
-
-    VkPrimitiveTopology _vkPrimitiveTopology;
-
-    unsigned _nextLocation = 0;
-
-    unsigned _nextBinding = 0;
-
-    bool _indexed = 0;
-
-    uint32_t _count = 0;
 
 }; // class VulkanMesh
 

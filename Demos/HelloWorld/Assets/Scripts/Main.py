@@ -4,8 +4,8 @@ Dusk.LoadModule("DuskSTBI")
 Dusk.LoadModule("DuskTinyOBJ")
 # Dusk.LoadModule("DuskGLTF2")
 # Dusk.LoadModule("DuskFreeType")
-# Dusk.LoadModule("DuskOpenGL")
-Dusk.LoadModule("DuskVulkan")
+Dusk.LoadModule("DuskOpenGL")
+# Dusk.LoadModule("DuskVulkan")
 
 gfx = Dusk.GetGraphicsDriver()
 if gfx == None:

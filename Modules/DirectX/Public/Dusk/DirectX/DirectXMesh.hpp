@@ -19,7 +19,7 @@ public:
 
     void Render() override;
 
-    bool Load(const MeshData * data) override;
+    bool Load(const PrimitiveData * data) override;
 
 private:
     

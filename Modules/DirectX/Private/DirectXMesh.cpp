@@ -14,7 +14,7 @@ void DirectXMesh::Render()
 }
 
 DUSK_DIRECTX_API
-bool DirectXMesh::Load(const MeshData * data)
+bool DirectXMesh::Load(const PrimitiveData * data)
 {
     DuskBenchmarkStart();
 

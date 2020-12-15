@@ -19,7 +19,7 @@ std::shared_ptr<Texture> LoadTextureFromFile(const std::string& filename, Textur
 
         auto texture = gfx->CreateTexture();
 
-        if (!texture->Load(textureData.get(), opts)) {
+        if (!texture->Load(textureData, opts)) {
             break;
         }
 
@@ -44,7 +44,7 @@ std::shared_ptr<Texture> LoadTextureFromMemory(const uint8_t * buffer, size_t le
 
         auto texture = gfx->CreateTexture();
 
-        if (!texture->Load(textureData.get(), opts)) {
+        if (!texture->Load(textureData, opts)) {
             break;
         }
 

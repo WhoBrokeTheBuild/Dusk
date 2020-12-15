@@ -139,9 +139,9 @@ struct CameraData
     float znear;
 };
 
-struct MeshData
+struct PrimitiveData
 {
-    std::vector<std::unique_ptr<MeshData>> Primitives;
+    std::vector<std::unique_ptr<PrimitiveData>> Primitives;
 };
 
 class DUSK_GLTF2_API glTF2File : public Object

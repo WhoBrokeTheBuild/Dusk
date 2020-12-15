@@ -4,35 +4,27 @@
 
 namespace Dusk {
 
-std::vector<std::shared_ptr<Mesh>> LoadMeshListFromFile(const std::string& filename)
+std::shared_ptr<Mesh> LoadMeshFromFile(const std::string& filename)
 {
     GraphicsDriver * gfx = GetGraphicsDriver();
 
     const auto& importers = GetAllMeshImporters();
     for (const auto& importer : importers) {
-        const auto& meshDataList = importer->LoadFromFile(filename);
-        if (meshDataList.empty()) {
+        const auto& primitiveList = importer->LoadFromFile(filename);
+        if (primitiveList.empty()) {
             continue;
         }
 
-        std::vector<std::shared_ptr<Mesh>> meshList;
-        meshList.reserve(meshDataList.size());
-
-        for (const auto& meshData : meshDataList) {
-            auto mesh = gfx->CreateMesh();
-            
-            if (!mesh->Load(meshData.get())) {
-                break;
-            }
-
-            meshList.push_back(mesh);
+        auto mesh = gfx->CreateMesh();
+        if (!mesh->Load(primitiveList)) {
+            break;
         }
 
-        return meshList;
+        return mesh;
     }
 
     DuskLogError("Failed to load mesh '%s'", filename);
-    return { };
+    return nullptr;
 }
 
 } // namespace Dusk

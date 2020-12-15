@@ -62,13 +62,11 @@ void run()
 
     auto meshImporters = Dusk::GetAllMeshImporters();
     // auto meshDatas = meshImporters[0]->LoadFromFile("sphere.obj");
-    auto meshDatas = meshImporters[0]->LoadFromFile("monkey.obj");
+    auto mesh = Dusk::LoadMeshFromFile("monkey.obj");
     // auto meshDatas = meshImporters[0]->LoadFromFile("crate/crate.obj");
     // auto meshDatas = meshImporters[0]->LoadFromFile("BoomBox.glb");
-    auto mesh = gfx->CreateMesh();
-    mesh->Load(meshDatas[0].get());
 
-    auto pipeline = gfx->CreatePipeline(shader, mesh);
+    // auto pipeline = gfx->CreatePipeline(shader, mesh);
 
     Dusk::ScriptConsole::Initialize();
 
@@ -80,6 +78,8 @@ void run()
         scene.Update(&updateContext);
 
         Dusk::ScriptConsole::Update();
+
+        mesh->Render();
 
         // shader->Bind();
         scene.Render(&renderContext);

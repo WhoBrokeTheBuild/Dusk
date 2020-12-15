@@ -3,7 +3,7 @@
 #include <Dusk/Benchmark.hpp>
 #include <Dusk/Log.hpp>
 #include <Dusk/Util.hpp>
-#include <Dusk/TinyOBJ/TinyOBJMeshData.hpp>
+#include <Dusk/TinyOBJ/TinyOBJPrimitiveData.hpp>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
@@ -11,22 +11,22 @@
 namespace Dusk::TinyOBJ {
 
 DUSK_TINYOBJ_API
-std::vector<std::unique_ptr<MeshData>> TinyOBJMeshImporter::LoadFromFile(const std::string& filename)
+std::vector<std::unique_ptr<PrimitiveData>> TinyOBJMeshImporter::LoadFromFile(const std::string& filename)
 {
     DuskBenchmarkStart();
 
-    std::vector<std::unique_ptr<MeshData>> meshes;
+    std::vector<std::unique_ptr<PrimitiveData>> primitiveList;
 
     tinyobj::attrib_t attrib;
-    std::vector<tinyobj::shape_t> shapes;
-    std::vector<tinyobj::material_t> materials;
+    std::vector<tinyobj::shape_t> shapeList;
+    std::vector<tinyobj::material_t> materialList;
 
     std::string warn, err;
     bool result = false;
 
-    const auto& assetPaths = GetAssetPaths();
+    const auto& assetPathList = GetAssetPathList();
 
-    for (const auto& path : assetPaths) {
+    for (const auto& path : assetPathList) {
         std::string fullPath = path + "Models/" + filename;
         DuskLogVerbose("Checking '%s'", fullPath);
 
@@ -35,7 +35,7 @@ std::vector<std::unique_ptr<MeshData>> TinyOBJMeshImporter::LoadFromFile(const s
         warn = "";
         err = "";
 
-        result = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, fullPath.c_str(), dir.c_str());
+        result = tinyobj::LoadObj(&attrib, &shapeList, &materialList, &warn, &err, fullPath.c_str(), dir.c_str());
 
         // If the error isn't 'Cannot open file', the .obj file is probably
         // broken, and we should fail
@@ -61,57 +61,60 @@ std::vector<std::unique_ptr<MeshData>> TinyOBJMeshImporter::LoadFromFile(const s
     }
     
     bool hasNormals = (!attrib.normals.empty());
-    bool hasUVs = (!attrib.texcoords.empty());
+    bool hasTexCoords = (!attrib.texcoords.empty());
     bool hasColors = (!attrib.colors.empty());
 
-    for (auto& shape : shapes) {
-        TinyOBJMeshData * meshData = New TinyOBJMeshData();
+    for (auto& shape : shapeList) {
+        TinyOBJPrimitiveData * primitiveData = New TinyOBJPrimitiveData();
         
-        meshData->Vertices.reserve(shape.mesh.indices.size());
-        
-        if (hasNormals) {
-            meshData->Normals.reserve(shape.mesh.indices.size());
-        }
+        primitiveData->VertexList.resize(shape.mesh.indices.size());
 
-        if (hasUVs) {
-            meshData->UVs.reserve(shape.mesh.indices.size());
-        }
+        for (size_t i = 0; i < shape.mesh.indices.size(); ++i) {
+            auto index = shape.mesh.indices[i];
+            auto& vertex = primitiveData->VertexList[i];
 
-        if (hasColors) {
-            meshData->Colors.reserve(shape.mesh.indices.size());
-        }
+            index.vertex_index -= 1;
+            vertex.Position = {
+                attrib.vertices[3 * index.vertex_index + 0],
+                attrib.vertices[3 * index.vertex_index + 1],
+                attrib.vertices[3 * index.vertex_index + 2],
+                1.0f,
+            };
 
-        for (const auto& i : shape.mesh.indices) {
-            meshData->Vertices.push_back(attrib.vertices[3 * i.vertex_index + 0]);
-            meshData->Vertices.push_back(attrib.vertices[3 * i.vertex_index + 1]);
-            meshData->Vertices.push_back(attrib.vertices[3 * i.vertex_index + 2]);
-            meshData->Vertices.push_back(1.0f);
-            
             if (hasNormals) {
-                meshData->Normals.push_back(attrib.normals[3 * i.normal_index + 0]);
-                meshData->Normals.push_back(attrib.normals[3 * i.normal_index + 1]);
-                meshData->Normals.push_back(attrib.normals[3 * i.normal_index + 2]);
-                meshData->Normals.push_back(1.0f);
+                index.normal_index -= 1;
+                vertex.Normal = {
+                    attrib.normals[3 * index.normal_index + 0],
+                    attrib.normals[3 * index.normal_index + 1],
+                    attrib.normals[3 * index.normal_index + 2],
+                    1.0f,
+                };
             }
             
-            if (hasUVs) {
-                meshData->UVs.push_back(attrib.texcoords[2 * i.texcoord_index + 0]);
-                meshData->UVs.push_back(attrib.texcoords[2 * i.texcoord_index + 1]);
-            }
-
             if (hasColors) {
-                meshData->Colors.push_back(attrib.colors[3 * i.vertex_index + 0]);
-                meshData->Colors.push_back(attrib.colors[3 * i.vertex_index + 1]);
-                meshData->Colors.push_back(attrib.colors[3 * i.vertex_index + 2]);
-                meshData->Colors.push_back(1.0f);
+                vertex.Color = {
+                    attrib.colors[3 * index.vertex_index + 0],
+                    attrib.colors[3 * index.vertex_index + 1],
+                    attrib.colors[3 * index.vertex_index + 2],
+                    1.0f,
+                };
+            }
+            
+            if (hasTexCoords) {
+                index.texcoord_index -= 1;
+                vertex.TexCoord1 = {
+                    attrib.texcoords[2 * index.texcoord_index + 0],
+                    attrib.texcoords[2 * index.texcoord_index + 1],
+                };
             }
         }
 
-        meshes.push_back(std::unique_ptr<MeshData>(meshData));
+        primitiveData->CalculateTBN();
+        primitiveList.push_back(std::unique_ptr<PrimitiveData>(primitiveData));
     }
 
     DuskBenchmarkEnd("TinyOBJMeshImporter::LoadFromFile");
-    return meshes;
+    return primitiveList;
 }
 
 } // namespace Dusk::TinyOBJ

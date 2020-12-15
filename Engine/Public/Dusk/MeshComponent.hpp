@@ -20,15 +20,13 @@ public:
 
     virtual ~MeshComponent() = default;
 
-    bool LoadFromFile(const std::string& filename);
-
-    void AddMesh(std::shared_ptr<Mesh> && mesh);
+    void SetMesh(std::shared_ptr<Mesh> && mesh);
 
     void Render(RenderContext * ctx) override;
 
 private:
 
-    std::vector<std::shared_ptr<Mesh>> _meshes;
+    std::shared_ptr<Mesh> _mesh;
 
 }; // class MeshComponent
 

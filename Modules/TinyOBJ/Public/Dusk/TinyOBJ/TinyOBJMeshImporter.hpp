@@ -17,7 +17,7 @@ public:
 
     TinyOBJMeshImporter() = default;
 
-    std::vector<std::unique_ptr<Dusk::MeshData>> LoadFromFile(const std::string& filename) override;
+    std::vector<std::unique_ptr<PrimitiveData>> LoadFromFile(const std::string& filename) override;
 
 }; // class TinyOBJMeshImporter
 

@@ -1373,11 +1373,11 @@ bool VulkanGraphicsDriver::InitCommandBuffers()
         for (const auto& p : _pipelines) {
             VulkanPipeline * pipeline = DUSK_VULKAN_PIPELINE(p.get());
             
-            pipeline->GenerateBindCommands(_vkCommandBuffers[i]);
+            // pipeline->GenerateBindCommands(_vkCommandBuffers[i]);
             
             vkCmdBindDescriptorSets(_vkCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _vkPipelineLayout, 0, 1, &_vkDescriptorSets[i], 0, nullptr);
             
-            pipeline->GenerateDrawCommands(_vkCommandBuffers[i]);
+            // pipeline->GenerateDrawCommands(_vkCommandBuffers[i]);
         }
 
         vkCmdEndRenderPass(_vkCommandBuffers[i]);

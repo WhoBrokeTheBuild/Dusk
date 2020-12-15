@@ -251,13 +251,13 @@ bool glTF2File::LoadSamplers()
 
     if (JSON.contains(SAMPLERS_PATH)) {
         for (const auto& object : JSON[SAMPLERS_PATH]) {
-            Samplers.push_back(Dusk::Texture::Options{
-                GetWrapType(object.value("wrapS", 0)),
-                GetWrapType(object.value("wrapT", 0)),
-                GetFilterType(object.value("magFilter", 0)),
-                GetFilterType(object.value("minFilter", 0)),
-                false,
-            });
+            Dusk::Texture::Options options;
+            options.WrapS = GetWrapType(object.value("wrapS", 0));
+            options.WrapT = GetWrapType(object.value("wrapT", 0));
+            options.MagFilter = GetFilterType(object.value("magFilter", 0));
+            options.MinFilter = GetFilterType(object.value("minFilter", 0));
+            options.GenerateMipmaps = false;
+            Samplers.push_back(options);
         }
     }
 
@@ -462,7 +462,7 @@ bool glTF2File::LoadMeshes()
 
     if (JSON.contains(MESHES_PATH)) {
         for (const auto& object : JSON[MESHES_PATH]) {
-            // std::vector<GLTF2MeshData>
+            // std::vector<GLTF2PrimitiveData>
 
             auto it = object.find("primitives");
             if (it != object.end()) {

@@ -125,24 +125,24 @@ bool VulkanPipeline::Initialize()
         .blendConstants = { 0.0f, 0.0f, 0.0f, 0.0f },
     };
 
-    const auto& bindings = mesh->GetVkVertexInputBindings();
-    const auto& attributes = mesh->GetVkVertexInputAttributes();
+    // const auto& bindings = mesh->GetVkVertexInputBindings();
+    // const auto& attributes = mesh->GetVkVertexInputAttributes();
 
     VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
-        .vertexBindingDescriptionCount = static_cast<uint32_t>(bindings.size()),
-        .pVertexBindingDescriptions = bindings.data(),
-        .vertexAttributeDescriptionCount = static_cast<uint32_t>(attributes.size()),
-        .pVertexAttributeDescriptions = attributes.data(),
+        // .vertexBindingDescriptionCount = static_cast<uint32_t>(bindings.size()),
+        // .pVertexBindingDescriptions = bindings.data(),
+        // .vertexAttributeDescriptionCount = static_cast<uint32_t>(attributes.size()),
+        // .pVertexAttributeDescriptions = attributes.data(),
     };
 
     VkPipelineInputAssemblyStateCreateInfo vertexInputAssemblyStateCreateInfo = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
-        .topology = mesh->GetVkPrimitiveTopology(),
+        // .topology = mesh->GetVkPrimitiveTopology(),
         .primitiveRestartEnable = VK_FALSE,
     };
 
@@ -177,31 +177,31 @@ bool VulkanPipeline::Initialize()
     return true;
 }
 
-DUSK_VULKAN_API
-void VulkanPipeline::GenerateBindCommands(VkCommandBuffer vkCommandBuffer)
-{
-    vkCmdBindPipeline(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _vkPipeline);
+// DUSK_VULKAN_API
+// void VulkanPipeline::GenerateBindCommands(VkCommandBuffer vkCommandBuffer)
+// {
+//     vkCmdBindPipeline(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _vkPipeline);
 
-    // TODO: Move to local variable post-conversion
-    VulkanMesh * mesh = DUSK_VULKAN_MESH(_mesh.get());
-    if (!mesh) {
-        return;
-    }
+//     // TODO: Move to local variable post-conversion
+//     VulkanMesh * mesh = DUSK_VULKAN_MESH(_mesh.get());
+//     if (!mesh) {
+//         return;
+//     }
 
-    mesh->GenerateBindCommands(vkCommandBuffer);
-}
+//     mesh->GenerateBindCommands(vkCommandBuffer);
+// }
 
-DUSK_VULKAN_API
-void VulkanPipeline::GenerateDrawCommands(VkCommandBuffer vkCommandBuffer)
-{
-    // TODO: Move to local variable post-conversion
-    VulkanMesh * mesh = DUSK_VULKAN_MESH(_mesh.get());
-    if (!mesh) {
-        return;
-    }
+// DUSK_VULKAN_API
+// void VulkanPipeline::GenerateDrawCommands(VkCommandBuffer vkCommandBuffer)
+// {
+//     // TODO: Move to local variable post-conversion
+//     VulkanMesh * mesh = DUSK_VULKAN_MESH(_mesh.get());
+//     if (!mesh) {
+//         return;
+//     }
 
-    mesh->GenerateDrawCommands(vkCommandBuffer);
-}
+//     mesh->GenerateDrawCommands(vkCommandBuffer);
+// }
 
 DUSK_VULKAN_API
 VkPolygonMode VulkanPipeline::GetVkPolygonMode() const

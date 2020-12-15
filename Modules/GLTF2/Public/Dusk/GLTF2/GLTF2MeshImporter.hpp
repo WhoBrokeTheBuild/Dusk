@@ -9,51 +9,27 @@
 
 namespace Dusk::GLTF2 {
 
-class DUSK_GLTF2_API GLTF2MeshData : public MeshData
+class DUSK_GLTF2_API GLTF2PrimitiveData : public PrimitiveData
 {
 public:
 
-    std::vector<float> Vertices;
+    std::vector<uint32_t> IndexList;
 
-    std::vector<float> Normals;
+    std::vector<Primitive::Vertex> VertexList;
 
-    std::vector<float> UVs;
-
-    std::vector<float> Colors;
-
-    Mode GetMode() const override {
-        return Mode::Triangles;
+    Primitive::Topology GetTopology() const override {
+        return Primitive::Topology::Triangles;
     }
 
-    gsl::span<const unsigned> GetIndices() const override {
-        return gsl::span<unsigned>();
+    gsl::span<uint32_t> GetIndexList() override {
+        return IndexList;
     }
 
-    gsl::span<const float> GetVertices() const override {
-        return gsl::span<const float>(Vertices.data(), Vertices.size());
+    gsl::span<Primitive::Vertex> GetVertexList() override {
+        return gsl::span<Primitive::Vertex>(VertexList.data(), VertexList.size());
     }
 
-    gsl::span<const float> GetNormals() const override {
-        return gsl::span<const float>(Normals.data(), Normals.size());
-    }
-
-    gsl::span<const float> GetUVs() const override {
-        return gsl::span<const float>(UVs.data(), UVs.size());
-    }
-
-    gsl::span<const float> GetColors() const override {
-        return gsl::span<const float>(Colors.data(), Colors.size());
-    }
-
-    gsl::span<const float> GetTangents() const override {
-        return gsl::span<float>();
-    }
-
-    gsl::span<const float> GetBitangents() const override {
-        return gsl::span<float>();
-    }
-
-}; // class MeshData
+}; // class PrimitiveData
 
 class DUSK_GLTF2_API GLTF2MeshImporter : public MeshImporter
 {
@@ -63,7 +39,7 @@ public:
 
     GLTF2MeshImporter() = default;
 
-    std::vector<std::unique_ptr<MeshData>> LoadFromFile(const std::string& filename) override;
+    std::vector<std::unique_ptr<PrimitiveData>> LoadFromFile(const std::string& filename) override;
 
 }; // class GLTF2MeshImporter
 

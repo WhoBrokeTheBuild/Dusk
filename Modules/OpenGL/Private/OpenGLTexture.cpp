@@ -15,7 +15,7 @@ OpenGLTexture::~OpenGLTexture()
 }
 
 DUSK_OPENGL_API
-bool OpenGLTexture::Load(const TextureData * data, Options opts /*= Options()*/)
+bool OpenGLTexture::Load(const std::unique_ptr<TextureData>& data, Options opts /*= Options()*/)
 {
     DuskBenchmarkStart();
 

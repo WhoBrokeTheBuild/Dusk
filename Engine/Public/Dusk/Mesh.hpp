@@ -3,7 +3,8 @@
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Object.hpp>
-#include <Dusk/MeshData.hpp>
+#include <Dusk/Primitive.hpp>
+#include <Dusk/PrimitiveData.hpp>
 
 #include <vector>
 
@@ -19,30 +20,18 @@ public:
 
     virtual ~Mesh() = default;
 
-    virtual void Render() = 0;
+    virtual void Render() { }
 
-    virtual bool Load(const MeshData * data) = 0;
+    virtual bool Load(const std::vector<std::unique_ptr<PrimitiveData>>& data) = 0;
 
 protected:
 
-    enum class VertexAttributeLocation {
-        Position        = 0,
-        Normal          = 1,
-        Tangent         = 2,
-        Bitangent       = 3,
-        Color1          = 4,
-        Color2          = 5,
-        UV1             = 6,
-        UV2             = 6,
-        UV3             = 7,
-        UV4             = 7,
-        UV5             = 8,
-        UV6             = 8,
-    };
+    std::vector<std::unique_ptr<Primitive>> _primitives;
+
 
 }; // class Mesh
 
-std::vector<std::shared_ptr<Mesh>> LoadMeshListFromFile(const std::string& filename);
+std::shared_ptr<Mesh> LoadMeshFromFile(const std::string& filename);
 
 } // namespace Dusk
 

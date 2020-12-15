@@ -5,8 +5,8 @@
 
 namespace Dusk {
 
-DUSK_ENGINE_API
-AxisMeshData AxisComponent::_MeshData;
+// DUSK_ENGINE_API
+// AxisPrimitiveData AxisComponent::_PrimitiveData;
 
 DUSK_ENGINE_API
 AxisComponent::AxisComponent()
@@ -20,7 +20,7 @@ AxisComponent::AxisComponent()
     });
 
     _mesh = gfx->CreateMesh();
-    _mesh->Load(&_MeshData);
+    // _mesh->Load(&_PrimitiveData);
     // TODO: Make GL_LINES
 }
 
@@ -36,7 +36,7 @@ void AxisComponent::Render(RenderContext * ctx)
     gfx->SetShaderData("DuskTransformData", sizeof(TransformData), transformData);
 
     // _shader->Bind();
-    _mesh->Render();
+    // _mesh->Render();
 }
 
 } // namespace Dusk

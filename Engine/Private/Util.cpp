@@ -45,7 +45,7 @@ std::string GetExtension(std::string path)
 }
 
 DUSK_ENGINE_API
-std::vector<std::string> GetAssetPaths()
+std::vector<std::string> GetAssetPathList()
 {
     static std::vector<std::string> paths;
     if (!paths.empty()) {

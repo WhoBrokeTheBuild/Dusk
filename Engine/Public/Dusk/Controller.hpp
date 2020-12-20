@@ -7,7 +7,8 @@
 
 namespace Dusk {
 
-enum class ControllerButton {
+enum class ControllerButton
+{
     Unknown = -1,
     
     A,
@@ -25,6 +26,7 @@ enum class ControllerButton {
     DPadDown,
     DPadLeft,
     DPadRight,
+
 }; // enum ControllerButton
 
 static inline std::string GetControllerButtonName(ControllerButton button)

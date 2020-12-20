@@ -32,8 +32,8 @@ public:
         return Components;
     }
 
-    DataType GetDataType() const override {
-        return TextureData::DataType::UnsignedByte;
+    TextureDataType GetDataType() const override {
+        return TextureDataType::UnsignedByte;
     }
 
 }; // class STBITextureData

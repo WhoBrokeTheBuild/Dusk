@@ -2,7 +2,6 @@
 
 #include <Dusk/Benchmark.hpp>
 #include <Dusk/OpenGL/OpenGLShader.hpp>
-#include <Dusk/OpenGL/OpenGLMesh.hpp>
 
 #include <cassert>
 
@@ -33,14 +32,13 @@ bool OpenGLPipeline::Bind()
 
     glViewport(0, 0, WIDTH, HEIGHT);
 
-    switch (_frontFace) {
-    case FrontFace::Clockwise:
-        glFrontFace(GL_CW);
-        break;
-    case FrontFace::CounterClockwise:
-        glFrontFace(GL_CCW);
-        break;
-    default: ;
+    glFrontFace(GetGLFrontFace(_frontFace));
+
+    if (_cullMode == CullMode::None) {
+        glDisable(GL_CULL_FACE);
+    }
+    else {
+        glCullFace(GetGLCullMode(_cullMode));
     }
 
     switch (_cullMode) {
@@ -58,15 +56,7 @@ bool OpenGLPipeline::Bind()
     default: ;
     }
 
-    switch (_fillMode) {
-    case FillMode::Fill:
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        break;
-    case FillMode::Line:
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        break;
-    default: ;
-    }
+    glPolygonMode(GL_FRONT_AND_BACK, GetGLFillMode(_fillMode));
 
     switch(_depthBiasMode) {
     case DepthBiasMode::Clamp:
@@ -100,68 +90,9 @@ bool OpenGLPipeline::Bind()
         glDisable(GL_BLEND);
     }
 
-    OpenGLMesh * mesh = DUSK_OPENGL_MESH(_mesh.get());
-    if (mesh) {
-        mesh->Render();
-    }
+    // glDepthFunc(GetGLCompareOperation())
 
     return true;
-}
-
-GLenum OpenGLPipeline::GetGLBlendFactor(BlendFactor factor) const
-{
-    switch (factor) {
-    case BlendFactor::Zero:
-        return GL_ZERO;
-    case BlendFactor::One:
-        return GL_ONE;
-    case BlendFactor::SrcColor:
-        return GL_SRC_COLOR;
-    case BlendFactor::OneMinusSrcColor:
-        return GL_ONE_MINUS_SRC_COLOR;
-    case BlendFactor::SrcAlpha:
-        return GL_SRC_ALPHA;
-    case BlendFactor::OneMinusSrcAlpha:
-        return GL_ONE_MINUS_SRC_ALPHA;
-    case BlendFactor::DstColor:
-        return GL_DST_COLOR;
-    case BlendFactor::OneMinusDstColor:
-        return GL_ONE_MINUS_DST_COLOR;
-    case BlendFactor::DstAlpha:
-        return GL_DST_ALPHA;
-    case BlendFactor::OneMinusDstAlpha:
-        return GL_ONE_MINUS_DST_ALPHA;
-    case BlendFactor::ConstantColor:
-        return GL_CONSTANT_COLOR;
-    case BlendFactor::OneMinusConstantColor:
-        return GL_ONE_MINUS_CONSTANT_COLOR;
-    case BlendFactor::ConstantAlpha:
-        return GL_CONSTANT_ALPHA;
-    case BlendFactor::OneMinusConstantAlpha:
-        return GL_ONE_MINUS_CONSTANT_ALPHA;
-    case BlendFactor::SrcAlphaSaturated:
-        return GL_SRC_ALPHA_SATURATE;
-    }
-
-    assert(false);
-}
-
-GLenum OpenGLPipeline::GetGLBlendOperation(BlendOperation op) const
-{
-    switch (op) {
-    case BlendOperation::Add:
-        return GL_FUNC_ADD;
-    case BlendOperation::Subtract:
-        return GL_FUNC_SUBTRACT;
-    case BlendOperation::ReverseSubtract:
-        return GL_FUNC_REVERSE_SUBTRACT;
-    case BlendOperation::Min:
-        return GL_MIN;
-    case BlendOperation::Max:
-        return GL_MAX;
-    }
-
-    assert(false);
 }
 
 } // namespace Dusk::OpenGL

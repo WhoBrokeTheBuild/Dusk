@@ -15,18 +15,18 @@ public:
 
     std::vector<uint32_t> IndexList;
 
-    std::vector<Primitive::Vertex> VertexList;
+    std::vector<Vertex> VertexList;
 
-    Primitive::Topology GetTopology() const override {
-        return Primitive::Topology::Triangles;
+    PrimitiveTopology GetTopology() const override {
+        return PrimitiveTopology::Triangles;
     }
 
     gsl::span<uint32_t> GetIndexList() override {
         return IndexList;
     }
 
-    gsl::span<Primitive::Vertex> GetVertexList() override {
-        return gsl::span<Primitive::Vertex>(VertexList.data(), VertexList.size());
+    gsl::span<Vertex> GetVertexList() override {
+        return gsl::span<Vertex>(VertexList.data(), VertexList.size());
     }
 
 }; // class PrimitiveData

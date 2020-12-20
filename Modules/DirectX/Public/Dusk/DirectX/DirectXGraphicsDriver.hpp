@@ -5,7 +5,6 @@
 
 #include <Dusk/GraphicsDriver.hpp>
 #include <Dusk/DirectX/DirectXShader.hpp>
-#include <Dusk/DirectX/DirectXMesh.hpp>
 
 #define BUFFER_COUNT 2
 
@@ -39,13 +38,13 @@ public:
 
     void SwapBuffers() override;
 
-    std::shared_ptr<Pipeline> CreatePipeline(std::shared_ptr<Shader> shader, std::shared_ptr<Mesh> mesh) override;
+    std::shared_ptr<Pipeline> CreatePipeline(std::shared_ptr<Shader> shader) override;
 
     std::shared_ptr<Texture> CreateTexture() override;
 
     std::shared_ptr<Shader> CreateShader() override;
 
-    std::shared_ptr<Mesh> CreateMesh() override;
+    std::unique_ptr<Primitive> CreatePrimitive() override;
 
     bool SetShaderData(const std::string& name, size_t size, void * data) override;
 

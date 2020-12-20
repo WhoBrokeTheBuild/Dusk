@@ -102,11 +102,10 @@ void OpenGLGraphicsDriver::SwapBuffers()
 }
 
 DUSK_OPENGL_API
-std::shared_ptr<Pipeline> OpenGLGraphicsDriver::CreatePipeline(std::shared_ptr<Shader> shader, std::shared_ptr<Mesh> mesh)
+std::shared_ptr<Pipeline> OpenGLGraphicsDriver::CreatePipeline(std::shared_ptr<Shader> shader)
 {
     auto ptr = std::shared_ptr<Pipeline>(New OpenGLPipeline());
     ptr->SetShader(shader);
-    ptr->SetMesh(mesh);
     return ptr;
 }
 
@@ -125,9 +124,9 @@ std::shared_ptr<Shader> OpenGLGraphicsDriver::CreateShader()
 }
 
 DUSK_OPENGL_API
-std::shared_ptr<Mesh> OpenGLGraphicsDriver::CreateMesh()
+std::unique_ptr<Primitive> OpenGLGraphicsDriver::CreatePrimitive()
 {
-    return std::shared_ptr<Mesh>(New OpenGLMesh());
+    return std::unique_ptr<Primitive>(New OpenGLPrimitive());
 }
 
 DUSK_OPENGL_API

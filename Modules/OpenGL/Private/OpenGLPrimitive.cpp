@@ -47,7 +47,7 @@ bool OpenGLPrimitive::Load(const std::unique_ptr<PrimitiveData>& data)
         glGenBuffers(1, &vbo);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexList.size() * sizeof(uint32_t), indexList.data(), GL_STATIC_DRAW);
+        glBufferStorage(GL_ELEMENT_ARRAY_BUFFER, indexList.size() * sizeof(uint32_t), indexList.data(), 0);
 
         vbos.push_back(vbo);
     }
@@ -55,45 +55,45 @@ bool OpenGLPrimitive::Load(const std::unique_ptr<PrimitiveData>& data)
     glGenBuffers(1, &vbo);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertexList.size() * sizeof(Primitive::Vertex), vertexList.data(), GL_STATIC_DRAW);
+    glBufferStorage(GL_ARRAY_BUFFER, vertexList.size() * sizeof(Vertex), vertexList.data(), 0);
 
     vbos.push_back(vbo);
 
     GLuint location;
 
-    location = GetVertexAttributeLocation(Primitive::VertexAttribute::Position);
+    location = GetVertexAttributeLocation(VertexAttribute::Position);
     glEnableVertexAttribArray(location);
     glVertexAttribPointer(location, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Position));
 
-    location = GetVertexAttributeLocation(Primitive::VertexAttribute::Normal);
+    location = GetVertexAttributeLocation(VertexAttribute::Normal);
     glEnableVertexAttribArray(location);
     glVertexAttribPointer(location, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Normal));
 
-    location = GetVertexAttributeLocation(Primitive::VertexAttribute::Tangent);
+    location = GetVertexAttributeLocation(VertexAttribute::Tangent);
     glEnableVertexAttribArray(location);
     glVertexAttribPointer(location, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Tangent));
 
-    location = GetVertexAttributeLocation(Primitive::VertexAttribute::Bitangent);
+    location = GetVertexAttributeLocation(VertexAttribute::Bitangent);
     glEnableVertexAttribArray(location);
     glVertexAttribPointer(location, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Bitangent));
 
-    location = GetVertexAttributeLocation(Primitive::VertexAttribute::Color);
+    location = GetVertexAttributeLocation(VertexAttribute::Color);
     glEnableVertexAttribArray(location);
     glVertexAttribPointer(location, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Color));
 
-    location = GetVertexAttributeLocation(Primitive::VertexAttribute::TexCoord1);
+    location = GetVertexAttributeLocation(VertexAttribute::TexCoord1);
     glEnableVertexAttribArray(location);
     glVertexAttribPointer(location, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, TexCoord1));
 
-    location = GetVertexAttributeLocation(Primitive::VertexAttribute::TexCoord2);
+    location = GetVertexAttributeLocation(VertexAttribute::TexCoord2);
     glEnableVertexAttribArray(location);
     glVertexAttribPointer(location, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, TexCoord2));
 
-    location = GetVertexAttributeLocation(Primitive::VertexAttribute::Joints);
+    location = GetVertexAttributeLocation(VertexAttribute::Joints);
     glEnableVertexAttribArray(location);
     glVertexAttribPointer(location, 4, GL_SHORT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Joints));
 
-    location = GetVertexAttributeLocation(Primitive::VertexAttribute::Weights);
+    location = GetVertexAttributeLocation(VertexAttribute::Weights);
     glEnableVertexAttribArray(location);
     glVertexAttribPointer(location, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Weights));
 
@@ -104,18 +104,18 @@ bool OpenGLPrimitive::Load(const std::unique_ptr<PrimitiveData>& data)
 }
 
 DUSK_OPENGL_API
-GLenum OpenGLPrimitive::GetGLMode(const Primitive::Topology& topology)
+GLenum OpenGLPrimitive::GetGLMode(const PrimitiveTopology& topology)
 {
     switch (topology) {
-    case Primitive::Topology::Points:
+    case PrimitiveTopology::Points:
         return GL_POINTS;
-    case Primitive::Topology::Lines:
+    case PrimitiveTopology::Lines:
         return GL_LINES;
-    case Primitive::Topology::LineStrip:
+    case PrimitiveTopology::LineStrip:
         return GL_LINE_STRIP;
-    case Primitive::Topology::Triangles:
+    case PrimitiveTopology::Triangles:
         return GL_TRIANGLES;
-    case Primitive::Topology::TriangleStrip:
+    case PrimitiveTopology::TriangleStrip:
         return GL_TRIANGLE_STRIP;
     }
 

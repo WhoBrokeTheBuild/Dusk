@@ -13,32 +13,30 @@ enum class FrontFace
 {
     Clockwise,
     CounterClockwise,
-};
+
+}; // enum class FrontFace
 
 enum class CullMode
 {
     None,
     Front,
     Back,
-};
+
+}; // enum class CullMode
 
 enum class FillMode
 {
     Fill,
     Line,
-};
+
+}; // enum class FillMode
 
 enum class DepthBiasMode
 {
     Clamp,
     Clip,
-};
 
-enum class StepRate
-{
-    Vertex,
-    Instance,
-};
+}; // enum class DepthBiasMode
 
 enum class BlendOperation
 {
@@ -47,7 +45,8 @@ enum class BlendOperation
     ReverseSubtract,
     Min,
     Max,
-};
+
+}; // enum class BlendOperation
 
 enum class BlendFactor
 {
@@ -66,7 +65,8 @@ enum class BlendFactor
     ConstantAlpha,
     OneMinusConstantAlpha,
     SrcAlphaSaturated, // TODO: Investigate
-};
+
+}; // enum class BlendFactor
 
 enum class CompareOperation
 {
@@ -78,7 +78,8 @@ enum class CompareOperation
     Equal,
     NotEqual,
     Always,
-};
+
+}; // enum class CompareOperation
 
 class DUSK_ENGINE_API Pipeline : public Object
 {
@@ -94,8 +95,8 @@ public:
         _shader = shader;
     }
 
-    inline void SetMesh(std::shared_ptr<Mesh> mesh) {
-        _mesh = mesh;
+    inline void SetPrimitiveTopology(PrimitiveTopology primitiveTopology) {
+        _primitiveTopology = primitiveTopology;
     }
 
     inline void SetFrontFace(FrontFace frontFace) {
@@ -138,7 +139,7 @@ protected:
 
     std::shared_ptr<Shader> _shader = nullptr;
 
-    std::shared_ptr<Mesh> _mesh = nullptr;
+    PrimitiveTopology _primitiveTopology = PrimitiveTopology::Triangles;
 
     FrontFace _frontFace = FrontFace::CounterClockwise;
 
@@ -171,6 +172,136 @@ protected:
     BlendFactor _dstAlphaFactor = BlendFactor::One;
 
 }; // class Pipeline
+
+inline std::string FrontFaceToString(FrontFace frontFace)
+{
+    switch (frontFace) {
+    case FrontFace::Clockwise:
+        return "Clockwise";
+    case FrontFace::CounterClockwise:
+        return "CounterClockwise";
+    }
+
+    return "Unknown";
+}
+
+inline std::string CullModeToString(CullMode cullMode)
+{
+    switch (cullMode) {
+    case CullMode::None:
+        return "None";
+    case CullMode::Front:
+        return "Front";
+    case CullMode::Back:
+        return "Back";
+    }
+
+    return "Unknown";
+}
+
+inline std::string CullModeToString(FillMode fillMode)
+{
+    switch (fillMode) {
+    case FillMode::Fill:
+        return "Fill";
+    case FillMode::Line:
+        return "Line";
+    }
+
+    return "Unknown";
+}
+
+inline std::string DepthBiasModeToString(DepthBiasMode depthBiasMode)
+{
+    switch (depthBiasMode) {
+    case DepthBiasMode::Clamp:
+        return "Clamp";
+    case DepthBiasMode::Clip:
+        return "Clip";
+    }
+
+    return "Unknown";
+}
+
+inline std::string BlendOperationToString(BlendOperation blendOperation)
+{
+    switch (blendOperation) {
+    case BlendOperation::Add:
+        return "Add";
+    case BlendOperation::Subtract:
+        return "Subtract";
+    case BlendOperation::ReverseSubtract:
+        return "ReverseSubtract";
+    case BlendOperation::Min:
+        return "Min";
+    case BlendOperation::Max:
+        return "Max";
+    }
+
+    return "Unknown";
+}
+
+inline std::string BlendFactorToString(BlendFactor blendFactor)
+{
+    switch (blendFactor) {
+        case BlendFactor::Zero:
+            return "Zero";
+        case BlendFactor::One:
+            return "One";
+        case BlendFactor::SrcColor:
+            return "SrcColor";
+        case BlendFactor::OneMinusSrcColor:
+            return "OneMinusSrcColor";
+        case BlendFactor::SrcAlpha:
+            return "SrcAlpha";
+        case BlendFactor::OneMinusSrcAlpha:
+            return "OneMinusSrcAlpha";
+        case BlendFactor::DstColor:
+            return "DstColor";
+        case BlendFactor::OneMinusDstColor:
+            return "OneMinusDstColor";
+        case BlendFactor::DstAlpha:
+            return "DstAlpha";
+        case BlendFactor::OneMinusDstAlpha:
+            return "OneMinusDstAlpha";
+        case BlendFactor::ConstantColor:
+            return "ConstantColor";
+        case BlendFactor::OneMinusConstantColor:
+            return "OneMinusConstantColor";
+        case BlendFactor::ConstantAlpha:
+            return "ConstantAlpha";
+        case BlendFactor::OneMinusConstantAlpha:
+            return "OneMinusConstantAlpha";
+        case BlendFactor::SrcAlphaSaturated:
+            return "SrcAlphaSaturated";
+    }
+
+    return "Unknown";
+}
+
+inline std::string CompareOperationToString(CompareOperation compareOperation)
+{
+    switch (compareOperation) {
+        case CompareOperation::Never:
+            return "Never";
+        case CompareOperation::Less:
+            return "Less";
+        case CompareOperation::LessOrEqual:
+            return "LessOrEqual";
+        case CompareOperation::Greater:
+            return "Greater";
+        case CompareOperation::GreaterOrEqual:
+            return "GreaterOrEqual";
+        case CompareOperation::Equal:
+            return "Equal";
+        case CompareOperation::NotEqual:
+            return "NotEqual";
+        case CompareOperation::Always:
+            return "Always";
+    }
+
+    return "Unknown";
+}
 
 } // namespace Dusk
 

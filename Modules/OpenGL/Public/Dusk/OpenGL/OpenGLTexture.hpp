@@ -28,11 +28,11 @@ private:
 
     GLenum GetGLDataFormat(int components);
     
-    GLenum GetGLDataType(const TextureData::DataType& type);
+    GLenum GetGLDataType(const TextureDataType& type);
 
-    GLenum GetGLWrapType(const WrapType& type);
+    GLenum GetGLWrapType(const TextureWrapType& type);
 
-    GLenum GetGLFilterType(const FilterType& type);
+    GLenum GetGLFilterType(const TextureFilterType& type);
 
     GLuint _glID = 0;
 

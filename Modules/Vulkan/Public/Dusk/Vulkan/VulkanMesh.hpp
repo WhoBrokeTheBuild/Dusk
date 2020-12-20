@@ -23,10 +23,6 @@ public:
 
     bool Load(const std::vector<std::unique_ptr<PrimitiveData>>& data) override;
 
-    void GenerateBindCommands(VkCommandBuffer vkCommandBuffer);
-    
-    void GenerateDrawCommands(VkCommandBuffer vkCommandBuffer);
-
 private:
 
 

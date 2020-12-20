@@ -25,7 +25,8 @@ enum class LogLevel
     Performance,
     Load,
     Verbose,
-};
+
+}; // enum class LogLevel
 
 DUSK_ENGINE_API
 bool AddLogFile(const std::string& filename);

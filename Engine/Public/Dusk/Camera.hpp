@@ -7,15 +7,16 @@
 
 namespace Dusk {
 
+enum class CameraMode 
+{
+    Perspective,
+    Orthographic,
+
+}; // enum class CameraMode
+
 class DUSK_ENGINE_API Camera : public Entity
 {
 public:
-
-    enum class Mode 
-    {
-        Perspective,
-        Orthographic,
-    };
 
     DISALLOW_COPY_AND_ASSIGN(Camera)
 
@@ -27,9 +28,9 @@ public:
 
     mat4 GetProjection() const;
 
-    void SetMode(Mode mode);
+    void SetMode(CameraMode mode);
 
-    inline Mode GetMode() const {
+    inline CameraMode GetMode() const {
         return _mode;
     }
 
@@ -89,7 +90,7 @@ public:
 
 private:
 
-    Mode _mode = Mode::Perspective;
+    CameraMode _mode = CameraMode::Perspective;
 
     vec2 _clip = { 0.1f, 10000.f };
 
@@ -109,6 +110,17 @@ private:
 
 };
 
+inline std::string CameraModeToString(CameraMode cameraMode)
+{
+    switch (cameraMode) {
+        case CameraMode::Perspective:
+            return "Perspective";
+        case CameraMode::Orthographic:
+            return "Orthographic";
+    }
+
+    return "Unknown";
+}
 
 } // namespace Dusk
 

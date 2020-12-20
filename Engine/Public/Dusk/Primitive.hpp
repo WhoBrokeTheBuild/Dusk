@@ -4,10 +4,21 @@
 #include <Dusk/Config.hpp>
 #include <Dusk/Object.hpp>
 #include <Dusk/Math.hpp>
+#include <Dusk/Vertex.hpp>
 
 #include <memory>
 
 namespace Dusk {
+
+enum class PrimitiveTopology 
+{
+    Points,
+    Lines,
+    LineStrip,
+    Triangles,
+    TriangleStrip,
+
+}; // enum class PrimitiveTopology
 
 class PrimitiveData;
 
@@ -15,46 +26,6 @@ class DUSK_ENGINE_API Primitive : public Object
 {
 public:
 
-    enum class Topology 
-    {
-        Points,
-        Lines,
-        LineStrip,
-        Triangles,
-        TriangleStrip,
-
-    }; // enum class Topology
-
-    struct Vertex
-    {
-        glm::vec4 Position;
-        glm::vec4 Normal;
-        glm::vec4 Tangent;
-        glm::vec4 Bitangent;
-        
-        glm::vec4 Color;
-
-        glm::vec2 TexCoord1;
-        glm::vec2 TexCoord2;
-
-        uint16_t Joints[4];
-        float Weights[4];
-        
-    }; // struct Vertex
-
-    enum class VertexAttribute
-    {
-        Position,
-        Normal,
-        Tangent,
-        Bitangent,
-        Color,
-        TexCoord1,
-        TexCoord2,
-        Joints,
-        Weights,
-
-    }; // enum class VertexAttribute
 
     DISALLOW_COPY_AND_ASSIGN(Primitive)
 
@@ -64,9 +35,25 @@ public:
 
     virtual bool Load(const std::unique_ptr<PrimitiveData>& data) = 0;
 
-    uint32_t GetVertexAttributeLocation(VertexAttribute attribute) const;
-
 }; // class Primitive
+
+inline std::string PrimitiveTopologyToString(PrimitiveTopology primitiveTopology)
+{
+    switch (primitiveTopology) {
+    case PrimitiveTopology::Points:
+        return "Points";
+    case PrimitiveTopology::Lines:
+        return "Lines";
+    case PrimitiveTopology::LineStrip:
+        return "LineStrip";
+    case PrimitiveTopology::Triangles:
+        return "Triangles";
+    case PrimitiveTopology::TriangleStrip:
+        return "TriangleStrip";
+    }
+
+    return "Unknown";
+}
 
 } // namespace Dusk
 

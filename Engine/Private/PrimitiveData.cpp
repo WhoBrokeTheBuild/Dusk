@@ -10,7 +10,7 @@ void PrimitiveData::CalculateTBN()
     auto indexList = GetIndexList();
     auto vertexList = GetVertexList();
 
-    auto calcVertex = [](Primitive::Vertex& v1, Primitive::Vertex& v2, Primitive::Vertex& v3)
+    auto calcVertex = [](Vertex& v1, Vertex& v2, Vertex& v3)
     {
         vec3 v = vec3(v2.Position) - vec3(v1.Position);
         vec3 w = vec3(v3.Position) - vec3(v1.Position);
@@ -53,7 +53,7 @@ void PrimitiveData::CalculateTBN()
         // TODO: Account for NaN and smoothing
     };
 
-    if (topology == Primitive::Topology::Triangles) {
+    if (topology == PrimitiveTopology::Triangles) {
         if (indexList.empty()) {
             for (size_t i = 0; i < vertexList.size(); i += 3) {
                 calcVertex(
@@ -73,7 +73,7 @@ void PrimitiveData::CalculateTBN()
             }
         }
     }
-    else if (topology == Primitive::Topology::TriangleStrip) {
+    else if (topology == PrimitiveTopology::TriangleStrip) {
         if (indexList.empty()) {
             for (size_t i = 0; i < vertexList.size(); ++i) {
                 calcVertex(

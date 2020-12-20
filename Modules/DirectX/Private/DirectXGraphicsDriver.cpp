@@ -45,6 +45,9 @@ bool DirectXGraphicsDriver::Initialize()
 
     std::string title = name + " (" + GetApplicationVersion().GetString() + ")";
 
+    RECT wr = { 0, 0, 640, 480 };
+    AdjustWindowRect(&wr, WS_OVERLAPPEDWINDOW, false);
+
     _window = CreateWindowEx(
         WS_EX_CLIENTEDGE,
         name.c_str(),
@@ -52,7 +55,8 @@ bool DirectXGraphicsDriver::Initialize()
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
-        640, 480,
+        wr.right - wr.left,
+        wr.bottom - wr.top,
         nullptr, nullptr,
         (HINSTANCE)GetModuleHandle(nullptr),
         nullptr
@@ -241,8 +245,7 @@ void DirectXGraphicsDriver::SwapBuffers()
 
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(_rtvHeap->GetCPUDescriptorHandleForHeapStart(), _renderTargetIndex, _rtvDescriptorSize);
 
-    const float clearColor[] = { 0.392f, 0.584f, 0.929f, 1.0f };
-    _commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+    _commandList->ClearRenderTargetView(rtvHandle, glm::value_ptr(GetClearColor()), 0, nullptr);
 
     // _commandList->ResourceBarrier(1, 
     //     &CD3DX12_RESOURCE_BARRIER::Transition(_renderTargets[_frameIndex].Get(),
@@ -270,7 +273,7 @@ void DirectXGraphicsDriver::SwapBuffers()
     _renderTargetIndex = _swapChain->GetCurrentBackBufferIndex();
 }
 
-std::shared_ptr<Pipeline> DirectXGraphicsDriver::CreatePipeline(std::shared_ptr<Shader> shader, std::shared_ptr<Mesh> mesh)
+std::shared_ptr<Pipeline> DirectXGraphicsDriver::CreatePipeline(std::shared_ptr<Shader> shader)
 {
     return nullptr;
 }
@@ -285,9 +288,10 @@ std::shared_ptr<Shader> DirectXGraphicsDriver::CreateShader()
     return std::shared_ptr<Shader>(New DirectXShader());
 }
 
-std::shared_ptr<Mesh> DirectXGraphicsDriver::CreateMesh()
+std::unique_ptr<Primitive> DirectXGraphicsDriver::CreatePrimitive()
 {
-    return std::shared_ptr<Mesh>(New DirectXMesh());
+    return nullptr;
+    // return std::unique_ptr<Mesh>(New DirectXPrimitive());
 }
 
 bool DirectXGraphicsDriver::SetShaderData(const std::string& name, size_t size, void * data)

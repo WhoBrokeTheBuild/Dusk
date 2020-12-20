@@ -4,6 +4,23 @@
 
 namespace Dusk {
 
+DUSK_ENGINE_API
+bool Mesh::Load(const std::vector<std::unique_ptr<PrimitiveData>>& data)
+{
+    GraphicsDriver * gfx = GetGraphicsDriver();
+    
+    for (const auto& primitiveData : data) {
+        auto primitive = gfx->CreatePrimitive();
+        if (!primitive || !primitive->Load(primitiveData)) {
+            return false;
+        }
+        _primitiveList.push_back(std::move(primitive));
+    }
+
+    return true;
+}
+
+DUSK_ENGINE_API
 std::shared_ptr<Mesh> LoadMeshFromFile(const std::string& filename)
 {
     GraphicsDriver * gfx = GetGraphicsDriver();

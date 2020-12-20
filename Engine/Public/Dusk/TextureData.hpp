@@ -9,29 +9,20 @@
 
 namespace Dusk {
 
+enum class TextureDataType
+{
+    UnsignedByte,
+    Byte,
+    UnsignedShort,
+    Short,
+    UnsignedInt,
+    Int,
+
+}; // enum TextureDataType
+
 class DUSK_ENGINE_API TextureData : public Object
 {
 public:
-
-    enum class DUSK_ENGINE_API CompressionType {
-        None,
-
-        // S3 Texture Compression (DirectX Texture Compression)
-        S3TC_DXT1, // RGB, RGBA
-        S3TC_DXT3, // RGBA
-        S3TC_DXT5, // RGBA
-
-    }; // enum CompressionType
-
-    enum class DUSK_ENGINE_API DataType {
-        UnsignedByte,
-        Byte,
-        UnsignedShort,
-        Short,
-        UnsignedInt,
-        Int,
-
-    }; // enum DataType
 
     DISALLOW_COPY_AND_ASSIGN(TextureData)
 
@@ -48,15 +39,30 @@ public:
     // Number of components (R, RG, RGB, RGBA)
     virtual int GetComponents() const = 0;
 
-    // Compression of the pixels in the data
-    virtual inline CompressionType GetCompressionType() const {
-        return CompressionType::None;
-    }
-
     // Format of the data in the buffer
-    virtual DataType GetDataType() const = 0;
+    virtual TextureDataType GetDataType() const = 0;
 
 }; // class TextureData
+
+inline std::string TextureDataTypeToString(TextureDataType textureDataType)
+{
+    switch (textureDataType) {
+        case TextureDataType::UnsignedByte:
+            return "UnsignedByte";
+        case TextureDataType::Byte:
+            return "Byte";
+        case TextureDataType::UnsignedShort:
+            return "UnsignedShort";
+        case TextureDataType::Short:
+            return "Short";
+        case TextureDataType::UnsignedInt:
+            return "UnsignedInt";
+        case TextureDataType::Int:
+            return "Int";
+    }
+
+    return "Unknown";
+}
 
 } // namespace Dusk
 

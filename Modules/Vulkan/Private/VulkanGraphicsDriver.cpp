@@ -8,6 +8,9 @@
 
 #include <set>
 
+#define VMA_IMPLEMENTATION
+#include <vk_mem_alloc.h>
+
 namespace Dusk::Vulkan {
 
 DUSK_VULKAN_API
@@ -42,6 +45,10 @@ bool VulkanGraphicsDriver::Initialize()
     }
 
     if (!InitLogicalDevice()) {
+        return false;
+    }
+
+    if (!InitAllocator()) {
         return false;
     }
 
@@ -95,6 +102,7 @@ void VulkanGraphicsDriver::Terminate()
     TermSwapChain();
     _pipelines.clear();
 
+    TermAllocator();
     TermLogicalDevice();
     TermSurface();
     TermDebugMessenger();
@@ -123,7 +131,6 @@ void VulkanGraphicsDriver::SwapBuffers()
         DuskLogFatal("vkAcquireNextImageKHR() failed");
     }
 
-
     Camera camera;
     camera.SetPosition({ 3, 3, 3 });
     camera.SetLookAt({ 0, 0, 0 });
@@ -143,11 +150,9 @@ void VulkanGraphicsDriver::SwapBuffers()
     transform.UpdateMVP();
 
     void * data;
-    vkMapMemory(_vkDevice, _vkUniformBuffersMemory[imageIndex], 0, sizeof(transform), 0, &data);
+    vmaMapMemory(_vmaAllocator, _vkUniformBufferAllocations[imageIndex], &data);
     memcpy(data, &transform, sizeof(transform));
-    vkUnmapMemory(_vkDevice, _vkUniformBuffersMemory[imageIndex]);
-
-
+    vmaUnmapMemory(_vmaAllocator, _vkUniformBufferAllocations[imageIndex]);
 
     if (_vkImagesInFlight[imageIndex] != VK_NULL_HANDLE) {
         vkWaitForFences(_vkDevice, 1, &_vkImagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
@@ -206,11 +211,10 @@ void VulkanGraphicsDriver::SwapBuffers()
 }
 
 DUSK_VULKAN_API
-std::shared_ptr<Pipeline> VulkanGraphicsDriver::CreatePipeline(std::shared_ptr<Shader> shader, std::shared_ptr<Mesh> mesh)
+std::shared_ptr<Pipeline> VulkanGraphicsDriver::CreatePipeline(std::shared_ptr<Shader> shader)
 {
     auto ptr = std::shared_ptr<Pipeline>(New VulkanPipeline());
     ptr->SetShader(shader);
-    ptr->SetMesh(mesh);
     // ptr->Initialize();
     _pipelines.push_back(ptr);
 
@@ -231,9 +235,9 @@ std::shared_ptr<Shader> VulkanGraphicsDriver::CreateShader()
 }
 
 DUSK_VULKAN_API
-std::shared_ptr<Mesh> VulkanGraphicsDriver::CreateMesh()
+std::unique_ptr<Primitive> VulkanGraphicsDriver::CreatePrimitive()
 {
-    return std::shared_ptr<Mesh>(New VulkanMesh());
+    return std::unique_ptr<Primitive>(New VulkanPrimitive());
 }
 
 DUSK_VULKAN_API
@@ -261,42 +265,77 @@ uint32_t VulkanGraphicsDriver::FindMemoryType(uint32_t filter, VkMemoryPropertyF
     return UINT32_MAX;
 }
 
-bool VulkanGraphicsDriver::CreateBuffer(VkBuffer & buffer, VkDeviceMemory & memory, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags props)
+bool VulkanGraphicsDriver::CreateBuffer(VkBuffer * buffer, VmaAllocation * vmaAllocation, VkDeviceSize size, VkBufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage)
 {
-    VkResult result;
+    VkResult vkResult;
     
     VkBufferCreateInfo bufferCreateInfo = {
         .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
         .size = size,
-        .usage = usage,
+        .usage = bufferUsage,
         .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
     };
 
-    result = vkCreateBuffer(_vkDevice, &bufferCreateInfo, nullptr, &buffer);
-    if (result != VK_SUCCESS) {
+    VmaAllocationCreateInfo allocationCreateInfo = {
+        .flags = VMA_ALLOCATION_CREATE_MAPPED_BIT,
+        .usage = memoryUsage,
+    };
+
+    VmaAllocationInfo allocationInfo = {
+    };
+
+    vkResult = vmaCreateBuffer(_vmaAllocator, &bufferCreateInfo, &allocationCreateInfo, buffer, vmaAllocation, &allocationInfo);
+    if (vkResult != VK_SUCCESS) {
         DuskLogError("Failed to create buffer");
         return false;
     }
 
-    VkMemoryRequirements memoryRequirements;
-    vkGetBufferMemoryRequirements(_vkDevice, buffer, &memoryRequirements);
+    return true;
+}
 
-    VkMemoryAllocateInfo memoryAllocateInfo = {
-        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+bool VulkanGraphicsDriver::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
+{
+    VkResult vkResult;
+
+    VkCommandBufferAllocateInfo commandBufferAllocateInfo = {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
         .pNext = nullptr,
-        .allocationSize = memoryRequirements.size,
-        .memoryTypeIndex = FindMemoryType(memoryRequirements.memoryTypeBits, props),
+        .commandPool = _vkCommandPool,
+        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+        .commandBufferCount = 1,
     };
 
-    result = vkAllocateMemory(_vkDevice, &memoryAllocateInfo, nullptr, &memory);
-    if (result != VK_SUCCESS) {
-        DuskLogError("Failed to allocate memory");
+    VkCommandBuffer commandBuffer;
+    vkResult = vkAllocateCommandBuffers(_vkDevice, &commandBufferAllocateInfo, &commandBuffer);
+    if (vkResult != VK_SUCCESS) {
+        DuskLogError("Failed to allocate command buffer");
         return false;
     }
 
-    vkBindBufferMemory(_vkDevice, buffer, memory, 0);
+    VkCommandBufferBeginInfo commandBufferBeginInfo = {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+        .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+    };
+
+    vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
+
+    VkBufferCopy copyRegion = {
+        .srcOffset = 0,
+        .dstOffset = 0,
+        .size = size,
+    };
+
+    vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+
+    vkResult = vkEndCommandBuffer(commandBuffer);
+    if (vkResult != VK_SUCCESS) {
+        DuskLogError("Failed to build command buffer");
+        return false;
+    }
+
+
     return true;
 }
 
@@ -314,44 +353,53 @@ bool VulkanGraphicsDriver::IsDeviceSuitable(const VkPhysicalDevice device)
         && _vkPhysicalDeviceFeatures.geometryShader;
 }
 
-std::vector<const char *> VulkanGraphicsDriver::GetEnabledDeviceLayers()
+std::vector<const char *> VulkanGraphicsDriver::GetRequiredDeviceLayers()
 {
-    std::vector<const char *> enabledLayers = {
+    std::vector<const char *> requiredLayers = {
 
     };
 
     #if defined(DUSK_VULKAN_VALIDATION_LAYER)
 
-        enabledLayers.push_back("VK_LAYER_KHRONOS_validation");
+        requiredLayers.push_back("VK_LAYER_KHRONOS_validation");
 
     #endif
 
-    return enabledLayers;
+    return requiredLayers;
 }
 
-std::vector<const char *> VulkanGraphicsDriver::GetEnabledDeviceExtensions()
+std::vector<const char *> VulkanGraphicsDriver::GetRequiredDeviceExtensions()
 {
-    std::vector<const char *> enabledExtensions = {
-        VK_KHR_SWAPCHAIN_EXTENSION_NAME
+    std::vector<const char *> requiredExtensions = {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
     };
 
-    return enabledExtensions;
+    auto it = _vkAvailableDeviceExtensions.find(VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME);
+    if (it != _vkAvailableDeviceExtensions.end()) {
+        requiredExtensions.push_back(VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME);
+    }
+
+    it = _vkAvailableDeviceExtensions.find(VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME);
+    if (it != _vkAvailableDeviceExtensions.end()) {
+        requiredExtensions.push_back(VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME);
+    }
+
+    it = _vkAvailableDeviceExtensions.find(VK_KHR_BIND_MEMORY_2_EXTENSION_NAME);
+    if (it != _vkAvailableDeviceExtensions.end()) {
+        requiredExtensions.push_back(VK_KHR_BIND_MEMORY_2_EXTENSION_NAME);
+    }
+
+    it = _vkAvailableDeviceExtensions.find(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
+    if (it != _vkAvailableDeviceExtensions.end()) {
+        requiredExtensions.push_back(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
+    }
+
+    return requiredExtensions;
 }
 
 std::vector<const char *> VulkanGraphicsDriver::GetRequiredInstanceExtensions()
 {
     SDL_bool sdlResult;
-    
-    uint32_t availableExtensionCount = 0;
-    vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, nullptr);
-
-    std::vector<VkExtensionProperties> availableExtensions(availableExtensionCount);
-    vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, availableExtensions.data());
-
-    DuskLogVerbose("Available Vulkan Extensions:");
-    for (const auto& extension : availableExtensions) {
-        DuskLogVerbose("\t%s", extension.extensionName);
-    }
 
     uint32_t requiredExtensionCount;
     SDL_Vulkan_GetInstanceExtensions(GetSDL2Window(), &requiredExtensionCount, nullptr);
@@ -365,15 +413,8 @@ std::vector<const char *> VulkanGraphicsDriver::GetRequiredInstanceExtensions()
 
     #if defined(DUSK_VULKAN_VALIDATION_LAYER)
 
-        bool debugUtilsExtensionFound = false;
-        for (const auto& extension : availableExtensions) {
-            if (std::string(extension.extensionName) == VK_EXT_DEBUG_UTILS_EXTENSION_NAME) {
-                debugUtilsExtensionFound = true;
-                break;
-            }
-        }
-
-        if (debugUtilsExtensionFound) {
+        auto it = _vkAvailableInstanceExtensions.find(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        if (it != _vkAvailableInstanceExtensions.end()) {
             requiredExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
         }
         else {
@@ -381,11 +422,6 @@ std::vector<const char *> VulkanGraphicsDriver::GetRequiredInstanceExtensions()
         }
 
     #endif
-
-    DuskLogVerbose("Required Vulkan Extensions:");
-    for (uint32_t i = 0; i < requiredExtensionCount; ++i) {
-        DuskLogVerbose("\t%s", requiredExtensions[i]);
-    }
 
     return requiredExtensions;
 }
@@ -398,10 +434,53 @@ bool VulkanGraphicsDriver::InitInstance()
     const auto& appVersion = GetApplicationVersion();
     const auto& appName = GetApplicationName();
 
+    uint32_t availableLayerCount = 0;
+    vkEnumerateInstanceLayerProperties(&availableLayerCount, nullptr);
+
+    if (availableLayerCount == 0) {
+        DuskLogError("vkEnumerateInstanceLayerProperties() failed, no available layers");
+        return false;
+    }
+
+    std::vector<VkLayerProperties> availableLayers(availableLayerCount);
+    vkResult = vkEnumerateInstanceLayerProperties(&availableLayerCount, availableLayers.data());
+
+    DuskLogVerbose("Available Vulkan Layers:");
+    for (const auto& layer : availableLayers) {
+        DuskLogVerbose("\t%s: %s", layer.layerName, layer.description);
+        _vkAvailableLayers.emplace(layer.layerName, layer);
+    }
+
+    uint32_t availableExtensionCount = 0;
+    vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, nullptr);
+
+    if (availableExtensionCount == 0) {
+        DuskLogError("vkEnumerateInstanceExtensionProperties() failed, no extensions available");
+        return false;
+    }
+
+    std::vector<VkExtensionProperties> availableExtensions(availableExtensionCount);
+    vkResult = vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, availableExtensions.data());
+    if (vkResult != VK_SUCCESS) {
+        DuskLogError("vkEnumerateInstanceExtensionProperties() failed");
+        return false;
+    }
+
+    DuskLogVerbose("Available Vulkan Instance Extensions:");
+    for (const auto& extension : availableExtensions) {
+        DuskLogVerbose("\t%s", extension.extensionName);
+        _vkAvailableInstanceExtensions.emplace(extension.extensionName, extension);
+    }
+
     const auto& requiredExtensions = GetRequiredInstanceExtensions();
     if (requiredExtensions.empty()) {
         DuskLogError("Failed to get Required Instance Expansions");
         return false;
+    }
+
+    DuskLogVerbose("Required Vulkan Instance Extensions:");
+    for (const auto& extension : requiredExtensions) {
+        DuskLogVerbose("\t%s", extension);
     }
 
     VkApplicationInfo applicationInfo = {
@@ -485,27 +564,14 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL _VulkanDebugMessageCallback(
 
 bool VulkanGraphicsDriver::InitDebugMessenger()
 {
-#if !defined(DUSK_VULKAN_VALIDATION_LAYER)
-    return true;
-#endif
+    #if !defined(DUSK_VULKAN_VALIDATION_LAYER)
+        return true;
+    #endif
 
     VkResult vkResult;
 
-    uint32_t layerCount;
-    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-
-    std::vector<VkLayerProperties> layers(layerCount);
-    vkEnumerateInstanceLayerProperties(&layerCount, layers.data());
-
-    bool validationLayerFound = false;
-    for (const auto& layer : layers) {
-        if (std::string(layer.layerName) == "VK_LAYER_KHRONOS_validation") {
-            validationLayerFound = true;
-            break;
-        }
-    }
-
-    if (!validationLayerFound) {
+    auto it = _vkAvailableLayers.find("VK_LAYER_KHRONOS_validation");
+    if (it == _vkAvailableLayers.end()) {
         return false;
     }
 
@@ -584,6 +650,8 @@ void VulkanGraphicsDriver::TermSurface()
 
 bool VulkanGraphicsDriver::InitPhysicalDevice()
 {
+    VkResult vkResult;
+
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(_vkInstance, &deviceCount, nullptr);
 
@@ -593,7 +661,11 @@ bool VulkanGraphicsDriver::InitPhysicalDevice()
     }
 
     std::vector<VkPhysicalDevice> devices(deviceCount);
-    vkEnumeratePhysicalDevices(_vkInstance, &deviceCount, devices.data());
+    vkResult = vkEnumeratePhysicalDevices(_vkInstance, &deviceCount, devices.data());
+    if (vkResult != VK_SUCCESS) {
+        DuskLogError("vkEnumeratePhysicalDevices() failed");
+        return false;
+    }
 
     for (const auto& device : devices) {
         if (IsDeviceSuitable(device)) {
@@ -615,6 +687,27 @@ bool VulkanGraphicsDriver::InitPhysicalDevice()
         return false;
     }
 
+    uint32_t availableExtensionCount = 0;
+    vkEnumerateDeviceExtensionProperties(_vkPhysicalDevice, nullptr, &availableExtensionCount, nullptr);
+
+    if (availableExtensionCount == 0) {
+        DuskLogError("vkEnumerateDeviceExtensionProperties() failed, no extensions available");
+        return false;
+    }
+
+    std::vector<VkExtensionProperties> availableExtensions(availableExtensionCount);
+    vkResult = vkEnumerateDeviceExtensionProperties(_vkPhysicalDevice, nullptr, &availableExtensionCount, availableExtensions.data());
+    if (vkResult != VK_SUCCESS) {
+        DuskLogError("vkEnumerateDeviceExtensionProperties() failed");
+        return false;
+    }
+
+    DuskLogVerbose("Available Vulkan Device Extensions:");
+    for (const auto& extension : availableExtensions) {
+        DuskLogVerbose("\t%s", extension.extensionName);
+        _vkAvailableDeviceExtensions.emplace(extension.extensionName, extension);
+    }
+    
     return true;
 }
 
@@ -704,8 +797,19 @@ bool VulkanGraphicsDriver::InitLogicalDevice()
         // TODO
     };
 
-    const auto& enabledLayers = GetEnabledDeviceLayers();
-    const auto& enabledExtensions = GetEnabledDeviceExtensions();
+    const auto& requiredLayers = GetRequiredDeviceLayers();
+
+    DuskLogVerbose("Required Vulkan Device Layers:");
+    for (const auto& layer : requiredLayers) {
+        DuskLogVerbose("\t%s", layer);
+    }
+
+    const auto& requiredExtensions = GetRequiredDeviceExtensions();
+    
+    DuskLogVerbose("Required Vulkan Device Extensions:");
+    for (const auto& extension : requiredExtensions) {
+        DuskLogVerbose("\t%s", extension);
+    }
 
     VkDeviceCreateInfo deviceCreateInfo = {
         .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
@@ -713,10 +817,10 @@ bool VulkanGraphicsDriver::InitLogicalDevice()
         .flags = 0,
         .queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfoList.size()),
         .pQueueCreateInfos = queueCreateInfoList.data(),
-        .enabledLayerCount = static_cast<uint32_t>(enabledLayers.size()),
-        .ppEnabledLayerNames = enabledLayers.data(),
-        .enabledExtensionCount = static_cast<uint32_t>(enabledExtensions.size()),
-        .ppEnabledExtensionNames = enabledExtensions.data(),
+        .enabledLayerCount = static_cast<uint32_t>(requiredLayers.size()),
+        .ppEnabledLayerNames = requiredLayers.data(),
+        .enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size()),
+        .ppEnabledExtensionNames = requiredExtensions.data(),
         .pEnabledFeatures = &deviceFeatures,
     };
 
@@ -742,6 +846,52 @@ bool VulkanGraphicsDriver::InitLogicalDevice()
 void VulkanGraphicsDriver::TermLogicalDevice()
 {
     vkDestroyDevice(_vkDevice, nullptr);
+}
+
+bool VulkanGraphicsDriver::InitAllocator()
+{
+    VkResult vkResult;
+
+    VmaAllocatorCreateFlags flags = 0;
+
+    auto it = _vkAvailableDeviceExtensions.find(VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME);
+    if (it != _vkAvailableDeviceExtensions.end()) {
+        flags |= VMA_ALLOCATOR_CREATE_KHR_BIND_MEMORY2_BIT;
+    }
+
+    it = _vkAvailableDeviceExtensions.find(VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME);
+    if (it != _vkAvailableDeviceExtensions.end()) {
+        flags |= VMA_ALLOCATOR_CREATE_KHR_DEDICATED_ALLOCATION_BIT;
+    }
+
+    it = _vkAvailableDeviceExtensions.find(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
+    if (it != _vkAvailableDeviceExtensions.end()) {
+        flags |= VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
+    }
+
+    VmaAllocatorCreateInfo allocatorCreateInfo = {
+        .flags = flags,
+        .physicalDevice = _vkPhysicalDevice,
+        .device = _vkDevice,
+        // .preferredLargeHeapBlockSize = ,
+        // .pAllocationCallbacks = ,
+        // .pDeviceMemoryCallbacks = ,
+        .instance = _vkInstance,
+        .vulkanApiVersion = VK_API_VERSION_1_1,
+    };
+
+    vkResult = vmaCreateAllocator(&allocatorCreateInfo, &_vmaAllocator);
+    if (vkResult != VK_SUCCESS) {
+        DuskLogError("vmaCreateAllocator() failed");
+        return false;
+    }
+
+    return true;
+}
+
+void VulkanGraphicsDriver::TermAllocator()
+{
+    vmaDestroyAllocator(_vmaAllocator);
 }
 
 bool VulkanGraphicsDriver::InitSwapChain()
@@ -872,13 +1022,13 @@ bool VulkanGraphicsDriver::InitSwapChain()
     }
 
     _vkUniformBuffers.resize(_vkSwapChainImages.size());
-    _vkUniformBuffersMemory.resize(_vkSwapChainImages.size());
+    _vkUniformBufferAllocations.resize(_vkSwapChainImages.size());
 
     for (size_t i = 0; i < _vkSwapChainImages.size(); ++i) {
-        CreateBuffer(_vkUniformBuffers[i], _vkUniformBuffersMemory[i], 
+        CreateBuffer(&_vkUniformBuffers[i], &_vkUniformBufferAllocations[i], 
             sizeof(TransformData), 
             VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+            VMA_MEMORY_USAGE_CPU_TO_GPU);
     }
 
     return true;
@@ -914,7 +1064,7 @@ void VulkanGraphicsDriver::TermSwapChain()
 
     for (size_t i = 0; i < _vkSwapChainImages.size(); i++) {
         vkDestroyBuffer(_vkDevice, _vkUniformBuffers[i], nullptr);
-        vkFreeMemory(_vkDevice, _vkUniformBuffersMemory[i], nullptr);
+        vmaFreeMemory(_vmaAllocator, _vkUniformBufferAllocations[i]);
     }
 
     vkDestroyDescriptorPool(_vkDevice, _vkDescriptorPool, nullptr);

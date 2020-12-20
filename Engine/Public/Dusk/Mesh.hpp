@@ -22,15 +22,19 @@ public:
 
     virtual void Render() { }
 
-    virtual bool Load(const std::vector<std::unique_ptr<PrimitiveData>>& data) = 0;
+    virtual bool Load(const std::vector<std::unique_ptr<PrimitiveData>>& data);
+
+    // virtual void SetPipeline(std::shared_ptr<Pipeline> pipeline);
 
 protected:
 
-    std::vector<std::unique_ptr<Primitive>> _primitives;
+    std::vector<std::unique_ptr<Primitive>> _primitiveList;
 
+    // std::shared_ptr<Pipeline> _pipeline;
 
 }; // class Mesh
 
+DUSK_ENGINE_API
 std::shared_ptr<Mesh> LoadMeshFromFile(const std::string& filename);
 
 } // namespace Dusk

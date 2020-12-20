@@ -11,6 +11,7 @@
 #include <Dusk/Shader.hpp>
 #include <Dusk/Mesh.hpp>
 #include <Dusk/Event.hpp>
+#include <Dusk/Buffer.hpp>
 
 #include <string>
 #include <vector>
@@ -58,17 +59,29 @@ public:
         return _clearColor;
     }
 
+    virtual void SetDefaultPipeline(std::shared_ptr<Pipeline> pipeline) {
+        _defaultPipeline = pipeline;
+    }
+
+    virtual std::shared_ptr<Pipeline> GetDefaultPipeline() const {
+        return _defaultPipeline;
+    }
+
     virtual void ProcessEvents() = 0;
     
     virtual void SwapBuffers() = 0;
 
-    virtual std::shared_ptr<Pipeline> CreatePipeline(std::shared_ptr<Shader> shader, std::shared_ptr<Mesh> mesh) = 0;
+    virtual std::shared_ptr<Pipeline> CreatePipeline(std::shared_ptr<Shader> shader) = 0;
 
     virtual std::shared_ptr<Texture> CreateTexture() = 0;
 
     virtual std::shared_ptr<Shader> CreateShader() = 0;
 
-    virtual std::shared_ptr<Mesh> CreateMesh() = 0;
+    virtual std::shared_ptr<Mesh> CreateMesh() {
+        return std::shared_ptr<Mesh>(New Mesh());
+    }
+
+    virtual std::unique_ptr<Primitive> CreatePrimitive() = 0;
 
     virtual UpdateContext * GetUpdateContext();
 
@@ -79,6 +92,8 @@ public:
     Event<Dusk::WindowResizedEventData> WindowResizedEvent;
 
 private:
+
+    std::shared_ptr<Pipeline> _defaultPipeline;
 
     vec4 _clearColor = vec4(0.392f, 0.584f, 0.929f, 1.0f);
 

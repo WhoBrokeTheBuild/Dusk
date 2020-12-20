@@ -80,20 +80,20 @@ GLenum OpenGLTexture::GetGLDataFormat(int components)
 }
 
 DUSK_OPENGL_API
-GLenum OpenGLTexture::GetGLDataType(const TextureData::DataType& type)
+GLenum OpenGLTexture::GetGLDataType(const TextureDataType& type)
 {
     switch (type) {
-    case TextureData::DataType::UnsignedByte:
+    case TextureDataType::UnsignedByte:
         return GL_UNSIGNED_BYTE;
-    case TextureData::DataType::Byte:
+    case TextureDataType::Byte:
         return GL_BYTE;
-    case TextureData::DataType::UnsignedShort:
+    case TextureDataType::UnsignedShort:
         return GL_UNSIGNED_SHORT;
-    case TextureData::DataType::Short:
+    case TextureDataType::Short:
         return GL_SHORT;
-    case TextureData::DataType::UnsignedInt:
+    case TextureDataType::UnsignedInt:
         return GL_UNSIGNED_INT;
-    case TextureData::DataType::Int:
+    case TextureDataType::Int:
         return GL_INT;
     }
 
@@ -101,16 +101,16 @@ GLenum OpenGLTexture::GetGLDataType(const TextureData::DataType& type)
 }
 
 DUSK_OPENGL_API
-GLenum OpenGLTexture::GetGLWrapType(const Texture::WrapType& type)
+GLenum OpenGLTexture::GetGLWrapType(const TextureWrapType& type)
 {
     switch (type) {
-    case Texture::WrapType::Repeat:
+    case TextureWrapType::Repeat:
         return GL_REPEAT;
-    case Texture::WrapType::MirroredRepeat:
+    case TextureWrapType::MirroredRepeat:
         return GL_MIRRORED_REPEAT;
-    case Texture::WrapType::ClampToEdge:
+    case TextureWrapType::ClampToEdge:
         return GL_CLAMP_TO_EDGE;
-    case Texture::WrapType::ClampToBorder:
+    case TextureWrapType::ClampToBorder:
         return GL_CLAMP_TO_BORDER;
     }
 
@@ -118,20 +118,20 @@ GLenum OpenGLTexture::GetGLWrapType(const Texture::WrapType& type)
 }
 
 DUSK_OPENGL_API
-GLenum OpenGLTexture::GetGLFilterType(const Texture::FilterType& type)
+GLenum OpenGLTexture::GetGLFilterType(const TextureFilterType& type)
 {
     switch (type) {
-    case Texture::FilterType::Nearest:
+    case TextureFilterType::Nearest:
         return GL_NEAREST;
-    case Texture::FilterType::NearestMipmapLinear:
+    case TextureFilterType::NearestMipmapLinear:
         return GL_NEAREST_MIPMAP_LINEAR;
-    case Texture::FilterType::NearestMipmapNearest:
+    case TextureFilterType::NearestMipmapNearest:
         return GL_NEAREST_MIPMAP_NEAREST;
-    case Texture::FilterType::Linear:
+    case TextureFilterType::Linear:
         return GL_LINEAR;
-    case Texture::FilterType::LinearMipmapLinear:
+    case TextureFilterType::LinearMipmapLinear:
         return GL_LINEAR_MIPMAP_LINEAR;
-    case Texture::FilterType::LinearMipmapNearest:
+    case TextureFilterType::LinearMipmapNearest:
         return GL_LINEAR_MIPMAP_NEAREST;
     }
 

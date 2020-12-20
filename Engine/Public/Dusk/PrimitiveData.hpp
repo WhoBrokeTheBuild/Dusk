@@ -19,13 +19,13 @@ public:
 
     virtual ~PrimitiveData() = default;
 
-    virtual Primitive::Topology GetTopology() const = 0;
+    virtual PrimitiveTopology GetTopology() const = 0;
 
     virtual gsl::span<uint32_t> GetIndexList() {
         return gsl::span<uint32_t>();
     }
     
-    virtual gsl::span<Primitive::Vertex> GetVertexList() = 0;
+    virtual gsl::span<Vertex> GetVertexList() = 0;
 
     virtual void CalculateTBN();
 

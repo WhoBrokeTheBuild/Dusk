@@ -7,7 +7,8 @@
 
 namespace Dusk {
 
-enum class KeyboardKey {
+enum class KeyboardKey
+{
     Unknown = -1,
 
     A,

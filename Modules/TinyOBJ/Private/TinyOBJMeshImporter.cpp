@@ -73,7 +73,6 @@ std::vector<std::unique_ptr<PrimitiveData>> TinyOBJMeshImporter::LoadFromFile(co
             auto index = shape.mesh.indices[i];
             auto& vertex = primitiveData->VertexList[i];
 
-            index.vertex_index -= 1;
             vertex.Position = {
                 attrib.vertices[3 * index.vertex_index + 0],
                 attrib.vertices[3 * index.vertex_index + 1],
@@ -82,7 +81,6 @@ std::vector<std::unique_ptr<PrimitiveData>> TinyOBJMeshImporter::LoadFromFile(co
             };
 
             if (hasNormals) {
-                index.normal_index -= 1;
                 vertex.Normal = {
                     attrib.normals[3 * index.normal_index + 0],
                     attrib.normals[3 * index.normal_index + 1],
@@ -101,7 +99,6 @@ std::vector<std::unique_ptr<PrimitiveData>> TinyOBJMeshImporter::LoadFromFile(co
             }
             
             if (hasTexCoords) {
-                index.texcoord_index -= 1;
                 vertex.TexCoord1 = {
                     attrib.texcoords[2 * index.texcoord_index + 0],
                     attrib.texcoords[2 * index.texcoord_index + 1],

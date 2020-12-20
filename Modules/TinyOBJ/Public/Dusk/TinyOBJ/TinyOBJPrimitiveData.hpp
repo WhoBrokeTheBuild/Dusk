@@ -11,14 +11,14 @@ class DUSK_TINYOBJ_API TinyOBJPrimitiveData : public PrimitiveData
 {
 public:
 
-    std::vector<Primitive::Vertex> VertexList;
+    std::vector<Vertex> VertexList;
 
-    Primitive::Topology GetTopology() const override {
-        return Primitive::Topology::Triangles;
+    PrimitiveTopology GetTopology() const override {
+        return PrimitiveTopology::Triangles;
     }
 
-    gsl::span<Primitive::Vertex> GetVertexList() override {
-        return gsl::span<Primitive::Vertex>(VertexList.data(), VertexList.size());
+    gsl::span<Vertex> GetVertexList() override {
+        return gsl::span<Vertex>(VertexList.data(), VertexList.size());
     }
 
 }; // class TinyOBJPrimitiveData

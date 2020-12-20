@@ -26,7 +26,7 @@ public:
 
 private:
 
-    GLenum GetGLMode(const Primitive::Topology& topology);
+    GLenum GetGLMode(const PrimitiveTopology& topology);
 
     GLuint _glVAO;
 
@@ -37,6 +37,25 @@ private:
     bool _indexed;
 
 }; // class OpenGLPrimitive
+
+inline GLenum GetGLPrimitiveTopology(PrimitiveTopology primitiveTopology)
+{
+    switch (primitiveTopology) {
+    case PrimitiveTopology::Points:
+        return GL_POINTS;
+    case PrimitiveTopology::Lines:
+        return GL_LINES;
+    case PrimitiveTopology::LineStrip:
+        return GL_LINE_STRIP;
+    case PrimitiveTopology::Triangles:
+        return GL_TRIANGLES;
+    case PrimitiveTopology::TriangleStrip:
+        return GL_TRIANGLE_STRIP;
+    default: ;
+    }
+
+    return GL_INVALID_ENUM;
+}
 
 } // namespace Dusk::OpenGL
 

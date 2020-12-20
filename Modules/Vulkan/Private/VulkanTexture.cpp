@@ -42,7 +42,7 @@ bool VulkanTexture::Load(const std::unique_ptr<TextureData>& data, Options opts 
     //     .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
     // };
 
-    // if (vkCreateImage(gfx->GetVkDevice(), &imageCreateInfo, nullptr, &_vkImage) != VK_SUCCESS) {
+    // if (vkCreateImage(gfx->GetDevice(), &imageCreateInfo, nullptr, &_vkImage) != VK_SUCCESS) {
     //     DuskLogError("Failed to create image");
     //     return false;
     // }
@@ -53,77 +53,6 @@ bool VulkanTexture::Load(const std::unique_ptr<TextureData>& data, Options opts 
 
     DuskBenchmarkEnd("VulkanTexture::Load");
     return true;
-}
-
-DUSK_VULKAN_API
-VkFormat VulkanTexture::GetVkDataFormat(int components, const TextureData::DataType& type)
-{
-    if (components == 1) {
-        switch(type) {
-            case TextureData::DataType::UnsignedByte:
-                return VK_FORMAT_R8_UINT;
-            case TextureData::DataType::Byte:
-                return VK_FORMAT_R8_SINT;
-            case TextureData::DataType::UnsignedShort:
-                return VK_FORMAT_R16_UINT;
-            case TextureData::DataType::Short:
-                return VK_FORMAT_R16_SINT;
-            case TextureData::DataType::UnsignedInt:
-                return VK_FORMAT_R32_UINT;
-            case TextureData::DataType::Int:
-                return VK_FORMAT_R32_SINT;
-        }
-    }
-    else if (components == 2) {
-        switch(type) {
-            case TextureData::DataType::UnsignedByte:
-                return VK_FORMAT_R8G8_UINT;
-            case TextureData::DataType::Byte:
-                return VK_FORMAT_R8G8_SINT;
-            case TextureData::DataType::UnsignedShort:
-                return VK_FORMAT_R16G16_UINT;
-            case TextureData::DataType::Short:
-                return VK_FORMAT_R16G16_SINT;
-            case TextureData::DataType::UnsignedInt:
-                return VK_FORMAT_R32G32_UINT;
-            case TextureData::DataType::Int:
-                return VK_FORMAT_R32G32_SINT;
-        }
-    }
-    else if (components == 3) {
-        switch(type) {
-            case TextureData::DataType::UnsignedByte:
-                return VK_FORMAT_R8G8B8_UINT;
-            case TextureData::DataType::Byte:
-                return VK_FORMAT_R8G8B8_SINT;
-            case TextureData::DataType::UnsignedShort:
-                return VK_FORMAT_R16G16B16_UINT;
-            case TextureData::DataType::Short:
-                return VK_FORMAT_R16G16B16_SINT;
-            case TextureData::DataType::UnsignedInt:
-                return VK_FORMAT_R32G32B32_UINT;
-            case TextureData::DataType::Int:
-                return VK_FORMAT_R32G32B32_SINT;
-        }
-    }
-    else if (components == 4) {
-        switch(type) {
-            case TextureData::DataType::UnsignedByte:
-                return VK_FORMAT_R8G8B8A8_UINT;
-            case TextureData::DataType::Byte:
-                return VK_FORMAT_R8G8B8A8_SINT;
-            case TextureData::DataType::UnsignedShort:
-                return VK_FORMAT_R16G16B16A16_UINT;
-            case TextureData::DataType::Short:
-                return VK_FORMAT_R16G16B16A16_SINT;
-            case TextureData::DataType::UnsignedInt:
-                return VK_FORMAT_R32G32B32A32_UINT;
-            case TextureData::DataType::Int:
-                return VK_FORMAT_R32G32B32A32_SINT;
-        }
-    }
-
-    return VK_FORMAT_UNDEFINED;
 }
 
 } // namespace Dusk::Vulkan

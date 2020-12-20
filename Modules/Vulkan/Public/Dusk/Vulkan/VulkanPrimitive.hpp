@@ -3,8 +3,12 @@
 
 #include <Dusk/Vulkan/VulkanConfig.hpp>
 
+#include <Dusk/Log.hpp>
 #include <Dusk/Primitive.hpp>
 #include <Dusk/PrimitiveData.hpp>
+
+#include <vector>
+#include <optional>
 
 namespace Dusk::Vulkan {
 
@@ -20,30 +24,24 @@ public:
 
     bool Load(const std::unique_ptr<PrimitiveData>& data) override;
 
-    inline std::vector<VkVertexInputBindingDescription> GetVkVertexInputBindings() {
-        return _vkBindings;
-    }
-
-    inline std::vector<VkVertexInputAttributeDescription> GetVkVertexInputAttributes() {
-        return _vkAttributes;
-    }
-
     VkPrimitiveTopology GetVkPrimitiveTopology() {
         return _vkPrimitiveTopology;
     }
+    
+    void GenerateBindCommands(VkCommandBuffer vkCommandBuffer);
+
+    void GenerateDrawCommands(VkCommandBuffer vkCommandBuffer);
 
 private:
 
     // bool AddBuffer(const void * data, VkDeviceSize size, uint32_t stride, VkFormat format,
     //     VkVertexInputRate inputRate, VkBufferUsageFlags usage, VertexAttribute attribute)
 
-    std::vector<VkBuffer> _vkBuffers;
+    VkBuffer _vkIndexBuffer;
+
+    VkBuffer _vkVertexBuffer;
 
     std::vector<VkDeviceMemory> _vkBufferMemories;
-
-    std::vector<VkVertexInputBindingDescription> _vkBindings;
-
-    std::vector<VkVertexInputAttributeDescription> _vkAttributes;
 
     VkPrimitiveTopology _vkPrimitiveTopology;
 
@@ -52,6 +50,24 @@ private:
     uint32_t _count = 0;
 
 }; // class VulkanPrimitive
+
+inline std::optional<VkPrimitiveTopology> GetVkPrimitiveTopology(PrimitiveTopology primitiveTopology)
+{
+    switch (primitiveTopology) {
+    case PrimitiveTopology::Points:
+        return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+    case PrimitiveTopology::Lines:
+        return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+    case PrimitiveTopology::LineStrip:
+        return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
+    case PrimitiveTopology::Triangles:
+        return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    case PrimitiveTopology::TriangleStrip:
+        return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+    }
+
+    return {};
+}
 
 } // namespace Dusk::Vulkan
 

@@ -22,51 +22,31 @@ using namespace std::chrono;
 
 void run()
 {
-    Dusk::UpdateContext updateContext;
-    Dusk::RenderContext renderContext;
-
-    Dusk::Scene scene;
-    // scene.LoadFromFile("Assets/Models/TestScene.glb");
-    // scene.LoadFromFile("Assets/Models/WaterBottle.glb");
-    // scene.LoadFromFile("Assets/Models/DamagedHelmet.glb");
-    // scene.LoadFromFile("Assets/Models/SciFiHelmet/SciFiHelmet.gltf");
-    
-    Dusk::Camera camera;
-    camera.SetPosition({ 10, 10, 10 });
-    camera.SetLookAt({ 0, 0, 0 });
-
-    // scene.AddComponent(std::make_unique<Dusk::AxisComponent>());
-
-    auto transformData = renderContext.GetTransformData();
-    transformData->View = camera.GetView();
-    transformData->Projection = camera.GetProjection();
-
-    // if (!scene.LoadFromFile("Assets/Models/cube.obj")) {
-    //     DuskLogError("Failed to load Assets/Models/cube.obj");
-    // }
-
-    // auto actor = scene.AddChild(std::make_unique<Dusk::Entity>());
-    // auto mesh = std::make_unique<Dusk::MeshComponent>();
-    // mesh->LoadFromFile("Assets/Models/crate/crate.obj");
-    // actor->AddComponent(std::move(mesh));
+    Dusk::LoadModule("DuskSTBI");
+    Dusk::LoadModule("DuskTinyOBJ");
+    // Dusk::LoadModule("DuskGLTF2");
+    // Dusk::LoadModule("DuskFreeType");
+    // Dusk::LoadModule("DuskOpenGL");
+    Dusk::LoadModule("DuskVulkan");
+    // Dusk::LoadModule("DuskDirectX");
 
     auto gfx = Dusk::GetGraphicsDriver();
 
-    auto shader = gfx->CreateShader();
-    if (!shader->LoadFromFiles({
-        "flat.vert",
-        "flat.frag",
-    })) {
-        return;
-    }
+    // auto shader = gfx->CreateShader();
+    // if (!shader->LoadFromFiles({
+    //     "flat.vert",
+    //     "flat.frag",
+    // })) {
+    //     return;
+    // }
 
-    auto meshImporters = Dusk::GetAllMeshImporters();
+    // auto meshImporters = Dusk::GetAllMeshImporters();
     // auto meshDatas = meshImporters[0]->LoadFromFile("sphere.obj");
-    auto mesh = Dusk::LoadMeshFromFile("monkey.obj");
+    // auto mesh = Dusk::LoadMeshFromFile("monkey.obj");
     // auto meshDatas = meshImporters[0]->LoadFromFile("crate/crate.obj");
     // auto meshDatas = meshImporters[0]->LoadFromFile("BoomBox.glb");
 
-    // auto pipeline = gfx->CreatePipeline(shader, mesh);
+    // auto pipeline = gfx->CreatePipeline(shader);
 
     Dusk::ScriptConsole::Initialize();
 
@@ -75,14 +55,11 @@ void run()
     while (Dusk::IsRunning()) {
         gfx->ProcessEvents();
 
-        scene.Update(&updateContext);
-
         Dusk::ScriptConsole::Update();
 
-        mesh->Render();
-
-        // shader->Bind();
-        scene.Render(&renderContext);
+        // if (mesh) {
+        //     mesh->Render();
+        // }
 
         gfx->SwapBuffers();
 

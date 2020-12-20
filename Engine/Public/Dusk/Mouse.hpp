@@ -7,12 +7,14 @@
 
 namespace Dusk {
 
-enum class MouseButton {
+enum class MouseButton
+{
     Unknown = -1,
     
     Left,
     Right,
     Middle,
+    
 }; // enum MouseButton
 
 static inline std::string GetMouseButtonName(MouseButton button)

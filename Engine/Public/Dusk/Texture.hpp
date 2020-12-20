@@ -14,39 +14,39 @@
 
 namespace Dusk {
 
+enum class TextureWrapType
+{
+    Repeat,
+    MirroredRepeat,
+    ClampToEdge,
+    ClampToBorder,
+
+}; // enum TextureWrapType
+
+enum class TextureFilterType
+{
+    Nearest,
+    NearestMipmapNearest,
+    NearestMipmapLinear,
+    Linear,
+    LinearMipmapNearest,
+    LinearMipmapLinear,
+
+}; // enum TextureFilterType
+
 class DUSK_ENGINE_API Texture : public Object
 {
 public:
-
-    enum class WrapType
-    {
-        Repeat,
-        MirroredRepeat,
-        ClampToEdge,
-        ClampToBorder,
-
-    }; // enum WrapType
-
-    enum class FilterType
-    {
-        Nearest,
-        NearestMipmapNearest,
-        NearestMipmapLinear,
-        Linear,
-        LinearMipmapNearest,
-        LinearMipmapLinear,
-
-    }; // enum FilterType
 
     struct Options
     {
         Options() { }
 
-        WrapType WrapS = WrapType::Repeat;
-        WrapType WrapT = WrapType::Repeat;
+        TextureWrapType WrapS = TextureWrapType::Repeat;
+        TextureWrapType WrapT = TextureWrapType::Repeat;
 
-        FilterType MagFilter = FilterType::Nearest;
-        FilterType MinFilter = FilterType::Nearest;
+        TextureFilterType MagFilter = TextureFilterType::Nearest;
+        TextureFilterType MinFilter = TextureFilterType::Nearest;
 
         bool GenerateMipmaps = false;
 
@@ -67,6 +67,42 @@ std::shared_ptr<Texture> LoadTextureFromFile(const std::string& filename, Textur
 
 DUSK_ENGINE_API
 std::shared_ptr<Texture> LoadTextureFromMemory(const uint8_t * buffer, size_t length, Texture::Options opts = Texture::Options());
+
+inline std::string TextureWrapTypeToString(TextureWrapType textureWrapType)
+{
+    switch (textureWrapType) {
+        case TextureWrapType::Repeat:
+            return "Repeat";
+        case TextureWrapType::MirroredRepeat:
+            return "MirroredRepeat";
+        case TextureWrapType::ClampToEdge:
+            return "ClampToEdge";
+        case TextureWrapType::ClampToBorder:
+            return "ClampToBorder";
+    }
+
+    return "Unknown";
+}
+
+inline std::string TextureWrapTypeToString(TextureFilterType textureFilterType)
+{
+    switch (textureFilterType) {
+        case TextureFilterType::Nearest:
+            return "Nearest";
+        case TextureFilterType::NearestMipmapNearest:
+            return "NearestMipmapNearest";
+        case TextureFilterType::NearestMipmapLinear:
+            return "NearestMipmapLinear";
+        case TextureFilterType::Linear:
+            return "Linear";
+        case TextureFilterType::LinearMipmapNearest:
+            return "LinearMipmapNearest";
+        case TextureFilterType::LinearMipmapLinear:
+            return "LinearMipmapLinear";
+    }
+
+    return "Unknown";
+}
 
 } // namespace Dusk
 

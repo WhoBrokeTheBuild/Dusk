@@ -7,7 +7,7 @@
 #include <Dusk/OpenGL/OpenGLPipeline.hpp>
 #include <Dusk/OpenGL/OpenGLTexture.hpp>
 #include <Dusk/OpenGL/OpenGLShader.hpp>
-#include <Dusk/OpenGL/OpenGLMesh.hpp>
+#include <Dusk/OpenGL/OpenGLPrimitive.hpp>
 
 namespace Dusk::OpenGL {
 
@@ -33,13 +33,13 @@ public:
 
     void SwapBuffers() override;
 
-    std::shared_ptr<Pipeline> CreatePipeline(std::shared_ptr<Shader> shader, std::shared_ptr<Mesh> mesh) override;
+    std::shared_ptr<Pipeline> CreatePipeline(std::shared_ptr<Shader> shader) override;
 
     std::shared_ptr<Texture> CreateTexture() override;
 
     std::shared_ptr<Shader> CreateShader() override;
 
-    std::shared_ptr<Mesh> CreateMesh() override;
+    std::unique_ptr<Primitive> CreatePrimitive() override;
 
     bool SetShaderData(const std::string& name, size_t size, void * data) override;
 

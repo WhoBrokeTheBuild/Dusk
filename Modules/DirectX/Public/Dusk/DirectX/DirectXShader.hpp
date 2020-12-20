@@ -5,6 +5,8 @@
 
 #include <Dusk/Shader.hpp>
 
+#include <optional>
+
 namespace Dusk {
 
 class DUSK_DIRECTX_API DirectXShader : public Shader
@@ -16,6 +18,8 @@ public:
     DirectXShader() = default;
 
     bool LoadFromFiles(const std::vector<std::string>& filenames) override;
+    
+    D3D12_SHADER_BYTECODE GetShaderBytecode(const ShaderStage& stage);
 
 private:
 
@@ -23,22 +27,28 @@ private:
 
     bool LoadHLSL(const std::string& filename);
 
-    Type GetType(const std::string& filename) const;
+    std::vector<uint8_t> _vertex;
 
-    const wchar_t * GetEntrypoint(const Type& type) const;
+    std::vector<uint8_t> _pixel;
 
-    const wchar_t * GetTargetProfile(const Type& type) const;
-    
-    ComPtr<IDxcBlob>& GetBlob(const Type& type);
+    std::vector<uint8_t> _domain;
 
-    ComPtr<IDxcBlob> _vs; // Vertex Shader
-    ComPtr<IDxcBlob> _ps; // Pixel Shader
-    ComPtr<IDxcBlob> _ds; // Domain Shader
-    ComPtr<IDxcBlob> _hs; // Hull Shader
-    ComPtr<IDxcBlob> _gs; // Geometry Shader
-    ComPtr<IDxcBlob> _cs; // Compute Shader
+    std::vector<uint8_t> _hull;
+
+    std::vector<uint8_t> _geometry;
+
+    std::vector<uint8_t> _compute;
 
 }; // class DirectXShader
+
+DUSK_DIRECTX_API
+std::optional<ShaderStage> GetShaderStageFromFilename(const std::string& filename);
+
+DUSK_DIRECTX_API
+std::optional<const wchar_t *> GetShaderEntrypoint(const ShaderStage& stage);
+
+DUSK_DIRECTX_API
+std::optional<const wchar_t *> GetShaderTargetProfile(const ShaderStage& stage);
 
 } // namespace Dusk
 

@@ -9,12 +9,12 @@ VulkanPrimitive::~VulkanPrimitive()
 {
     VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
 
-    for (VkBuffer buffer : _vkBuffers) {
-        vkDestroyBuffer(gfx->GetVkDevice(), buffer, nullptr);
-    }
+    // for (VkBuffer buffer : _vkBuffers) {
+    //     vkDestroyBuffer(gfx->GetDevice(), buffer, nullptr);
+    // }
 
     for (VkDeviceMemory memory : _vkBufferMemories) {
-        vkFreeMemory(gfx->GetVkDevice(), memory, nullptr);
+        vkFreeMemory(gfx->GetDevice(), memory, nullptr);
     }
 }
 
@@ -22,28 +22,11 @@ bool VulkanPrimitive::Load(const std::unique_ptr<PrimitiveData>& data)
 {
     bool result;
 
-    switch (data->GetTopology()) {
-    case Primitive::Topology::Points:
-        _vkPrimitiveTopology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
-        break;
-    case Primitive::Topology::Lines:
-        _vkPrimitiveTopology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
-        break;
-    case Primitive::Topology::LineStrip:
-        _vkPrimitiveTopology = VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
-        break;
-    case Primitive::Topology::Triangles:
-        _vkPrimitiveTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-        break;
-    case Primitive::Topology::TriangleStrip:
-        _vkPrimitiveTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
-        break;
-    }
 
     // const auto& indexList = data->GetIndexList();
     // const auto& vertexList = data->GetVertexList();
 
-    // std::vector<Primitive::Vertex> vertexList(positionList.size() / 4);
+    // std::vector<Vertex> vertexList(positionList.size() / 4);
 
     // for (size_t i = 0; i < vertexList.size(); ++i) {
     //     vertexList[i].Position = {
@@ -134,6 +117,24 @@ bool VulkanPrimitive::Load(const std::unique_ptr<PrimitiveData>& data)
     return true;
 }
 
+// void VulkanPrimitive::GenerateCommands(VkCommandBuffer vkCommandBuffer)
+// {
+//     if (_indexed) {
+//         vkCmdBindIndexBuffer(vkCommandBuffer, _vkIndexBuffer, 0, VK_INDEX_TYPE_UINT32);
+//     }
+
+//     VkDeviceSize offsets[] = { 0 };
+//     VkBuffer vertexBuffers[] = { _vkVertexBuffer };
+//     vkCmdBindVertexBuffers(vkCommandBuffer, 0, 1, vertexBuffers, offsets);
+    
+//     if (_indexed) {
+//         vkCmdDrawIndexed(vkCommandBuffer, _count, 1, 0, 0, 0);
+//     }
+//     else {
+//         vkCmdDraw(vkCommandBuffer, _count, 1, 0, 0);
+//     }
+// }
+
 // bool VulkanPrimitive::AddBuffer(const void * data, VkDeviceSize size, uint32_t stride, VkFormat format,
 // VkVertexInputRate inputRate, VkBufferUsageFlags usage, VertexAttribute attribute)
 // {
@@ -183,9 +184,9 @@ bool VulkanPrimitive::Load(const std::unique_ptr<PrimitiveData>& data)
 //     }
 
 //     void * ptr;
-//     vkMapMemory(gfx->GetVkDevice(), memory, 0, size, 0, &ptr);
+//     vkMapMemory(gfx->GetDevice(), memory, 0, size, 0, &ptr);
 //     memcpy(ptr, data, static_cast<size_t>(size));
-//     vkUnmapMemory(gfx->GetVkDevice(), memory);
+//     vkUnmapMemory(gfx->GetDevice(), memory);
 
 //     // _vkBuffers.push_back(buffer);
 //     // _vkBufferMemories.push_back(memory);

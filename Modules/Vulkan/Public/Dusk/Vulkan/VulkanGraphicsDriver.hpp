@@ -7,9 +7,11 @@
 #include <Dusk/Vulkan/VulkanPipeline.hpp>
 #include <Dusk/Vulkan/VulkanTexture.hpp>
 #include <Dusk/Vulkan/VulkanShader.hpp>
-#include <Dusk/Vulkan/VulkanMesh.hpp>
+#include <Dusk/Vulkan/VulkanPrimitive.hpp>
 
 #include <vector>
+
+#include <vk_mem_alloc.h>
 
 namespace Dusk::Vulkan {
 
@@ -31,45 +33,50 @@ public:
 
     void SwapBuffers() override;
 
-    std::shared_ptr<Pipeline> CreatePipeline(std::shared_ptr<Shader> shader, std::shared_ptr<Mesh> mesh) override;
+    std::shared_ptr<Pipeline> CreatePipeline(std::shared_ptr<Shader> shader) override;
 
     std::shared_ptr<Texture> CreateTexture() override;
 
     std::shared_ptr<Shader> CreateShader() override;
     
-    std::shared_ptr<Mesh> CreateMesh() override;
+    std::unique_ptr<Primitive> CreatePrimitive() override;
 
     bool SetShaderData(const std::string& name, size_t size, void * data) override;
 
 
-    inline VkDevice GetVkDevice() const {
+    inline VkDevice GetDevice() const {
         return _vkDevice;
     }
 
-    inline VkExtent2D GetVkSwapChainExtent() const {
+    inline VmaAllocator GetAllocator() const {
+        return _vmaAllocator;
+    }
+
+    inline VkExtent2D GetSwapChainExtent() const {
         return _vkSwapChainExtent;
     }
 
-    inline VkPipelineLayout GetVkPipelineLayout() {
+    inline VkPipelineLayout GetPipelineLayout() {
         return _vkPipelineLayout;
     }
 
-    inline VkRenderPass GetVkRenderPass() const {
+    inline VkRenderPass GetRenderPass() const {
         return _vkRenderPass;
     }
 
     uint32_t FindMemoryType(uint32_t filter, VkMemoryPropertyFlags props);
 
-    bool CreateBuffer(VkBuffer & buffer, VkDeviceMemory & memory, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags props);
+    bool CreateBuffer(VkBuffer * buffer, VmaAllocation * vmaAllocation, VkDeviceSize size, VkBufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage);
 
+    bool CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
 private:
 
     bool IsDeviceSuitable(const VkPhysicalDevice device);
 
-    std::vector<const char *> GetEnabledDeviceLayers();
+    std::vector<const char *> GetRequiredDeviceLayers();
 
-    std::vector<const char *> GetEnabledDeviceExtensions();
+    std::vector<const char *> GetRequiredDeviceExtensions();
 
     std::vector<const char *> GetRequiredInstanceExtensions();
 
@@ -94,6 +101,10 @@ private:
     bool InitLogicalDevice();
 
     void TermLogicalDevice();
+
+    bool InitAllocator();
+
+    void TermAllocator();
     
     bool InitSwapChain();
 
@@ -117,6 +128,12 @@ private:
 
     bool InitSyncObjects();
 
+    std::unordered_map<std::string, VkLayerProperties> _vkAvailableLayers;
+
+    std::unordered_map<std::string, VkExtensionProperties> _vkAvailableInstanceExtensions;
+
+    std::unordered_map<std::string, VkExtensionProperties> _vkAvailableDeviceExtensions;
+
     VkInstance _vkInstance;
 
     VkDebugUtilsMessengerEXT _vkDebugMessenger;
@@ -131,6 +148,8 @@ private:
     VkPhysicalDevice _vkPhysicalDevice;
 
     VkDevice _vkDevice;
+
+    VmaAllocator _vmaAllocator;
 
     uint32_t _vkGraphicsQueueFamilyIndex;
     uint32_t _vkPresentQueueFamilyIndex;
@@ -173,7 +192,7 @@ private:
     std::vector<VkFence> _vkImagesInFlight;
 
     std::vector<VkBuffer> _vkUniformBuffers;
-    std::vector<VkDeviceMemory> _vkUniformBuffersMemory;
+    std::vector<VmaAllocation> _vkUniformBufferAllocations;
 
     VkDescriptorPool _vkDescriptorPool;
 

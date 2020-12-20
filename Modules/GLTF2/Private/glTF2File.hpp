@@ -56,41 +56,41 @@ inline quat ParseQuat(const json& value, quat def)
 }
 
 DUSK_GLTF2_API
-inline Texture::WrapType GetWrapType(const GLenum& type)
+inline TextureWrapType GetWrapType(const GLenum& type)
 {
     switch (type) {
     case GL_REPEAT:
-        return Texture::WrapType::Repeat;
+        return TextureWrapType::Repeat;
     case GL_MIRRORED_REPEAT:
-        return Texture::WrapType::MirroredRepeat;
+        return TextureWrapType::MirroredRepeat;
     case GL_CLAMP_TO_EDGE:
-        return Texture::WrapType::ClampToEdge;
+        return TextureWrapType::ClampToEdge;
     case GL_CLAMP_TO_BORDER:
-        return Texture::WrapType::ClampToBorder;
+        return TextureWrapType::ClampToBorder;
     }
 
-    return Texture::WrapType::Repeat;
+    return TextureWrapType::Repeat;
 }
 
 DUSK_GLTF2_API
-inline Texture::FilterType GetFilterType(const GLenum& type)
+inline TextureFilterType GetFilterType(const GLenum& type)
 {
     switch (type) {
     case GL_NEAREST:
-        return Texture::FilterType::Nearest;
+        return TextureFilterType::Nearest;
     case GL_NEAREST_MIPMAP_NEAREST:
-        return Texture::FilterType::NearestMipmapNearest;
+        return TextureFilterType::NearestMipmapNearest;
     case GL_NEAREST_MIPMAP_LINEAR:
-        return Texture::FilterType::NearestMipmapLinear;
+        return TextureFilterType::NearestMipmapLinear;
     case GL_LINEAR:
-        return Texture::FilterType::Linear;
+        return TextureFilterType::Linear;
     case GL_LINEAR_MIPMAP_NEAREST:
-        return Texture::FilterType::LinearMipmapNearest;
+        return TextureFilterType::LinearMipmapNearest;
     case GL_LINEAR_MIPMAP_LINEAR:
-        return Texture::FilterType::LinearMipmapLinear;
+        return TextureFilterType::LinearMipmapLinear;
     }
 
-    return Texture::FilterType::Nearest;
+    return TextureFilterType::Nearest;
 }
 
 struct BufferViewData

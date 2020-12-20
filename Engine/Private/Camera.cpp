@@ -21,10 +21,10 @@ mat4 Camera::GetView() const
 DUSK_ENGINE_API
 mat4 Camera::GetProjection() const 
 {
-    if (_mode == Mode::Perspective) {
+    if (_mode == CameraMode::Perspective) {
         return glm::perspective(_fovX, GetAspect(), _clip[0], _clip[1]);
     }
-    else if (_mode == Mode::Orthographic) {
+    else if (_mode == CameraMode::Orthographic) {
         const auto& view = GetViewport();
         return glm::ortho(view[0], view[1], view[2], view[3], _clip[0], _clip[1]);
     }
@@ -33,7 +33,7 @@ mat4 Camera::GetProjection() const
 }
 
 DUSK_ENGINE_API
-void Camera::SetMode(Mode mode)
+void Camera::SetMode(CameraMode mode)
 {
     _mode = mode;
 }

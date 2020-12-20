@@ -9,25 +9,20 @@
 
 namespace Dusk {
 
+enum class ShaderStage
+{
+    Vertex,
+    Fragment,
+    Geometry,
+    Compute,
+    TessControl,
+    TessEvaluation,
+
+}; // enum class ShaderStage
+
 class DUSK_ENGINE_API Shader : public Object
 {
 public:
-
-    enum class Type {
-        Unknown = -1,
-
-        Vertex,
-        Fragment,
-        Geometry,
-        Compute,
-        TessControl,
-        TessEvaluation,
-
-        // DirectX Aliases
-        Pixel = Fragment,
-        Hull = TessControl,
-        Domain = TessEvaluation,
-    };
 
     DISALLOW_COPY_AND_ASSIGN(Shader)
 
@@ -42,6 +37,26 @@ public:
     // GetPreprocessorDefines()
 
 };
+
+inline std::string ShaderStageToString(ShaderStage shaderStage)
+{
+    switch (shaderStage) {
+        case ShaderStage::Vertex:
+            return "Vertex";
+        case ShaderStage::Fragment:
+            return "Fragment";
+        case ShaderStage::Geometry:
+            return "Geometry";
+        case ShaderStage::Compute:
+            return "Compute";
+        case ShaderStage::TessControl:
+            return "TessControl";
+        case ShaderStage::TessEvaluation:
+            return "TessEvaluation";
+    }
+
+    return "Unknown";
+}
 
 } // namespace Dusk
 

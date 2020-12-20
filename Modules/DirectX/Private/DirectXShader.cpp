@@ -1,6 +1,7 @@
 #include <Dusk/DirectX/DirectXShader.hpp>
 
 #include <Dusk/DirectX/DirectXGraphicsDriver.hpp>
+#include <Dusk/Util.hpp>
 #include <Dusk/Benchmark.hpp>
 #include <Dusk/Log.hpp>
 
@@ -31,13 +32,13 @@ public:
 
     HRESULT LoadSource(LPCWSTR wfilename, IDxcBlob ** source)
     {
-        const auto& assetPaths = GetAssetPaths();
+        const auto& assetPathList = GetAssetPathList();
 
         std::string filename = ConvertWideStringToUTF8(wfilename);
         
         std::ifstream file;
 
-        for (const auto& path : assetPaths) {
+        for (const auto& path : assetPathList) {
             const std::string& fullPath = path + "Shaders/" + filename;
             DuskLogVerbose("Checking shader include '%s'", fullPath);
             
@@ -108,19 +109,25 @@ bool DirectXShader::LoadFromFiles(const std::vector<std::string>& filenames)
     return true;
 }
 
+DUSK_DIRECTX_API
 bool DirectXShader::LoadCSO(const std::string& filename)
 {
     DuskLogVerbose("Looking for Compiled Shader Object '%s'", filename);
 
-    const auto& assetPaths = GetAssetPaths();
+    auto stage = GetShaderStageFromFilename(filename);
+    if (!stage) {
+        return false;
+    }
+
+    const auto& assetPathList = GetAssetPathList();
 
     std::ifstream file;
 
-    for (const auto& path : assetPaths) {
+    for (const auto& path : assetPathList) {
         const std::string& fullPath = path + "Shaders/" + filename;
         DuskLogVerbose("Checking '%s'", fullPath);
         
-        file.open(fullPath, std::ios::binary);
+        file.open(fullPath, std::ios::binary | std::ios::ate);
         if (file.is_open()) {
             break;
         }
@@ -132,23 +139,45 @@ bool DirectXShader::LoadCSO(const std::string& filename)
 
     file.unsetf(std::ios::skipws);
 
+    size_t size = file.tellg();
+    file.seekg(0, std::ios::beg);
+
     DuskLogLoad("Loading Compiled Shader Object '%s'", filename);
 
-    std::vector<uint8_t> data(
-        (std::istreambuf_iterator<char>(file)),
-        std::istreambuf_iterator<char>()
-    );
+    auto begin = std::istreambuf_iterator<char>(file);
+    auto end = std::istreambuf_iterator<char>();
 
-    size_t pivot = filename.find_last_of('.');
-    if (pivot == std::string::npos) {
-        DuskLogWarn("Failed to find shader type extension for '%s'", filename.c_str());
-        return false;
+    switch (stage.value()) {
+    case ShaderStage::Vertex:
+        _vertex.reserve(size);
+        _vertex.assign(begin, end);
+        break;
+    case ShaderStage::Fragment:
+        _pixel.reserve(size);
+        _pixel.assign(begin, end);
+        break;
+    case ShaderStage::TessControl:
+        _domain.reserve(size);
+        _domain.assign(begin, end);
+        break;
+    case ShaderStage::TessEvaluation:
+        _hull.reserve(size);
+        _hull.assign(begin, end);
+        break;
+    case ShaderStage::Geometry:
+        _geometry.reserve(size);
+        _geometry.assign(begin, end);
+        break;
+    case ShaderStage::Compute:
+        _compute.reserve(size);
+        _compute.assign(begin, end);
+        break;
     }
 
-    // TODO
     return true;
 }
 
+DUSK_DIRECTX_API
 bool DirectXShader::LoadHLSL(const std::string& filename)
 {
     DuskLogVerbose("Looking for HLSL shader '%s'", filename);
@@ -157,10 +186,10 @@ bool DirectXShader::LoadHLSL(const std::string& filename)
 
     std::ifstream file;
 
-    const auto& assetPaths = GetAssetPaths();
+    const auto& assetPathList = GetAssetPathList();
 
-    for (const auto& path : assetPaths) {
-        const std::string& fullPath = path + filename;
+    for (const auto& path : assetPathList) {
+        const std::string& fullPath = path + "Shaders/" + filename;
         DuskLogVerbose("Checking '%s'", fullPath);
         
         file.open(fullPath, std::ios::binary);
@@ -182,12 +211,6 @@ bool DirectXShader::LoadHLSL(const std::string& filename)
         std::istreambuf_iterator<char>()
     );
 
-    size_t pivot = filename.find_last_of('.');
-    if (pivot == std::string::npos) {
-        DuskLogWarn("Failed to find shader type extension for '%s'", filename.c_str());
-        return false;
-    }
-
     ComPtr<IDxcLibrary> library;
     result = DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(library.GetAddressOf()));
     if (FAILED(result)) {
@@ -202,8 +225,8 @@ bool DirectXShader::LoadHLSL(const std::string& filename)
         return false;
     }
 
-    ComPtr<IDxcBlobEncoding> blob;
-    result = library->CreateBlobWithEncodingFromPinned(data.data(), (uint32_t)data.size(), CP_UTF8, blob.GetAddressOf());
+    ComPtr<IDxcBlobEncoding> sourceBlob;
+    result = library->CreateBlobWithEncodingFromPinned(data.data(), (uint32_t)data.size(), CP_UTF8, sourceBlob.GetAddressOf());
     if (FAILED(result)) {
         DuskLogError("CreateBlobWithEncodingFromPinned failed");
         return false;
@@ -221,14 +244,25 @@ bool DirectXShader::LoadHLSL(const std::string& filename)
 
     IncludeHandler inc(library.Get());
 
-    Type type = GetType(filename);
+    auto stage = GetShaderStageFromFilename(filename);
+
+    if (!stage) {
+        return false;
+    }
+
+    auto entrypoint = GetShaderEntrypoint(stage.value());
+    auto targetProfile = GetShaderTargetProfile(stage.value());
+
+    if (!entrypoint || !targetProfile) {
+        return false;
+    }
 
     ComPtr<IDxcOperationResult> compileResult;
     result = compiler->Compile(
-        blob.Get(),
+        sourceBlob.Get(),
         wfilename.c_str(),
-        GetEntrypoint(type),
-        GetTargetProfile(type),
+        entrypoint.value(),
+        targetProfile.value(),
         &args[0],
         sizeof(args) / sizeof(args[0]),
         nullptr, 0,
@@ -252,103 +286,137 @@ bool DirectXShader::LoadHLSL(const std::string& filename)
         }
     }
 
-    compileResult->GetResult(_vs.GetAddressOf());
+    ComPtr<IDxcBlob> blob;
+    compileResult->GetResult(blob.GetAddressOf());
 
-    // TODO
+    uint8_t * begin = static_cast<uint8_t *>(blob->GetBufferPointer());
+    uint8_t * end = begin + blob->GetBufferSize();
+
+    switch (stage.value()) {
+    case ShaderStage::Vertex:
+        _vertex.reserve(blob->GetBufferSize());
+        _vertex.assign(begin, end);
+        break;
+    case ShaderStage::Fragment:
+        _pixel.reserve(blob->GetBufferSize());
+        _pixel.assign(begin, end);
+        break;
+    case ShaderStage::TessControl:
+        _domain.reserve(blob->GetBufferSize());
+        _domain.assign(begin, end);
+        break;
+    case ShaderStage::TessEvaluation:
+        _hull.reserve(blob->GetBufferSize());
+        _hull.assign(begin, end);
+        break;
+    case ShaderStage::Geometry:
+        _geometry.reserve(blob->GetBufferSize());
+        _geometry.assign(begin, end);
+        break;
+    case ShaderStage::Compute:
+        _compute.reserve(blob->GetBufferSize());
+        _compute.assign(begin, end);
+        break;
+    }
+    
     return true;
 }
 
-Shader::Type DirectXShader::GetType(const std::string& filename) const
+DUSK_DIRECTX_API
+D3D12_SHADER_BYTECODE DirectXShader::GetShaderBytecode(const ShaderStage& stage)
+{
+    switch (stage) {
+    case ShaderStage::Vertex:
+        return { static_cast<void *>(_vertex.data()), _vertex.size() };
+    case ShaderStage::Fragment:
+        return { static_cast<void *>(_pixel.data()), _pixel.size() };
+    case ShaderStage::TessControl:
+        return { static_cast<void *>(_domain.data()), _domain.size() };
+    case ShaderStage::TessEvaluation:
+        return { static_cast<void *>(_hull.data()), _hull.size() };
+    case ShaderStage::Geometry:
+        return { static_cast<void *>(_geometry.data()), _geometry.size() };
+    case ShaderStage::Compute:
+        return { static_cast<void *>(_compute.data()), _compute.size() };
+    }
+
+    return { nullptr, 0 };
+}
+
+DUSK_DIRECTX_API
+std::optional<ShaderStage> GetShaderStageFromFilename(const std::string& filename)
 {
     std::string ext = GetExtension(filename);
     if (ext == "cso" || ext == "hlsl") {
         size_t pivot = filename.find_last_of('.');
         if (pivot == std::string::npos) {
-            return Type::Unknown;
+            return {};
         }
         ext = GetExtension(filename.substr(0, pivot));
     }
 
     if (ext == "vert" || ext == "vertex") {
-        return Type::Vertex;
+        return ShaderStage::Vertex;
     }
-    else if (ext == "pixel" || ext == "frag" || ext == "fragment") {
-        return Type::Pixel;
+    else if (ext == "frag" || ext == "fragment" || ext == "pixel") {
+        return ShaderStage::Fragment;
     }
-    else if (ext == "hull") {
-        return Type::Hull;
+    else if (ext == "tesc" || ext == "tesscontrol" || ext == "hull") {
+        return ShaderStage::TessControl;
     }
-    else if (ext == "domain") {
-        return Type::Domain;
+    else if (ext == "tese" || ext == "tesseval" || ext == "domain") {
+        return ShaderStage::TessEvaluation;
     }
     else if (ext == "geom" || ext == "geometry") {
-        return Type::Geometry;
+        return ShaderStage::Geometry;
     }
     else if (ext == "comp" || ext == "compute") {
-        return Type::Compute;
+        return ShaderStage::Compute;
     }
 
-    return Type::Unknown;
+    return {};
 }
 
-const wchar_t * DirectXShader::GetEntrypoint(const Shader::Type& type) const
+DUSK_DIRECTX_API
+std::optional<const wchar_t *> GetShaderEntrypoint(const ShaderStage& stage)
 {
-    switch (type) {
-    case Type::Vertex:
+    switch (stage) {
+    case ShaderStage::Vertex:
         return L"VSMain";
-    case Type::Pixel:
+    case ShaderStage::Fragment:
         return L"PSMain";
-    case Type::Hull:
+    case ShaderStage::TessControl:
         return L"HSMain";
-    case Type::Domain:
+    case ShaderStage::TessEvaluation:
         return L"DSMain";
-    case Type::Geometry:
+    case ShaderStage::Geometry:
         return L"GSMain";
-    case Type::Compute:
+    case ShaderStage::Compute:
         return L"CSMain";
     }
     
-    DuskLogFatal("Unexpected Shader Type: %d", (int)type);
+    return {};
 }
 
-const wchar_t * DirectXShader::GetTargetProfile(const Shader::Type& type) const
+DUSK_DIRECTX_API
+std::optional<const wchar_t *> GetShaderTargetProfile(const ShaderStage& stage)
 {
-    switch (type) {
-    case Type::Vertex:
+    switch (stage) {
+    case ShaderStage::Vertex:
         return L"vs_6_0";
-    case Type::Pixel:
+    case ShaderStage::Fragment:
         return L"ps_6_0";
-    case Type::Hull:
+    case ShaderStage::TessControl:
         return L"hs_6_0";
-    case Type::Domain:
+    case ShaderStage::TessEvaluation:
         return L"ds_6_0";
-    case Type::Geometry:
+    case ShaderStage::Geometry:
         return L"gs_6_0";
-    case Type::Compute:
+    case ShaderStage::Compute:
         return L"cs_6_0";
     }
 
-    DuskLogFatal("Unexpected Shader Type: %d", (int)type);
-}
-
-ComPtr<IDxcBlob>& DirectXShader::GetBlob(const Shader::Type& type)
-{
-    switch (type) {
-    case Type::Vertex:
-        return _vs;
-    case Type::Pixel:
-        return _ps;
-    case Type::Hull:
-        return _hs;
-    case Type::Domain:
-        return _ds;
-    case Type::Geometry:
-        return _gs;
-    case Type::Compute:
-        return _cs;
-    }
-
-    DuskLogFatal("Unexpected Shader Type: %d", (int)type);
+    return {};
 }
 
 } // namespace Dusk

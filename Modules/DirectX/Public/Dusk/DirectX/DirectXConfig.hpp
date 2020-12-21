@@ -9,15 +9,13 @@
     #define DUSK_DIRECTX_API DUSK_API_IMPORT
 #endif
 
-#ifndef WIN32_LEAN_AND_MEAN
-    #define WIN32_LEAN_AND_MEAN
-#endif
-
-#ifndef NOMINMAX
-    #define NOMINMAX
+#if !defined(NDEBUG)
+    #define DUSK_DIRECTX_DEBUG_LAYER
 #endif
 
 #include <Windows.h>
+
+#include <winerror.h>
 
 // Windows Runtime Template Library
 // Required for ComPtr

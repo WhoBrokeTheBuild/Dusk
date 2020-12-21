@@ -8,7 +8,7 @@
 
 #include <D3D12MemAlloc.h>
 
-#define BUFFER_COUNT 2
+#include <vector>
 
 namespace Dusk {
 
@@ -62,6 +62,8 @@ public:
 
 private:
 
+    static const unsigned BUFFER_COUNT = 2;
+
     bool IsDeviceSuitable(IDXGIAdapter1 * adapter);
 
     bool InitWindow();
@@ -72,9 +74,15 @@ private:
 
     void TermDevice();
 
+    bool InitDebugLayer();
+
+    void TermDebugLayer();
+
     bool InitAllocator();
 
     void TermAllocator();
+
+    bool InitCommandQueue();
     
     bool InitSwapChain();
 
@@ -82,11 +90,11 @@ private:
 
     bool ResetSwapChain();
 
-    bool InitDescriptorPool();
+    bool InitDescriptorHeaps();
+
+    bool InitRenderTargets();
 
     bool InitGraphicsPipelines();
-
-    bool InitFramebuffers();
 
     bool InitCommandLists();
 
@@ -94,11 +102,7 @@ private:
 
     HWND _window = nullptr;
 
-    RECT _windowRect;
-
-    int _renderTargetIndex = 0;
-
-    // DirectX 12 Control
+    glm::ivec2 _windowSize;
 
     ComPtr<IDXGIFactory6> _dxFactory;
 
@@ -106,11 +110,34 @@ private:
 
     ComPtr<ID3D12Device2> _dxDevice;
 
+    ComPtr<ID3D12Debug> _dxDebug;
+
     D3D12MA::Allocator * _dmaAllocator = nullptr;
 
-    ComPtr<ID3D12CommandQueue> _commandQueue;
+    ComPtr<ID3D12CommandQueue> _dxCommandQueue;
 
-    ComPtr<IDXGISwapChain4> _swapChain;
+    ComPtr<IDXGISwapChain4> _dxSwapChain;
+
+    ComPtr<ID3D12DescriptorHeap> _dxRenderTargetViewHeap;
+
+    unsigned _dxRenderTargetViewDescriptorSize;
+
+    unsigned _renderTargetIndex = 0;
+
+    std::vector<ComPtr<ID3D12Resource>> _dxRenderTargets;
+
+    std::vector<ComPtr<ID3D12CommandAllocator>> _dxCommandAllocators;
+
+    ComPtr<ID3D12Fence> _dxFence;
+
+    std::vector<uint64_t> _dxFenceValues;
+
+    HANDLE _dxFenceEvent;
+
+
+
+
+    
 
     ComPtr<ID3D12Resource> _renderTargets[BUFFER_COUNT] = { nullptr };
 
@@ -124,8 +151,6 @@ private:
 
 
 
-    ComPtr<ID3D12Fence> _fence;
-    HANDLE _fenceEvent;
     unsigned long _fenceValue;
 
     // Render Target Views

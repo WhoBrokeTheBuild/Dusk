@@ -34,7 +34,13 @@ bool VulkanGraphicsDriver::Initialize()
         return false;
     }
 
-    InitDebugMessenger();
+    #if defined(DUSK_VULKAN_VALIDATION_LAYER)
+
+        if (!InitDebugMessenger()) {
+            return false;
+        }
+
+    #endif
 
     if (!InitSurface()) {
         return false;
@@ -113,7 +119,13 @@ void VulkanGraphicsDriver::Terminate()
     TermAllocator();
     TermLogicalDevice();
     TermSurface();
-    TermDebugMessenger();
+
+    #if defined(DUSK_VULKAN_VALIDATION_LAYER)
+
+        TermDebugMessenger();
+
+    #endif
+
     TermInstance();
 
     SDL2GraphicsDriver::Terminate();
@@ -587,10 +599,6 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL _VulkanDebugMessageCallback(
 
 bool VulkanGraphicsDriver::InitDebugMessenger()
 {
-    #if !defined(DUSK_VULKAN_VALIDATION_LAYER)
-        return true;
-    #endif
-
     VkResult vkResult;
 
     auto it = _vkAvailableLayers.find("VK_LAYER_KHRONOS_validation");
@@ -936,6 +944,8 @@ bool VulkanGraphicsDriver::InitSwapChain()
 
     std::vector<VkPresentModeKHR> presentModes(presentModeCount);
     vkGetPhysicalDeviceSurfacePresentModesKHR(_vkPhysicalDevice, _vkSurface, &presentModeCount, presentModes.data());
+
+    // VK_FORMAT_R8G8B8A8_UNORM
 
     _vkSwapChainImageFormat = formats[0];
     for (const auto& format : formats) {

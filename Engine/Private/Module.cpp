@@ -34,11 +34,8 @@ ModuleHandle _dlopen(const std::string& filename)
 
         handle = LoadLibraryA(filename.c_str());
         if (!handle) {
-            char message[256];
-            FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                NULL, GetLastError(), GetUserDefaultUILanguage(), message, sizeof(message), NULL);
-
-            DuskLogError("Failed to load '%s', %s", filename, message);
+            WindowsErrorMessage msg(HRESULT_FROM_WIN32(GetLastError()));
+            DuskLogError("Failed to load '%s', %s", filename, msg);
             return nullptr;
         }
         

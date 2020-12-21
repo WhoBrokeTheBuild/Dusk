@@ -53,7 +53,7 @@ bool DirectXBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUs
         IID_PPV_ARGS(&_dxResource)
     );
 
-    if (!SUCCEEDED(hResult)) {
+    if (FAILED(hResult)) {
         DuskLogError("CreateResource() failed");
         return false;
     }
@@ -62,8 +62,9 @@ bool DirectXBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUs
 
     void * ptr;
     hResult = _dxResource->Map(0, &readRange, &ptr);
-    if (!SUCCEEDED(hResult)) {
-        DuskLogError("Map() failed");
+    if (FAILED(hResult)) {
+        WindowsErrorMessage msg(hResult);
+        DuskLogError("Map() failed: %s", msg);
         return false;
     }
 

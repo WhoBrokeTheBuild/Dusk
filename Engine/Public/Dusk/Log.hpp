@@ -53,12 +53,14 @@ inline auto LogWrap<std::string>(const std::string& v) {
     return v.c_str();
 }
 
-template <>
-inline auto LogWrap<json>(const json& v) {
-    static std::string str;
-    str = v.get<std::string>();
-    return str.c_str();
-}
+#if defined(DUSK_PLATFORM_WINDOWS)
+
+    template <>
+    inline auto LogWrap<WindowsErrorMessage>(const WindowsErrorMessage& v) {
+        return v.GetMessage();
+    }
+
+#endif
 
 #pragma clang diagnostic pop
 

@@ -11,6 +11,7 @@ namespace Dusk {
 LRESULT CALLBACK WndProc(HWND hwnd, unsigned msg, WPARAM wParam, LPARAM lParam)
 {
     DirectXGraphicsDriver * gfx = DUSK_DIRECTX_GRAPHICS_DRIVER(GetGraphicsDriver());
+
     return gfx->ProcessMessage(hwnd, msg, wParam, lParam);
 }
 
@@ -24,6 +25,12 @@ bool DirectXGraphicsDriver::Initialize()
     if (!InitDevice()) {
         return false;
     }
+
+    #if defined(DUSK_DIRECTX_DEBUG_LAYER)
+
+        InitDebugLayer();
+        
+    #endif
 
     if (!InitAllocator()) {
         return false;
@@ -47,7 +54,8 @@ bool DirectXGraphicsDriver::Initialize()
 DUSK_DIRECTX_API
 void DirectXGraphicsDriver::Terminate()
 {
-
+    TermAllocator();
+    TermDevice();
     TermWindow();
 }
 
@@ -65,14 +73,14 @@ std::string DirectXGraphicsDriver::GetWindowTitle()
 
 void DirectXGraphicsDriver::SetWindowSize(const ivec2& size)
 {
+    // TODO: Check if we need AdjustWindowRect
     SetWindowPos(_window, HWND_TOP, 0, 0, size.x, size.y, SWP_NOMOVE | SWP_NOREPOSITION);
+    _windowSize = size;
 }
 
 ivec2 DirectXGraphicsDriver::GetWindowSize()
 {
-    RECT rect;
-    GetWindowRect(_window, &rect);
-    return { rect.right - rect.left, rect.bottom - rect.top };
+    return _windowSize;
 }
 
 void DirectXGraphicsDriver::ProcessEvents()
@@ -168,6 +176,10 @@ LRESULT DirectXGraphicsDriver::ProcessMessage(HWND hwnd, unsigned msg, WPARAM wP
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
+    case WM_SIZE:
+        _windowSize = { LOWORD(lParam), HIWORD(lParam) };
+
+        break;
     default:
         return DefWindowProc(hwnd, msg, wParam, lParam);
     }
@@ -210,7 +222,8 @@ bool DirectXGraphicsDriver::InitWindow()
     };
 
     if (!RegisterClassEx(&wndClass)) {
-        DuskLogError("RegisterClassEx() failed: %d", GetLastError());
+        WindowsErrorMessage msg(HRESULT_FROM_WIN32(GetLastError()));
+        DuskLogError("RegisterClassEx() failed: %s", msg);
         return false;
     }
     
@@ -220,7 +233,9 @@ bool DirectXGraphicsDriver::InitWindow()
 
     DWORD dwStyle = WS_OVERLAPPEDWINDOW;
 
-    RECT wr = { 0, 0, 640, 480 };
+    _windowSize = { 640, 480 };
+
+    RECT wr = { 0, 0, _windowSize.x, _windowSize.y };
     AdjustWindowRect(&wr, dwStyle, false);
 
     _window = CreateWindowEx(
@@ -239,7 +254,8 @@ bool DirectXGraphicsDriver::InitWindow()
     );
 
     if (!_window) {
-        DuskLogError("CreateWindowEx() failed");
+        WindowsErrorMessage msg(HRESULT_FROM_WIN32(GetLastError()));
+        DuskLogError("CreateWindowEx() failed: %s", msg);
         return false;
     }
 
@@ -263,18 +279,29 @@ bool DirectXGraphicsDriver::InitDevice()
 
     hResult = CreateDXGIFactory2(0, IID_PPV_ARGS(&_dxFactory));
     if (FAILED(hResult)) {
-        DuskLogError("CreateDXGIFactory2() failed: %d", GetLastError());
+        WindowsErrorMessage msg(hResult);
+        DuskLogError("CreateDXGIFactory2() failed: %s", msg);
         return false;
     }
 
     for (unsigned i = 0; ; ++i) {
-        hResult = _dxFactory->EnumAdapterByGpuPreference(i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&_dxAdapter));
+        hResult = _dxFactory->EnumAdapterByGpuPreference(
+            i,
+            DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
+            IID_PPV_ARGS(&_dxAdapter)
+        );
+
         if (hResult == DXGI_ERROR_NOT_FOUND) {
             break;
         }
 
         if (IsDeviceSuitable(_dxAdapter.Get())) {
-            hResult = D3D12CreateDevice(_dxAdapter.Get(), D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&_dxDevice));
+            hResult = D3D12CreateDevice(
+                _dxAdapter.Get(),
+                D3D_FEATURE_LEVEL_12_1,
+                IID_PPV_ARGS(&_dxDevice)
+            );
+
             if (SUCCEEDED(hResult)) {
                 break;
             }
@@ -296,7 +323,26 @@ bool DirectXGraphicsDriver::InitDevice()
     // Disable Alt+Enter fullscreen command
     hResult = _dxFactory->MakeWindowAssociation(_window, DXGI_MWA_NO_ALT_ENTER);
     if (FAILED(hResult)) {
-        DuskLogWarn("Failed to disable Alt+Enter");
+        WindowsErrorMessage msg(hResult);
+        DuskLogWarn("MakeWindowAssociation() failed: %s", msg);
+    }
+    
+    D3D12_COMMAND_QUEUE_DESC commandQueueDesc = {
+        .Type = D3D12_COMMAND_LIST_TYPE_DIRECT,
+        .Priority = 0,
+        .Flags = D3D12_COMMAND_QUEUE_FLAG_NONE,
+        .NodeMask = 0,
+    };
+
+    hResult = _dxDevice->CreateCommandQueue(
+        &commandQueueDesc,
+        IID_PPV_ARGS(&_dxCommandQueue)
+    );
+
+    if (FAILED(hResult)) {
+        WindowsErrorMessage msg(hResult);
+        DuskLogError("CreateCommandQueue() failed: %s", msg);
+        return false;
     }
 
     return true;
@@ -304,8 +350,25 @@ bool DirectXGraphicsDriver::InitDevice()
 
 void DirectXGraphicsDriver::TermDevice()
 {
+    _dxCommandQueue.Reset();
     _dxDevice.Reset();
     _dxAdapter.Reset();
+}
+
+bool DirectXGraphicsDriver::InitDebugLayer()
+{
+    HRESULT hResult;
+
+    hResult = D3D12GetDebugInterface(IID_PPV_ARGS(&_dxDebug));
+    if (FAILED(hResult)) {
+        WindowsErrorMessage msg(hResult);
+        DuskLogError("D3D12GetDebugInterface() failed: %s", msg);
+        return false;
+    }
+
+    _dxDebug->EnableDebugLayer();
+
+    return true;
 }
 
 bool DirectXGraphicsDriver::InitAllocator()
@@ -321,6 +384,15 @@ bool DirectXGraphicsDriver::InitAllocator()
 
     hResult = D3D12MA::CreateAllocator(&allocatorDesc, &_dmaAllocator);
 
+    switch (_dmaAllocator->GetD3D12Options().ResourceHeapTier) {
+    case D3D12_RESOURCE_HEAP_TIER_1:
+        DuskLogVerbose("Resource Heap Tier: D3D12_RESOURCE_HEAP_TIER_1");
+        break;
+    case D3D12_RESOURCE_HEAP_TIER_2:
+        DuskLogVerbose("Resource Heap Tier: D3D12_RESOURCE_HEAP_TIER_2");
+        break;
+    }
+
     return true;
 }
 
@@ -332,36 +404,54 @@ void DirectXGraphicsDriver::TermAllocator()
 
 bool DirectXGraphicsDriver::InitSwapChain()
 {
-    // DXGI_SWAP_CHAIN_DESC1 swapChainDesc = { };
-    // swapChainDesc.BufferCount = BUFFER_COUNT;
-    // swapChainDesc.Width = 640;
-    // swapChainDesc.Height = 480;
-    // swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    // swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    // swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-    // swapChainDesc.SampleDesc.Count = 1;
+    HRESULT hResult;
 
-    // ComPtr<IDXGISwapChain1> swapChain;
-    // result = factory->CreateSwapChainForHwnd(
-    //     _commandQueue.Get(),
-    //     _window,
-    //     &swapChainDesc,
-    //     nullptr,
-    //     nullptr,
-    //     &swapChain
-    // );
-    // if (FAILED(result)) {
-    //     DuskLogFatal("Failed to create swap chain");
-    // }
+    DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {
+        .Width = static_cast<UINT>(_windowSize.x),
+        .Height = static_cast<UINT>(_windowSize.y),
+        .Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+        .Stereo = false,
+        .SampleDesc = {
+            .Count = 1,
+            .Quality = 0,
+        },
+        .BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT,
+        .BufferCount = BUFFER_COUNT,
+        .Scaling = DXGI_SCALING_STRETCH,
+        .SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD,
+        .AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED,
+        .Flags = 0,
+    };
 
-    // // Convert the IDXGISwapChain1 into IDXGISwapChain4
-    // swapChain.As(&_swapChain);
+    ComPtr<IDXGISwapChain1> swapChain;
+    hResult = _dxFactory->CreateSwapChainForHwnd(
+        _dxCommandQueue.Get(),
+        _window,
+        &swapChainDesc,
+        nullptr,
+        nullptr,
+        &swapChain
+    );
+
+    if (FAILED(hResult)) {
+        WindowsErrorMessage msg(hResult);
+        DuskLogError("CreateSwapChainForHwnd() failed: %s", msg);
+        return false;
+    }
+
+    hResult = swapChain.As(&_dxSwapChain);
+    if (FAILED(hResult)) {
+        WindowsErrorMessage msg(hResult);
+        DuskLogError("Failed to convert IDXGISwapChain1 to IDXGISwapChain4: %s", msg);
+        return false;
+    }
 
     return true;
 }
 
 void DirectXGraphicsDriver::TermSwapChain()
 {
+    _dxSwapChain.Reset();
 
 }
 
@@ -371,49 +461,77 @@ bool DirectXGraphicsDriver::ResetSwapChain()
     return true;
 }
 
-bool DirectXGraphicsDriver::InitDescriptorPool()
+bool DirectXGraphicsDriver::InitDescriptorHeaps()
 {
-    // D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = { };
-    // rtvHeapDesc.NumDescriptors = BUFFER_COUNT;
-    // rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-    // rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+    HRESULT hResult;
 
-    // result = _device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&_rtvHeap));
-    // if (FAILED(result)) {
-    //     DuskLogFatal("Failed to create RTV descriptor heap");
-    // }
+    D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {
+        .Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
+        .NumDescriptors = BUFFER_COUNT,
+        .Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
+        .NodeMask = 0,
+    };
+
+    hResult = _dxDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&_dxRenderTargetViewHeap));
+    if (FAILED(hResult)) {
+        WindowsErrorMessage msg(hResult);
+        DuskLogError("CreateDescriptorHeap() failed: %s", msg);
+        return false;
+    }
+
+    _dxRenderTargetViewDescriptorSize = 
+        _dxDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
+    return true;
+}
+
+bool DirectXGraphicsDriver::InitRenderTargets()
+{
+    HRESULT hResult;
+
+    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(
+        _dxRenderTargetViewHeap->GetCPUDescriptorHandleForHeapStart()
+    );
+
+    _dxRenderTargets.resize(BUFFER_COUNT);
+    _dxCommandAllocators.resize(BUFFER_COUNT);
+
+    for (unsigned i = 0; i < BUFFER_COUNT; ++i) {
+        hResult = _dxSwapChain->GetBuffer(i, IID_PPV_ARGS(&_dxRenderTargets[i]));
+        if (FAILED(hResult)) {
+            WindowsErrorMessage msg(hResult);
+            DuskLogError("GetBuffer() failed: %s", msg);
+            return false;
+        }
+
+        D3D12_RENDER_TARGET_VIEW_DESC renderTargetViewDesc = {
+        };
+
+        _dxDevice->CreateRenderTargetView(
+            _dxRenderTargets[i].Get(),
+            &renderTargetViewDesc,
+            rtvHandle
+        );
+
+        rtvHandle.Offset(1);
+
+        hResult = _dxDevice->CreateCommandAllocator(
+            D3D12_COMMAND_LIST_TYPE_DIRECT,
+            IID_PPV_ARGS(&_dxCommandAllocators[i])
+        );
+
+        if(FAILED(hResult)) {
+            WindowsErrorMessage msg(hResult);
+            DuskLogError("CreateCommandAllocator() failed: %s", msg);
+            return false;
+        }
+    }
 
     return true;
 }
 
 bool DirectXGraphicsDriver::InitGraphicsPipelines()
 {
-
-    return true;
-}
-
-bool DirectXGraphicsDriver::InitFramebuffers()
-{
-    // _renderTargetIndex = _swapChain->GetCurrentBackBufferIndex();
-
-    // _rtvDescriptorSize = _device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-
-    // CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(_rtvHeap->GetCPUDescriptorHandleForHeapStart());
-
-    // for (unsigned i = 0; i < BUFFER_COUNT; ++i) {
-    //     result = _swapChain->GetBuffer(i, IID_PPV_ARGS(&_renderTargets[i]));
-    //     if (FAILED(result)) {
-    //         DuskLogFatal("Failed to get buffer %d from swap chain", i);
-    //     }
-
-    //     _device->CreateRenderTargetView(_renderTargets[i].Get(), nullptr, rtvHandle);
-    //     rtvHandle.Offset(1, _rtvDescriptorSize);
-    // }
-
-    // result = _device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&_commandAllocator));
-    // if (FAILED(result)) {
-    //     DuskLogFatal("Failed to create command allocator");
-    // }
 
     return true;
 }
@@ -428,10 +546,27 @@ bool DirectXGraphicsDriver::InitCommandLists()
 
 bool DirectXGraphicsDriver::InitSyncObjects()
 {
-    // _device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&_fence));
-    // _fenceValue = 1;
+    HRESULT hResult;
 
-    // _fenceEvent = CreateEvent(nullptr, false, false, nullptr);
+    _dxFenceValues.resize(BUFFER_COUNT);
+
+    hResult = _dxDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&_dxFence));
+    if (FAILED(hResult)) {
+        WindowsErrorMessage msg(hResult);
+        DuskLogError("CreateFence() failed: %s", msg);
+        return false;
+    }
+
+    ++_dxFenceValues[_renderTargetIndex];
+
+    _dxFenceEvent = CreateEvent(nullptr, false, false, nullptr);
+    if (_dxFenceEvent == nullptr) {
+        WindowsErrorMessage msg(HRESULT_FROM_WIN32(GetLastError()));
+        DuskLogError("CreateEvent() failed: %s", msg);
+        return false;
+    }
+
+    // WaitForGPU
 
     return true;
 }

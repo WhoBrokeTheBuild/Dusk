@@ -9,16 +9,14 @@
     #define DUSK_VULKAN_API DUSK_API_IMPORT
 #endif
 
-#define WIN32_LEAN_AND_MEAN
+#if !defined(NDEBUG)
+    #define DUSK_VULKAN_VALIDATION_LAYER
+#endif
 
 #include <glad/vulkan.h>
 
 #include <Dusk/SDL2/SDL2Config.hpp>
 #include <SDL_vulkan.h>
-
-#if !defined(NDEBUG)
-    #define DUSK_VULKAN_VALIDATION_LAYER
-#endif
 
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 

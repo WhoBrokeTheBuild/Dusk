@@ -16,6 +16,15 @@ enum class BufferUsage
 
 }; // enum class BufferUsage
 
+enum class MemoryUsage
+{
+    GPU,
+    UploadOnce,
+    UploadOften,
+    Download,
+
+}; // enum class MemoryUsage
+
 class DUSK_ENGINE_API Buffer
 {
 public:
@@ -26,9 +35,15 @@ public:
 
     virtual ~Buffer() = default;
 
-    virtual bool Initialize(size_t size, uint8_t * data, BufferUsage usage) = 0;
+    virtual bool Initialize(size_t size, uint8_t * data, BufferUsage bufferUsage, MemoryUsage memoryUsage) = 0;
 
     virtual void Terminate() = 0;
+
+protected:
+
+    BufferUsage _bufferUsage;
+
+    MemoryUsage _memoryUsage;
 
 }; // class Buffer
 
@@ -41,6 +56,22 @@ inline std::string BufferUsageToString(BufferUsage bufferUsage)
             return "Vertex";
         case BufferUsage::Constant:
             return "Constant";
+    }
+
+    return "Unknown";
+}
+
+inline std::string MemoryUsageToString(MemoryUsage memoryUsage)
+{
+    switch (memoryUsage) {
+        case MemoryUsage::GPU:
+            return "GPU";
+        case MemoryUsage::UploadOnce:
+            return "UploadOnce";
+        case MemoryUsage::UploadOften:
+            return "UploadOften";
+        case MemoryUsage::Download:
+            return "Download";
     }
 
     return "Unknown";

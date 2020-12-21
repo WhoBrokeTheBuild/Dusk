@@ -22,7 +22,7 @@ public:
         Terminate();
     };
 
-    bool Initialize(size_t size, uint8_t * data, BufferUsage usage) override;
+    bool Initialize(size_t size, uint8_t * data, BufferUsage bufferUsage, MemoryUsage memoryUsage) override;
 
     void Terminate() override;
 
@@ -49,6 +49,22 @@ inline std::optional<VkBufferUsageFlagBits> GetVkBufferUsage(BufferUsage bufferU
         return VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
     case BufferUsage::Constant:
         return VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+    }
+
+    return {};
+}
+
+inline std::optional<VmaMemoryUsage> GetVkMemoryUsage(MemoryUsage memoryUsage)
+{
+    switch (memoryUsage) {
+    case MemoryUsage::GPU:
+        return VMA_MEMORY_USAGE_GPU_ONLY;
+    case MemoryUsage::UploadOnce:
+        return VMA_MEMORY_USAGE_CPU_ONLY;
+    case MemoryUsage::UploadOften:
+        return VMA_MEMORY_USAGE_CPU_TO_GPU;
+    case MemoryUsage::Download:
+        return VMA_MEMORY_USAGE_GPU_TO_CPU;
     }
 
     return {};

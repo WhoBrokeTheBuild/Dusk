@@ -88,6 +88,14 @@ bool VulkanGraphicsDriver::Initialize()
         return false;
     }
 
+    VmaStats stats;
+    vmaCalculateStats(_vmaAllocator, &stats);
+    
+    DuskLogVerbose("Allocated Memory Blocks: %u", stats.total.blockCount);
+    DuskLogVerbose("Allocation Objects: %u", stats.total.allocationCount);
+    DuskLogVerbose("Used bytes: %u", stats.total.usedBytes);
+    DuskLogVerbose("Unused bytes: %u", stats.total.unusedBytes);
+
     DuskBenchmarkEnd("VulkanGraphicsDriver::Initialize");
     return true;
 }
@@ -208,6 +216,9 @@ void VulkanGraphicsDriver::SwapBuffers()
     }
 
     _currentFrame = (_currentFrame + 1) % 2;
+
+    // TODO: Find out where this lives
+    vmaSetCurrentFrameIndex(_vmaAllocator, _currentFrame);
 }
 
 DUSK_VULKAN_API
@@ -335,6 +346,15 @@ bool VulkanGraphicsDriver::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, Vk
         return false;
     }
 
+    VkSubmitInfo submitInfo = {
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        .pNext = nullptr,
+        .commandBufferCount = 1,
+        .pCommandBuffers = &commandBuffer,
+    };
+
+    vkResult = vkQueueSubmit(_vkGraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(_vkGraphicsQueue);
 
     return true;
 }
@@ -361,7 +381,10 @@ std::vector<const char *> VulkanGraphicsDriver::GetRequiredDeviceLayers()
 
     #if defined(DUSK_VULKAN_VALIDATION_LAYER)
 
-        requiredLayers.push_back("VK_LAYER_KHRONOS_validation");
+        auto it = _vkAvailableLayers.find("VK_LAYER_KHRONOS_validation");
+        if (it != _vkAvailableLayers.end()) {
+            requiredLayers.push_back("VK_LAYER_KHRONOS_validation");
+        }
 
     #endif
 
@@ -670,6 +693,7 @@ bool VulkanGraphicsDriver::InitPhysicalDevice()
     for (const auto& device : devices) {
         if (IsDeviceSuitable(device)) {
             _vkPhysicalDevice = device;
+            break;
         }
     }
 

@@ -27,8 +27,8 @@ void run()
     // Dusk::LoadModule("DuskGLTF2");
     // Dusk::LoadModule("DuskFreeType");
     // Dusk::LoadModule("DuskOpenGL");
-    Dusk::LoadModule("DuskVulkan");
-    // Dusk::LoadModule("DuskDirectX");
+    // Dusk::LoadModule("DuskVulkan");
+    Dusk::LoadModule("DuskDirectX");
 
     auto gfx = Dusk::GetGraphicsDriver();
 

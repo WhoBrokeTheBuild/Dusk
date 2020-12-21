@@ -18,7 +18,7 @@ public:
         Terminate();
     }
 
-    bool Initialize(size_t size, uint8_t * data, BufferUsage usage) override;
+    bool Initialize(size_t size, uint8_t * data, BufferUsage bufferUsage, MemoryUsage memoryUsage) override;
 
     void Terminate() override;
 
@@ -48,6 +48,20 @@ inline GLenum GetGLBufferUsage(BufferUsage bufferUsage)
     return GL_INVALID_ENUM;
 }
 
+inline GLbitfield GetGLMemoryUsage(MemoryUsage memoryUsage)
+{
+    switch (memoryUsage) {
+    case MemoryUsage::GPU:
+        return 0;
+    case MemoryUsage::UploadOnce:
+    case MemoryUsage::UploadOften:
+        return GL_MAP_WRITE_BIT | GL_MAP_COHERENT_BIT;
+    case MemoryUsage::Download:
+        return GL_MAP_READ_BIT | GL_MAP_COHERENT_BIT;
+    }
+
+    return 0;
+}
 } // namespace Dusk::OpenGL
 
 #endif // DUSK_OPENGL_BUFFER_HPP

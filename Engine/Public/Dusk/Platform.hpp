@@ -10,6 +10,7 @@
         #if __has_include(<winapifamily.h>)
             #include <winapifamily.h>
             #if !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
+                // Universal Windows Platform
                 #define DUSK_PLATFORM_UWP
             #endif
         #endif

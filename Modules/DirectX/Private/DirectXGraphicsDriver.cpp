@@ -153,20 +153,6 @@ std::unique_ptr<Primitive> DirectXGraphicsDriver::CreatePrimitive()
     // return std::unique_ptr<Mesh>(New DirectXPrimitive());
 }
 
-bool DirectXGraphicsDriver::SetShaderData(const std::string& name, size_t size, void * data)
-{
-//     ID3D11ShaderReflection * reflector = nullptr;
-//     D3DReflect()
-
-
-//     const auto& it = _constantBufferBindings.find(binding);
-//     if (it == _constantBufferBindings.cend()) {
-//         GetConstantBufferByName()
-//     }
-
-    return false;
-}
-
 LRESULT DirectXGraphicsDriver::ProcessMessage(HWND hwnd, unsigned msg, WPARAM wParam, LPARAM lParam)
 {
     switch (msg) {

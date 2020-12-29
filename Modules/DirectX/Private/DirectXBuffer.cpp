@@ -92,9 +92,11 @@ void DirectXBuffer::Terminate()
     _dxResource.Reset();
 }
 
-DUSK_OPENGL_API
+DUSK_DIRECTX_API
 bool DirectXBuffer::ReadFrom(size_t offset, size_t length, uint8_t * data)
 {
+    HRESULT hResult;
+    
     if (_memoryUsage != MemoryUsage::Download) {
         DuskLogError("Unable to read data from buffer with MemoryUsage: %s",
             MemoryUsageToString(_memoryUsage));
@@ -118,9 +120,11 @@ bool DirectXBuffer::ReadFrom(size_t offset, size_t length, uint8_t * data)
     return true;
 }
 
-DUSK_OPENGL_API
+DUSK_DIRECTX_API
 bool DirectXBuffer::WriteTo(size_t offset, size_t length, uint8_t * data)
 {
+    HRESULT hResult;
+
     if (_memoryUsage != MemoryUsage::UploadOnce && _memoryUsage != MemoryUsage::UploadOften) {
         DuskLogError("Unable to write data to buffer with MemoryUsage: %s",
             MemoryUsageToString(_memoryUsage));

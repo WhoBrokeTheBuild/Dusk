@@ -48,8 +48,6 @@ public:
 
     std::unique_ptr<Primitive> CreatePrimitive() override;
 
-    bool SetShaderData(const std::string& name, size_t size, void * data) override;
-
     LRESULT ProcessMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
     ID3D12Device2 * GetDevice() const {

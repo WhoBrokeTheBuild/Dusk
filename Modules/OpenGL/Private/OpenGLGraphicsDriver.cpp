@@ -21,6 +21,12 @@ bool OpenGLGraphicsDriver::Initialize()
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
+    #if defined(DUSK_BUILD_DEBUG)
+
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+
+    #endif
+
     if (!SDL2GraphicsDriver::CreateWindow(SDL_WINDOW_OPENGL)) {
         return false;
     }
@@ -35,6 +41,12 @@ bool OpenGLGraphicsDriver::Initialize()
         DuskLogError("Failed to initialize OpenGL context");
         return false;
     }
+
+    #if defined(DUSK_BUILD_DEBUG)
+
+        InitDebugMessageCallback();
+
+    #endif
     
     DuskLogVerbose("OpenGL Version: %s",  glGetString(GL_VERSION));
     DuskLogVerbose("GLSL Version: %s",    glGetString(GL_SHADING_LANGUAGE_VERSION));
@@ -80,9 +92,6 @@ bool OpenGLGraphicsDriver::Initialize()
     DuskLogVerbose("Max Uniform Block Size: %d", value);
 
     glClearColor(0.392f, 0.584f, 0.929f, 1.0f);
-
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_ONE_MINUS_SRC_ALPHA);
 
     return true;
 }
@@ -130,56 +139,69 @@ std::unique_ptr<Primitive> OpenGLGraphicsDriver::CreatePrimitive()
 }
 
 DUSK_OPENGL_API
-bool OpenGLGraphicsDriver::SetShaderData(const std::string& name, size_t size, void * buffer)
+void OpenGLGraphicsDriver::BindUniformBufferObjects()
 {
-    GLuint glID = 0;
-
-    const auto& it = _shaderDataBindings.find(name);
-    if (it == _shaderDataBindings.cend()) {
-        DuskLogVerbose("Querying uniform block binding for '%s'", name);
-
-        for (int i = 0; i < _shaders.size(); ++i) {
-            if (auto shader = _shaders[i].lock()) {
-                OpenGLShader * glShader = DUSK_OPENGL_SHADER(shader.get());
-                GLuint index = glGetUniformBlockIndex(glShader->GetID(), name.c_str());
-                if (index == GL_INVALID_OPERATION || index == GL_INVALID_INDEX) {
-                    continue;
-                }
-
-                DuskLogVerbose("Uniform block '%s' is at index %d", name, index);
-
-                glGenBuffers(1, &glID);
-                glBindBuffer(GL_UNIFORM_BUFFER, glID);
-                glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_STATIC_DRAW);
-                glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-                glBindBufferBase(GL_UNIFORM_BUFFER, index, glID);
-
-                _shaderDataBindings.emplace(name, glID);
-                break;
-            }
-            else {
-                _shaders.erase(_shaders.begin() + i);
-                --i;
-            }
+    for (const auto& it : _constantBufferBindings) {
+        OpenGLBuffer * buffer = DUSK_OPENGL_BUFFER(it.second.get());
+        if (!buffer) {
+            continue;
         }
-        if (glID == 0) {
-            return false;
-        }
+
+        glBindBufferBase(GL_UNIFORM_BUFFER, it.first, buffer->GetGLID());
+    }
+}
+
+void GLAPIENTRY
+_OpenGLDebugMessageCallback(
+    GLenum source, GLenum type, GLenum id, GLenum severity,
+    GLsizei length, const GLchar * message, const void * userData)
+{
+    if (type == GL_DEBUG_TYPE_PERFORMANCE) {
+        Log(LogLevel::Performance, "[PERF](OpenGLDebugMessage) %s\n", message);
     }
     else {
-        glID = it->second;
+        switch (severity) {
+        case GL_DEBUG_SEVERITY_HIGH:
+        case GL_DEBUG_SEVERITY_MEDIUM:
+            Log(LogLevel::Error, "[ERRO](OpenGLDebugMessage) %s\n", message);
+            break;
+        case GL_DEBUG_SEVERITY_LOW:
+            Log(LogLevel::Warning, "[WARN](OpenGLDebugMessage) %s\n", message);
+            break;
+        case GL_DEBUG_SEVERITY_NOTIFICATION:
+            Log(LogLevel::Verbose, "[VERB](OpenGLDebugMessage) %s\n", message);
+        }
     }
+}
 
-    glBindBuffer(GL_UNIFORM_BUFFER, glID);
+void OpenGLGraphicsDriver::InitDebugMessageCallback()
+{
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(_OpenGLDebugMessageCallback, nullptr);
 
-    GLvoid * ptr = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-    memcpy(ptr, buffer, size);
-    glUnmapBuffer(GL_UNIFORM_BUFFER);
-    
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    glDebugMessageControl(
+        GL_DONT_CARE,
+        GL_DEBUG_TYPE_PUSH_GROUP,
+        GL_DONT_CARE,
+        0,
+        nullptr,
+        GL_FALSE);
 
-    return true;
+    glDebugMessageControl(
+        GL_DONT_CARE,
+        GL_DEBUG_TYPE_POP_GROUP,
+        GL_DONT_CARE,
+        0,
+        nullptr,
+        GL_FALSE);
+
+    glDebugMessageControl(
+        GL_DONT_CARE,
+        GL_DEBUG_TYPE_MARKER,
+        GL_DONT_CARE,
+        0,
+        nullptr,
+        GL_FALSE);
 }
 
 } // namespace Dusk::OpenGL

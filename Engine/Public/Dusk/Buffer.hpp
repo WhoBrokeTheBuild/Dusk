@@ -2,6 +2,7 @@
 #define DUSK_BUFFER_HPP
 
 #include <Dusk/Config.hpp>
+#include <Dusk/Object.hpp>
 
 #include <cstdint>
 #include <string>
@@ -25,7 +26,7 @@ enum class MemoryUsage
 
 }; // enum class MemoryUsage
 
-class DUSK_ENGINE_API Buffer
+class DUSK_ENGINE_API Buffer : public Object
 {
 public:
 
@@ -38,6 +39,10 @@ public:
     virtual bool Initialize(size_t size, uint8_t * data, BufferUsage bufferUsage, MemoryUsage memoryUsage) = 0;
 
     virtual void Terminate() = 0;
+
+    virtual bool ReadFrom(size_t offset, size_t length, uint8_t * data) = 0;
+
+    virtual bool WriteTo(size_t offset, size_t length, uint8_t * data) = 0;
 
 protected:
 

@@ -26,11 +26,27 @@ void run()
     Dusk::LoadModule("DuskTinyOBJ");
     // Dusk::LoadModule("DuskGLTF2");
     // Dusk::LoadModule("DuskFreeType");
-    // Dusk::LoadModule("DuskOpenGL");
-    // Dusk::LoadModule("DuskVulkan");
-    Dusk::LoadModule("DuskDirectX");
+
+    const char * graphicsDriver = getenv("DUSK_GRAPHICS_DRIVER");
+    
+    if (!graphicsDriver) {
+        graphicsDriver = "DuskVulkan";
+    }
+
+    if (strcmp(graphicsDriver, "OpenGL") == 0) {
+        Dusk::LoadModule("DuskOpenGL");
+    }
+    else if (strcmp(graphicsDriver, "DirectX") == 0) {
+        Dusk::LoadModule("DuskDirectX");
+    }
+    else {
+        Dusk::LoadModule("DuskVulkan");
+    }
 
     auto gfx = Dusk::GetGraphicsDriver();
+    if (!gfx) {
+        return;
+    }
 
     // auto shader = gfx->CreateShader();
     // if (!shader->LoadFromFiles({
@@ -77,10 +93,10 @@ int main(int argc, char** argv)
     Dusk::SetApplicationVersion({ 1, 0, 0 });
 
     Dusk::Initialize(argc, argv);
-    if (!Dusk::RunScriptFile("Main.py")) {
-        DuskLogError("Failed to load Main.py");
-        return 1;
-    }
+    // if (!Dusk::RunScriptFile("Main.py")) {
+    //     DuskLogError("Failed to load Main.py");
+    //     return 1;
+    // }
 
     run();
 

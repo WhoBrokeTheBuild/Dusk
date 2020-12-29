@@ -1,9 +1,9 @@
 import Dusk
 
 
-gfx = Dusk.GetGraphicsDriver()
-if gfx == None:
-    quit()
+# gfx = Dusk.GetGraphicsDriver()
+# if gfx == None:
+#     quit()
 
 # gfx.SetWindowSize(( 1024, 768 ))
 

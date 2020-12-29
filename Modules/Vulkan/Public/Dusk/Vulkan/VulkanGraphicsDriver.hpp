@@ -8,6 +8,7 @@
 #include <Dusk/Vulkan/VulkanTexture.hpp>
 #include <Dusk/Vulkan/VulkanShader.hpp>
 #include <Dusk/Vulkan/VulkanPrimitive.hpp>
+#include <Dusk/Vulkan/VulkanBuffer.hpp>
 
 #include <vector>
 
@@ -40,9 +41,6 @@ public:
     std::shared_ptr<Shader> CreateShader() override;
     
     std::unique_ptr<Primitive> CreatePrimitive() override;
-
-    bool SetShaderData(const std::string& name, size_t size, void * data) override;
-
 
     inline VkDevice GetDevice() const {
         return _vkDevice;
@@ -84,9 +82,9 @@ private:
 
     void TermWindow();
 
-    bool InitDebugMessenger();
+    bool InitDebugUtilsMessenger();
 
-    void TermDebugMessenger();
+    void TermDebugUtilsMessenger();
 
     bool InitInstance();
 
@@ -118,11 +116,11 @@ private:
 
     bool InitGraphicsPipelines();
 
+    bool InitDepthBuffer();
+
     bool InitFramebuffers();
 
     bool InitCommandPool();
-
-    bool InitDepthBuffer();
 
     bool InitCommandBuffers();
 

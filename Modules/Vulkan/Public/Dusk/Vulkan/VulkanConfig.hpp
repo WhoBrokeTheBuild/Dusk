@@ -9,10 +9,6 @@
     #define DUSK_VULKAN_API DUSK_API_IMPORT
 #endif
 
-#if !defined(NDEBUG)
-    #define DUSK_VULKAN_VALIDATION_LAYER
-#endif
-
 #include <glad/vulkan.h>
 
 #include <Dusk/SDL2/SDL2Config.hpp>

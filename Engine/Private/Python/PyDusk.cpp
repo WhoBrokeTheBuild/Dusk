@@ -188,7 +188,7 @@ bool PyCheckError()
             PyObject * pyValueStr = PyUnicode_AsEncodedString(pyValueRepr, "utf-8", "~E~");
 
             fprintf(stderr,
-                "[ERRO] Exception %s\n", 
+                "[ERRO](Python) Exception %s\n", 
                 PyBytes_AS_STRING(pyValueStr));
 
             Py_XDECREF(pyValueStr);
@@ -199,7 +199,7 @@ bool PyCheckError()
             PyObject * pyTypeNameStr = PyUnicode_AsEncodedString(pyTypeName, "utf-8", "~E~");
 
             fprintf(stderr,
-                "[ERRO] Exception %s\n", 
+                "[ERRO](Python) Exception %s\n", 
                 PyBytes_AS_STRING(pyTypeNameStr));
 
             Py_XDECREF(pyTypeNameStr);

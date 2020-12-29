@@ -26,6 +26,10 @@ public:
 
     void Terminate() override;
 
+    bool ReadFrom(size_t offset, size_t length, uint8_t * data) override;
+
+    bool WriteTo(size_t offset, size_t length, uint8_t * data) override;
+
     inline VkBuffer GetBuffer() {
         return _vkBuffer;
     }

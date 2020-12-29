@@ -9,10 +9,6 @@
     #define DUSK_DIRECTX_API DUSK_API_IMPORT
 #endif
 
-#if !defined(NDEBUG)
-    #define DUSK_DIRECTX_DEBUG_LAYER
-#endif
-
 #include <Windows.h>
 
 #include <winerror.h>

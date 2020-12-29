@@ -13,6 +13,11 @@ bool VulkanBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUsa
     _memoryUsage = memoryUsage;
     _size = static_cast<VkDeviceSize>(size);
 
+    if (!data && _memoryUsage == MemoryUsage::GPU) {
+        DuskLogError("Attempting to create an empty buffer with MemoryUsage GPU");
+        return false;
+    }
+
     VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
 
     auto vkBufferUsage = GetVkBufferUsage(_bufferUsage);
@@ -77,10 +82,18 @@ bool VulkanBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUsa
             return false;
         }
 
-        void * ptr;
-        vmaMapMemory(gfx->GetAllocator(), _vmaAllocation, &ptr);
-        memcpy(ptr, data, _size);
-        vmaUnmapMemory(gfx->GetAllocator(), _vmaAllocation);
+        if (data) {
+            void * ptr;
+            vkResult = vmaMapMemory(gfx->GetAllocator(), _vmaAllocation, &ptr);
+            if (vkResult != VK_SUCCESS) {
+                DuskLogError("vmaMapMemory() failed");
+                return false;
+            }
+
+            memcpy(ptr, data, _size);
+
+            vmaUnmapMemory(gfx->GetAllocator(), _vmaAllocation);
+        }
     }
     else {
         DuskLogError("MemoryUsage::Download is not yet supported");
@@ -97,6 +110,60 @@ void VulkanBuffer::Terminate()
 
     vkDestroyBuffer(gfx->GetDevice(), _vkBuffer, nullptr);
     vmaFreeMemory(gfx->GetAllocator(), _vmaAllocation);
+}
+
+DUSK_VULKAN_API
+bool VulkanBuffer::ReadFrom(size_t offset, size_t length, uint8_t * data)
+{
+    VkResult vkResult;
+
+    if (_memoryUsage != MemoryUsage::Download) {
+        DuskLogError("Unable to read data from buffer with MemoryUsage: %s",
+            MemoryUsageToString(_memoryUsage));
+        return false;
+    }
+
+    VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
+
+    void * ptr;
+    vkResult = vmaMapMemory(gfx->GetAllocator(), _vmaAllocation, &ptr);
+    if (vkResult != VK_SUCCESS) {
+        DuskLogError("vmaMapMemory() failed");
+        return false;
+    }
+
+    memcpy(data, static_cast<char *>(ptr) + offset, length);
+
+    vmaUnmapMemory(gfx->GetAllocator(), _vmaAllocation);
+
+    return true;
+}
+
+DUSK_VULKAN_API
+bool VulkanBuffer::WriteTo(size_t offset, size_t length, uint8_t * data)
+{
+    VkResult vkResult;
+    
+    if (_memoryUsage != MemoryUsage::UploadOnce && _memoryUsage != MemoryUsage::UploadOften) {
+        DuskLogError("Unable to write data to buffer with MemoryUsage: %s",
+            MemoryUsageToString(_memoryUsage));
+        return false;
+    }
+
+    VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
+
+    void * ptr;
+    vkResult = vmaMapMemory(gfx->GetAllocator(), _vmaAllocation, &ptr);
+    if (vkResult != VK_SUCCESS) {
+        DuskLogError("vmaMapMemory() failed");
+        return false;
+    }
+
+    memcpy(static_cast<char *>(ptr) + offset, data, length);
+
+    vmaUnmapMemory(gfx->GetAllocator(), _vmaAllocation);
+
+    return true;
 }
 
 } // namespace Dusk::Vulkan

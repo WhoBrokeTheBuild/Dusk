@@ -6,6 +6,8 @@
 
 namespace Dusk::OpenGL {
 
+#define DUSK_OPENGL_BUFFER(x) (dynamic_cast<Dusk::OpenGL::OpenGLBuffer *>(x))
+
 class DUSK_OPENGL_API OpenGLBuffer : public Buffer
 {
 public:
@@ -22,7 +24,15 @@ public:
 
     void Terminate() override;
 
+    bool ReadFrom(size_t offset, size_t length, uint8_t * data) override;
+
+    bool WriteTo(size_t offset, size_t length, uint8_t * data) override;
+
     void Bind();
+
+    GLuint GetGLID() const {
+        return _glID;
+    }
 
 private:
 

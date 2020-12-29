@@ -51,6 +51,14 @@ public:
 
     virtual ivec2 GetWindowSize() = 0;
 
+    virtual void SetBackbufferCount(unsigned backbufferCount) {
+        _backbufferCount = backbufferCount;
+    }
+
+    virtual unsigned GetBackbufferCount() const {
+        return _backbufferCount;
+    }
+
     virtual void SetClearColor(const vec4& color) {
         _clearColor = color;
     }
@@ -59,13 +67,11 @@ public:
         return _clearColor;
     }
 
-    virtual void SetDefaultPipeline(std::shared_ptr<Pipeline> pipeline) {
-        _defaultPipeline = pipeline;
-    }
+    virtual bool AddConstantBuffer(std::shared_ptr<Buffer> buffer, unsigned binding);
 
-    virtual std::shared_ptr<Pipeline> GetDefaultPipeline() const {
-        return _defaultPipeline;
-    }
+    virtual bool RemoveConstantBuffer(unsigned binding);
+
+    virtual Buffer * GetConstantBuffer(unsigned binding);
 
     virtual void ProcessEvents() = 0;
     
@@ -87,13 +93,15 @@ public:
 
     virtual RenderContext * GetRenderContext();
 
-    virtual bool SetShaderData(const std::string& name, size_t size, void * data) = 0;
-
     Event<Dusk::WindowResizedEventData> WindowResizedEvent;
 
-private:
+protected:
 
-    std::shared_ptr<Pipeline> _defaultPipeline;
+    unsigned _backbufferCount = 2;
+
+    std::unordered_map<unsigned, std::shared_ptr<Buffer>> _constantBufferBindings;
+
+    // Push Constants?
 
     vec4 _clearColor = vec4(0.392f, 0.584f, 0.929f, 1.0f);
 

@@ -8,6 +8,7 @@
 #include <Dusk/OpenGL/OpenGLTexture.hpp>
 #include <Dusk/OpenGL/OpenGLShader.hpp>
 #include <Dusk/OpenGL/OpenGLPrimitive.hpp>
+#include <Dusk/OpenGL/OpenGLBuffer.hpp>
 
 namespace Dusk::OpenGL {
 
@@ -41,9 +42,13 @@ public:
 
     std::unique_ptr<Primitive> CreatePrimitive() override;
 
-    bool SetShaderData(const std::string& name, size_t size, void * data) override;
+    // bool SetShaderData(const std::string& name, size_t size, void * data) override;
 
 private:
+
+    void BindUniformBufferObjects();
+
+    void InitDebugMessageCallback();
 
     SDL_GLContext _glContext = nullptr;
 

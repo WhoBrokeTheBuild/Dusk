@@ -26,7 +26,7 @@ bool DirectXGraphicsDriver::Initialize()
         return false;
     }
 
-    #if defined(DUSK_DIRECTX_DEBUG_LAYER)
+    #if defined(DUSK_BUILD_DEBUG)
 
         InitDebugLayer();
         

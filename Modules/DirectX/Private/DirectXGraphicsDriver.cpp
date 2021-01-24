@@ -18,6 +18,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, unsigned msg, WPARAM wParam, LPARAM lParam)
 DUSK_DIRECTX_API
 bool DirectXGraphicsDriver::Initialize()
 {
+    if (!GraphicsDriver::Initialize()) {
+        return false;
+    }
+    
     if (!InitWindow()) {
         return false;
     }

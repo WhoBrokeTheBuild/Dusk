@@ -65,9 +65,9 @@ inline GLbitfield GetGLMemoryUsage(MemoryUsage memoryUsage)
         return 0;
     case MemoryUsage::UploadOnce:
     case MemoryUsage::UploadOften:
-        return GL_MAP_WRITE_BIT | GL_MAP_COHERENT_BIT;
+        return GL_MAP_WRITE_BIT | GL_MAP_COHERENT_BIT | GL_MAP_PERSISTENT_BIT;
     case MemoryUsage::Download:
-        return GL_MAP_READ_BIT | GL_MAP_COHERENT_BIT;
+        return GL_MAP_READ_BIT | GL_MAP_COHERENT_BIT | GL_MAP_PERSISTENT_BIT;
     }
 
     return 0;

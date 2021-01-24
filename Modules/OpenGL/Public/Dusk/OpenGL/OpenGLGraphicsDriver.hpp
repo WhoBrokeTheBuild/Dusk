@@ -7,6 +7,7 @@
 #include <Dusk/OpenGL/OpenGLPipeline.hpp>
 #include <Dusk/OpenGL/OpenGLTexture.hpp>
 #include <Dusk/OpenGL/OpenGLShader.hpp>
+#include <Dusk/OpenGL/OpenGLMesh.hpp>
 #include <Dusk/OpenGL/OpenGLPrimitive.hpp>
 #include <Dusk/OpenGL/OpenGLBuffer.hpp>
 
@@ -39,6 +40,8 @@ public:
     std::shared_ptr<Texture> CreateTexture() override;
 
     std::shared_ptr<Shader> CreateShader() override;
+
+    std::shared_ptr<Mesh> CreateMesh() override;
 
     std::unique_ptr<Primitive> CreatePrimitive() override;
 

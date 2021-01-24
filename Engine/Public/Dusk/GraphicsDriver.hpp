@@ -40,7 +40,7 @@ public:
 
     virtual ~GraphicsDriver() = default;
 
-    virtual bool Initialize() = 0;
+    virtual bool Initialize();
 
     virtual void Terminate() = 0;
 
@@ -84,9 +84,7 @@ public:
 
     virtual std::shared_ptr<Shader> CreateShader() = 0;
 
-    virtual std::shared_ptr<Mesh> CreateMesh() {
-        return std::shared_ptr<Mesh>(New Mesh());
-    }
+    virtual std::shared_ptr<Mesh> CreateMesh() = 0;
 
     virtual std::unique_ptr<Primitive> CreatePrimitive() = 0;
 

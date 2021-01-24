@@ -48,13 +48,46 @@ void run()
         return;
     }
 
-    // auto shader = gfx->CreateShader();
-    // if (!shader->LoadFromFiles({
-    //     "flat.vert",
-    //     "flat.frag",
-    // })) {
-    //     return;
-    // }
+    Dusk::RenderContext * renderCtx = gfx->GetRenderContext();
+    Dusk::TransformData * transformData = renderCtx->GetTransformData();
+
+    Dusk::Camera camera;
+    camera.SetAspect(glm::vec2(640.0f, 480.0f));
+    camera.SetFOVX(45.0f);
+    camera.SetMode(Dusk::CameraMode::Perspective);
+    camera.SetPosition({ 3, 3, 3 });
+    camera.SetLookAt({ 0, 0, 0 });
+
+    static float rotation = 0.0f;
+    rotation += 0.01f;
+
+    transformData->View = camera.GetView();
+    transformData->Projection = camera.GetProjection();
+
+    auto shader = gfx->CreateShader();
+    if (!shader->LoadFromFiles({
+        "flat.vert",
+        "flat.frag",
+    })) {
+        return;
+    }
+
+    auto pipeline = gfx->CreatePipeline(shader);
+
+    Dusk::Scene scene;
+    gfx->SetCurrentScene(&scene);
+
+    auto mesh = Dusk::LoadMeshFromFile("cube.obj");
+    mesh->SetPipeline(pipeline);
+
+    auto entity = std::unique_ptr<Dusk::Entity>(New Dusk::Entity());
+    Dusk::Entity * tmpEntity = entity.get();
+
+    auto meshComponent = std::unique_ptr<Dusk::MeshComponent>(New Dusk::MeshComponent());
+    meshComponent->SetMesh(mesh);
+    entity->AddComponent(std::move(meshComponent));
+
+    scene.AddChild(std::move(entity));
 
     // auto meshImporters = Dusk::GetAllMeshImporters();
     // auto meshDatas = meshImporters[0]->LoadFromFile("sphere.obj");
@@ -69,15 +102,14 @@ void run()
     Dusk::SetRunning(true);
 
     while (Dusk::IsRunning()) {
+        gfx->Render();
+
         gfx->ProcessEvents();
 
         Dusk::ScriptConsole::Update();
 
-        // if (mesh) {
-        //     mesh->Render();
-        // }
-
-        gfx->Render();
+        glm::quat orient = tmpEntity->GetOrientation() * glm::angleAxis(glm::radians(0.1f), glm::vec3(0.0f, 1.0f, 0.0f));
+        tmpEntity->SetOrientation(orient);
 
         std::this_thread::sleep_for(16ms);
     }

@@ -8,6 +8,10 @@ namespace Dusk::SDL2 {
 DUSK_SDL2_API
 bool SDL2GraphicsDriver::Initialize()
 {
+    if (!GraphicsDriver::Initialize()) {
+        return false;
+    }
+
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
         DuskLogError("Failed to initialize SDL, %s", SDL_GetError());
         return false;

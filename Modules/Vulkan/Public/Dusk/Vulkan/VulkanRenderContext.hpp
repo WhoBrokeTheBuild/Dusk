@@ -4,9 +4,11 @@
 #include <Dusk/Vulkan/VulkanConfig.hpp>
 #include <Dusk/RenderContext.hpp>
 
-namespace Dusk {
+namespace Dusk::Vulkan {
 
-class DUSK_ENGINE_API VulkanRenderContext : public Object
+#define DUSK_VULKAN_RENDER_CONTEXT(x) (dynamic_cast<Dusk::Vulkan::VulkanRenderContext *>(x))
+
+class DUSK_ENGINE_API VulkanRenderContext : public RenderContext
 {
 public:
 
@@ -30,6 +32,6 @@ private:
 
 }; // class RenderContext
 
-} // namespace Dusk
+} // namespace Dusk::Vulkan
 
 #endif // DUSK_VULKAN_RENDER_CONTEXT_HPP

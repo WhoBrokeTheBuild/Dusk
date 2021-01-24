@@ -26,8 +26,6 @@ public:
 
 private:
 
-    GLenum GetGLMode(const PrimitiveTopology& topology);
-
     GLuint _glVAO;
 
     GLenum _glMode;
@@ -41,13 +39,13 @@ private:
 inline GLenum GetGLPrimitiveTopology(PrimitiveTopology primitiveTopology)
 {
     switch (primitiveTopology) {
-    case PrimitiveTopology::Points:
+    case PrimitiveTopology::PointList:
         return GL_POINTS;
-    case PrimitiveTopology::Lines:
+    case PrimitiveTopology::LineList:
         return GL_LINES;
     case PrimitiveTopology::LineStrip:
         return GL_LINE_STRIP;
-    case PrimitiveTopology::Triangles:
+    case PrimitiveTopology::TriangleList:
         return GL_TRIANGLES;
     case PrimitiveTopology::TriangleStrip:
         return GL_TRIANGLE_STRIP;

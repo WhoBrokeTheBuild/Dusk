@@ -7,6 +7,7 @@
 #include <Dusk/Vulkan/VulkanPipeline.hpp>
 #include <Dusk/Vulkan/VulkanTexture.hpp>
 #include <Dusk/Vulkan/VulkanShader.hpp>
+#include <Dusk/Vulkan/VulkanMesh.hpp>
 #include <Dusk/Vulkan/VulkanPrimitive.hpp>
 #include <Dusk/Vulkan/VulkanBuffer.hpp>
 #include <Dusk/Vulkan/VulkanRenderContext.hpp>
@@ -41,6 +42,8 @@ public:
     std::shared_ptr<Texture> CreateTexture() override;
 
     std::shared_ptr<Shader> CreateShader() override;
+
+    std::shared_ptr<Mesh> CreateMesh() override;
     
     std::unique_ptr<Primitive> CreatePrimitive() override;
 

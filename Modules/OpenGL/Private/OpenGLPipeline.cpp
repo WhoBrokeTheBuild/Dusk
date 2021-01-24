@@ -1,6 +1,7 @@
 #include <Dusk/OpenGL/OpenGLPipeline.hpp>
 
 #include <Dusk/Benchmark.hpp>
+#include <Dusk/GraphicsDriver.hpp>
 #include <Dusk/OpenGL/OpenGLShader.hpp>
 
 #include <cassert>
@@ -21,16 +22,15 @@ void OpenGLPipeline::Terminate()
 DUSK_OPENGL_API
 bool OpenGLPipeline::Bind()
 {
-    // TODO: Fix
-    float WIDTH = 1024.0f;
-    float HEIGHT = 768.0f;
+    auto gfx = GetGraphicsDriver();
+    glm::ivec2 windowSize = gfx->GetWindowSize();
 
     OpenGLShader * shader = DUSK_OPENGL_SHADER(_shader.get());
     if (shader) {
         shader->Bind();
     }
 
-    glViewport(0, 0, WIDTH, HEIGHT);
+    glViewport(0, 0, windowSize.x, windowSize.y);
 
     glFrontFace(GetGLFrontFace(_frontFace));
 

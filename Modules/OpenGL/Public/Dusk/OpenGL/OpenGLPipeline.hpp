@@ -7,6 +7,8 @@
 
 namespace Dusk::OpenGL {
 
+#define DUSK_OPENGL_PIPELINE(x) (dynamic_cast<Dusk::OpenGL::OpenGLPipeline *>(x))
+
 class DUSK_OPENGL_API OpenGLPipeline : public Pipeline
 {
 public:

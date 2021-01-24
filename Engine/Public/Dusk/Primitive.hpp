@@ -12,10 +12,10 @@ namespace Dusk {
 
 enum class PrimitiveTopology 
 {
-    Points,
-    Lines,
+    PointList,
+    LineList,
     LineStrip,
-    Triangles,
+    TriangleList,
     TriangleStrip,
 
 }; // enum class PrimitiveTopology
@@ -39,14 +39,14 @@ public:
 inline std::string PrimitiveTopologyToString(PrimitiveTopology primitiveTopology)
 {
     switch (primitiveTopology) {
-    case PrimitiveTopology::Points:
-        return "Points";
-    case PrimitiveTopology::Lines:
-        return "Lines";
+    case PrimitiveTopology::PointList:
+        return "PointList";
+    case PrimitiveTopology::LineList:
+        return "LineList";
     case PrimitiveTopology::LineStrip:
         return "LineStrip";
-    case PrimitiveTopology::Triangles:
-        return "Triangles";
+    case PrimitiveTopology::TriangleList:
+        return "TriangleList";
     case PrimitiveTopology::TriangleStrip:
         return "TriangleStrip";
     }

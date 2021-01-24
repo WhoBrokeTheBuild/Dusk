@@ -9,7 +9,7 @@ namespace Dusk {
 
 class Entity;
 
-class DUSK_ENGINE_API Component 
+class DUSK_ENGINE_API Component : public Object
 {
 public:
 

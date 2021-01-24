@@ -14,7 +14,7 @@ public:
     std::vector<Vertex> VertexList;
 
     PrimitiveTopology GetTopology() const override {
-        return PrimitiveTopology::Triangles;
+        return PrimitiveTopology::TriangleList;
     }
 
     gsl::span<Vertex> GetVertexList() override {

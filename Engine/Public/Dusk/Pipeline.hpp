@@ -141,7 +141,7 @@ protected:
 
     std::shared_ptr<Shader> _shader = nullptr;
 
-    PrimitiveTopology _primitiveTopology = PrimitiveTopology::Triangles;
+    PrimitiveTopology _primitiveTopology = PrimitiveTopology::TriangleList;
 
     FrontFace _frontFace = FrontFace::CounterClockwise;
 

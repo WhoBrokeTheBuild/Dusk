@@ -31,7 +31,7 @@ bool OpenGLPrimitive::Load(const std::unique_ptr<PrimitiveData>& data)
     const auto& indexList = data->GetIndexList();
     const auto& vertexList = data->GetVertexList();
 
-    _glMode = GetGLMode(data->GetTopology());
+    _glMode = GetGLPrimitiveTopology(data->GetTopology());
 
     GLuint vbo;
     std::vector<GLuint> vbos;
@@ -101,25 +101,6 @@ bool OpenGLPrimitive::Load(const std::unique_ptr<PrimitiveData>& data)
 
     DuskBenchmarkEnd("OpenGLPrimitive::Load");
     return true;
-}
-
-DUSK_OPENGL_API
-GLenum OpenGLPrimitive::GetGLMode(const PrimitiveTopology& topology)
-{
-    switch (topology) {
-    case PrimitiveTopology::Points:
-        return GL_POINTS;
-    case PrimitiveTopology::Lines:
-        return GL_LINES;
-    case PrimitiveTopology::LineStrip:
-        return GL_LINE_STRIP;
-    case PrimitiveTopology::Triangles:
-        return GL_TRIANGLES;
-    case PrimitiveTopology::TriangleStrip:
-        return GL_TRIANGLE_STRIP;
-    }
-
-    return GL_INVALID_ENUM;
 }
 
 } // namespace Dusk::OpenGL

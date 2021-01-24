@@ -17,12 +17,12 @@ public:
 
     VulkanMesh() = default;
 
-    virtual ~VulkanMesh();
+    virtual ~VulkanMesh() = default;
 
     bool Load(const std::vector<std::unique_ptr<PrimitiveData>>& data) override;
 
-    void GenerateCommands(VkCommandBuffer vkCommandBuffer);
-
+    void Render(RenderContext * ctx) override;
+    
 private:
 
 

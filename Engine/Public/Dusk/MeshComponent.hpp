@@ -20,7 +20,7 @@ public:
 
     virtual ~MeshComponent() = default;
 
-    void SetMesh(std::shared_ptr<Mesh> && mesh);
+    void SetMesh(std::shared_ptr<Mesh> mesh);
 
     void Render(RenderContext * ctx) override;
 

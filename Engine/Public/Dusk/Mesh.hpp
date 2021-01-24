@@ -6,6 +6,7 @@
 #include <Dusk/Primitive.hpp>
 #include <Dusk/PrimitiveData.hpp>
 #include <Dusk/Pipeline.hpp>
+#include <Dusk/RenderContext.hpp>
 
 #include <vector>
 
@@ -22,6 +23,8 @@ public:
     virtual ~Mesh() = default;
 
     virtual bool Load(const std::vector<std::unique_ptr<PrimitiveData>>& data);
+
+    virtual void Render(RenderContext * ctx) = 0;
 
     virtual void SetPipeline(std::shared_ptr<Pipeline> pipeline) {
         _pipeline = pipeline;

@@ -54,7 +54,7 @@ bool VulkanGraphicsDriver::Initialize()
         return false;
     }
 
-    _renderContext = std::unique_ptr<RenderContext>(New VulkanRenderContext());
+    _renderContext.reset(New VulkanRenderContext());
 
     const unsigned TRANSFORM_DATA_BINDING = 0;
 
@@ -134,11 +134,6 @@ void VulkanGraphicsDriver::Render()
 
 
 
-
-    // GenerateCurrentCommandBuffer
-
-
-
     VkCommandBufferBeginInfo commandBufferBeginInfo = {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
         .pNext = nullptr,
@@ -146,11 +141,17 @@ void VulkanGraphicsDriver::Render()
         .pInheritanceInfo = nullptr,
     };
 
+    vkResetCommandBuffer(_vkCommandBuffers[_currentFrame], 0);
+
     vkResult = vkBeginCommandBuffer(_vkCommandBuffers[_currentFrame], &commandBufferBeginInfo);
     if (vkResult != VK_SUCCESS) {
         DuskLogError("vkBeginCommandBuffer() failed");
         return;
     }
+
+    VulkanRenderContext * vkRenderContext = DUSK_VULKAN_RENDER_CONTEXT(_renderContext.get());
+    vkRenderContext->SetVkCommandBuffer(_vkCommandBuffers[_currentFrame]);
+
 
     std::array<VkClearValue, 2> clearValues = { };
 
@@ -163,8 +164,6 @@ void VulkanGraphicsDriver::Render()
         .depth = 1.0f, 
         .stencil = 0,
     };
-
-    vkResetCommandBuffer(_vkCommandBuffers[_currentFrame], 0);
 
     VkRenderPassBeginInfo renderPassBeginInfo = {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
@@ -184,17 +183,16 @@ void VulkanGraphicsDriver::Render()
         _currentScene->Render(_renderContext.get());
     }
 
-
-    for (const auto& p : _pipelines) {
-        VulkanPipeline * pipeline = DUSK_VULKAN_PIPELINE(p.get());
+    // for (const auto& p : _pipelines) {
+    //     VulkanPipeline * pipeline = DUSK_VULKAN_PIPELINE(p.get());
         
-        // pipeline->GenerateBindCommands(_vkCommandBuffers[i]);
+    //     // pipeline->GenerateBindCommands(_vkCommandBuffers[i]);
         
-        // TODO: Move into Pipeline's Generate Commands
-        vkCmdBindDescriptorSets(_vkCommandBuffers[_currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, _vkPipelineLayout, 0, 1, &_vkDescriptorSets[_currentFrame], 0, nullptr);
+    //     // TODO: Move into Pipeline's Generate Commands
+    //     vkCmdBindDescriptorSets(_vkCommandBuffers[_currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, _vkPipelineLayout, 0, 1, &_vkDescriptorSets[_currentFrame], 0, nullptr);
         
-        // pipeline->GenerateDrawCommands(_vkCommandBuffers[i]);
-    }
+    //     // pipeline->GenerateDrawCommands(_vkCommandBuffers[i]);
+    // }
 
     vkCmdEndRenderPass(_vkCommandBuffers[_currentFrame]);
 
@@ -203,6 +201,7 @@ void VulkanGraphicsDriver::Render()
         DuskLogError("vkEndCommandBuffer() failed");
         return;
     }
+
 
 
 
@@ -219,33 +218,11 @@ void VulkanGraphicsDriver::Render()
         DuskLogFatal("vkAcquireNextImageKHR() failed");
     }
 
-    Camera camera;
-    camera.SetPosition({ 3, 3, 3 });
-    camera.SetLookAt({ 0, 0, 0 });
 
-    static float rotation = 0.0f;
-    rotation += 0.01f;
-
-    TransformData transform = {
-        .Model = glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 1.0f, 0.0f)),
-        .View = camera.GetView(),
-        .Projection = camera.GetProjection(),
-    };
-
-    // OpenGL, and thus glm are upside-down
-    transform.Projection[1][1] *= -1;
-
-    transform.UpdateMVP();
-
-    // void * data;
-    // vmaMapMemory(_vmaAllocator, _vkUniformBufferAllocations[imageIndex], &data);
-    // memcpy(data, &transform, sizeof(transform));
-    // vmaUnmapMemory(_vmaAllocator, _vkUniformBufferAllocations[imageIndex]);
 
     if (_vkImagesInFlight[imageIndex] != VK_NULL_HANDLE) {
         vkWaitForFences(_vkDevice, 1, &_vkImagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
     }
-
     _vkImagesInFlight[imageIndex] = _vkInFlightFences[_currentFrame];
 
     VkSemaphore waitSemaphores[] = { _vkImageAvailableSemaphores[_currentFrame] };
@@ -295,7 +272,7 @@ void VulkanGraphicsDriver::Render()
         DuskLogFatal("vkQueuePresentKHR() failed");
     }
 
-    _currentFrame = (_currentFrame + 1) % 2;
+    _currentFrame = (_currentFrame + 1) % GetBackbufferCount();
 
     // TODO: Find out where this lives
     vmaSetCurrentFrameIndex(_vmaAllocator, _currentFrame);
@@ -323,6 +300,12 @@ DUSK_VULKAN_API
 std::shared_ptr<Shader> VulkanGraphicsDriver::CreateShader()
 {
     return std::shared_ptr<Shader>(New VulkanShader());
+}
+
+DUSK_VULKAN_API
+std::shared_ptr<Mesh> VulkanGraphicsDriver::CreateMesh()
+{
+    return std::shared_ptr<Mesh>(New VulkanMesh());
 }
 
 DUSK_VULKAN_API

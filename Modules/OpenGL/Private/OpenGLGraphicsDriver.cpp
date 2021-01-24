@@ -92,7 +92,30 @@ bool OpenGLGraphicsDriver::Initialize()
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &value);
     DuskLogVerbose("Max Uniform Block Size: %d", value);
 
+    // TODO: Fix
     glClearColor(0.392f, 0.584f, 0.929f, 1.0f);
+
+    // TODO: Move
+    glViewport(0, 0, 640, 480);
+
+    const unsigned TRANSFORM_DATA_BINDING = 0;
+
+    bool result;
+
+    // TODO: Move
+    std::shared_ptr<Buffer> transformDataBuffer = std::shared_ptr<Buffer>(New OpenGLBuffer());
+    result = transformDataBuffer->Initialize(
+        sizeof(TransformData),
+        nullptr,
+        BufferUsage::Constant,
+        MemoryUsage::UploadOften
+    );
+
+    if (!result) {
+        DuskLogError("Freak out");
+    }
+
+    AddConstantBuffer(transformDataBuffer, TRANSFORM_DATA_BINDING);
 
     return true;
 }
@@ -111,6 +134,14 @@ void OpenGLGraphicsDriver::Terminate()
 DUSK_OPENGL_API
 void OpenGLGraphicsDriver::Render()
 {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    BindUniformBufferObjects();
+
+    if (_currentScene) {
+        _currentScene->Render(_renderContext.get());
+    }
+
     SDL_GL_SwapWindow(GetSDL2Window());
 }
 
@@ -134,6 +165,12 @@ std::shared_ptr<Shader> OpenGLGraphicsDriver::CreateShader()
     auto shader = std::shared_ptr<Shader>(New OpenGLShader());
     _shaders.push_back(shader);
     return shader;
+}
+
+DUSK_OPENGL_API
+std::shared_ptr<Mesh> OpenGLGraphicsDriver::CreateMesh()
+{
+    return std::shared_ptr<Mesh>(New OpenGLMesh());
 }
 
 DUSK_OPENGL_API

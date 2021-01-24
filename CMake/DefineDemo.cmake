@@ -238,11 +238,27 @@ MACRO(DEFINE_DEMO _target)
 
         IF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/.vscode)
             SET(_launch_json ${CMAKE_SOURCE_DIR}/.vscode/launch.json)
-            ADD_CUSTOM_COMMAND(
-                TARGET ${_target} POST_BUILD
-                BYPRODUCTS ${_launch_json}
-                COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Scripts/add-vscode-launch-target.py ${_launch_json} ${_target} $<TARGET_FILE:${_target}> ${CMAKE_CURRENT_BINARY_DIR} "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${ASSET_PATH}"
-            )
+            SET(_graphics_drivers "")
+
+            IF("OpenGL" IN_LIST REQUIRED_MODULES)
+                LIST(APPEND _graphics_drivers "OpenGL")
+            ENDIF()
+
+            IF("Vulkan" IN_LIST REQUIRED_MODULES)
+                LIST(APPEND _graphics_drivers "Vulkan")
+            ENDIF()
+
+            IF("DirectX" IN_LIST REQUIRED_MODULES)
+                LIST(APPEND _graphics_drivers "DirectX")
+            ENDIF()
+
+            FOREACH(_driver ${_graphics_drivers})
+                ADD_CUSTOM_COMMAND(
+                    TARGET ${_target} POST_BUILD
+                    BYPRODUCTS ${_launch_json}
+                    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Scripts/add-vscode-launch-target.py ${_launch_json} "${_target} ${_driver}" $<TARGET_FILE:${_target}> ${CMAKE_CURRENT_BINARY_DIR} "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${ASSET_PATH}" "DUSK_GRAPHICS_DRIVER=${_driver}"
+                )
+            ENDFOREACH()
         ENDIF()
     ENDIF()
     

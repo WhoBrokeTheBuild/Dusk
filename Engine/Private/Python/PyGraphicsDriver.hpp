@@ -10,7 +10,7 @@ PyObject * New_PyGraphicsDriver(GraphicsDriver * gfx);
 
 PyObject * PyGraphicsDriver_ProcessEvents(PyObject * self, PyObject * args);
 
-PyObject * PyGraphicsDriver_SwapBuffers(PyObject * self, PyObject * args);
+PyObject * PyGraphicsDriver_Render(PyObject * self, PyObject * args);
 
 PyObject * PyGraphicsDriver_GetWindowTitle(PyObject * self, PyObject * args);
 

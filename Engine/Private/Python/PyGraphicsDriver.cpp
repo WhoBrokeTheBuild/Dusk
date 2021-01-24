@@ -14,7 +14,7 @@ typedef struct
 
 static PyMethodDef PyGraphicsDriver_methods[] = {
     { "ProcessEvents",          PyGraphicsDriver_ProcessEvents,         METH_NOARGS,    nullptr },
-    { "SwapBuffers",            PyGraphicsDriver_SwapBuffers,           METH_NOARGS,    nullptr },
+    { "Render",                 PyGraphicsDriver_Render,                METH_NOARGS,    nullptr },
     { "GetWindowTitle",         PyGraphicsDriver_GetWindowTitle,        METH_NOARGS,    nullptr },
     { "SetWindowTitle",         PyGraphicsDriver_SetWindowTitle,        METH_VARARGS,   nullptr },
     { "GetWindowSize",          PyGraphicsDriver_GetWindowSize,         METH_NOARGS,    nullptr },
@@ -94,10 +94,10 @@ PyObject * PyGraphicsDriver_ProcessEvents(PyObject * self, PyObject * args)
     Py_RETURN_NONE;
 }
 
-PyObject * PyGraphicsDriver_SwapBuffers(PyObject * self, PyObject * args)
+PyObject * PyGraphicsDriver_Render(PyObject * self, PyObject * args)
 {
     PyGraphicsDriver * gfx = (PyGraphicsDriver *)self;
-    gfx->Pointer->SwapBuffers();
+    gfx->Pointer->Render();
     Py_RETURN_NONE;
 }
 

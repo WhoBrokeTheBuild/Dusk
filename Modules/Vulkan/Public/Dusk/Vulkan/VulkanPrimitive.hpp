@@ -6,11 +6,14 @@
 #include <Dusk/Log.hpp>
 #include <Dusk/Primitive.hpp>
 #include <Dusk/PrimitiveData.hpp>
+#include <Dusk/Buffer.hpp>
 
 #include <vector>
 #include <optional>
 
 namespace Dusk::Vulkan {
+
+#define DUSK_VULKAN_PRIMITIVE(x) (dynamic_cast<Dusk::Vulkan::VulkanPrimitive *>(x))
 
 class DUSK_VULKAN_API VulkanPrimitive : public Primitive
 {
@@ -28,20 +31,13 @@ public:
         return _vkPrimitiveTopology;
     }
     
-    void GenerateBindCommands(VkCommandBuffer vkCommandBuffer);
-
-    void GenerateDrawCommands(VkCommandBuffer vkCommandBuffer);
+    void GenerateCommands(VkCommandBuffer vkCommandBuffer);
 
 private:
 
-    // bool AddBuffer(const void * data, VkDeviceSize size, uint32_t stride, VkFormat format,
-    //     VkVertexInputRate inputRate, VkBufferUsageFlags usage, VertexAttribute attribute)
+    std::unique_ptr<Buffer> _indexBuffer;
 
-    VkBuffer _vkIndexBuffer;
-
-    VkBuffer _vkVertexBuffer;
-
-    std::vector<VkDeviceMemory> _vkBufferMemories;
+    std::unique_ptr<Buffer> _vertexBuffer;
 
     VkPrimitiveTopology _vkPrimitiveTopology;
 

@@ -5,7 +5,9 @@
 #include <Dusk/Object.hpp>
 
 #include <Dusk/Shader.hpp>
-#include <Dusk/Mesh.hpp>
+#include <Dusk/Primitive.hpp>
+
+#include <memory>
 
 namespace Dusk {
 
@@ -153,7 +155,7 @@ protected:
 
     float _depthBiasClamp = 0.0f;
 
-    DepthBiasMode _depthBiasMode = DepthBiasMode::Clamp;
+    DepthBiasMode _depthBiasMode = DepthBiasMode::Clip;
 
     CompareOperation _depthCompareOperation = CompareOperation::Less;
 

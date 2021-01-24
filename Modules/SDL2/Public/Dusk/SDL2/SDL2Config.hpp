@@ -11,8 +11,4 @@
 
 #include <SDL.h>
 
-#undef CreateWindow
-#undef near
-#undef far
-
 #endif // DUSK_SDL2_CONFIG_HPP

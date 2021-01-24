@@ -12,6 +12,7 @@
 #include <Dusk/Mesh.hpp>
 #include <Dusk/Event.hpp>
 #include <Dusk/Buffer.hpp>
+#include <Dusk/Scene.hpp>
 
 #include <string>
 #include <vector>
@@ -75,7 +76,7 @@ public:
 
     virtual void ProcessEvents() = 0;
     
-    virtual void SwapBuffers() = 0;
+    virtual void Render() = 0;
 
     virtual std::shared_ptr<Pipeline> CreatePipeline(std::shared_ptr<Shader> shader) = 0;
 
@@ -95,19 +96,27 @@ public:
 
     Event<Dusk::WindowResizedEventData> WindowResizedEvent;
 
+    inline void SetCurrentScene(Scene * currentScene) {
+        _currentScene = currentScene;
+    }
+
 protected:
 
-    unsigned _backbufferCount = 2;
-
-    std::unordered_map<unsigned, std::shared_ptr<Buffer>> _constantBufferBindings;
+    virtual void TermConstantBuffers();
 
     // Push Constants?
 
     vec4 _clearColor = vec4(0.392f, 0.584f, 0.929f, 1.0f);
 
-    std::unique_ptr<UpdateContext> _updateContext = std::make_unique<UpdateContext>();
+    std::unique_ptr<UpdateContext> _updateContext;
 
-    std::unique_ptr<RenderContext> _renderContext = std::make_unique<RenderContext>();
+    std::unique_ptr<RenderContext> _renderContext;
+
+    unsigned _backbufferCount = 2;
+
+    std::unordered_map<unsigned, std::shared_ptr<Buffer>> _constantBufferBindings;
+
+    Scene * _currentScene = nullptr;
 
 }; // class GraphicsDriver
 

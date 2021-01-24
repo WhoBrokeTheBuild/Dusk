@@ -215,30 +215,10 @@ bool VulkanPipeline::Initialize()
     return true;
 }
 
-// DUSK_VULKAN_API
-// void VulkanPipeline::GenerateBindCommands(VkCommandBuffer vkCommandBuffer)
-// {
-//     vkCmdBindPipeline(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _vkPipeline);
-
-//     // TODO: Move to local variable post-conversion
-//     VulkanMesh * mesh = DUSK_VULKAN_MESH(_mesh.get());
-//     if (!mesh) {
-//         return;
-//     }
-
-//     mesh->GenerateBindCommands(vkCommandBuffer);
-// }
-
-// DUSK_VULKAN_API
-// void VulkanPipeline::GenerateDrawCommands(VkCommandBuffer vkCommandBuffer)
-// {
-//     // TODO: Move to local variable post-conversion
-//     VulkanMesh * mesh = DUSK_VULKAN_MESH(_mesh.get());
-//     if (!mesh) {
-//         return;
-//     }
-
-//     mesh->GenerateDrawCommands(vkCommandBuffer);
-// }
+DUSK_VULKAN_API
+void VulkanPipeline::GenerateCommands(VkCommandBuffer vkCommandBuffer)
+{
+    vkCmdBindPipeline(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _vkPipeline);
+}
 
 } // namespace Dusk::Vulkan

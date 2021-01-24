@@ -77,7 +77,7 @@ void run()
         //     mesh->Render();
         // }
 
-        gfx->SwapBuffers();
+        gfx->Render();
 
         std::this_thread::sleep_for(16ms);
     }

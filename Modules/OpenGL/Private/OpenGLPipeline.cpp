@@ -38,22 +38,8 @@ bool OpenGLPipeline::Bind()
         glDisable(GL_CULL_FACE);
     }
     else {
+        glEnable(GL_CULL_FACE);
         glCullFace(GetGLCullMode(_cullMode));
-    }
-
-    switch (_cullMode) {
-    case CullMode::None:
-        glDisable(GL_CULL_FACE);
-        break;
-    case CullMode::Front:
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_FRONT);
-        break;
-    case CullMode::Back:
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-        break;
-    default: ;
     }
 
     glPolygonMode(GL_FRONT_AND_BACK, GetGLFillMode(_fillMode));
@@ -67,7 +53,7 @@ bool OpenGLPipeline::Bind()
     case DepthBiasMode::Clip:
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_POLYGON_OFFSET_FILL);
-        glDepthFunc(GL_LEQUAL);
+        glDepthFunc(GetGLCompareOperation(_depthCompareOperation));
         break;
     }
 
@@ -89,8 +75,6 @@ bool OpenGLPipeline::Bind()
     else {
         glDisable(GL_BLEND);
     }
-
-    // glDepthFunc(GetGLCompareOperation())
 
     return true;
 }

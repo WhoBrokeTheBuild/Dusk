@@ -1,7 +1,6 @@
 #ifndef DUSK_CONFIG_HPP
 #define DUSK_CONFIG_HPP
 
-#include <Dusk/Platform.hpp>
 #include <Dusk/Macros.hpp>
 
 #define DUSK_VERSION_MAJOR @PROJECT_VERSION_MAJOR@

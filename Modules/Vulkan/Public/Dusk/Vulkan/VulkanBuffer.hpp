@@ -10,6 +10,8 @@
 
 namespace Dusk::Vulkan {
 
+#define DUSK_VULKAN_BUFFER(x) (dynamic_cast<Dusk::Vulkan::VulkanBuffer *>(x))
+
 class DUSK_VULKAN_API VulkanBuffer : public Buffer
 {
 public:
@@ -30,7 +32,7 @@ public:
 
     bool WriteTo(size_t offset, size_t length, uint8_t * data) override;
 
-    inline VkBuffer GetBuffer() {
+    inline VkBuffer GetVkBuffer() {
         return _vkBuffer;
     }
 

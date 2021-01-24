@@ -32,7 +32,7 @@ public:
 
     void Terminate() override;
 
-    void SwapBuffers() override;
+    void Render() override;
 
     std::shared_ptr<Pipeline> CreatePipeline(std::shared_ptr<Shader> shader) override;
 

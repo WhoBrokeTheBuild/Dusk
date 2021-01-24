@@ -126,9 +126,6 @@ class Command
 {
 public:
 
-    virtual void AddCommand(CommandList list) { };
-
-    virtual void Execute() { };
 };
 
 class SetPipelineCommand : public Command
@@ -139,7 +136,7 @@ public:
         : _pipeline(pipeline)
     { }
 
-private:
+protected:
 
     std::shared_ptr<Pipeline> _pipeline;
 };
@@ -148,7 +145,7 @@ class VulkanSetPipelineCommand : SetPipelineCommand
 {
 public:
     
-    void AddCommand(CommandList list) override {
+    void Execute() override {
         auto vulkanCommandBuffer = DUSK_VULKAN_COMMAND_LIST(list.get());
         auto vulkanPipeline = DUSK_VULKAN_PIPELINE(_pipeline.get());
         vkCmdBindPipeline(vulkanCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline);
@@ -168,6 +165,48 @@ public:
 
 // Command Bundles?
 
+
+
+
+enum class CommandListUsage
+{
+    // TODO: Improve
+    Default,
+    OneTime,
+
+}; // enum class CommandListUsage
+
+class DUSK_ENGINE_API CommandAllocator : public Object
+{
+public:
+
+    // TODO: Revisit
+
+}; // class CommandAllocator
+
+class DUSK_ENGINE_API RenderTarget : public Object
+{
+public:
+
+private:
+
+}; // class RenderTarget
+
+class DUSK_VULKAN_API VulkanRenderTarget : public RenderTarget
+{
+public:
+
+    VulkanRenderTarget(VkFramebuffer * framebuffer);
+
+};
+
+class DUSK_DIRECTX_API DirectXRenderTarget : public RenderTarget
+{
+public:
+
+    DirectXRenderTarget(ComPtr<ID3D12Resource> renderTarget);
+};
+
 class DUSK_ENGINE_API CommandList : public Object
 {
 public:
@@ -178,15 +217,36 @@ public:
 
     virtual ~CommandList() = default;
 
-    void Begin();
-    void End();
+    virtual bool Initialize(CommandAllocator * commandAllocator, CommandListUsage commandListUsage) = 0;
 
-    void AddSetPipelineCommand(std::shared_ptr<Pipeline> pipeline);
+    virtual void Terminate() = 0;
 
-    void AddSetIndexBufferCommand(std::shared_ptr<Buffer> indexBuffer);
-    void AddSetVertexBuffersCommand(std::vector<std::shared_ptr<Buffer>> vertexBuffers);
+    virtual void Begin(Pipeline * initialPipeline) = 0;
 
-    void AddSetViewportCommand(Viewport viewport);
+    virtual void End() = 0;
+
+    virtual void BeginRenderPass(RenderTarget * framebuffer, vec4 clearColor, float depth, int stencil) = 0;
+
+    virtual void EndRenderPass() = 0;
+
+    virtual void SetPipeline(std::shared_ptr<Pipeline> pipeline) = 0;
+
+    virtual void SetIndexBuffer(std::shared_ptr<Buffer> indexBuffer) = 0;
+
+    virtual void SetVertexBuffers(std::vector<std::shared_ptr<Buffer>> vertexBuffers) = 0;
+
+    // BindDescriptorSets?
+    // PushConstants?
+    // RootSignature?
+
+    virtual void Draw() = 0;
+
+
+    // SetRenderTarget (Framebuffer)
+    // ClearColor
+    // ClearDepth
+
+    // void AddSetViewportCommand(Viewport viewport);
 
 private:
 

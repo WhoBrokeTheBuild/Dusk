@@ -26,7 +26,6 @@ class DUSK_ENGINE_API Primitive : public Object
 {
 public:
 
-
     DISALLOW_COPY_AND_ASSIGN(Primitive)
 
     Primitive() = default;

@@ -5,6 +5,7 @@
 #include <Dusk/Object.hpp>
 #include <Dusk/Primitive.hpp>
 #include <Dusk/PrimitiveData.hpp>
+#include <Dusk/Pipeline.hpp>
 
 #include <vector>
 
@@ -20,17 +21,17 @@ public:
 
     virtual ~Mesh() = default;
 
-    virtual void Render() { }
-
     virtual bool Load(const std::vector<std::unique_ptr<PrimitiveData>>& data);
 
-    // virtual void SetPipeline(std::shared_ptr<Pipeline> pipeline);
+    virtual void SetPipeline(std::shared_ptr<Pipeline> pipeline) {
+        _pipeline = pipeline;
+    }
 
 protected:
 
     std::vector<std::unique_ptr<Primitive>> _primitiveList;
 
-    // std::shared_ptr<Pipeline> _pipeline;
+    std::shared_ptr<Pipeline> _pipeline;
 
 }; // class Mesh
 

@@ -8,8 +8,12 @@
 
 #include <set>
 
-#define VMA_IMPLEMENTATION
-#include <vk_mem_alloc.h>
+DISABLE_WARNINGS()
+
+    #define VMA_IMPLEMENTATION
+    #include <vk_mem_alloc.h>
+
+ENABLE_WARNINGS()
 
 namespace Dusk::Vulkan {
 
@@ -21,14 +25,6 @@ bool VulkanGraphicsDriver::Initialize()
     SDL2GraphicsDriver::Initialize();
     
     SDL2GraphicsDriver::CreateWindow(SDL_WINDOW_VULKAN);
-
-    int vkVersion = gladLoaderLoadVulkan(nullptr, nullptr, nullptr);
-    if (vkVersion == 0) {
-        DuskLogError("gladLoaderLoadVulkan() failed");
-        return false;
-    }
-    
-    DuskLogVerbose("Vulkan %d.%d", GLAD_VERSION_MAJOR(vkVersion), GLAD_VERSION_MINOR(vkVersion));
 
     if (!InitInstance()) {
         return false;
@@ -58,6 +54,8 @@ bool VulkanGraphicsDriver::Initialize()
         return false;
     }
 
+    _renderContext = std::unique_ptr<RenderContext>(New VulkanRenderContext());
+
     const unsigned TRANSFORM_DATA_BINDING = 0;
 
     // TODO: Move
@@ -77,38 +75,6 @@ bool VulkanGraphicsDriver::Initialize()
 
 
     if (!InitSwapChain()) {
-        return false;
-    }
-
-    if (!InitRenderPass()) {
-        return false;
-    }
-
-    if (!InitDescriptorPool()) {
-        return false;
-    }
-
-    if (!InitGraphicsPipelines()) {
-        return false;
-    }
-
-    if (!InitDepthBuffer()) {
-        return false;
-    }
-
-    if (!InitFramebuffers()) {
-        return false;
-    }
-
-    if (!InitCommandPool()) {
-        return false;
-    }
-
-    if (!InitCommandBuffers()) {
-        return false;
-    }
-
-    if (!InitSyncObjects()) {
         return false;
     }
 
@@ -132,8 +98,7 @@ void VulkanGraphicsDriver::Terminate()
     TermSwapChain();
     _pipelines.clear();
 
-    // TODO: Move
-    _constantBufferBindings.clear();
+    TermConstantBuffers();
 
     TermAllocator();
     TermLogicalDevice();
@@ -153,9 +118,93 @@ void VulkanGraphicsDriver::Terminate()
 }
 
 DUSK_VULKAN_API
-void VulkanGraphicsDriver::SwapBuffers()
+void VulkanGraphicsDriver::SetBackbufferCount(unsigned backbufferCount)
+{
+    if (backbufferCount != GetBackbufferCount()) {
+        ResetSwapChain();
+    }
+
+    GraphicsDriver::SetBackbufferCount(backbufferCount);
+}
+
+DUSK_VULKAN_API
+void VulkanGraphicsDriver::Render()
 {
     VkResult vkResult;
+
+
+
+
+    // GenerateCurrentCommandBuffer
+
+
+
+    VkCommandBufferBeginInfo commandBufferBeginInfo = {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .pInheritanceInfo = nullptr,
+    };
+
+    vkResult = vkBeginCommandBuffer(_vkCommandBuffers[_currentFrame], &commandBufferBeginInfo);
+    if (vkResult != VK_SUCCESS) {
+        DuskLogError("vkBeginCommandBuffer() failed");
+        return;
+    }
+
+    std::array<VkClearValue, 2> clearValues = { };
+
+    const vec4& cc = GetClearColor();
+    clearValues[0].color = {
+        .float32 = { cc.r, cc.g, cc.b, cc.a }
+    };
+    
+    clearValues[1].depthStencil = { 
+        .depth = 1.0f, 
+        .stencil = 0,
+    };
+
+    vkResetCommandBuffer(_vkCommandBuffers[_currentFrame], 0);
+
+    VkRenderPassBeginInfo renderPassBeginInfo = {
+        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+        .renderPass = _vkRenderPass,
+        .framebuffer = _vkFramebuffers[_currentFrame],
+        .renderArea = {
+            .offset = { 0, 0 },
+            .extent = _vkSwapChainExtent,
+        },
+        .clearValueCount = static_cast<uint32_t>(clearValues.size()),
+        .pClearValues = clearValues.data(),
+    };
+
+    vkCmdBeginRenderPass(_vkCommandBuffers[_currentFrame], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+    if (_currentScene) {
+        _currentScene->Render(_renderContext.get());
+    }
+
+
+    for (const auto& p : _pipelines) {
+        VulkanPipeline * pipeline = DUSK_VULKAN_PIPELINE(p.get());
+        
+        // pipeline->GenerateBindCommands(_vkCommandBuffers[i]);
+        
+        // TODO: Move into Pipeline's Generate Commands
+        vkCmdBindDescriptorSets(_vkCommandBuffers[_currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, _vkPipelineLayout, 0, 1, &_vkDescriptorSets[_currentFrame], 0, nullptr);
+        
+        // pipeline->GenerateDrawCommands(_vkCommandBuffers[i]);
+    }
+
+    vkCmdEndRenderPass(_vkCommandBuffers[_currentFrame]);
+
+    vkResult = vkEndCommandBuffer(_vkCommandBuffers[_currentFrame]);
+    if (vkResult != VK_SUCCESS) {
+        DuskLogError("vkEndCommandBuffer() failed");
+        return;
+    }
+
+
 
     vkWaitForFences(_vkDevice, 1, &_vkInFlightFences[_currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -397,9 +446,7 @@ bool VulkanGraphicsDriver::IsDeviceSuitable(const VkPhysicalDevice device)
 
 std::vector<const char *> VulkanGraphicsDriver::GetRequiredDeviceLayers()
 {
-    std::vector<const char *> requiredLayers = {
-
-    };
+    std::vector<const char *> requiredLayers = { };
 
     #if defined(DUSK_BUILD_DEBUG)
 
@@ -475,9 +522,13 @@ bool VulkanGraphicsDriver::InitInstance()
 {
     VkResult vkResult;
 
-    const auto& engineVersion = GetVersion();
-    const auto& appVersion = GetApplicationVersion();
-    const auto& appName = GetApplicationName();
+    int vkVersion = gladLoaderLoadVulkan(nullptr, nullptr, nullptr);
+    if (vkVersion == 0) {
+        DuskLogError("gladLoaderLoadVulkan() failed");
+        return false;
+    }
+    
+    DuskLogVerbose("Vulkan %d.%d", GLAD_VERSION_MAJOR(vkVersion), GLAD_VERSION_MINOR(vkVersion));
 
     uint32_t availableLayerCount = 0;
     vkEnumerateInstanceLayerProperties(&availableLayerCount, nullptr);
@@ -489,6 +540,10 @@ bool VulkanGraphicsDriver::InitInstance()
 
     std::vector<VkLayerProperties> availableLayers(availableLayerCount);
     vkResult = vkEnumerateInstanceLayerProperties(&availableLayerCount, availableLayers.data());
+    if (vkResult != VK_SUCCESS) {
+        DuskLogError("vkEnumerateInstanceLayerProperties() failed");
+        return false;
+    }
 
     DuskLogVerbose("Available Vulkan Layers:");
     for (const auto& layer : availableLayers) {
@@ -519,7 +574,7 @@ bool VulkanGraphicsDriver::InitInstance()
 
     const auto& requiredExtensions = GetRequiredInstanceExtensions();
     if (requiredExtensions.empty()) {
-        DuskLogError("Failed to get Required Instance Expansions");
+        DuskLogError("Failed to get Required Instance Extensions");
         return false;
     }
 
@@ -527,6 +582,10 @@ bool VulkanGraphicsDriver::InitInstance()
     for (const auto& extension : requiredExtensions) {
         DuskLogVerbose("\t%s", extension);
     }
+
+    const auto& engineVersion = GetVersion();
+    const auto& appVersion = GetApplicationVersion();
+    const auto& appName = GetApplicationName();
 
     VkApplicationInfo applicationInfo = {
         .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
@@ -564,7 +623,7 @@ bool VulkanGraphicsDriver::InitInstance()
     }
 
     // Reload glad to load instance pointers and populate available extensions
-    int vkVersion = gladLoaderLoadVulkan(_vkInstance, nullptr, nullptr);
+    vkVersion = gladLoaderLoadVulkan(_vkInstance, nullptr, nullptr);
     if (vkVersion == 0) {
         DuskLogError("gladLoaderLoadVulkan() failed, unable to reload symbols with VkInstance");
         return false;
@@ -591,19 +650,17 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL _VulkanDebugMessageCallback(
         Log(LogLevel::Performance, "[PERF](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
     }
     else {
-        switch (messageSeverity) {
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-            Log(LogLevel::Info, "[INFO](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
-            break;
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-            Log(LogLevel::Warning, "[WARN](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
-            break;
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+        if ((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) > 0) {
             Log(LogLevel::Error, "[ERRO](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
-            break;
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+        }
+        else if ((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) > 0) {
+            Log(LogLevel::Warning, "[WARN](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
+        }
+        else if ((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT) > 0) {
+            Log(LogLevel::Info, "[INFO](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
+        }
+        else if ((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) > 0) {
             Log(LogLevel::Verbose, "[VERB](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
-            break;
         }
     }
 
@@ -655,14 +712,12 @@ bool VulkanGraphicsDriver::InitDebugUtilsMessenger()
         return false;
     }
 
-    _debugMessengerInitialized = true;
-
     return true;
 }
 
 void VulkanGraphicsDriver::TermDebugUtilsMessenger()
 {
-    if (!_debugMessengerInitialized) {
+    if (!_vkDebugMessenger) {
         return;
     }
     
@@ -672,7 +727,6 @@ void VulkanGraphicsDriver::TermDebugUtilsMessenger()
     }
 
     vkDestroyDebugUtilsMessengerEXT(_vkInstance, _vkDebugMessenger, nullptr);
-    _debugMessengerInitialized = false;
 }
 
 bool VulkanGraphicsDriver::InitSurface()
@@ -792,8 +846,7 @@ bool VulkanGraphicsDriver::InitLogicalDevice()
             types += "SparseBinding ";
         }
 
-        DuskLogVerbose("Queue Number: %d", prop.queueCount);
-        DuskLogVerbose("Queue Flags: %s", types);
+        DuskLogVerbose("Queue #%d: %s", prop.queueCount, types);
     }
 
     uint32_t index = 0;
@@ -822,7 +875,7 @@ bool VulkanGraphicsDriver::InitLogicalDevice()
     }
 
     if (_vkPresentQueueFamilyIndex == UINT32_MAX) {
-        DuskLogError("No suitable graphics queue found");
+        DuskLogError("No suitable present queue found");
         return false;
     }
 
@@ -842,7 +895,7 @@ bool VulkanGraphicsDriver::InitLogicalDevice()
         });
     }
 
-    VkPhysicalDeviceFeatures deviceFeatures = {
+    VkPhysicalDeviceFeatures requiredDeviceFeatures = {
         // TODO
     };
 
@@ -870,7 +923,7 @@ bool VulkanGraphicsDriver::InitLogicalDevice()
         .ppEnabledLayerNames = requiredLayers.data(),
         .enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size()),
         .ppEnabledExtensionNames = requiredExtensions.data(),
-        .pEnabledFeatures = &deviceFeatures,
+        .pEnabledFeatures = &requiredDeviceFeatures,
     };
 
     vkResult = vkCreateDevice(_vkPhysicalDevice, &deviceCreateInfo, nullptr, &_vkDevice);
@@ -983,11 +1036,9 @@ bool VulkanGraphicsDriver::InitSwapChain()
     for (const auto& presentMode : presentModes) {
         if (presentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
             swapChainPresentMode = presentMode;
+            break;
         }
     }
-
-    // TODO: Remove
-    swapChainPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
 
     _vkSwapChainExtent = surfaceCapabilities.currentExtent;
     if (_vkSwapChainExtent.width == UINT32_MAX) {
@@ -1001,7 +1052,7 @@ bool VulkanGraphicsDriver::InitSwapChain()
     }
 
     uint32_t backbufferCount = std::clamp(
-        _backbufferCount,
+        GetBackbufferCount(),
         surfaceCapabilities.minImageCount,
         surfaceCapabilities.maxImageCount
     );
@@ -1073,6 +1124,40 @@ bool VulkanGraphicsDriver::InitSwapChain()
             DuskLogError("vkCreateImageView() failed");
             return false;
         }
+    }
+
+    GraphicsDriver::SetBackbufferCount(backbufferCount);
+
+    if (!InitRenderPass()) {
+        return false;
+    }
+
+    if (!InitDescriptorPool()) {
+        return false;
+    }
+
+    if (!InitGraphicsPipelines()) {
+        return false;
+    }
+
+    if (!InitDepthBuffer()) {
+        return false;
+    }
+
+    if (!InitFramebuffers()) {
+        return false;
+    }
+
+    if (!InitCommandPool()) {
+        return false;
+    }
+
+    if (!InitCommandBuffers()) {
+        return false;
+    }
+
+    if (!InitSyncObjects()) {
+        return false;
     }
 
     return true;
@@ -1166,34 +1251,6 @@ bool VulkanGraphicsDriver::ResetSwapChain()
         return false;
     }
 
-    if (!InitRenderPass()) {
-        return false;
-    }
-
-    if (!InitDescriptorPool()) {
-        return false;
-    }
-
-    if (!InitGraphicsPipelines()) {
-        return false;
-    }
-
-    if (!InitDepthBuffer()) {
-        return false;
-    }
-
-    if (!InitFramebuffers()) {
-        return false;
-    }
-
-    if (!InitCommandPool()) {
-        return false;
-    }
-
-    if (!InitCommandBuffers()) {
-        return false;
-    }
-
     DuskBenchmarkEnd("VulkanGraphicsDriver::ResetSwapChain()");
     return true;
 }
@@ -1231,7 +1288,7 @@ bool VulkanGraphicsDriver::InitRenderPass()
         .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
     };
 
-    VkAttachmentReference detphAttachmentReference = {
+    VkAttachmentReference depthAttachmentReference = {
         .attachment = 1,
         .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
     };
@@ -1244,7 +1301,7 @@ bool VulkanGraphicsDriver::InitRenderPass()
         .colorAttachmentCount = 1,
         .pColorAttachments = &colorAttachmentReference,
         .pResolveAttachments = nullptr,
-        .pDepthStencilAttachment = &detphAttachmentReference,
+        .pDepthStencilAttachment = &depthAttachmentReference,
         .preserveAttachmentCount = 0,
         .pPreserveAttachments = nullptr,
     };
@@ -1571,66 +1628,6 @@ bool VulkanGraphicsDriver::InitCommandBuffers()
     if (vkResult != VK_SUCCESS) {
         DuskLogError("vkAllocateCommandBuffers() failed");
         return false;
-    }
-
-    for (size_t i = 0; i < _vkCommandBuffers.size(); ++i) {
-        VkCommandBufferBeginInfo commandBufferBeginInfo = {
-            .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-            .pNext = nullptr,
-            .flags = 0,
-            .pInheritanceInfo = nullptr,
-        };
-
-        vkResult = vkBeginCommandBuffer(_vkCommandBuffers[i], &commandBufferBeginInfo);
-        if (vkResult != VK_SUCCESS) {
-            DuskLogError("vkBeginCommandBuffer() failed");
-            return false;
-        }
-
-        std::array<VkClearValue, 2> clearValues = { };
-
-        const vec4& cc = GetClearColor();
-        clearValues[0].color = {
-            .float32 = { cc.r, cc.g, cc.b, cc.a }
-        };
-        
-        clearValues[1].depthStencil = { 
-            .depth = 1.0f, 
-            .stencil = 0,
-        };
-
-        VkRenderPassBeginInfo renderPassBeginInfo = {
-            .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-            .renderPass = _vkRenderPass,
-            .framebuffer = _vkFramebuffers[i],
-            .renderArea = {
-                .offset = { 0, 0 },
-                .extent = _vkSwapChainExtent,
-            },
-            .clearValueCount = static_cast<uint32_t>(clearValues.size()),
-            .pClearValues = clearValues.data(),
-        };
-
-        vkCmdBeginRenderPass(_vkCommandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-        for (const auto& p : _pipelines) {
-            VulkanPipeline * pipeline = DUSK_VULKAN_PIPELINE(p.get());
-            
-            // pipeline->GenerateBindCommands(_vkCommandBuffers[i]);
-            
-            // TODO: Move into Pipeline's Generate Commands
-            vkCmdBindDescriptorSets(_vkCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _vkPipelineLayout, 0, 1, &_vkDescriptorSets[i], 0, nullptr);
-            
-            // pipeline->GenerateDrawCommands(_vkCommandBuffers[i]);
-        }
-
-        vkCmdEndRenderPass(_vkCommandBuffers[i]);
-
-        vkResult = vkEndCommandBuffer(_vkCommandBuffers[i]);
-        if (vkResult != VK_SUCCESS) {
-            DuskLogError("vkEndCommandBuffer() failed");
-            return false;
-        }
     }
 
     return true;

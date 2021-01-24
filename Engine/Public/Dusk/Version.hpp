@@ -74,9 +74,14 @@ struct DUSK_ENGINE_API Version
             std::to_string(Patch);
     }
 
+    operator std::string() const {
+        return GetString();
+    }
+
     inline static int Compare(const Version& a, const Version& b)
     {
-        auto cmp = [](int a, int b) {
+        auto cmp = [](int a, int b)
+        {
             if (a == b) {
                 return 0;
             }

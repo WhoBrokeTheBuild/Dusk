@@ -9,8 +9,6 @@
     #define DUSK_OPENGL_API DUSK_API_IMPORT
 #endif
 
-#define WIN32_LEAN_AND_MEAN
-
 #include <glad/gl.h>
 
 #include <Dusk/SDL2/SDL2Config.hpp>

@@ -9,10 +9,10 @@
 #include <Dusk/Vulkan/VulkanShader.hpp>
 #include <Dusk/Vulkan/VulkanPrimitive.hpp>
 #include <Dusk/Vulkan/VulkanBuffer.hpp>
+#include <Dusk/Vulkan/VulkanRenderContext.hpp>
 
 #include <vector>
-
-#include <vk_mem_alloc.h>
+#include <unordered_map>
 
 namespace Dusk::Vulkan {
 
@@ -32,7 +32,9 @@ public:
 
     void Terminate() override;
 
-    void SwapBuffers() override;
+    void SetBackbufferCount(unsigned backbufferCount) override;
+
+    void Render() override;
 
     std::shared_ptr<Pipeline> CreatePipeline(std::shared_ptr<Shader> shader) override;
 
@@ -77,10 +79,6 @@ private:
     std::vector<const char *> GetRequiredDeviceExtensions();
 
     std::vector<const char *> GetRequiredInstanceExtensions();
-
-    bool InitWindow();
-
-    void TermWindow();
 
     bool InitDebugUtilsMessenger();
 
@@ -132,52 +130,53 @@ private:
 
     std::unordered_map<std::string, VkExtensionProperties> _vkAvailableDeviceExtensions;
 
-    VkInstance _vkInstance;
+    VkInstance _vkInstance = nullptr;
 
-    VkDebugUtilsMessengerEXT _vkDebugMessenger;
-    bool _debugMessengerInitialized = false;
+    VkDebugUtilsMessengerEXT _vkDebugMessenger = nullptr;
 
-    VkSurfaceKHR _vkSurface;
+    VkSurfaceKHR _vkSurface = nullptr;
 
     VkPhysicalDeviceProperties _vkPhysicalDeviceProperties;
     
     VkPhysicalDeviceFeatures _vkPhysicalDeviceFeatures;
 
-    VkPhysicalDevice _vkPhysicalDevice;
+    VkPhysicalDevice _vkPhysicalDevice = nullptr;
 
-    VkDevice _vkDevice;
-
-    VmaAllocator _vmaAllocator;
+    VkDevice _vkDevice = nullptr;
 
     uint32_t _vkGraphicsQueueFamilyIndex;
+
     uint32_t _vkPresentQueueFamilyIndex;
 
-    VkQueue _vkGraphicsQueue;
-    VkQueue _vkPresentQueue;
+    VkQueue _vkGraphicsQueue = nullptr;
+    
+    VkQueue _vkPresentQueue = nullptr;
+
+    VmaAllocator _vmaAllocator = nullptr;
 
     VkSurfaceFormatKHR _vkSwapChainImageFormat;
 
     VkExtent2D _vkSwapChainExtent;
 
-    VkSwapchainKHR _vkSwapChain;
+    VkSwapchainKHR _vkSwapChain = nullptr;
 
     std::vector<VkImage> _vkSwapChainImages;
 
     std::vector<VkImageView> _vkSwapChainImageViews;
 
-    VkRenderPass _vkRenderPass;
+    VkRenderPass _vkRenderPass = nullptr;
 
     VkFormat _vkDepthImageFormat;
 
-    VkImage _vkDepthImage;
+    VkImage _vkDepthImage = nullptr;
 
-    VkDeviceMemory _vkDepthImageMemory;
+    VkDeviceMemory _vkDepthImageMemory = nullptr;
 
-    VkImageView _vkDepthImageView;
+    VkImageView _vkDepthImageView = nullptr;
 
     std::vector<VkFramebuffer> _vkFramebuffers;
 
-    VkCommandPool _vkCommandPool;
+    VkCommandPool _vkCommandPool = nullptr;
 
     std::vector<VkCommandBuffer> _vkCommandBuffers;
 
@@ -190,13 +189,14 @@ private:
     std::vector<VkFence> _vkImagesInFlight;
 
     std::vector<VkBuffer> _vkUniformBuffers;
+
     std::vector<VmaAllocation> _vkUniformBufferAllocations;
 
-    VkDescriptorPool _vkDescriptorPool;
+    VkDescriptorPool _vkDescriptorPool = nullptr;
 
-    VkDescriptorSetLayout _vkDescriptorSetLayout;
+    VkDescriptorSetLayout _vkDescriptorSetLayout = nullptr;
 
-    VkPipelineLayout _vkPipelineLayout;
+    VkPipelineLayout _vkPipelineLayout = nullptr;
 
     std::vector<VkDescriptorSet> _vkDescriptorSets;
 

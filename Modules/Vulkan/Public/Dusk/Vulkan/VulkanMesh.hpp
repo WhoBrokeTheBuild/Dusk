@@ -19,9 +19,9 @@ public:
 
     virtual ~VulkanMesh();
 
-    void Render() override;
-
     bool Load(const std::vector<std::unique_ptr<PrimitiveData>>& data) override;
+
+    void GenerateCommands(VkCommandBuffer vkCommandBuffer);
 
 private:
 

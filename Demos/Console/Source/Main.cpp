@@ -37,7 +37,7 @@ int main(int argc, char** argv)
         Dusk::ScriptConsole::Update();
 
         if (gfx) {
-            gfx->SwapBuffers();
+            gfx->Render();
         }
     }
 

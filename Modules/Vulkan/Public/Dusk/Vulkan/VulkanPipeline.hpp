@@ -26,9 +26,7 @@ public:
 
     void Terminate() override;
 
-    // void GenerateBindCommands(VkCommandBuffer vkCommandBuffer);
-
-    // void GenerateDrawCommands(VkCommandBuffer vkCommandBuffer);
+    void GenerateCommands(VkCommandBuffer vkCommandBuffer);
 
 private:
 

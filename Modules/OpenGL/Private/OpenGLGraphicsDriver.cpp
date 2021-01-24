@@ -16,7 +16,8 @@ bool OpenGLGraphicsDriver::Initialize()
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, GL_TRUE);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
@@ -99,13 +100,16 @@ bool OpenGLGraphicsDriver::Initialize()
 DUSK_OPENGL_API
 void OpenGLGraphicsDriver::Terminate()
 {
-    SDL_GL_DeleteContext(_glContext);
+    if (_glContext) {
+        SDL_GL_DeleteContext(_glContext);
+        _glContext = nullptr;
+    }
 
     SDL2GraphicsDriver::Terminate();
 }
 
 DUSK_OPENGL_API
-void OpenGLGraphicsDriver::SwapBuffers()
+void OpenGLGraphicsDriver::Render()
 {
     SDL_GL_SwapWindow(GetSDL2Window());
 }
@@ -178,30 +182,6 @@ void OpenGLGraphicsDriver::InitDebugMessageCallback()
 {
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(_OpenGLDebugMessageCallback, nullptr);
-
-    glDebugMessageControl(
-        GL_DONT_CARE,
-        GL_DEBUG_TYPE_PUSH_GROUP,
-        GL_DONT_CARE,
-        0,
-        nullptr,
-        GL_FALSE);
-
-    glDebugMessageControl(
-        GL_DONT_CARE,
-        GL_DEBUG_TYPE_POP_GROUP,
-        GL_DONT_CARE,
-        0,
-        nullptr,
-        GL_FALSE);
-
-    glDebugMessageControl(
-        GL_DONT_CARE,
-        GL_DEBUG_TYPE_MARKER,
-        GL_DONT_CARE,
-        0,
-        nullptr,
-        GL_FALSE);
 }
 
 } // namespace Dusk::OpenGL

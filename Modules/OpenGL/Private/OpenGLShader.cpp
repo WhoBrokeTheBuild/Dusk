@@ -6,6 +6,7 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
+#include <functional>
 
 namespace Dusk::OpenGL {
 

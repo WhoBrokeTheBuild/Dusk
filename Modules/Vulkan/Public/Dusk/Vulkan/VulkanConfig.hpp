@@ -9,11 +9,17 @@
     #define DUSK_VULKAN_API DUSK_API_IMPORT
 #endif
 
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+
 #include <glad/vulkan.h>
 
 #include <Dusk/SDL2/SDL2Config.hpp>
 #include <SDL_vulkan.h>
 
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+DISABLE_WARNINGS()
+
+    #include <vk_mem_alloc.h>
+
+ENABLE_WARNINGS()
 
 #endif // DUSK_VULKAN_CONFIG_HPP

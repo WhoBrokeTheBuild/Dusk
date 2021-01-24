@@ -67,6 +67,12 @@ Buffer * GraphicsDriver::GetConstantBuffer(unsigned binding)
 }
 
 DUSK_ENGINE_API
+void GraphicsDriver::TermConstantBuffers()
+{
+    _constantBufferBindings.clear();
+}
+
+DUSK_ENGINE_API
 UpdateContext * GraphicsDriver::GetUpdateContext()
 {
     return _updateContext.get();

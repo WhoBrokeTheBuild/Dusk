@@ -92,7 +92,7 @@ void DirectXGraphicsDriver::ProcessEvents()
     }
 }
 
-void DirectXGraphicsDriver::SwapBuffers()
+void DirectXGraphicsDriver::Render()
 {
     // _commandAllocator->Reset();
     // _commandList->Reset(_commandAllocator.Get(), _pipelineState.Get());

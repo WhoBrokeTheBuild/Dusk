@@ -10,10 +10,10 @@ namespace Dusk {
 #define DuskBenchmarkStart() \
     auto duskBenchClockStart = std::chrono::high_resolution_clock::now();
 
-#define DuskBenchmarkEnd(funcName)                                                          \
-    DuskLogPerf("Function: %s took %.3f millis", funcName,                              \
-        std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(          \
-            std::chrono::high_resolution_clock::now() - duskBenchClockStart             \
+#define DuskBenchmarkEnd(funcName)                                              \
+    DuskLogPerf("Function: %s took %.3f millis", DUSK_FUNCTION_NAME(),          \
+        std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(  \
+            std::chrono::high_resolution_clock::now() - duskBenchClockStart     \
         ).count());
 
 } // namespace Dusk

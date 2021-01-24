@@ -3,7 +3,6 @@
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Util.hpp>
-#include <Dusk/JSON.hpp>
 
 #include <string>
 #include <cstdio>
@@ -139,22 +138,22 @@ inline void Log(LogLevel level, const char * format, Args... args)
 
     #endif
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-security"
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wformat-security"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-security"
-        
-    printf(format, LogWrap(args)...);
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wformat-security"
+                
+        printf(format, LogWrap(args)...);
 
-    const auto& logFiles = GetAllLogFiles();
-    for (FILE * file : logFiles) {
-        fprintf(file, format, LogWrap(args)...);
-    }
+        const auto& logFiles = GetAllLogFiles();
+        for (FILE * file : logFiles) {
+            fprintf(file, format, LogWrap(args)...);
+        }
 
-#pragma clang diagnostic pop
+    #pragma clang diagnostic pop
 
-#pragma GCC diagnostic pop
+    #pragma GCC diagnostic pop
 
     #if defined(DUSK_PLATFORM_WINDOWS)
 

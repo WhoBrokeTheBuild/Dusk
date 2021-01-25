@@ -27,8 +27,8 @@ void VulkanMesh::Render(RenderContext * ctx)
     VulkanRenderContext * vkRenderContext = DUSK_VULKAN_RENDER_CONTEXT(ctx);
     VkCommandBuffer vkCommandBuffer = vkRenderContext->GetVkCommandBuffer();
 
-    VulkanPipeline * vkPipeline = DUSK_VULKAN_PIPELINE(_pipeline.get());
-    vkPipeline->GenerateCommands(vkCommandBuffer);
+    // VulkanPipeline * vkPipeline = DUSK_VULKAN_PIPELINE(_pipeline.get());
+    // vkPipeline->GenerateCommands(vkCommandBuffer);
 
     for (auto& primitive : _primitiveList) {
         VulkanPrimitive * vkPrimitive = DUSK_VULKAN_PRIMITIVE(primitive.get());

@@ -680,8 +680,8 @@ PFN_vkUpdateDescriptorSetWithTemplate glad_vkUpdateDescriptorSetWithTemplate = N
 PFN_vkUpdateDescriptorSetWithTemplateKHR glad_vkUpdateDescriptorSetWithTemplateKHR = NULL;
 PFN_vkUpdateDescriptorSets glad_vkUpdateDescriptorSets = NULL;
 PFN_vkWaitForFences glad_vkWaitForFences = NULL;
-PFN_vkWaitSemaphores glad_vkWaitSemaphores = NULL;
-PFN_vkWaitSemaphoresKHR glad_vkWaitSemaphoresKHR = NULL;
+PFN_vkrenderCompleteSemaphores glad_vkrenderCompleteSemaphores = NULL;
+PFN_vkrenderCompleteSemaphoresKHR glad_vkrenderCompleteSemaphoresKHR = NULL;
 #if defined(VK_ENABLE_BETA_EXTENSIONS)
 PFN_vkWriteAccelerationStructuresPropertiesKHR glad_vkWriteAccelerationStructuresPropertiesKHR = NULL;
 #endif
@@ -872,7 +872,7 @@ static void glad_vk_load_VK_VERSION_1_2( GLADuserptrloadfunc load, void* userptr
     glad_vkGetSemaphoreCounterValue = (PFN_vkGetSemaphoreCounterValue) load(userptr, "vkGetSemaphoreCounterValue");
     glad_vkResetQueryPool = (PFN_vkResetQueryPool) load(userptr, "vkResetQueryPool");
     glad_vkSignalSemaphore = (PFN_vkSignalSemaphore) load(userptr, "vkSignalSemaphore");
-    glad_vkWaitSemaphores = (PFN_vkWaitSemaphores) load(userptr, "vkWaitSemaphores");
+    glad_vkrenderCompleteSemaphores = (PFN_vkrenderCompleteSemaphores) load(userptr, "vkrenderCompleteSemaphores");
 }
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
 static void glad_vk_load_VK_ANDROID_external_memory_android_hardware_buffer( GLADuserptrloadfunc load, void* userptr) {
@@ -1278,7 +1278,7 @@ static void glad_vk_load_VK_KHR_timeline_semaphore( GLADuserptrloadfunc load, vo
     if(!GLAD_VK_KHR_timeline_semaphore) return;
     glad_vkGetSemaphoreCounterValueKHR = (PFN_vkGetSemaphoreCounterValueKHR) load(userptr, "vkGetSemaphoreCounterValueKHR");
     glad_vkSignalSemaphoreKHR = (PFN_vkSignalSemaphoreKHR) load(userptr, "vkSignalSemaphoreKHR");
-    glad_vkWaitSemaphoresKHR = (PFN_vkWaitSemaphoresKHR) load(userptr, "vkWaitSemaphoresKHR");
+    glad_vkrenderCompleteSemaphoresKHR = (PFN_vkrenderCompleteSemaphoresKHR) load(userptr, "vkrenderCompleteSemaphoresKHR");
 }
 #if defined(VK_USE_PLATFORM_WAYLAND_KHR)
 static void glad_vk_load_VK_KHR_wayland_surface( GLADuserptrloadfunc load, void* userptr) {
@@ -2136,8 +2136,8 @@ static const char* DEVICE_FUNCTIONS[] = {
     "vkUpdateDescriptorSetWithTemplateKHR",
     "vkUpdateDescriptorSets",
     "vkWaitForFences",
-    "vkWaitSemaphores",
-    "vkWaitSemaphoresKHR",
+    "vkrenderCompleteSemaphores",
+    "vkrenderCompleteSemaphoresKHR",
     "vkWriteAccelerationStructuresPropertiesKHR",
 };
 

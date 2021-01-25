@@ -25,6 +25,7 @@ bool VulkanPrimitive::Load(const std::unique_ptr<PrimitiveData>& data)
         BufferUsage::Vertex, MemoryUsage::GPU);
 
     if (!result) {
+        DuskLogError("Failed to upload vertex list to GPU buffer");
         return false;
     }
 
@@ -57,22 +58,34 @@ void VulkanPrimitive::GenerateCommands(VkCommandBuffer vkCommandBuffer)
 {
     // TODO: Test moving index buffer inside of other if _indexed check
     if (_indexed) {
-        VulkanBuffer * vkIndexBuffer = DUSK_VULKAN_BUFFER(_indexBuffer.get());
-        vkCmdBindIndexBuffer(vkCommandBuffer, vkIndexBuffer->GetVkBuffer(), 0, VK_INDEX_TYPE_UINT32);
+        vkCmdBindIndexBuffer(vkCommandBuffer, _indexBuffer->GetVkBuffer(), 0, VK_INDEX_TYPE_UINT32);
     }
 
-    VulkanBuffer * vkVertexBuffer = DUSK_VULKAN_BUFFER(_vertexBuffer.get());
-    VkBuffer vertexBuffers[] = { vkVertexBuffer->GetVkBuffer() };
-    
+    VkBuffer vertexBuffers[] = { _vertexBuffer->GetVkBuffer() };
     VkDeviceSize offsets[] = { 0 };
+    
     vkCmdBindVertexBuffers(vkCommandBuffer, 0, 1, vertexBuffers, offsets);
     
+
+    {
+        VkDebugUtilsLabelEXT label = {
+            .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT,
+            .pNext = NULL,
+            .pLabelName = "ActualDraw",
+            .color = { 0.4f, 0.3f, 0.2f, 0.1f },
+        };
+        vkCmdBeginDebugUtilsLabelEXT(vkCommandBuffer, &label);
+    }
+
+
     if (_indexed) {
         vkCmdDrawIndexed(vkCommandBuffer, _count, 1, 0, 0, 0);
     }
     else {
         vkCmdDraw(vkCommandBuffer, _count, 1, 0, 0);
     }
+
+    vkCmdEndDebugUtilsLabelEXT(vkCommandBuffer);
 }
 
 } // namespace Dusk::Vulkan

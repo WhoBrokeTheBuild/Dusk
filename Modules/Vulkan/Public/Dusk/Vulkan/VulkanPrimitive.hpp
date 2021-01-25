@@ -6,7 +6,7 @@
 #include <Dusk/Log.hpp>
 #include <Dusk/Primitive.hpp>
 #include <Dusk/PrimitiveData.hpp>
-#include <Dusk/Buffer.hpp>
+#include <Dusk/Vulkan/VulkanBuffer.hpp>
 
 #include <vector>
 #include <optional>
@@ -35,9 +35,9 @@ public:
 
 private:
 
-    std::unique_ptr<Buffer> _indexBuffer;
+    std::unique_ptr<VulkanBuffer> _indexBuffer;
 
-    std::unique_ptr<Buffer> _vertexBuffer;
+    std::unique_ptr<VulkanBuffer> _vertexBuffer;
 
     VkPrimitiveTopology _vkPrimitiveTopology;
 

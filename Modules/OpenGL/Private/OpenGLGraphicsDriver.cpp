@@ -92,9 +92,6 @@ bool OpenGLGraphicsDriver::Initialize()
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &value);
     DuskLogVerbose("Max Uniform Block Size: %d", value);
 
-    // TODO: Fix
-    glClearColor(0.392f, 0.584f, 0.929f, 1.0f);
-
     // TODO: Move
     glViewport(0, 0, 640, 480);
 
@@ -134,6 +131,9 @@ void OpenGLGraphicsDriver::Terminate()
 DUSK_OPENGL_API
 void OpenGLGraphicsDriver::Render()
 {
+    vec4 cc = GetClearColor();
+    glClearColor(cc[0], cc[1], cc[2], cc[3]);
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     BindUniformBufferObjects();

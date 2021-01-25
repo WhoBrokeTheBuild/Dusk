@@ -127,6 +127,8 @@ private:
 
     bool InitSyncObjects();
 
+    bool FillCommandBuffers();
+
     std::unordered_map<std::string, VkLayerProperties> _vkAvailableLayers;
 
     std::unordered_map<std::string, VkExtensionProperties> _vkAvailableInstanceExtensions;

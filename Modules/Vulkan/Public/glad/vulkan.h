@@ -3253,7 +3253,7 @@ typedef struct VkPresentInfoKHR {
     VkStructureType   sType;
     const  void *   pNext;
     uint32_t           waitSemaphoreCount;
-    const  VkSemaphore *  pWaitSemaphores;
+    const  VkSemaphore *  prenderCompleteSemaphores;
     uint32_t                           swapchainCount;
     const  VkSwapchainKHR *  pSwapchains;
     const  uint32_t *  pImageIndices;
@@ -4923,7 +4923,7 @@ typedef struct VkBindSparseInfo {
     VkStructureType   sType;
     const  void *             pNext;
     uint32_t                 waitSemaphoreCount;
-    const  VkSemaphore *      pWaitSemaphores;
+    const  VkSemaphore *      prenderCompleteSemaphores;
     uint32_t                 bufferBindCount;
     const  VkSparseBufferMemoryBindInfo *  pBufferBinds;
     uint32_t                 imageOpaqueBindCount;
@@ -4931,7 +4931,7 @@ typedef struct VkBindSparseInfo {
     uint32_t                 imageBindCount;
     const  VkSparseImageMemoryBindInfo *  pImageBinds;
     uint32_t                 signalSemaphoreCount;
-    const  VkSemaphore *      pSignalSemaphores;
+    const  VkSemaphore *      ppresentCompleteSemaphores;
 } VkBindSparseInfo;
 
 typedef struct VkImageCopy {
@@ -5500,12 +5500,12 @@ typedef struct VkSubmitInfo {
     VkStructureType   sType;
     const  void *  pNext;
     uint32_t         waitSemaphoreCount;
-    const  VkSemaphore *      pWaitSemaphores;
+    const  VkSemaphore *      prenderCompleteSemaphores;
     const  VkPipelineStageFlags *            pWaitDstStageMask;
     uint32_t         commandBufferCount;
     const  VkCommandBuffer *      pCommandBuffers;
     uint32_t         signalSemaphoreCount;
-    const  VkSemaphore *      pSignalSemaphores;
+    const  VkSemaphore *      ppresentCompleteSemaphores;
 } VkSubmitInfo;
 
 typedef struct VkDisplayPropertiesKHR {
@@ -8296,8 +8296,8 @@ typedef void (GLAD_API_PTR *PFN_vkUpdateDescriptorSetWithTemplate)(VkDevice devi
 typedef void (GLAD_API_PTR *PFN_vkUpdateDescriptorSetWithTemplateKHR)(VkDevice device, VkDescriptorSet descriptorSet, VkDescriptorUpdateTemplate descriptorUpdateTemplate, const void * pData);
 typedef void (GLAD_API_PTR *PFN_vkUpdateDescriptorSets)(VkDevice device, uint32_t descriptorWriteCount, const VkWriteDescriptorSet * pDescriptorWrites, uint32_t descriptorCopyCount, const VkCopyDescriptorSet * pDescriptorCopies);
 typedef VkResult (GLAD_API_PTR *PFN_vkWaitForFences)(VkDevice device, uint32_t fenceCount, const VkFence * pFences, VkBool32 waitAll, uint64_t timeout);
-typedef VkResult (GLAD_API_PTR *PFN_vkWaitSemaphores)(VkDevice device, const VkSemaphoreWaitInfo * pWaitInfo, uint64_t timeout);
-typedef VkResult (GLAD_API_PTR *PFN_vkWaitSemaphoresKHR)(VkDevice device, const VkSemaphoreWaitInfo * pWaitInfo, uint64_t timeout);
+typedef VkResult (GLAD_API_PTR *PFN_vkrenderCompleteSemaphores)(VkDevice device, const VkSemaphoreWaitInfo * pWaitInfo, uint64_t timeout);
+typedef VkResult (GLAD_API_PTR *PFN_vkrenderCompleteSemaphoresKHR)(VkDevice device, const VkSemaphoreWaitInfo * pWaitInfo, uint64_t timeout);
 #if defined(VK_ENABLE_BETA_EXTENSIONS)
 typedef VkResult (GLAD_API_PTR *PFN_vkWriteAccelerationStructuresPropertiesKHR)(VkDevice device, uint32_t accelerationStructureCount, const VkAccelerationStructureKHR * pAccelerationStructures, VkQueryType queryType, size_t dataSize, void * pData, size_t stride);
 #endif
@@ -9158,10 +9158,10 @@ GLAD_API_CALL PFN_vkUpdateDescriptorSets glad_vkUpdateDescriptorSets;
 #define vkUpdateDescriptorSets glad_vkUpdateDescriptorSets
 GLAD_API_CALL PFN_vkWaitForFences glad_vkWaitForFences;
 #define vkWaitForFences glad_vkWaitForFences
-GLAD_API_CALL PFN_vkWaitSemaphores glad_vkWaitSemaphores;
-#define vkWaitSemaphores glad_vkWaitSemaphores
-GLAD_API_CALL PFN_vkWaitSemaphoresKHR glad_vkWaitSemaphoresKHR;
-#define vkWaitSemaphoresKHR glad_vkWaitSemaphoresKHR
+GLAD_API_CALL PFN_vkrenderCompleteSemaphores glad_vkrenderCompleteSemaphores;
+#define vkrenderCompleteSemaphores glad_vkrenderCompleteSemaphores
+GLAD_API_CALL PFN_vkrenderCompleteSemaphoresKHR glad_vkrenderCompleteSemaphoresKHR;
+#define vkrenderCompleteSemaphoresKHR glad_vkrenderCompleteSemaphoresKHR
 #if defined(VK_ENABLE_BETA_EXTENSIONS)
 GLAD_API_CALL PFN_vkWriteAccelerationStructuresPropertiesKHR glad_vkWriteAccelerationStructuresPropertiesKHR;
 #define vkWriteAccelerationStructuresPropertiesKHR glad_vkWriteAccelerationStructuresPropertiesKHR

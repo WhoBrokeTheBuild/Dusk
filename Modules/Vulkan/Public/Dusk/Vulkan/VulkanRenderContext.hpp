@@ -8,7 +8,7 @@ namespace Dusk::Vulkan {
 
 #define DUSK_VULKAN_RENDER_CONTEXT(x) (dynamic_cast<Dusk::Vulkan::VulkanRenderContext *>(x))
 
-class DUSK_ENGINE_API VulkanRenderContext : public RenderContext
+class DUSK_VULKAN_API VulkanRenderContext : public RenderContext
 {
 public:
 

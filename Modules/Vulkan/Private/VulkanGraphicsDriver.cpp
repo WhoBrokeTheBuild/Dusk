@@ -110,7 +110,7 @@ void VulkanGraphicsDriver::Terminate()
 
     #if defined(DUSK_BUILD_DEBUG)
 
-        TermDebugUtilsMessenger();
+        // TermDebugUtilsMessenger();
 
     #endif
 
@@ -136,8 +136,9 @@ void VulkanGraphicsDriver::Render()
 {
     VkResult vkResult;
 
-    ///// DISCREPANCY #1
-    // vkWaitForFences(_vkDevice, 1, &_vkInFlightFences[_currentFrame], VK_TRUE, UINT64_MAX);
+    vmaSetCurrentFrameIndex(_vmaAllocator, _currentFrame);
+
+    vkWaitForFences(_vkDevice, 1, &_vkInFlightFences[_currentFrame], VK_TRUE, UINT64_MAX);
 
     uint32_t imageIndex = 0;
     vkResult = vkAcquireNextImageKHR(_vkDevice, _vkSwapChain, UINT64_MAX, _vkImageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE, &imageIndex);
@@ -150,35 +151,33 @@ void VulkanGraphicsDriver::Render()
         DuskLogFatal("vkAcquireNextImageKHR() failed");
     }
 
-
-
-    // if (_vkImagesInFlight[imageIndex] != VK_NULL_HANDLE) {
-    //     vkWaitForFences(_vkDevice, 1, &_vkImagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
-    // }
-    // _vkImagesInFlight[imageIndex] = _vkInFlightFences[_currentFrame];
+    if (_vkImagesInFlight[imageIndex] != VK_NULL_HANDLE) {
+        vkWaitForFences(_vkDevice, 1, &_vkImagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
+    }
+    _vkImagesInFlight[imageIndex] = _vkInFlightFences[_currentFrame];
 
     // "Present Complete"
-    VkSemaphore renderCompleteSemaphores[] = { _vkImageAvailableSemaphores[_currentFrame] };
+    VkSemaphore waitSemaphores[] = { _vkImageAvailableSemaphores[_currentFrame] };
     VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 
     // "Render Complete"
-    VkSemaphore presentCompleteSemaphores[] = { _vkRenderingFinishedSemaphores[_currentFrame] };
+    VkSemaphore signalSemaphores[] = { _vkRenderingFinishedSemaphores[_currentFrame] };
 
     VkSubmitInfo submitInfo = {
         .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
         .pNext = nullptr,
         .waitSemaphoreCount = 1,
-        .prenderCompleteSemaphores = renderCompleteSemaphores,
+        .pWaitSemaphores = waitSemaphores,
         .pWaitDstStageMask = waitStages,
         .commandBufferCount = 1,
         .pCommandBuffers = &_vkCommandBuffers[imageIndex],
         .signalSemaphoreCount = 1,
-        .ppresentCompleteSemaphores = presentCompleteSemaphores,
+        .pSignalSemaphores = signalSemaphores,
     };
 
-    // vkResetFences(_vkDevice, 1, &_vkInFlightFences[_currentFrame]);
+    vkResetFences(_vkDevice, 1, &_vkInFlightFences[_currentFrame]);
 
-    vkResult = vkQueueSubmit(_vkGraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+    vkResult = vkQueueSubmit(_vkGraphicsQueue, 1, &submitInfo, _vkInFlightFences[_currentFrame]);
     if (vkResult != VK_SUCCESS) {
         DuskLogFatal("vkQueueSubmit() failed");
     }
@@ -189,7 +188,7 @@ void VulkanGraphicsDriver::Render()
         .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
         .pNext = 0,
         .waitSemaphoreCount = 1,
-        .prenderCompleteSemaphores = presentCompleteSemaphores,
+        .pWaitSemaphores = signalSemaphores,
         .swapchainCount = 1,
         .pSwapchains = swapChains,
         .pImageIndices = &imageIndex,
@@ -207,9 +206,6 @@ void VulkanGraphicsDriver::Render()
     }
 
     _currentFrame = (_currentFrame + 1) % GetBackbufferCount();
-
-    // TODO: Find out where this lives
-    vmaSetCurrentFrameIndex(_vmaAllocator, _currentFrame);
 }
 
 DUSK_VULKAN_API
@@ -372,6 +368,11 @@ std::vector<const char *> VulkanGraphicsDriver::GetRequiredDeviceLayers()
             requiredLayers.push_back("VK_LAYER_KHRONOS_validation");
         }
 
+        it = _vkAvailableLayers.find("VK_LAYER_RENDERDOC_Capture");
+        if (it != _vkAvailableLayers.end()) {
+            requiredLayers.push_back("VK_LAYER_RENDERDOC_Capture");
+        }
+
     #endif
 
     return requiredLayers;
@@ -433,6 +434,40 @@ std::vector<const char *> VulkanGraphicsDriver::GetRequiredInstanceExtensions()
     #endif
 
     return requiredExtensions;
+}
+
+static VKAPI_ATTR VkBool32 VKAPI_CALL _VulkanDebugMessageCallback(
+    VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+    VkDebugUtilsMessageTypeFlagsEXT messageType,
+    const VkDebugUtilsMessengerCallbackDataEXT * callbackData,
+    void * userData)
+{
+    if (callbackData->messageIdNumber == 0) { // Loader Message
+        return VK_FALSE;
+    }
+
+    if ((messageType & VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT) > 0) {
+        Log(LogLevel::Performance, "[PERF](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
+    }
+    else {
+        if ((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) > 0) {
+            Log(LogLevel::Error, "[ERRO](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
+        }
+        else if ((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) > 0) {
+            Log(LogLevel::Warning, "[WARN](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
+        }
+        else if ((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT) > 0) {
+            Log(LogLevel::Info, "[INFO](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
+        }
+        else if ((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) > 0) {
+            Log(LogLevel::Verbose, "[VERB](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
+        }
+        else {
+            Log(LogLevel::Info, "[????](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
+        }
+    }
+
+    return VK_FALSE;
 }
 
 bool VulkanGraphicsDriver::InitInstance()
@@ -522,7 +557,8 @@ bool VulkanGraphicsDriver::InitInstance()
         .apiVersion = VK_API_VERSION_1_1,
     };
 
-    VkInstanceCreateInfo createInfo = {
+
+    VkInstanceCreateInfo instanceCreateInfo = {
         .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
@@ -533,7 +569,38 @@ bool VulkanGraphicsDriver::InitInstance()
         .ppEnabledExtensionNames = requiredExtensions.data(),
     };
 
-    vkResult = vkCreateInstance(&createInfo, nullptr, &_vkInstance);
+    VkDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfo;
+
+    auto it = _vkAvailableLayers.find("VK_LAYER_KHRONOS_validation");
+    if (it != _vkAvailableLayers.end()) {
+        VkDebugUtilsMessageSeverityFlagsEXT messageSeverity = 
+            VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT |
+            VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+            VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT;
+
+        #if defined(DUSK_ENABLE_VERBOSE_LOGGING)
+            messageSeverity |= VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT;
+        #endif
+
+        VkDebugUtilsMessageTypeFlagsEXT messageType =
+            VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | 
+            VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | 
+            VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+
+        debugUtilsMessengerCreateInfo = {
+            .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
+            .pNext = nullptr,
+            .flags = 0,
+            .messageSeverity = messageSeverity,
+            .messageType = messageType,
+            .pfnUserCallback = _VulkanDebugMessageCallback,
+            .pUserData = nullptr,
+        };
+
+        instanceCreateInfo.pNext = &debugUtilsMessengerCreateInfo;
+    }
+
+    vkResult = vkCreateInstance(&instanceCreateInfo, nullptr, &_vkInstance);
     if (vkResult != VK_SUCCESS) {
         DuskLogError("vkCreateInstance() failed");
         return false;
@@ -555,34 +622,6 @@ void VulkanGraphicsDriver::TermInstance()
         vkDestroyInstance(_vkInstance, nullptr);
         _vkInstance = nullptr;
     }
-}
-
-static VKAPI_ATTR VkBool32 VKAPI_CALL _VulkanDebugMessageCallback(
-    VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-    VkDebugUtilsMessageTypeFlagsEXT messageType,
-    const VkDebugUtilsMessengerCallbackDataEXT * callbackData,
-    void * userData)
-{
-    printf("What the actual fuck guys\n");
-    if ((messageType & VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT) > 0) {
-        Log(LogLevel::Performance, "[PERF](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
-    }
-    else {
-        if ((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) > 0) {
-            Log(LogLevel::Error, "[ERRO](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
-        }
-        else if ((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) > 0) {
-            Log(LogLevel::Warning, "[WARN](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
-        }
-        else if ((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT) > 0) {
-            Log(LogLevel::Info, "[INFO](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
-        }
-        else if ((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) > 0) {
-            Log(LogLevel::Verbose, "[VERB](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
-        }
-    }
-
-    return VK_FALSE;
 }
 
 bool VulkanGraphicsDriver::InitDebugUtilsMessenger()
@@ -1046,6 +1085,10 @@ bool VulkanGraphicsDriver::InitSwapChain()
 
     GraphicsDriver::SetBackbufferCount(backbufferCount);
 
+    if (!InitDepthBuffer()) {
+        return false;
+    }
+
     if (!InitRenderPass()) {
         return false;
     }
@@ -1055,10 +1098,6 @@ bool VulkanGraphicsDriver::InitSwapChain()
     }
 
     if (!InitGraphicsPipelines()) {
-        return false;
-    }
-
-    if (!InitDepthBuffer()) {
         return false;
     }
 
@@ -1083,17 +1122,6 @@ bool VulkanGraphicsDriver::InitSwapChain()
 
 void VulkanGraphicsDriver::TermSwapChain()
 {
-    // TODO: Move
-    if (_vkDepthImageView) {
-        vkDestroyImageView(_vkDevice, _vkDepthImageView, nullptr);
-        _vkDepthImageView = nullptr;
-    }
-
-    if (_vkDepthImage) {
-        vkDestroyImage(_vkDevice, _vkDepthImage, nullptr);
-        _vkDepthImage = nullptr;
-    }
-
     if (_vkDepthImageMemory) {
         vkFreeMemory(_vkDevice, _vkDepthImageMemory, nullptr);
         _vkDepthImageMemory = nullptr;
@@ -1125,6 +1153,17 @@ void VulkanGraphicsDriver::TermSwapChain()
     if (_vkRenderPass) {
         vkDestroyRenderPass(_vkDevice, _vkRenderPass, nullptr);
         _vkRenderPass = nullptr;
+    }
+
+    // TODO: Move
+    if (_vkDepthImageView) {
+        vkDestroyImageView(_vkDevice, _vkDepthImageView, nullptr);
+        _vkDepthImageView = nullptr;
+    }
+
+    if (_vkDepthImage) {
+        vkDestroyImage(_vkDevice, _vkDepthImage, nullptr);
+        _vkDepthImage = nullptr;
     }
 
     for (auto& imageView : _vkSwapChainImageViews) {
@@ -1605,7 +1644,7 @@ bool VulkanGraphicsDriver::FillCommandBuffers()
 {
     VkResult vkResult;
 
-    for (VkCommandBuffer commandBuffer : _vkCommandBuffers) {
+    for (size_t i = 0; i < _vkCommandBuffers.size(); ++i) {
 
         VkCommandBufferBeginInfo commandBufferBeginInfo = {
             .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -1614,16 +1653,16 @@ bool VulkanGraphicsDriver::FillCommandBuffers()
             .pInheritanceInfo = nullptr,
         };
 
-        // vkResetCommandBuffer(commandBuffer, 0);
+        vkResetCommandBuffer(_vkCommandBuffers[i], 0);
 
-        vkResult = vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
+        vkResult = vkBeginCommandBuffer(_vkCommandBuffers[i], &commandBufferBeginInfo);
         if (vkResult != VK_SUCCESS) {
             DuskLogError("vkBeginCommandBuffer() failed");
             return false;
         }
 
         VulkanRenderContext * vkRenderContext = DUSK_VULKAN_RENDER_CONTEXT(_renderContext.get());
-        vkRenderContext->SetVkCommandBuffer(commandBuffer);
+        vkRenderContext->SetVkCommandBuffer(_vkCommandBuffers[i]);
 
 
         std::array<VkClearValue, 2> clearValues = { };
@@ -1641,7 +1680,7 @@ bool VulkanGraphicsDriver::FillCommandBuffers()
         VkRenderPassBeginInfo renderPassBeginInfo = {
             .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
             .renderPass = _vkRenderPass,
-            .framebuffer = _vkFramebuffers[_currentFrame],
+            .framebuffer = _vkFramebuffers[i],
             .renderArea = {
                 .offset = { 0, 0 },
                 .extent = _vkSwapChainExtent,
@@ -1650,9 +1689,9 @@ bool VulkanGraphicsDriver::FillCommandBuffers()
             .pClearValues = clearValues.data(),
         };
 
-        vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+        vkCmdBeginRenderPass(_vkCommandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _vkPipelineLayout, 0, 1, &_vkDescriptorSets[_currentFrame], 0, nullptr);
+        vkCmdBindDescriptorSets(_vkCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _vkPipelineLayout, 0, 1, &_vkDescriptorSets[_currentFrame], 0, nullptr);
 
         if (_currentScene) {
             _currentScene->Render(_renderContext.get());
@@ -1668,9 +1707,9 @@ bool VulkanGraphicsDriver::FillCommandBuffers()
         //     // pipeline->GenerateDrawCommands(_vkCommandBuffers[i]);
         // }
 
-        vkCmdEndRenderPass(commandBuffer);
+        vkCmdEndRenderPass(_vkCommandBuffers[i]);
 
-        vkResult = vkEndCommandBuffer(commandBuffer);
+        vkResult = vkEndCommandBuffer(_vkCommandBuffers[i]);
         if (vkResult != VK_SUCCESS) {
             DuskLogError("vkEndCommandBuffer() failed");
             return false;

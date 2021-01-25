@@ -4,6 +4,8 @@
 #include <Dusk/Log.hpp>
 #include <Python/PyDusk.hpp>
 
+#include <algorithm>
+
 namespace Dusk {
 
 PyObject * ScriptConsole::_locals = nullptr;

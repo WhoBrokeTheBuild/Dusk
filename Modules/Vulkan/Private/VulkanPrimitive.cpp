@@ -66,26 +66,12 @@ void VulkanPrimitive::GenerateCommands(VkCommandBuffer vkCommandBuffer)
     
     vkCmdBindVertexBuffers(vkCommandBuffer, 0, 1, vertexBuffers, offsets);
     
-
-    {
-        VkDebugUtilsLabelEXT label = {
-            .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT,
-            .pNext = NULL,
-            .pLabelName = "ActualDraw",
-            .color = { 0.4f, 0.3f, 0.2f, 0.1f },
-        };
-        vkCmdBeginDebugUtilsLabelEXT(vkCommandBuffer, &label);
-    }
-
-
     if (_indexed) {
         vkCmdDrawIndexed(vkCommandBuffer, _count, 1, 0, 0, 0);
     }
     else {
         vkCmdDraw(vkCommandBuffer, _count, 1, 0, 0);
     }
-
-    vkCmdEndDebugUtilsLabelEXT(vkCommandBuffer);
 }
 
 } // namespace Dusk::Vulkan

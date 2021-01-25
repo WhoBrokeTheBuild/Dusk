@@ -161,6 +161,57 @@ bool VulkanPipeline::Initialize()
     std::array<VkVertexInputAttributeDescription, 9> attributes = {
         VkVertexInputAttributeDescription {
             .location = GetVertexAttributeLocation(VertexAttribute::Position),
+            .binding = 0,
+            .format = VK_FORMAT_R32G32B32A32_SFLOAT,
+            .offset = 0,
+        },
+        VkVertexInputAttributeDescription {
+            .location = GetVertexAttributeLocation(VertexAttribute::Normal),
+            .binding = 0,
+            .format = VK_FORMAT_R32G32B32A32_SFLOAT,
+            .offset = 0,
+        },
+        VkVertexInputAttributeDescription {
+            .location = GetVertexAttributeLocation(VertexAttribute::Tangent),
+            .binding = 0,
+            .format = VK_FORMAT_R32G32B32A32_SFLOAT,
+            .offset = 0,
+        },
+        VkVertexInputAttributeDescription {
+            .location = GetVertexAttributeLocation(VertexAttribute::Bitangent),
+            .binding = 0,
+            .format = VK_FORMAT_R32G32B32A32_SFLOAT,
+            .offset = 0,
+        },
+        VkVertexInputAttributeDescription {
+            .location = GetVertexAttributeLocation(VertexAttribute::Color),
+            .binding = 0,
+            .format = VK_FORMAT_R32G32B32A32_SFLOAT,
+            .offset = 0,
+        },
+        VkVertexInputAttributeDescription {
+            .location = GetVertexAttributeLocation(VertexAttribute::TexCoord1),
+            .binding = 0,
+            .format = VK_FORMAT_R32G32_SFLOAT,
+            .offset = 0,
+        },
+        VkVertexInputAttributeDescription {
+            .location = GetVertexAttributeLocation(VertexAttribute::TexCoord2),
+            .binding = 0,
+            .format = VK_FORMAT_R32G32_SFLOAT,
+            .offset = 0,
+        },
+        VkVertexInputAttributeDescription {
+            .location = GetVertexAttributeLocation(VertexAttribute::Joints),
+            .binding = 0,
+            .format = VK_FORMAT_R16G16B16A16_UINT,
+            .offset = 0,
+        },
+        VkVertexInputAttributeDescription {
+            .location = GetVertexAttributeLocation(VertexAttribute::Weights),
+            .binding = 0,
+            .format = VK_FORMAT_R32G32B32A32_SFLOAT,
+            .offset = 0,
         },
     };
 

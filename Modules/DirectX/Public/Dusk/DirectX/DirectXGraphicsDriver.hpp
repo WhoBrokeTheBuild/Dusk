@@ -46,6 +46,8 @@ public:
 
     std::shared_ptr<Shader> CreateShader() override;
 
+    std::shared_ptr<Mesh> CreateMesh() override;
+
     std::unique_ptr<Primitive> CreatePrimitive() override;
 
     LRESULT ProcessMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);

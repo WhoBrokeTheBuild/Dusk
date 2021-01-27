@@ -146,6 +146,11 @@ std::shared_ptr<Texture> DirectXGraphicsDriver::CreateTexture()
     return nullptr;
 }
 
+std::shared_ptr<Mesh> DirectXGraphicsDriver::CreateMesh()
+{
+    return nullptr;
+}
+
 std::shared_ptr<Shader> DirectXGraphicsDriver::CreateShader()
 {
     return std::shared_ptr<Shader>(New DirectXShader());

@@ -92,14 +92,13 @@ bool OpenGLGraphicsDriver::Initialize()
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &value);
     DuskLogVerbose("Max Uniform Block Size: %d", value);
 
+
+
     // TODO: Move
-    glViewport(0, 0, 640, 480);
+    bool result;
 
     const unsigned TRANSFORM_DATA_BINDING = 0;
 
-    bool result;
-
-    // TODO: Move
     std::shared_ptr<Buffer> transformDataBuffer = std::shared_ptr<Buffer>(New OpenGLBuffer());
     result = transformDataBuffer->Initialize(
         sizeof(TransformData),
@@ -113,6 +112,9 @@ bool OpenGLGraphicsDriver::Initialize()
     }
 
     AddConstantBuffer(transformDataBuffer, TRANSFORM_DATA_BINDING);
+
+
+
 
     return true;
 }

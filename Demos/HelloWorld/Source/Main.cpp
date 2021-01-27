@@ -66,8 +66,8 @@ void run()
 
     auto shader = gfx->CreateShader();
     if (!shader->LoadFromFiles({
-        "flat.vert",
-        "flat.frag",
+        "Dusk/DebugNormalColor.vert",
+        "Dusk/DebugNormalColor.frag",
     })) {
         return;
     }
@@ -124,7 +124,10 @@ int main(int argc, char** argv)
     Dusk::SetApplicationName("HelloWorld");
     Dusk::SetApplicationVersion({ 1, 0, 0 });
 
-    Dusk::Initialize(argc, argv);
+    if (!Dusk::Initialize(argc, argv)) {
+        return 1;
+    }
+
     // if (!Dusk::RunScriptFile("Main.py")) {
     //     DuskLogError("Failed to load Main.py");
     //     return 1;

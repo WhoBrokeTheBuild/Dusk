@@ -221,7 +221,7 @@ GLuint OpenGLShader::LoadGLSL(const std::string& filename)
                         const std::string& fullPath = path + "Shaders/" + incFilename;
                         DuskLogVerbose("Checking '%s'", fullPath);
                         
-                        file.open(fullPath);
+                        incFile.open(fullPath);
                         if (incFile.is_open()) {
                             break;
                         }

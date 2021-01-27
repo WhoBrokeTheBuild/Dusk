@@ -3,7 +3,6 @@
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Object.hpp>
-
 #include <Dusk/Shader.hpp>
 #include <Dusk/Primitive.hpp>
 

@@ -22,7 +22,10 @@ int main(int argc, char** argv)
     Dusk::SetApplicationName("Console");
     Dusk::SetApplicationVersion({ 1, 0, 0 });
 
-    Dusk::Initialize(argc, argv);
+    if (!Dusk::Initialize(argc, argv)) {
+        return 1;
+    }
+
     Dusk::ScriptConsole::Initialize();
 
     Dusk::SetRunning(true);

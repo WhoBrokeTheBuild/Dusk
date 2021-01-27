@@ -9,7 +9,7 @@
 namespace Dusk {
 
 DUSK_ENGINE_API
-void Initialize(int argc, char ** argv);
+bool Initialize(int argc, char ** argv);
 
 DUSK_ENGINE_API
 void Terminate();

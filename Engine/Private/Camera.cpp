@@ -123,7 +123,8 @@ vec4 Camera::GetViewport() const
 
     if (_aspect > 1.f) {
         size.y /= _aspect;
-    } else {
+    }
+    else {
         size.x *= _aspect;
     }
 

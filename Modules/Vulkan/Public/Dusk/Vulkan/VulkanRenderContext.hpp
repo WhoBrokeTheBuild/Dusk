@@ -30,7 +30,7 @@ private:
 
     VkCommandBuffer _vkCommandBuffer;
 
-}; // class RenderContext
+}; // class VulkanRenderContext
 
 } // namespace Dusk::Vulkan
 

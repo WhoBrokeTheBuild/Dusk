@@ -17,7 +17,7 @@
 namespace Dusk {
 
 DUSK_ENGINE_API
-void Initialize(int argc, char ** argv) {
+bool Initialize(int argc, char ** argv) {
     InitMemoryTracking();
 
     PyImport_AppendInittab("Dusk", PyInit_Dusk);
@@ -35,6 +35,8 @@ void Initialize(int argc, char ** argv) {
     DuskLogVerbose("Dusk Version: %s", GetVersion().GetString());
     DuskLogVerbose("Application Name: %s", GetApplicationName());
     DuskLogVerbose("Application Version: %s", GetApplicationVersion().GetString());
+
+    return true;
 }
 
 DUSK_ENGINE_API

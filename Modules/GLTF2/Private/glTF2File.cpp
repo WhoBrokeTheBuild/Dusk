@@ -134,7 +134,7 @@ bool glTF2File::LoadFromFile(const std::string& filename)
 
     DuskLogLoad("glTF2 file '%s'", Filename);
 
-    DuskBenchmarkEnd("glTF2File::LoadFromFile");
+    DuskBenchmarkEnd();
     return true;
 }
 
@@ -329,7 +329,7 @@ bool glTF2File::LoadTextures()
                 std::string path = BaseDir + DUSK_PATH_SLASH + image.uri;
                 DuskLogVerbose("Loading glTF2 texture from file: '%s'", path);
                 
-                auto texture = LoadTextureFromFile(path, opts);
+                auto texture = LoadTextureFromFile(path, false, opts);
                 if (!texture) {
                     return false;
                 }

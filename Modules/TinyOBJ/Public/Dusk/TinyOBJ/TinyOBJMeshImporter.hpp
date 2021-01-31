@@ -17,7 +17,7 @@ public:
 
     TinyOBJMeshImporter() = default;
 
-    std::vector<std::unique_ptr<PrimitiveData>> LoadFromFile(const std::string& filename) override;
+    std::vector<std::unique_ptr<PrimitiveData>> LoadFromFile(const std::string& filename, bool useAssetPath = true) override;
 
 }; // class TinyOBJMeshImporter
 

@@ -47,6 +47,21 @@ public:
 
     // bool SetShaderData(const std::string& name, size_t size, void * data) override;
 
+
+
+
+
+
+    
+
+    bool AddConstantBuffer(std::shared_ptr<Buffer> buffer, unsigned binding);
+
+    bool RemoveConstantBuffer(unsigned binding);
+
+    Buffer * GetConstantBuffer(unsigned binding);
+
+    void TermConstantBuffers();
+
 private:
 
     void BindUniformBufferObjects();
@@ -55,7 +70,7 @@ private:
 
     SDL_GLContext _glContext = nullptr;
 
-    std::unordered_map<std::string, GLuint> _shaderDataBindings;
+    std::unordered_map<unsigned, std::shared_ptr<Buffer>> _constantBufferBindings;
 
     std::vector<std::weak_ptr<Shader>> _shaders;
     

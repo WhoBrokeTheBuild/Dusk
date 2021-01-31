@@ -211,16 +211,65 @@ _OpenGLDebugMessageCallback(
         case GL_DEBUG_SEVERITY_LOW:
             Log(LogLevel::Warning, "[WARN](OpenGLDebugMessage) %s\n", message);
             break;
-        case GL_DEBUG_SEVERITY_NOTIFICATION:
-            Log(LogLevel::Verbose, "[VERB](OpenGLDebugMessage) %s\n", message);
+
+        #if defined(DUSK_ENABLE_VERBOSE_LOGGING)
+
+            case GL_DEBUG_SEVERITY_NOTIFICATION:
+                Log(LogLevel::Verbose, "[VERB](OpenGLDebugMessage) %s\n", message);
+                break;
+                
+        #endif
+
         }
     }
 }
 
+DUSK_OPENGL_API
 void OpenGLGraphicsDriver::InitDebugMessageCallback()
 {
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(_OpenGLDebugMessageCallback, nullptr);
+}
+
+DUSK_OPENGL_API
+bool OpenGLGraphicsDriver::AddConstantBuffer(std::shared_ptr<Buffer> buffer, unsigned binding)
+{
+    auto it = _constantBufferBindings.find(binding);
+    if (it != _constantBufferBindings.end()) {
+        return false;
+    }
+
+    _constantBufferBindings[binding] = buffer;
+    return true;
+}
+
+DUSK_OPENGL_API
+bool OpenGLGraphicsDriver::RemoveConstantBuffer(unsigned binding)
+{
+    auto it = _constantBufferBindings.find(binding);
+    if (it == _constantBufferBindings.end()) {
+        return false;
+    }
+
+    _constantBufferBindings.erase(it);
+    return true;
+}
+
+DUSK_OPENGL_API
+Buffer * OpenGLGraphicsDriver::GetConstantBuffer(unsigned binding)
+{
+    auto it = _constantBufferBindings.find(binding);
+    if (it == _constantBufferBindings.end()) {
+        return nullptr;
+    }
+
+    return it->second.get();
+}
+
+DUSK_OPENGL_API
+void OpenGLGraphicsDriver::TermConstantBuffers()
+{
+    _constantBufferBindings.clear();
 }
 
 } // namespace Dusk::OpenGL

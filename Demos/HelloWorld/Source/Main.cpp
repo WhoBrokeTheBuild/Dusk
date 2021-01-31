@@ -30,7 +30,7 @@ void run()
     const char * graphicsDriver = getenv("DUSK_GRAPHICS_DRIVER");
     
     if (!graphicsDriver) {
-        graphicsDriver = "DuskVulkan";
+        graphicsDriver = "Vulkan";
     }
 
     if (strcmp(graphicsDriver, "OpenGL") == 0) {
@@ -52,17 +52,12 @@ void run()
     Dusk::TransformData * transformData = renderCtx->GetTransformData();
 
     Dusk::Camera camera;
-    camera.SetAspect(glm::vec2(640.0f, 480.0f));
     camera.SetFOVX(45.0f);
-    camera.SetMode(Dusk::CameraMode::Perspective);
     camera.SetPosition({ 3, 3, 3 });
     camera.SetLookAt({ 0, 0, 0 });
 
     static float rotation = 0.0f;
     rotation += 0.01f;
-
-    transformData->View = camera.GetView();
-    transformData->Projection = camera.GetProjection();
 
     auto shader = gfx->CreateShader();
     if (!shader->LoadFromFiles({
@@ -77,7 +72,7 @@ void run()
     Dusk::Scene scene;
     gfx->SetCurrentScene(&scene);
 
-    auto mesh = Dusk::LoadMeshFromFile("cube.obj");
+    auto mesh = Dusk::LoadMeshFromFile("monkey.obj");
     mesh->SetPipeline(pipeline);
 
     auto entity = std::unique_ptr<Dusk::Entity>(New Dusk::Entity());
@@ -107,6 +102,9 @@ void run()
         gfx->ProcessEvents();
 
         Dusk::ScriptConsole::Update();
+
+        transformData->View = camera.GetView();
+        transformData->Projection = camera.GetProjection();
 
         glm::quat orient = tmpEntity->GetOrientation() * glm::angleAxis(glm::radians(0.1f), glm::vec3(0.0f, 1.0f, 0.0f));
         tmpEntity->SetOrientation(orient);

@@ -30,7 +30,7 @@ public:
 
     virtual ~Shader() = default;
 
-    virtual bool LoadFromFiles(const std::vector<std::string>& filenames) = 0;
+    virtual bool LoadFromFiles(const std::vector<std::string>& filenames, bool useAssetPath = true) = 0;
 
     // GetSize()
     // SetPreprocessorDefines()

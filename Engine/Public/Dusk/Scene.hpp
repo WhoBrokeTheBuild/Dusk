@@ -30,7 +30,6 @@ private:
 
     std::vector<System *> _systemPtrs;
 
-
 }; // class Scene
 
 } // namespace Dusk

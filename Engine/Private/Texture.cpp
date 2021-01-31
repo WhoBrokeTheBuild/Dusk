@@ -6,13 +6,13 @@
 namespace Dusk {
 
 DUSK_ENGINE_API
-std::shared_ptr<Texture> LoadTextureFromFile(const std::string& filename, Texture::Options opts /*= Texture::Options()*/)
+std::shared_ptr<Texture> LoadTextureFromFile(const std::string& filename, bool useAssetPath /*= true*/, Texture::Options opts /*= Texture::Options()*/)
 {
     GraphicsDriver * gfx = GetGraphicsDriver();
 
     const auto& importers = GetAllTextureImporters();
     for (const auto& importer : importers) {
-        auto textureData = importer->LoadFromFile(filename);
+        auto textureData = importer->LoadFromFile(filename, useAssetPath);
         if (!textureData) {
             continue;
         }

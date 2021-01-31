@@ -80,66 +80,6 @@ IF("nlohmann_json" IN_LIST REQUIRED_DEPENDENCIES)
     ENDIF()
 ENDIF()
 
-# GTest
-
-IF("GTest" IN_LIST REQUIRED_DEPENDENCIES)
-    SET(GTEST_ROOT       ${CMAKE_BINARY_DIR}/GTest)
-    SET(GTEST_SOURCE_DIR ${CMAKE_BINARY_DIR}/GTest_src)
-    SET(GTEST_BINARY_DIR ${CMAKE_BINARY_DIR}/GTest_bin)
-
-    SET(GTEST_MSVC_SEARCH "MD")
-    FIND_PACKAGE(GTest QUIET)
-
-    IF(NOT GTEST_FOUND)
-        ExternalProject_Add(
-            ThirdParty_GTest
-            URL                 "https://github.com/google/googletest/archive/release-1.10.0.tar.gz"
-            URL_HASH            MD5=ecd1fa65e7de707cd5c00bdac56022cd
-            SOURCE_DIR          ${GTEST_SOURCE_DIR}
-            BINARY_DIR          ${GTEST_BINARY_DIR}
-            CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${GTEST_ROOT}
-                                -DCMAKE_POSITION_INDEPENDENT_CODE=ON
-                                -DBUILD_SHARED_LIBS=ON
-            BUILD_COMMAND       ""
-            UPDATE_COMMAND      ""
-            TEST_COMMAND        ""
-            INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
-        )
-    ENDIF()
-ENDIF()
-
-# SDL2
-
-IF("SDL2" IN_LIST REQUIRED_DEPENDENCIES)
-    SET(SDL2_ROOT       ${CMAKE_BINARY_DIR}/SDL2)
-    SET(SDL2_SOURCE_DIR ${CMAKE_BINARY_DIR}/SDL2_src)
-    SET(SDL2_BINARY_DIR ${CMAKE_BINARY_DIR}/SDL2_bin)
-
-    FIND_PACKAGE(SDL2 2.0.6 CONFIG QUIET)
-
-    IF(CMAKE_GENERATOR STREQUAL "Visual Studio 16 2019")
-        SET(_SDL2_PATCH_COMMAND ${patch_COMMAND} ${SDL2_SOURCE_DIR}/CMakeLists.txt ${CMAKE_SOURCE_DIR}/SDL2_vcruntime.patch )
-    ENDIF()
-
-    IF(NOT SDL2_FOUND)
-        ExternalProject_Add(
-            ThirdParty_SDL2
-            URL                 "https://www.libsdl.org/release/SDL2-2.0.12.tar.gz"
-            URL_HASH            MD5=783b6f2df8ff02b19bb5ce492b99c8ff
-            SOURCE_DIR          ${SDL2_SOURCE_DIR}
-            BINARY_DIR          ${SDL2_BINARY_DIR}
-            CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${SDL2_ROOT}
-                                -DBUILD_SHARED_LIBS=ON
-            BUILD_COMMAND       ""
-            UPDATE_COMMAND      ""
-            TEST_COMMAND        ""
-            INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
-            COMMAND             ${CMAKE_COMMAND} --build . --target install --config Debug
-            PATCH_COMMAND       ${_SDL2_PATCH_COMMAND}
-        )
-    ENDIF()
-ENDIF()
-
 # Python3
 
 IF("Python3" IN_LIST REQUIRED_DEPENDENCIES)
@@ -177,6 +117,38 @@ IF("Python3" IN_LIST REQUIRED_DEPENDENCIES)
                 COMMAND             ${_Python3_INSTALL_COMMAND2}
                 TEST_COMMAND        ""
             )
+    ENDIF()
+ENDIF()
+
+# SDL2
+
+IF("SDL2" IN_LIST REQUIRED_DEPENDENCIES)
+    SET(SDL2_ROOT       ${CMAKE_BINARY_DIR}/SDL2)
+    SET(SDL2_SOURCE_DIR ${CMAKE_BINARY_DIR}/SDL2_src)
+    SET(SDL2_BINARY_DIR ${CMAKE_BINARY_DIR}/SDL2_bin)
+
+    FIND_PACKAGE(SDL2 2.0.6 CONFIG QUIET)
+
+    IF(CMAKE_GENERATOR STREQUAL "Visual Studio 16 2019")
+        SET(_SDL2_PATCH_COMMAND ${patch_COMMAND} ${SDL2_SOURCE_DIR}/CMakeLists.txt ${CMAKE_SOURCE_DIR}/SDL2_vcruntime.patch )
+    ENDIF()
+
+    IF(NOT SDL2_FOUND)
+        ExternalProject_Add(
+            ThirdParty_SDL2
+            URL                 "https://www.libsdl.org/release/SDL2-2.0.12.tar.gz"
+            URL_HASH            MD5=783b6f2df8ff02b19bb5ce492b99c8ff
+            SOURCE_DIR          ${SDL2_SOURCE_DIR}
+            BINARY_DIR          ${SDL2_BINARY_DIR}
+            CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${SDL2_ROOT}
+                                -DBUILD_SHARED_LIBS=ON
+            BUILD_COMMAND       ""
+            UPDATE_COMMAND      ""
+            TEST_COMMAND        ""
+            INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
+            COMMAND             ${CMAKE_COMMAND} --build . --target install --config Debug
+            PATCH_COMMAND       ${_SDL2_PATCH_COMMAND}
+        )
     ENDIF()
 ENDIF()
 
@@ -229,38 +201,6 @@ IF("freetype" IN_LIST REQUIRED_DEPENDENCIES)
             UPDATE_COMMAND      ""
             TEST_COMMAND        ""
             INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
-        )
-    ENDIF()
-ENDIF()
-
-# SFML
-
-IF("SFML" IN_LIST DEPENDENCIES)
-    SET(SFML_ROOT           ${CMAKE_BINARY_DIR}/SFML)
-    SET(SFML_SOURCE_DIR     ${CMAKE_BINARY_DIR}/SFML_src)
-    SET(SFML_BINARY_DIR     ${CMAKE_BINARY_DIR}/SFML_bin)
-
-    FIND_PACKAGE(SFML CONFIG COMPONENTS system window graphics)
-    
-    IF(NOT SFML_FOUND)
-        ExternalProject_Add(
-            ThirdParty_SFML
-            URL                 "https://www.sfml-dev.org/files/SFML-2.5.1-sources.zip"
-            URL_HASH            MD5=8533b22888102b4f0883311385fb1c71
-            SOURCE_DIR          ${SFML_SOURCE_DIR}
-            BINARY_DIR          ${SFML_BINARY_DIR}
-            CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${SFML_ROOT}
-                                -DSFML_BUILD_EXAMPLES=OFF
-                                -DSFML_BUILD_DOC=OFF
-                                -DSFML_BUILD_WINDOW=ON
-                                -DSFML_BUILD_GRAPHICS=ON
-                                -DSFML_BUILD_AUDIO=OFF
-                                -DSFML_BUILD_NETWORK=OFF
-                                -DSFML_DEPENDENCIES_INSTALL_PREFIX="${OpenAL_ROOT};${freetype_ROOT}"
-                                BUILD_COMMAND       ""
-                                UPDATE_COMMAND      ""
-                                TEST_COMMAND        ""
-                                INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
         )
     ENDIF()
 ENDIF()
@@ -386,5 +326,33 @@ IF("Ogg" IN_LIST REQUIRED_DEPENDENCIES)
         )
         
         ADD_REQUIRED_DEPENDENCIES(ThirdParty_Theora ThirdParty_Ogg ThirdParty_Vorbis)
+    ENDIF()
+ENDIF()
+
+# GTest
+
+IF("GTest" IN_LIST REQUIRED_DEPENDENCIES)
+    SET(GTEST_ROOT       ${CMAKE_BINARY_DIR}/GTest)
+    SET(GTEST_SOURCE_DIR ${CMAKE_BINARY_DIR}/GTest_src)
+    SET(GTEST_BINARY_DIR ${CMAKE_BINARY_DIR}/GTest_bin)
+
+    SET(GTEST_MSVC_SEARCH "MD")
+    FIND_PACKAGE(GTest QUIET)
+
+    IF(NOT GTEST_FOUND)
+        ExternalProject_Add(
+            ThirdParty_GTest
+            URL                 "https://github.com/google/googletest/archive/release-1.10.0.tar.gz"
+            URL_HASH            MD5=ecd1fa65e7de707cd5c00bdac56022cd
+            SOURCE_DIR          ${GTEST_SOURCE_DIR}
+            BINARY_DIR          ${GTEST_BINARY_DIR}
+            CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${GTEST_ROOT}
+                                -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+                                -DBUILD_SHARED_LIBS=ON
+            BUILD_COMMAND       ""
+            UPDATE_COMMAND      ""
+            TEST_COMMAND        ""
+            INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
+        )
     ENDIF()
 ENDIF()

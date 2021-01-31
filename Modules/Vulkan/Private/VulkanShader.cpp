@@ -9,25 +9,25 @@
 namespace Dusk::Vulkan {
 
 DUSK_VULKAN_API
-bool VulkanShader::LoadFromFiles(const std::vector<std::string>& filenames)
+bool VulkanShader::LoadFromFiles(const std::vector<std::string>& filenames, bool useAssetPath /*= true*/)
 {
     DuskBenchmarkStart();
 
     for (const auto& filename : filenames) {
-        if (!LoadSPV(filename)) {
-            if (!LoadSPV(filename + ".spv")) {
+        if (!LoadSPV(filename, useAssetPath)) {
+            if (!LoadSPV(filename + ".spv", useAssetPath)) {
                 DuskLogError("Failed to load '%s'", filename);
                 return false;
             }
         }
     }
 
-    DuskBenchmarkEnd("VulkanShader::LoadFromFiles");
+    DuskBenchmarkEnd();
     return true;
 }
 
 DUSK_VULKAN_API
-bool VulkanShader::LoadSPV(const std::string& filename)
+bool VulkanShader::LoadSPV(const std::string& filename, bool useAssetPath)
 {
     VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
 
@@ -35,14 +35,19 @@ bool VulkanShader::LoadSPV(const std::string& filename)
 
     std::ifstream file;
 
-    for (const auto& path : assetPaths) {
-        const std::string& fullPath = path + "Shaders/" + filename;
-        DuskLogVerbose("Checking '%s'", fullPath);
+    if (useAssetPath) {
+        for (const auto& path : assetPaths) {
+            const std::string& fullPath = path + "Shaders" + DUSK_PATH_SLASH + filename;
+            DuskLogVerbose("Checking '%s'", fullPath);
 
-        file.open(fullPath, std::ios::binary);
-        if (file.is_open()) {
-            break;
+            file.open(fullPath, std::ios::binary);
+            if (file.is_open()) {
+                break;
+            }
         }
+    }
+    else {
+        file.open(filename, std::ios::binary);
     }
 
     if (!file.is_open()) {

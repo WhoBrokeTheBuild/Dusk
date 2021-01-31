@@ -68,12 +68,6 @@ public:
         return _clearColor;
     }
 
-    virtual bool AddConstantBuffer(std::shared_ptr<Buffer> buffer, unsigned binding);
-
-    virtual bool RemoveConstantBuffer(unsigned binding);
-
-    virtual Buffer * GetConstantBuffer(unsigned binding);
-
     virtual void ProcessEvents() = 0;
     
     virtual void Render() = 0;
@@ -100,8 +94,6 @@ public:
 
 protected:
 
-    virtual void TermConstantBuffers();
-
     // Push Constants?
 
     vec4 _clearColor = vec4(0.392f, 0.584f, 0.929f, 1.0f);
@@ -111,8 +103,6 @@ protected:
     std::unique_ptr<RenderContext> _renderContext;
 
     unsigned _backbufferCount = 2;
-
-    std::unordered_map<unsigned, std::shared_ptr<Buffer>> _constantBufferBindings;
 
     Scene * _currentScene = nullptr;
 

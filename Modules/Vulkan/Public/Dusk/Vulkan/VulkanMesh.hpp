@@ -25,6 +25,7 @@ public:
     
 private:
 
+    VkDescriptorSet _vkDescriptorSet;
 
 }; // class VulkanMesh
 

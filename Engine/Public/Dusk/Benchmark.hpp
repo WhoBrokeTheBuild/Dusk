@@ -10,7 +10,7 @@ namespace Dusk {
 #define DuskBenchmarkStart() \
     auto duskBenchClockStart = std::chrono::high_resolution_clock::now();
 
-#define DuskBenchmarkEnd(funcName)                                              \
+#define DuskBenchmarkEnd()                                                      \
     DuskLogPerf("Function: %s took %.3f millis", DUSK_FUNCTION_NAME(),          \
         std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(  \
             std::chrono::high_resolution_clock::now() - duskBenchClockStart     \

@@ -56,7 +56,7 @@ std::vector<std::string> GetAssetPathList()
 
     const char * path = getenv("DUSK_ASSET_PATH");
     DuskLogVerbose("DUSK_ASSET_PATH=%s", path);
-
+    
     if (path) {
         std::istringstream iss(path);
         std::string p;

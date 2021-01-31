@@ -22,7 +22,7 @@ public:
 
     Camera();
 
-    virtual ~Camera() = default;
+    virtual ~Camera();
 
     mat4 GetView() const;
 
@@ -97,6 +97,8 @@ private:
     vec3 _up = { 0.f, 1.f, 0.f };
 
     float _aspect = 16.f / 9.f; // 16:9
+
+    unsigned _windowResizedEventHandlerID;
 
     // Perspective
 

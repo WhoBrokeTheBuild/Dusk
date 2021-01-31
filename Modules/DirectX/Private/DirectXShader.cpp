@@ -39,7 +39,7 @@ public:
         std::ifstream file;
 
         for (const auto& path : assetPathList) {
-            const std::string& fullPath = path + "Shaders/" + filename;
+            const std::string& fullPath = path + "Shaders" + DUSK_PATH_SLASH + filename;
             DuskLogVerbose("Checking shader include '%s'", fullPath);
             
             file.open(fullPath);
@@ -105,7 +105,7 @@ bool DirectXShader::LoadFromFiles(const std::vector<std::string>& filenames)
         }
     }
         
-    DuskBenchmarkEnd("DirectXShader::LoadFromFiles");
+    DuskBenchmarkEnd();
     return true;
 }
 
@@ -124,7 +124,7 @@ bool DirectXShader::LoadCSO(const std::string& filename)
     std::ifstream file;
 
     for (const auto& path : assetPathList) {
-        const std::string& fullPath = path + "Shaders/" + filename;
+        const std::string& fullPath = path + "Shaders" + DUSK_PATH_SLASH + filename;
         DuskLogVerbose("Checking '%s'", fullPath);
         
         file.open(fullPath, std::ios::binary | std::ios::ate);
@@ -189,7 +189,7 @@ bool DirectXShader::LoadHLSL(const std::string& filename)
     const auto& assetPathList = GetAssetPathList();
 
     for (const auto& path : assetPathList) {
-        const std::string& fullPath = path + "Shaders/" + filename;
+        const std::string& fullPath = path + "Shaders" + DUSK_PATH_SLASH + filename;
         DuskLogVerbose("Checking '%s'", fullPath);
         
         file.open(fullPath, std::ios::binary);

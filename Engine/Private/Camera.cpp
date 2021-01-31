@@ -7,9 +7,25 @@ namespace Dusk {
 DUSK_ENGINE_API
 Camera::Camera()
 {
-    const ivec2& size = GetGraphicsDriver()->GetWindowSize();
+    auto gfx = GetGraphicsDriver();
+
+    const ivec2& size = gfx->GetWindowSize();
     SetAspect(size);
     SetViewportSize(size);
+
+    _windowResizedEventHandlerID = gfx->WindowResizedEvent.AddListener(
+        [=](const WindowResizedEventData * data) {
+            SetAspect(data->Size);
+            SetViewportSize(data->Size);
+        }
+    );
+}
+
+DUSK_ENGINE_API
+Camera::~Camera()
+{
+    auto gfx = GetGraphicsDriver();
+    gfx->WindowResizedEvent.RemoveListener(_windowResizedEventHandlerID);
 }
 
 DUSK_ENGINE_API

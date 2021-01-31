@@ -40,15 +40,19 @@ public:
 
     virtual void Terminate() = 0;
 
-    virtual bool ReadFrom(size_t offset, size_t length, uint8_t * data) = 0;
+    virtual bool ReadFrom(size_t offset, size_t length, uint8_t * data);
 
-    virtual bool WriteTo(size_t offset, size_t length, uint8_t * data) = 0;
+    virtual bool WriteTo(size_t offset, size_t length, uint8_t * data);
+
+    virtual bool MapBufferToMemory() = 0;
 
 protected:
 
     BufferUsage _bufferUsage;
 
     MemoryUsage _memoryUsage;
+
+    void * _mappedBufferMemory;
 
 }; // class Buffer
 

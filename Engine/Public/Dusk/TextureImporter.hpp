@@ -22,7 +22,7 @@ public:
 
     virtual ~TextureImporter() = default;
 
-    virtual std::unique_ptr<TextureData> LoadFromFile(const std::string& filename) = 0;
+    virtual std::unique_ptr<TextureData> LoadFromFile(const std::string& filename, bool useAssetPath = true) = 0;
 
     virtual std::unique_ptr<TextureData> LoadFromMemory(const uint8_t * buffer, size_t length) = 0;
 

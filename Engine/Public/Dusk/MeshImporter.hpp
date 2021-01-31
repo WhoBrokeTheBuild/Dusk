@@ -20,7 +20,7 @@ public:
 
     virtual ~MeshImporter() = default;
 
-    virtual std::vector<std::unique_ptr<PrimitiveData>> LoadFromFile(const std::string& filename) = 0;
+    virtual std::vector<std::unique_ptr<PrimitiveData>> LoadFromFile(const std::string& filename, bool useAssetPath = true) = 0;
 
 }; // class MeshImporter
 

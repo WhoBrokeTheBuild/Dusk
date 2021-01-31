@@ -11,7 +11,7 @@
 namespace Dusk::OpenGL {
 
 DUSK_OPENGL_API
-bool OpenGLShader::LoadFromFiles(const std::vector<std::string>& filenames)
+bool OpenGLShader::LoadFromFiles(const std::vector<std::string>& filenames, bool useAssetPath /*= true*/)
 {
     DuskBenchmarkStart();
 
@@ -23,15 +23,15 @@ bool OpenGLShader::LoadFromFiles(const std::vector<std::string>& filenames)
         const std::string& ext = GetExtension(filename);
 
         if (ext == "spv") {
-            shader = LoadSPV(filename);
+            shader = LoadSPV(filename, useAssetPath);
         }
         else if (ext == "glsl") {
-            shader = LoadGLSL(filename);
+            shader = LoadGLSL(filename, useAssetPath);
         }
         else {
-            shader = LoadSPV(filename + ".spv");
+            shader = LoadSPV(filename + ".spv", useAssetPath);
             if (shader == 0) {
-                shader = LoadGLSL(filename + ".glsl");
+                shader = LoadGLSL(filename + ".glsl", useAssetPath);
             }
         }
 
@@ -100,7 +100,7 @@ bool OpenGLShader::LoadFromFiles(const std::vector<std::string>& filenames)
         glDetachShader(_glID, shader);
     }
 
-    DuskBenchmarkEnd("OpenGLShader::LoadFromFiles");
+    DuskBenchmarkEnd();
     return true;
 }
 
@@ -117,22 +117,27 @@ GLuint OpenGLShader::GetID()
 }
 
 DUSK_OPENGL_API
-GLuint OpenGLShader::LoadSPV(const std::string& filename)
+GLuint OpenGLShader::LoadSPV(const std::string& filename, bool useAssetPath)
 {
     DuskLogVerbose("Looking for SPIR-V shader '%s'", filename);
 
-    const auto& assetPaths = GetAssetPathList();
+    const auto& assetPathList = GetAssetPathList();
 
     std::ifstream file;
 
-    for (const auto& path : assetPaths) {
-        const std::string& fullPath = path + "Shaders/" + filename;
-        DuskLogVerbose("Checking '%s'", fullPath);
-        
-        file.open(fullPath, std::ios::binary);
-        if (file.is_open()) {
-            break;
+    if (useAssetPath) {
+        for (const auto& path : assetPathList) {
+            const std::string& fullPath = path + "Shaders" + DUSK_PATH_SLASH + filename;
+            DuskLogVerbose("Checking '%s'", fullPath);
+            
+            file.open(fullPath, std::ios::binary);
+            if (file.is_open()) {
+                break;
+            }
         }
+    }
+    else {
+        file.open(filename, std::ios::binary);
     }
 
     if (!file.is_open()) {
@@ -164,7 +169,7 @@ GLuint OpenGLShader::LoadSPV(const std::string& filename)
 }
 
 DUSK_OPENGL_API
-GLuint OpenGLShader::LoadGLSL(const std::string& filename)
+GLuint OpenGLShader::LoadGLSL(const std::string& filename, bool useAssetPath)
 {
     DuskLogVerbose("Looking for GLSL shader '%s'", filename);
 
@@ -172,14 +177,19 @@ GLuint OpenGLShader::LoadGLSL(const std::string& filename)
 
     std::ifstream file;
 
-    for (const auto& path : assetPaths) {
-        const std::string& fullPath = path + "Shaders/" + filename;
-        DuskLogVerbose("Checking '%s'", fullPath);
-        
-        file.open(fullPath);
-        if (file.is_open()) {
-            break;
+    if (useAssetPath) {
+        for (const auto& path : assetPaths) {
+            const std::string& fullPath = path + "Shaders" + DUSK_PATH_SLASH + filename;
+            DuskLogVerbose("Checking '%s'", fullPath);
+            
+            file.open(fullPath);
+            if (file.is_open()) {
+                break;
+            }
         }
+    }
+    else {
+        file.open(filename);
     }
 
     if (!file.is_open()) {
@@ -192,6 +202,8 @@ GLuint OpenGLShader::LoadGLSL(const std::string& filename)
         (std::istreambuf_iterator<char>(file)),
         std::istreambuf_iterator<char>()
     );
+
+    // TODO: Support relative includes, without asset path
 
     std::function<std::string(std::string)> preprocessGLSL = 
         [&](std::string code) -> std::string {
@@ -218,7 +230,7 @@ GLuint OpenGLShader::LoadGLSL(const std::string& filename)
                     std::ifstream incFile;
 
                     for (const auto& path : assetPaths) {
-                        const std::string& fullPath = path + "Shaders/" + incFilename;
+                        const std::string& fullPath = path + "Shaders" + DUSK_PATH_SLASH + incFilename;
                         DuskLogVerbose("Checking '%s'", fullPath);
                         
                         incFile.open(fullPath);

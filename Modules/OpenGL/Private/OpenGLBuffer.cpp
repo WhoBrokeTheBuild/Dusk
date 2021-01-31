@@ -26,7 +26,10 @@ bool OpenGLBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUsa
     glGenBuffers(1, &_glID);
     glBindBuffer(_glTarget, _glID);
     glBufferStorage(_glTarget, _size, data, flags);
-    glBindBuffer(_glTarget, 0);
+
+    if (!MapBufferToMemory()) {
+        return false;
+    }
 
     return true;
 }
@@ -34,64 +37,39 @@ bool OpenGLBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUsa
 DUSK_OPENGL_API
 void OpenGLBuffer::Terminate()
 {
+    if (_mappedBufferMemory) {
+        glBindBuffer(_glTarget, _glID);
+        glUnmapBuffer(_glTarget);
+        glBindBuffer(_glTarget, 0);
+        
+        _mappedBufferMemory = nullptr;
+    }
+
     glDeleteBuffers(1, &_glID);
 }
 
 DUSK_OPENGL_API
-bool OpenGLBuffer::ReadFrom(size_t offset, size_t length, uint8_t * data)
+bool OpenGLBuffer::MapBufferToMemory()
 {
-    if (_memoryUsage != MemoryUsage::Download) {
-        DuskLogError("Unable to read data from buffer with MemoryUsage: %s",
-            MemoryUsageToString(_memoryUsage));
-        return false;
-    }
-
-    GLbitfield flags = GetGLMemoryUsage(_memoryUsage);
-    
     glBindBuffer(_glTarget, _glID);
+    
+    GLenum access = GL_INVALID_ENUM;
 
-    void * ptr;
-    ptr = glMapBufferRange(_glTarget, offset, length, flags);
-    if (!ptr) {
-        DuskLogError("glMapBufferRange() failed");
-        return false;
+    if (_memoryUsage == MemoryUsage::UploadOnce ||
+        _memoryUsage == MemoryUsage::UploadOften) {
+        access = GL_WRITE_ONLY;
+    }
+    else if (_memoryUsage == MemoryUsage::Download) {
+        access = GL_READ_ONLY;
     }
 
-    memcpy(data, ptr, length);
-
-    glUnmapBuffer(_glTarget);
+    _mappedBufferMemory = glMapBuffer(_glTarget, access);
+    if (!_mappedBufferMemory) {
+        DuskLogError("glMapBuffer() failed");
+        return false;
+    }
 
     glBindBuffer(_glTarget, 0);
-
-    return true;
-}
-
-DUSK_OPENGL_API
-bool OpenGLBuffer::WriteTo(size_t offset, size_t length, uint8_t * data)
-{
-    if (_memoryUsage != MemoryUsage::UploadOnce && _memoryUsage != MemoryUsage::UploadOften) {
-        DuskLogError("Unable to write data to buffer with MemoryUsage: %s",
-            MemoryUsageToString(_memoryUsage));
-        return false;
-    }
-
-    GLbitfield flags = GetGLMemoryUsage(_memoryUsage);
-    
-    glBindBuffer(_glTarget, _glID);
-
-    void * ptr;
-    ptr = glMapBufferRange(_glTarget, offset, length, flags);
-    if (!ptr) {
-        DuskLogError("glMapBufferRange() failed");
-        return false;
-    }
-
-    memcpy(ptr, data, length);
-
-    glUnmapBuffer(_glTarget);
-
-    glBindBuffer(_glTarget, 0);
-
     return true;
 }
 

@@ -11,7 +11,7 @@
 namespace Dusk::TinyOBJ {
 
 DUSK_TINYOBJ_API
-std::vector<std::unique_ptr<PrimitiveData>> TinyOBJMeshImporter::LoadFromFile(const std::string& filename)
+std::vector<std::unique_ptr<PrimitiveData>> TinyOBJMeshImporter::LoadFromFile(const std::string& filename, bool useAssetPath /*= true*/)
 {
     DuskBenchmarkStart();
 
@@ -24,28 +24,34 @@ std::vector<std::unique_ptr<PrimitiveData>> TinyOBJMeshImporter::LoadFromFile(co
     std::string warn, err;
     bool result = false;
 
-    const auto& assetPathList = GetAssetPathList();
+    if (useAssetPath) {
+        const auto& assetPathList = GetAssetPathList();
 
-    for (const auto& path : assetPathList) {
-        std::string fullPath = path + "Models/" + filename;
-        DuskLogVerbose("Checking '%s'", fullPath);
+        for (const auto& path : assetPathList) {
+            std::string fullPath = path + "Models" + DUSK_PATH_SLASH + filename;
+            DuskLogVerbose("Checking '%s'", fullPath);
 
-        std::string dir = GetDirname(fullPath);
+            std::string dir = GetDirname(fullPath);
 
-        warn = "";
-        err = "";
+            warn = "";
+            err = "";
 
-        result = tinyobj::LoadObj(&attrib, &shapeList, &materialList, &warn, &err, fullPath.c_str(), dir.c_str());
+            result = tinyobj::LoadObj(&attrib, &shapeList, &materialList, &warn, &err, fullPath.c_str(), dir.c_str());
 
-        // If the error isn't 'Cannot open file', the .obj file is probably
-        // broken, and we should fail
-        if (!err.empty() && err.rfind("Cannot open file", 0) != 0) {
-            break;
+            // If the error isn't 'Cannot open file', the .obj file is probably
+            // broken, and we should fail
+            if (!err.empty() && err.rfind("Cannot open file", 0) != 0) {
+                break;
+            }
+
+            if (result) {
+                break;
+            }
         }
-
-        if (result) {
-            break;
-        }
+    }
+    else {
+        std::string dir = GetDirname(filename);
+        result = tinyobj::LoadObj(&attrib, &shapeList, &materialList, &warn, &err, filename.c_str(), dir.c_str());
     }
 
     if (!warn.empty()) {
@@ -110,7 +116,7 @@ std::vector<std::unique_ptr<PrimitiveData>> TinyOBJMeshImporter::LoadFromFile(co
         primitiveList.push_back(std::unique_ptr<PrimitiveData>(primitiveData));
     }
 
-    DuskBenchmarkEnd("TinyOBJMeshImporter::LoadFromFile");
+    DuskBenchmarkEnd();
     return primitiveList;
 }
 

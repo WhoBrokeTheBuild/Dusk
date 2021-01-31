@@ -51,7 +51,7 @@ bool VulkanTexture::Load(const std::unique_ptr<TextureData>& data, Options opts 
 
     // TODO:
 
-    DuskBenchmarkEnd("VulkanTexture::Load");
+    DuskBenchmarkEnd();
     return true;
 }
 

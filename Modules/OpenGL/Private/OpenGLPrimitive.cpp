@@ -99,7 +99,7 @@ bool OpenGLPrimitive::Load(const std::unique_ptr<PrimitiveData>& data)
 
     glBindVertexArray(0);
 
-    DuskBenchmarkEnd("OpenGLPrimitive::Load");
+    DuskBenchmarkEnd();
     return true;
 }
 

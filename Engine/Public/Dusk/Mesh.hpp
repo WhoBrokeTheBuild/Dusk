@@ -7,6 +7,7 @@
 #include <Dusk/PrimitiveData.hpp>
 #include <Dusk/Pipeline.hpp>
 #include <Dusk/RenderContext.hpp>
+#include <Dusk/Buffer.hpp>
 
 #include <vector>
 
@@ -30,16 +31,22 @@ public:
         _pipeline = pipeline;
     }
 
+    virtual Buffer * GetTransformDataBuffer() {
+        return _transformDataBuffer.get();
+    }
+
 protected:
 
     std::vector<std::unique_ptr<Primitive>> _primitiveList;
 
     std::shared_ptr<Pipeline> _pipeline;
 
+    std::shared_ptr<Buffer> _transformDataBuffer;
+
 }; // class Mesh
 
 DUSK_ENGINE_API
-std::shared_ptr<Mesh> LoadMeshFromFile(const std::string& filename);
+std::shared_ptr<Mesh> LoadMeshFromFile(const std::string& filename, bool useAssetPath = true);
 
 } // namespace Dusk
 

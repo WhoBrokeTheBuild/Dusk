@@ -21,13 +21,13 @@ bool Mesh::Load(const std::vector<std::unique_ptr<PrimitiveData>>& data)
 }
 
 DUSK_ENGINE_API
-std::shared_ptr<Mesh> LoadMeshFromFile(const std::string& filename)
+std::shared_ptr<Mesh> LoadMeshFromFile(const std::string& filename, bool useAssetPath /*= true*/)
 {
     GraphicsDriver * gfx = GetGraphicsDriver();
 
     const auto& importers = GetAllMeshImporters();
     for (const auto& importer : importers) {
-        const auto& primitiveList = importer->LoadFromFile(filename);
+        const auto& primitiveList = importer->LoadFromFile(filename, useAssetPath);
         if (primitiveList.empty()) {
             continue;
         }

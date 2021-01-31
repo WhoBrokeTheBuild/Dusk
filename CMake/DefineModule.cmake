@@ -1,5 +1,6 @@
 
 INCLUDE(SetSourceGroups)
+INCLUDE(GoogleTest)
 
 MACRO(DEFINE_MODULE _target _prefix)
 
@@ -208,19 +209,20 @@ MACRO(DEFINE_MODULE _target _prefix)
                 ${_test_source}
             )
 
-            SET_TARGET_PROPERTIES(
-                ${_test_target} PROPERTIES
-                    CXX_STANDARD 17
-                    CXX_STANDARD_REQUIRED ON
-                    CXX_EXTENSIONS OFF
-            )
-
             TARGET_LINK_LIBRARIES(
                 ${_test_target}
                 PRIVATE
                     ${_target}
                     GTest::GTest
                     GTest::Main
+            )
+
+            SET_TARGET_PROPERTIES(
+                ${_test_target}
+                PROPERTIES
+                    CXX_STANDARD 20
+                    CXX_STANDARD_REQUIRED ON
+                    CXX_EXTENSIONS OFF
             )
 
             SET_TARGET_PROPERTIES(
@@ -235,12 +237,10 @@ MACRO(DEFINE_MODULE _target _prefix)
                     VS_DEBUGGER_ENVIRONMENT "PATH=%PATH%;${RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${RUNTIME_SEARCH_PATH_DEBUG}>;$<$<CONFIG:Release>:${RUNTIME_SEARCH_PATH_RELEASE}>"
             )
 
-            ADD_TEST(
-                NAME ${_test_target}
-                COMMAND $<TARGET_FILE:${_test_target}>
+            GTEST_ADD_TESTS(
+                TARGET ${_test_target}
                 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Tests"
             )
-        
         ENDFOREACH()
     ENDIF()
 ENDMACRO()

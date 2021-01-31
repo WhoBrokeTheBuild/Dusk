@@ -24,9 +24,7 @@ public:
 
     void Terminate() override;
 
-    bool ReadFrom(size_t offset, size_t length, uint8_t * data) override;
-
-    bool WriteTo(size_t offset, size_t length, uint8_t * data) override;
+    bool MapBufferToMemory() override;
 
     void Bind();
 
@@ -72,6 +70,7 @@ inline GLbitfield GetGLMemoryUsage(MemoryUsage memoryUsage)
 
     return 0;
 }
+
 } // namespace Dusk::OpenGL
 
 #endif // DUSK_OPENGL_BUFFER_HPP

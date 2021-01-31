@@ -63,7 +63,7 @@ public:
 }; // class Texture
 
 DUSK_ENGINE_API
-std::shared_ptr<Texture> LoadTextureFromFile(const std::string& filename, Texture::Options opts = Texture::Options());
+std::shared_ptr<Texture> LoadTextureFromFile(const std::string& filename, bool useAssetPath = true, Texture::Options opts = Texture::Options());
 
 DUSK_ENGINE_API
 std::shared_ptr<Texture> LoadTextureFromMemory(const uint8_t * buffer, size_t length, Texture::Options opts = Texture::Options());

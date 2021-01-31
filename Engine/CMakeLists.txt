@@ -23,7 +23,7 @@ TARGET_LINK_LIBRARIES(
 
 FILE(
     GLOB_RECURSE
-    _shaders_out
+    _shaders_in
     Assets/Shaders/*.glsl
     Assets/Shaders/*.hlsl
 )
@@ -37,10 +37,14 @@ LIST(APPEND ASSET_PATH
 
 SET(ASSET_PATH ${ASSET_PATH} PARENT_SCOPE)
 
-COMPILE_SHADERS("${_shaders_out}" _shaders_out)
+COMPILE_SHADERS("${_shaders_in}" _shaders_out)
 
 TARGET_SOURCES(
     ${_target}
     PRIVATE
+        ${_shaders_in}
         ${_shaders_out}
 )
+
+SET_SOURCE_GROUPS(${CMAKE_CURRENT_SOURCE_DIR} "${_shaders_in}")
+SET_SOURCE_GROUPS(${CMAKE_CURRENT_BINARY_DIR} "${_shaders_out}")

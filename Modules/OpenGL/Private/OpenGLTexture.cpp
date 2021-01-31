@@ -52,7 +52,7 @@ bool OpenGLTexture::Load(const std::unique_ptr<TextureData>& data, Options opts 
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    DuskBenchmarkEnd("OpenGLTexture::Load");
+    DuskBenchmarkEnd();
     return true;
 }
 

@@ -53,7 +53,7 @@ bool SDL2GraphicsDriver::CreateWindow(unsigned flags)
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         640, 480, 
-        flags);
+        flags | SDL_WINDOW_RESIZABLE);
 
     if (!_sdlWindow) {
         DuskLogError("SDL_CreateWindow() failed, %s", SDL_GetError());
@@ -85,6 +85,11 @@ DUSK_SDL2_API
 void SDL2GraphicsDriver::SetWindowSize(const ivec2& size)
 {
     SDL_SetWindowSize(_sdlWindow, size.x, size.y);
+
+    // TODO: Investigate why this wasn't done automatically from the ProcessEvents loop
+    WindowResizedEventData data;
+    data.Size = size;
+    WindowResizedEvent.Call(&data);
 }
 
 DUSK_SDL2_API

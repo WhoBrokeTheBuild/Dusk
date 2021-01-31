@@ -20,8 +20,10 @@ void MeshComponent::Render(RenderContext * ctx)
     transformData->Model = GetEntity()->GetWorldTransform();
     transformData->UpdateMVP();
 
-    Buffer * buffer = GetGraphicsDriver()->GetConstantBuffer(0);
-    buffer->WriteTo(0, sizeof(TransformData), reinterpret_cast<uint8_t *>(ctx->GetTransformData()));
+    Buffer * buffer = _mesh->GetTransformDataBuffer();
+    if (buffer) {
+        buffer->WriteTo(0, sizeof(TransformData), reinterpret_cast<uint8_t *>(ctx->GetTransformData()));
+    }
 
     _mesh->Render(ctx);    
 }

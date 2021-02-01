@@ -25,7 +25,7 @@ public:
 
     virtual bool Load(const std::vector<std::unique_ptr<PrimitiveData>>& data);
 
-    virtual void Render(RenderContext * ctx) = 0;
+    virtual void Render(RenderContext * ctx);
 
     virtual void SetPipeline(std::shared_ptr<Pipeline> pipeline) {
         _pipeline = pipeline;
@@ -36,6 +36,8 @@ protected:
     std::vector<std::unique_ptr<Primitive>> _primitiveList;
 
     std::shared_ptr<Pipeline> _pipeline;
+
+    std::shared_ptr<Buffer> _shaderTransformBuffer;
 
 }; // class Mesh
 

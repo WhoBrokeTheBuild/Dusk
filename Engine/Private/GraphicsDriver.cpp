@@ -27,8 +27,8 @@ void GraphicsDriver::InitializeRenderContext()
     globals->Resolution = GetWindowSize();
     globals->Mouse = { 0, 0 };
     globals->FrameCount = 0;
-    globals->FrameSpeedRatio = _updateContext->GetFrameSpeedRatio();
-    // globals->TotalTime = _updateContext->GetTotalDuration();
+    globals->TotalTime = 0;
+    globals->FrameSpeedRatio = 0.0f;
 
     auto transform = _renderContext->GetShaderTransform();
     transform->Model = mat4(1.0f);
@@ -64,8 +64,8 @@ void GraphicsDriver::Render()
     globals->Resolution = GetWindowSize();
     globals->Mouse = input->GetMouseCoordinates();
     ++globals->FrameCount;
+    globals->TotalTime = (float)_updateContext->GetTotalDuration().count() / 1000.0f;
     globals->FrameSpeedRatio = _updateContext->GetFrameSpeedRatio();
-    // globals->TotalTime = _updateContext->GetTotalDuration();
 }
 
 DUSK_ENGINE_API

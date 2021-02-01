@@ -17,8 +17,6 @@ public:
 
     virtual ~OpenGLMesh() = default;
 
-    bool Load(const std::vector<std::unique_ptr<PrimitiveData>>& data) override;
-
     void Render(RenderContext * ctx) override;
 
 private:

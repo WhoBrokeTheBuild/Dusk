@@ -38,8 +38,7 @@ void SDL2GraphicsDriver::Terminate()
 DUSK_SDL2_API
 bool SDL2GraphicsDriver::CreateWindow(unsigned flags)
 {
-    std::string title = GetApplicationName() + " (" + GetApplicationVersion().GetString() + ")";
-    GraphicsDriver::SetWindowTitle(title);
+    _windowTitle = GetApplicationName() + " (" + GetApplicationVersion().GetString() + ")";
 
     ivec2 size = GetWindowSize();
 
@@ -48,7 +47,7 @@ bool SDL2GraphicsDriver::CreateWindow(unsigned flags)
         _sdlWindow = nullptr;
     }
 
-    _sdlWindow = SDL_CreateWindow(title.c_str(),
+    _sdlWindow = SDL_CreateWindow(_windowTitle.c_str(),
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         size.x, size.y, 

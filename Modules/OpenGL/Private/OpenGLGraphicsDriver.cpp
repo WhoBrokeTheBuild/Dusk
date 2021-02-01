@@ -2,6 +2,7 @@
 
 #include <Dusk/Dusk.hpp>
 #include <Dusk/Log.hpp>
+#include <Dusk/Scene.hpp>
 
 namespace Dusk::OpenGL {
 
@@ -48,6 +49,8 @@ bool OpenGLGraphicsDriver::Initialize()
         InitDebugMessageCallback();
 
     #endif
+
+    SDL_GL_SetSwapInterval(0);
     
     DuskLogVerbose("OpenGL Version: %s",  glGetString(GL_VERSION));
     DuskLogVerbose("GLSL Version: %s",    glGetString(GL_SHADING_LANGUAGE_VERSION));
@@ -95,6 +98,15 @@ bool OpenGLGraphicsDriver::Initialize()
     InitializeUpdateContext();
     InitializeRenderContext();
 
+    // TODO: Move
+    _shaderGlobalsBuffer = CreateBuffer();
+    _shaderGlobalsBuffer->Initialize(
+        sizeof(ShaderGlobals),
+        nullptr,
+        BufferUsage::Constant,
+        MemoryUsage::UploadOften
+    );
+
     return true;
 }
 
@@ -117,9 +129,18 @@ void OpenGLGraphicsDriver::Render()
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    BindUniformBufferObjects();
-
     GraphicsDriver::Render();
+
+    uint8_t * data = reinterpret_cast<uint8_t *>(_renderContext->GetShaderGlobals());
+    _shaderGlobalsBuffer->WriteTo(0, sizeof(ShaderGlobals), data);
+
+    OpenGLBuffer * buffer = DUSK_OPENGL_BUFFER(_shaderGlobalsBuffer.get());
+    glBindBufferBase(GL_UNIFORM_BUFFER, DUSK_SHADER_GLOBALS_BINDING, buffer->GetGLID());
+
+    Scene * scene = GetCurrentScene();
+    if (scene) {
+        scene->Render(_renderContext.get());
+    }
 
     SDL_GL_SwapWindow(GetSDL2Window());
 }
@@ -164,19 +185,6 @@ std::unique_ptr<Primitive> OpenGLGraphicsDriver::CreatePrimitive()
     return std::unique_ptr<Primitive>(New OpenGLPrimitive());
 }
 
-DUSK_OPENGL_API
-void OpenGLGraphicsDriver::BindUniformBufferObjects()
-{
-    for (const auto& it : _constantBufferBindings) {
-        OpenGLBuffer * buffer = DUSK_OPENGL_BUFFER(it.second.get());
-        if (!buffer) {
-            continue;
-        }
-
-        glBindBufferBase(GL_UNIFORM_BUFFER, it.first, buffer->GetGLID());
-    }
-}
-
 void GLAPIENTRY
 _OpenGLDebugMessageCallback(
     GLenum source, GLenum type, GLenum id, GLenum severity,
@@ -212,47 +220,6 @@ void OpenGLGraphicsDriver::InitDebugMessageCallback()
 {
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(_OpenGLDebugMessageCallback, nullptr);
-}
-
-DUSK_OPENGL_API
-bool OpenGLGraphicsDriver::AddConstantBuffer(std::shared_ptr<Buffer> buffer, unsigned binding)
-{
-    auto it = _constantBufferBindings.find(binding);
-    if (it != _constantBufferBindings.end()) {
-        return false;
-    }
-
-    _constantBufferBindings[binding] = buffer;
-    return true;
-}
-
-DUSK_OPENGL_API
-bool OpenGLGraphicsDriver::RemoveConstantBuffer(unsigned binding)
-{
-    auto it = _constantBufferBindings.find(binding);
-    if (it == _constantBufferBindings.end()) {
-        return false;
-    }
-
-    _constantBufferBindings.erase(it);
-    return true;
-}
-
-DUSK_OPENGL_API
-std::shared_ptr<Buffer> OpenGLGraphicsDriver::GetConstantBuffer(unsigned binding)
-{
-    auto it = _constantBufferBindings.find(binding);
-    if (it == _constantBufferBindings.end()) {
-        return nullptr;
-    }
-
-    return it->second;
-}
-
-DUSK_OPENGL_API
-void OpenGLGraphicsDriver::TermConstantBuffers()
-{
-    _constantBufferBindings.clear();
 }
 
 } // namespace Dusk::OpenGL

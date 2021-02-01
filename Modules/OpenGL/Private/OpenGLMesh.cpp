@@ -20,6 +20,9 @@ bool OpenGLMesh::Load(const std::vector<std::unique_ptr<PrimitiveData>>& data)
         _primitiveList.push_back(std::move(primitive));
     }
 
+    auto gfx = DUSK_OPENGL_GRAPHICS_DRIVER(GetGraphicsDriver());
+    // _transformDataBuffer = gfx->GetConstantBuffer(0);
+
     return true;
 }
 

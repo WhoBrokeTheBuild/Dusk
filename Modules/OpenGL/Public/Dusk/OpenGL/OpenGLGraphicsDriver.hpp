@@ -19,6 +19,8 @@ struct ShaderDataBindingInfo
     size_t size;
 };
 
+#define DUSK_OPENGL_GRAPHICS_DRIVER(x) (dynamic_cast<Dusk::OpenGL::OpenGLGraphicsDriver *>(x))
+
 class DUSK_OPENGL_API OpenGLGraphicsDriver : public SDL2::SDL2GraphicsDriver
 {
 public:
@@ -34,6 +36,8 @@ public:
     void Terminate() override;
 
     void Render() override;
+
+    std::shared_ptr<Buffer> CreateBuffer() override;
 
     std::shared_ptr<Pipeline> CreatePipeline(std::shared_ptr<Shader> shader) override;
 
@@ -58,7 +62,7 @@ public:
 
     bool RemoveConstantBuffer(unsigned binding);
 
-    Buffer * GetConstantBuffer(unsigned binding);
+    std::shared_ptr<Buffer> GetConstantBuffer(unsigned binding);
 
     void TermConstantBuffers();
 

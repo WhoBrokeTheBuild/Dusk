@@ -12,7 +12,7 @@
 #include <Dusk/Mesh.hpp>
 #include <Dusk/Event.hpp>
 #include <Dusk/Buffer.hpp>
-#include <Dusk/Scene.hpp>
+#include <Dusk/Time.hpp>
 
 #include <string>
 #include <vector>
@@ -40,17 +40,31 @@ public:
 
     virtual ~GraphicsDriver() = default;
 
-    virtual bool Initialize();
+    virtual bool Initialize() = 0;
 
     virtual void Terminate() = 0;
 
-    virtual void SetWindowTitle(const std::string& title) = 0;
+    virtual void InitializeUpdateContext();
 
-    virtual std::string GetWindowTitle() = 0;
+    virtual void InitializeRenderContext();
 
-    virtual void SetWindowSize(const ivec2& size) = 0;
+    virtual void SetWindowTitle(const std::string& title) {
+        _windowTitle = title;
+        UpdateWindowTitle(title);
+    }
 
-    virtual ivec2 GetWindowSize() = 0;
+    virtual std::string GetWindowTitle() {
+        return _windowTitle;
+    }
+
+    virtual void SetWindowSize(const ivec2& size) {
+        _windowSize = size;
+        UpdateWindowSize(size);
+    }
+
+    virtual ivec2 GetWindowSize() {
+        return _windowSize;
+    }
 
     virtual void SetBackbufferCount(unsigned backbufferCount) {
         _backbufferCount = backbufferCount;
@@ -70,7 +84,9 @@ public:
 
     virtual void ProcessEvents() = 0;
     
-    virtual void Render() = 0;
+    virtual void Render();
+
+    virtual std::shared_ptr<Buffer> CreateBuffer() = 0;
 
     virtual std::shared_ptr<Pipeline> CreatePipeline(std::shared_ptr<Shader> shader) = 0;
 
@@ -88,11 +104,19 @@ public:
 
     Event<Dusk::WindowResizedEventData> WindowResizedEvent;
 
-    inline void SetCurrentScene(Scene * currentScene) {
-        _currentScene = currentScene;
-    }
-
 protected:
+
+    virtual void UpdateWindowTitle(const std::string& title) = 0;
+
+    virtual void UpdateWindowSize(const ivec2& size) = 0;
+
+    std::string _windowTitle = "Dusk";
+
+    ivec2 _windowSize = { 640, 480 };
+
+    microseconds _fpsUpdateElapsedTime = 0us;
+
+    uintmax_t _fpsUpdateFrameCount = 0;
 
     // Push Constants?
 
@@ -104,13 +128,13 @@ protected:
 
     unsigned _backbufferCount = 2;
 
-    Scene * _currentScene = nullptr;
-
 }; // class GraphicsDriver
 
-DUSK_ENGINE_API void SetGraphicsDriver(std::unique_ptr<GraphicsDriver> && driver);
+DUSK_ENGINE_API
+void SetGraphicsDriver(std::unique_ptr<GraphicsDriver> && driver);
 
-DUSK_ENGINE_API GraphicsDriver * GetGraphicsDriver();
+DUSK_ENGINE_API
+GraphicsDriver * GetGraphicsDriver();
 
 } // namespace Dusk
 

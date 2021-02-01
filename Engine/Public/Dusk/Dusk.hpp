@@ -5,6 +5,7 @@
 #include <Dusk/Version.hpp>
 
 #include <string>
+#include <functional>
 
 namespace Dusk {
 
@@ -19,6 +20,9 @@ void SetRunning(bool running);
 
 DUSK_ENGINE_API
 bool IsRunning();
+
+DUSK_ENGINE_API
+bool Run(std::function<void()> update);
 
 DUSK_ENGINE_API
 bool RunScriptFile(const std::string& filename);

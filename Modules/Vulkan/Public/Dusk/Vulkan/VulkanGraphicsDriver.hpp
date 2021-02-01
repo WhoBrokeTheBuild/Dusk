@@ -33,9 +33,13 @@ public:
 
     void Terminate() override;
 
+    void InitializeRenderContext() override;
+
     void SetBackbufferCount(unsigned backbufferCount) override;
 
     void Render() override;
+
+    std::shared_ptr<Buffer> CreateBuffer() override;
 
     std::shared_ptr<Pipeline> CreatePipeline(std::shared_ptr<Shader> shader) override;
 

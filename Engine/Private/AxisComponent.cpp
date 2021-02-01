@@ -28,7 +28,7 @@ DUSK_ENGINE_API
 void AxisComponent::Render(RenderContext * ctx)
 {
     auto gfx = GetGraphicsDriver();
-    auto transformData = ctx->GetTransformData();
+    auto transformData = ctx->GetShaderTransform();
 
     transformData->Model = GetEntity()->GetWorldTransform();
     transformData->UpdateMVP();

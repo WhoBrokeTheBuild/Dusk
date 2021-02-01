@@ -59,6 +59,13 @@ void SDL2InputDriver::ProcessEvent(SDL_Event * event)
     }
 }
 
+ivec2 SDL2InputDriver::GetMouseCoordinates() const
+{
+    int x, y;
+    SDL_GetMouseState(&x, &y);
+    return { x, y };
+}
+
 KeyboardKey SDL2InputDriver::GetSDLKey(int sdlKey)
 {
     switch (sdlKey) {

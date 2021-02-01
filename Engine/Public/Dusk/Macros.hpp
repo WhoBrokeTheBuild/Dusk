@@ -24,13 +24,6 @@
     
     #define ENABLE_WARNINGS() \
         _Pragma("warning(pop)")
-#elif defined(DUSK_COMPILER_GCC)
-    #define DISABLE_WARNINGS() \
-        _Pragma("GCC diagnostic push")                      \
-        _Pragma("GCC diagnostic ignored \"-Wall\"")
-    
-    #define ENABLE_WARNINGS() \
-        _Pragma("GCC diagnostic pop")
 #elif defined(DUSK_COMPILER_CLANG)
     #define DISABLE_WARNINGS() \
         _Pragma("clang diagnostic push")                    \
@@ -38,6 +31,13 @@
     
     #define ENABLE_WARNINGS() \
         _Pragma("clang diagnostic pop")
+#elif defined(DUSK_COMPILER_GCC)
+    #define DISABLE_WARNINGS() \
+        _Pragma("GCC diagnostic push")                      \
+        _Pragma("GCC diagnostic ignored \"-Wall\"")
+    
+    #define ENABLE_WARNINGS() \
+        _Pragma("GCC diagnostic pop")
 #else
     #define DISABLE_WARNINGS()
 #endif

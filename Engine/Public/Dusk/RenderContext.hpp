@@ -3,7 +3,8 @@
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Object.hpp>
-#include <Dusk/TransformData.hpp>
+#include <Dusk/ShaderGlobals.hpp>
+#include <Dusk/ShaderTransform.hpp>
 
 namespace Dusk {
 
@@ -17,13 +18,19 @@ public:
 
     virtual ~RenderContext() = default;
 
-    virtual TransformData * GetTransformData() {
-        return &_transformData;
+    virtual ShaderGlobals * GetShaderGlobals() {
+        return &_shaderGlobals;
+    }
+
+    virtual ShaderTransform * GetShaderTransform() {
+        return &_shaderTransform;
     }
 
 private:
 
-    TransformData _transformData;
+    ShaderGlobals _shaderGlobals;
+
+    ShaderTransform _shaderTransform;
 
 }; // class RenderContext
 

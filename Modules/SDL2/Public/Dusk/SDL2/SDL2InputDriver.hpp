@@ -19,6 +19,8 @@ public:
 
     void ProcessEvent(SDL_Event * event);
 
+    ivec2 GetMouseCoordinates() const;
+
 private:
 
     KeyboardKey GetSDLKey(int sdlKey);

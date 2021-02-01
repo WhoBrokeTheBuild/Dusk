@@ -18,19 +18,17 @@ public:
 
     virtual bool CreateWindow(unsigned flags);
 
-    void SetWindowTitle(const std::string& title) override;
-
-    std::string GetWindowTitle() override;
-
-    void SetWindowSize(const ivec2& size) override;
-
-    ivec2 GetWindowSize() override;
-
     void ProcessEvents() override;
 
     SDL_Window * GetSDL2Window() const {
         return _sdlWindow;
     }
+
+protected:
+
+    void UpdateWindowTitle(const std::string& title) override;
+
+    void UpdateWindowSize(const ivec2& size) override;
 
 private:
 

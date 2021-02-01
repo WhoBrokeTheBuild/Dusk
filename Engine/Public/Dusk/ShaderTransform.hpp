@@ -1,12 +1,14 @@
-#ifndef DUSK_TRANSFORM_DATA_HPP
-#define DUSK_TRANSFORM_DATA_HPP
+#ifndef DUSK_SHADER_TRANSFORM_HPP
+#define DUSK_SHADER_TRANSFORM_HPP
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Math.hpp>
 
 namespace Dusk {
 
-struct DUSK_ENGINE_API TransformData
+#define DUSK_SHADER_TRANSFORM_BINDING 1
+
+struct DUSK_ENGINE_API ShaderTransform
 {
 public:
 
@@ -19,8 +21,8 @@ public:
         MVP = Projection * View * Model;
     }
 
-}; // struct TransformData
+}; // struct ShaderTransform
 
 } // namespace Dusk
 
-#endif // DUSK_TRANSFORM_DATA_HPP
+#endif // DUSK_SHADER_TRANSFORM_HPP

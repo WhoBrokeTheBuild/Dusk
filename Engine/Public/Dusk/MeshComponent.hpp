@@ -28,6 +28,8 @@ private:
 
     std::shared_ptr<Mesh> _mesh;
 
+    std::shared_ptr<Buffer> _transformDataBuffer;
+
 }; // class MeshComponent
 
 } // namespace Dusk

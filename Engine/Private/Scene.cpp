@@ -2,6 +2,8 @@
 
 namespace Dusk {
 
+static Dusk::Scene * _CurrentScene = nullptr;
+
 DUSK_ENGINE_API
 System * Scene::AddSystem(std::unique_ptr<System> && sys)
 {
@@ -17,4 +19,16 @@ std::vector<System *> Scene::GetSystems() const
 	return _systemPtrs;
 }
 
+DUSK_ENGINE_API
+void SetCurrentScene(Scene * scene)
+{
+	_CurrentScene = scene;
 }
+
+DUSK_ENGINE_API
+Scene * GetCurrentScene()
+{
+	return _CurrentScene;
+}
+
+} // namespace Dusk

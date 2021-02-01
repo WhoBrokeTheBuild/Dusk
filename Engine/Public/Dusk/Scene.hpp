@@ -32,6 +32,12 @@ private:
 
 }; // class Scene
 
+DUSK_ENGINE_API
+void SetCurrentScene(Scene * scene);
+
+DUSK_ENGINE_API
+Scene * GetCurrentScene();
+
 } // namespace Dusk
 
 #endif // DUSK_SCENE_HPP

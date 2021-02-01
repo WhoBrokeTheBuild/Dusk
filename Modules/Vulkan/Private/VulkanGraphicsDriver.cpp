@@ -54,7 +54,8 @@ bool VulkanGraphicsDriver::Initialize()
         return false;
     }
 
-    _renderContext.reset(New VulkanRenderContext());
+    InitializeUpdateContext();
+    InitializeRenderContext();
 
     // const unsigned TRANSFORM_DATA_BINDING = 0;
 
@@ -114,6 +115,12 @@ void VulkanGraphicsDriver::Terminate()
     SDL2GraphicsDriver::Terminate();
 
     DuskBenchmarkEnd();
+}
+
+void VulkanGraphicsDriver::InitializeRenderContext()
+{
+    _renderContext.reset(New VulkanRenderContext());
+    GraphicsDriver::InitializeRenderContext();
 }
 
 DUSK_VULKAN_API
@@ -202,6 +209,13 @@ void VulkanGraphicsDriver::Render()
 
     _currentFrame = (_currentFrame + 1) % GetBackbufferCount();
 }
+
+DUSK_VULKAN_API
+std::shared_ptr<Buffer> VulkanGraphicsDriver::CreateBuffer()
+{
+    return std::shared_ptr<Buffer>(New VulkanBuffer());
+}
+
 
 DUSK_VULKAN_API
 std::shared_ptr<Pipeline> VulkanGraphicsDriver::CreatePipeline(std::shared_ptr<Shader> shader)
@@ -1694,9 +1708,9 @@ bool VulkanGraphicsDriver::FillCommandBuffers()
 
         vkCmdBindDescriptorSets(_vkCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _vkPipelineLayout, 0, 1, &_vkDescriptorSets[_currentFrame], 0, nullptr);
 
-        if (_currentScene) {
-            _currentScene->Render(_renderContext.get());
-        }
+        // if (_currentScene) {
+        //     _currentScene->Render(_renderContext.get());
+        // }
 
         // for (const auto& p : _pipelines) {
         //     VulkanPipeline * pipeline = DUSK_VULKAN_PIPELINE(p.get());

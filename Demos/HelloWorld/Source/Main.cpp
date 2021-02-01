@@ -4,7 +4,7 @@
 #include <Dusk/Module.hpp>
 #include <Dusk/ScriptConsole.hpp>
 #include <Dusk/GraphicsDriver.hpp>
-#include <Dusk/TransformData.hpp>
+#include <Dusk/ShaderTransform.hpp>
 #include <Dusk/AxisComponent.hpp>
 #include <Dusk/MeshComponent.hpp>
 #include <Dusk/Entity.hpp>
@@ -49,7 +49,7 @@ void run()
     }
 
     Dusk::RenderContext * renderCtx = gfx->GetRenderContext();
-    Dusk::TransformData * transformData = renderCtx->GetTransformData();
+    Dusk::ShaderTransform * transformData = renderCtx->GetShaderTransform();
 
     Dusk::Camera camera;
     camera.SetFOVX(45.0f);
@@ -70,7 +70,7 @@ void run()
     auto pipeline = gfx->CreatePipeline(shader);
 
     Dusk::Scene scene;
-    gfx->SetCurrentScene(&scene);
+    Dusk::SetCurrentScene(&scene);
 
     auto mesh = Dusk::LoadMeshFromFile("monkey.obj");
     mesh->SetPipeline(pipeline);
@@ -94,13 +94,7 @@ void run()
 
     Dusk::ScriptConsole::Initialize();
 
-    Dusk::SetRunning(true);
-
-    while (Dusk::IsRunning()) {
-        gfx->Render();
-
-        gfx->ProcessEvents();
-
+    Dusk::Run([&]() {
         Dusk::ScriptConsole::Update();
 
         transformData->View = camera.GetView();
@@ -108,9 +102,7 @@ void run()
 
         glm::quat orient = tmpEntity->GetOrientation() * glm::angleAxis(glm::radians(0.1f), glm::vec3(0.0f, 1.0f, 0.0f));
         tmpEntity->SetOrientation(orient);
-
-        std::this_thread::sleep_for(16ms);
-    }
+    });
 
     Dusk::ScriptConsole::Terminate();
 }

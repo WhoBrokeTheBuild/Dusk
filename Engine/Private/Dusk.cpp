@@ -4,6 +4,8 @@
 #include <Dusk/Module.hpp>
 #include <Dusk/Object.hpp>
 #include <Dusk/GraphicsDriver.hpp>
+#include <Dusk/Time.hpp>
+#include <Dusk/Scene.hpp>
 
 #include <Python/PyDusk.hpp>
 
@@ -13,11 +15,13 @@
 #include <string>
 #include <vector>
 #include <cstdio>
+#include <thread>
 
 namespace Dusk {
 
 DUSK_ENGINE_API
-bool Initialize(int argc, char ** argv) {
+bool Initialize(int argc, char ** argv)
+{
     InitMemoryTracking();
 
     PyImport_AppendInittab("Dusk", PyInit_Dusk);
@@ -40,7 +44,8 @@ bool Initialize(int argc, char ** argv) {
 }
 
 DUSK_ENGINE_API
-void Terminate() {
+void Terminate()
+{
     Py_Finalize();
 
     FreeAllModules();
@@ -53,17 +58,65 @@ void Terminate() {
 static bool _Running = false;
 
 DUSK_ENGINE_API
-void SetRunning(bool running) {
+void SetRunning(bool running)
+{
     _Running = running;
 }
 
 DUSK_ENGINE_API
-bool IsRunning() {
+bool IsRunning()
+{
     return _Running;
 }
 
 DUSK_ENGINE_API
-bool RunScriptFile(const std::string& filename) {
+bool Run(std::function<void()> update)
+{
+    using namespace std::chrono;
+
+    GraphicsDriver * gfx = GetGraphicsDriver();
+    UpdateContext * updateCtx = gfx->GetUpdateContext();
+
+    high_resolution_clock::time_point startTime = high_resolution_clock::now();
+    high_resolution_clock::time_point previousTime = startTime;
+
+
+    Dusk::SetRunning(true);
+
+    while (Dusk::IsRunning()) {
+        high_resolution_clock::time_point currentTime = high_resolution_clock::now();
+        auto totalDuration = duration_cast<milliseconds>(currentTime - startTime);
+        auto previousFrameDuration = duration_cast<microseconds>(currentTime - previousTime);
+        previousTime = currentTime;
+
+        updateCtx->SetTotalDuration(totalDuration);
+        updateCtx->SetPreviousFrameDuration(previousFrameDuration);
+        auto frameEndTime = currentTime + updateCtx->GetExpectedFrameDuration();
+
+        gfx->ProcessEvents();
+
+        update();
+
+        auto scene = GetCurrentScene();
+        if (scene) {
+            scene->Update(gfx->GetUpdateContext());
+        }
+
+        gfx->Render();
+
+        currentTime = high_resolution_clock::now();
+        auto timeToSleep = duration_cast<milliseconds>(frameEndTime - currentTime);
+        if (timeToSleep > 1ms) { // TODO: Find "minimum" sleep time
+            std::this_thread::sleep_for(timeToSleep);
+        }
+    }
+
+    return true;
+}
+
+DUSK_ENGINE_API
+bool RunScriptFile(const std::string& filename)
+{
     FILE * file = nullptr;
     
     const auto& assetPaths = GetAssetPathList();

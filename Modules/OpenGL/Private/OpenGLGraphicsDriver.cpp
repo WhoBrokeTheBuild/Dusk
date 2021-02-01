@@ -92,29 +92,8 @@ bool OpenGLGraphicsDriver::Initialize()
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &value);
     DuskLogVerbose("Max Uniform Block Size: %d", value);
 
-
-
-    // TODO: Move
-    bool result;
-
-    const unsigned TRANSFORM_DATA_BINDING = 0;
-
-    std::shared_ptr<Buffer> transformDataBuffer = std::shared_ptr<Buffer>(New OpenGLBuffer());
-    result = transformDataBuffer->Initialize(
-        sizeof(TransformData),
-        nullptr,
-        BufferUsage::Constant,
-        MemoryUsage::UploadOften
-    );
-
-    if (!result) {
-        DuskLogError("Freak out");
-    }
-
-    AddConstantBuffer(transformDataBuffer, TRANSFORM_DATA_BINDING);
-
-
-
+    InitializeUpdateContext();
+    InitializeRenderContext();
 
     return true;
 }
@@ -140,11 +119,15 @@ void OpenGLGraphicsDriver::Render()
 
     BindUniformBufferObjects();
 
-    if (_currentScene) {
-        _currentScene->Render(_renderContext.get());
-    }
+    GraphicsDriver::Render();
 
     SDL_GL_SwapWindow(GetSDL2Window());
+}
+
+DUSK_OPENGL_API
+std::shared_ptr<Buffer> OpenGLGraphicsDriver::CreateBuffer()
+{
+    return std::shared_ptr<Buffer>(New OpenGLBuffer());
 }
 
 DUSK_OPENGL_API
@@ -256,14 +239,14 @@ bool OpenGLGraphicsDriver::RemoveConstantBuffer(unsigned binding)
 }
 
 DUSK_OPENGL_API
-Buffer * OpenGLGraphicsDriver::GetConstantBuffer(unsigned binding)
+std::shared_ptr<Buffer> OpenGLGraphicsDriver::GetConstantBuffer(unsigned binding)
 {
     auto it = _constantBufferBindings.find(binding);
     if (it == _constantBufferBindings.end()) {
         return nullptr;
     }
 
-    return it->second.get();
+    return it->second;
 }
 
 DUSK_OPENGL_API

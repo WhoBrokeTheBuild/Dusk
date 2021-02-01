@@ -3,6 +3,7 @@
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Object.hpp>
+#include <Dusk/Math.hpp>
 #include <Dusk/Keyboard.hpp>
 #include <Dusk/Mouse.hpp>
 #include <Dusk/Controller.hpp>
@@ -45,6 +46,8 @@ public:
     InputDriver() = default;
     
     virtual ~InputDriver() = default;
+
+    virtual ivec2 GetMouseCoordinates() const = 0;
 
 }; // class InputDriver
 

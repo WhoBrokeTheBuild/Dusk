@@ -8,10 +8,6 @@ namespace Dusk::SDL2 {
 DUSK_SDL2_API
 bool SDL2GraphicsDriver::Initialize()
 {
-    if (!GraphicsDriver::Initialize()) {
-        return false;
-    }
-
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
         DuskLogError("Failed to initialize SDL, %s", SDL_GetError());
         return false;
@@ -43,16 +39,19 @@ DUSK_SDL2_API
 bool SDL2GraphicsDriver::CreateWindow(unsigned flags)
 {
     std::string title = GetApplicationName() + " (" + GetApplicationVersion().GetString() + ")";
+    GraphicsDriver::SetWindowTitle(title);
+
+    ivec2 size = GetWindowSize();
 
     if (_sdlWindow) {
         SDL_DestroyWindow(_sdlWindow);
         _sdlWindow = nullptr;
     }
 
-    _sdlWindow = SDL_CreateWindow(title.c_str(), 
+    _sdlWindow = SDL_CreateWindow(title.c_str(),
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        640, 480, 
+        size.x, size.y, 
         flags | SDL_WINDOW_RESIZABLE);
 
     if (!_sdlWindow) {
@@ -67,37 +66,6 @@ bool SDL2GraphicsDriver::CreateWindow(unsigned flags)
     SDL_FreeSurface(surface);
 
     return true;
-}
-
-DUSK_SDL2_API
-void SDL2GraphicsDriver::SetWindowTitle(const std::string& title)
-{
-    SDL_SetWindowTitle(_sdlWindow, title.c_str());
-}
-
-DUSK_SDL2_API
-std::string SDL2GraphicsDriver::GetWindowTitle()
-{
-    return SDL_GetWindowTitle(_sdlWindow);
-}
-
-DUSK_SDL2_API
-void SDL2GraphicsDriver::SetWindowSize(const ivec2& size)
-{
-    SDL_SetWindowSize(_sdlWindow, size.x, size.y);
-
-    // TODO: Investigate why this wasn't done automatically from the ProcessEvents loop
-    WindowResizedEventData data;
-    data.Size = size;
-    WindowResizedEvent.Call(&data);
-}
-
-DUSK_SDL2_API
-ivec2 SDL2GraphicsDriver::GetWindowSize()
-{
-    ivec2 size;
-    SDL_GetWindowSize(_sdlWindow, &size.x, &size.y);
-    return size;
 }
 
 DUSK_SDL2_API
@@ -116,8 +84,11 @@ void SDL2GraphicsDriver::ProcessEvents()
             switch (event.window.event) {
             case SDL_WINDOWEVENT_RESIZED:
             {
+                ivec2 size = { event.window.data1, event.window.data2 };
+                GraphicsDriver::SetWindowSize(size);
+
                 WindowResizedEventData data;
-                data.Size = { event.window.data1, event.window.data2 };
+                data.Size = size;
                 WindowResizedEvent.Call(&data);
 
                 break;
@@ -125,6 +96,21 @@ void SDL2GraphicsDriver::ProcessEvents()
             }
         }
     }
+}
+
+void SDL2GraphicsDriver::UpdateWindowTitle(const std::string& title)
+{
+    SDL_SetWindowTitle(_sdlWindow, title.c_str());
+}
+
+void SDL2GraphicsDriver::UpdateWindowSize(const ivec2& size) 
+{
+    SDL_SetWindowSize(_sdlWindow, size.x, size.y);
+
+    // TODO: Investigate why this wasn't done automatically from the ProcessEvents loop
+    WindowResizedEventData data;
+    data.Size = size;
+    WindowResizedEvent.Call(&data);
 }
 
 } // namespace Dusk::SDL2

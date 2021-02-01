@@ -31,17 +31,11 @@ public:
         _pipeline = pipeline;
     }
 
-    virtual Buffer * GetTransformDataBuffer() {
-        return _transformDataBuffer.get();
-    }
-
 protected:
 
     std::vector<std::unique_ptr<Primitive>> _primitiveList;
 
     std::shared_ptr<Pipeline> _pipeline;
-
-    std::shared_ptr<Buffer> _transformDataBuffer;
 
 }; // class Mesh
 

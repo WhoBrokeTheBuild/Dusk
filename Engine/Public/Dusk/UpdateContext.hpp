@@ -3,6 +3,7 @@
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Object.hpp>
+#include <Dusk/Time.hpp>
 
 #include <cstdint>
 
@@ -25,51 +26,57 @@ public:
 
     virtual inline void SetTargetFPS(float fps) {
         _targetFPS = fps;
-    }
-
-    // Current Frames/Second
-    virtual inline float GetCurrentFPS() const {
-        return _currentFPS;
-    }
-
-    virtual inline void SetCurrentFPS(float fps) {
-        _currentFPS = fps;
-        _fpsRatio = _targetFPS / _currentFPS;
+        _expectedFrameDuration = microseconds((int64_t)(1000000.0f / GetTargetFPS()));
     }
 
     // Ratio between Target FPS and Current FPS
     // > 1.0 means Current is less than Target
     // < 1.0 means Current is greater than Target
-    virtual inline float GetFPSRatio() const {
-        return _fpsRatio;
-    }
-
-    // Time since last update in Milliseconds
-    virtual inline long long GetElapsedTime() const {
-        return _elapsedTime;
+    virtual inline float GetFrameSpeedRatio() const {
+        return _frameSpeedRatio;
     }
 
     // Time since program start in Milliseconds
-    virtual inline long long GetTotalTime() const {
-        return _totalTime;
+    virtual inline milliseconds GetTotalDuration() const {
+        return _totalDuration;
     }
 
-    virtual inline void AddElapsedTime(long long time) {
-        _elapsedTime = time;
-        _totalTime += time;
+    // Time that a frame should take in Milliseconds
+    virtual inline microseconds GetExpectedFrameDuration() const {
+        return _expectedFrameDuration;
+    }
+
+    // Time the previous frame took in Milliseconds
+    virtual inline microseconds GetPreviousFrameDuration() const {
+        return _previousFrameDuration;
+    }
+
+    virtual inline void ResetTime() {
+        _totalDuration = 0ms;
+        _previousFrameDuration = 0ms;
+        _frameSpeedRatio = 1.0f;
+    }
+
+    virtual inline void SetTotalDuration(milliseconds totalFrameDuration) {
+        _totalDuration = totalFrameDuration;
+    }
+
+    virtual inline void SetPreviousFrameDuration(microseconds previousFrameDuration) {
+        _previousFrameDuration = previousFrameDuration;
+        _frameSpeedRatio = previousFrameDuration / _expectedFrameDuration;
     }
 
 private:
 
-    float _targetFPS = 0.f;
+    float _targetFPS = 0.0f;
 
-    float _currentFPS = 0.f;
+    float _frameSpeedRatio = 1.0f;
 
-    float _fpsRatio = 0.f;
+    milliseconds _totalDuration = 0ms;
 
-    uintmax_t _elapsedTime = 0;
+    microseconds _expectedFrameDuration = 0ms;
 
-    uintmax_t _totalTime = 0;
+    microseconds _previousFrameDuration = 0ms;
 
 }; // class UpdateContext
 

@@ -1,15 +1,8 @@
 #include <Dusk/Dusk.hpp>
 
 #include <Dusk/Log.hpp>
-#include <Dusk/Module.hpp>
 #include <Dusk/ScriptConsole.hpp>
 #include <Dusk/GraphicsDriver.hpp>
-#include <Dusk/TransformData.hpp>
-#include <Dusk/AxisComponent.hpp>
-#include <Dusk/MeshComponent.hpp>
-#include <Dusk/Entity.hpp>
-#include <Dusk/Scene.hpp>
-#include <Dusk/Camera.hpp>
 
 #include <Dusk/Event.hpp>
 

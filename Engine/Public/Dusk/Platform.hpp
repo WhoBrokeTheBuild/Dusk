@@ -55,15 +55,15 @@
     // Microsoft VisualStudio C/C++
     #define DUSK_COMPILER_MSVC _MSC_VER
 
-#elif defined(__GNUC__)
-    
-    // GNU Compiler Collection
-    #define DUSK_COMPILER_GCC __GNUC__
-
 #elif defined(__clang__)
 
     // Apple Clang Compiler
     #define DUSK_COMPILER_CLANG __clang__
+
+#elif defined(__GNUC__)
+    
+    // GNU Compiler Collection
+    #define DUSK_COMPILER_GCC __GNUC__
 
 #else
 

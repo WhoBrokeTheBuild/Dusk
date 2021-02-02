@@ -19,7 +19,7 @@ public:
 
     virtual ~VulkanMesh() = default;
 
-    bool Load(const std::vector<std::unique_ptr<PrimitiveData>>& data) override;
+    bool Initialize() override;
 
     void Render(RenderContext * ctx) override;
     

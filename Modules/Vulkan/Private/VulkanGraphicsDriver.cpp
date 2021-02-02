@@ -5,7 +5,9 @@
 #include <Dusk/Benchmark.hpp>
 #include <Dusk/MeshImporter.hpp>
 #include <Dusk/Camera.hpp>
+#include <Dusk/Scene.hpp>
 
+#include <algorithm>
 #include <set>
 
 DISABLE_WARNINGS()
@@ -56,21 +58,13 @@ bool VulkanGraphicsDriver::Initialize()
 
     InitializeUpdateContext();
     InitializeRenderContext();
-
-    // const unsigned TRANSFORM_DATA_BINDING = 0;
-
-    // // TODO: Move
-    // std::shared_ptr<Buffer> transformDataBuffer = std::shared_ptr<Buffer>(New VulkanBuffer());
-    // transformDataBuffer->Initialize(
-    //     sizeof(TransformData),
-    //     nullptr,
-    //     BufferUsage::Constant,
-    //     MemoryUsage::UploadOften
-    // );
-
-    // AddConstantBuffer(transformDataBuffer, TRANSFORM_DATA_BINDING);
-
+    InitializeConstantBuffers();
+    
     if (!InitSwapChain()) {
+        return false;
+    }
+
+    if (!InitSyncObjects()) {
         return false;
     }
 
@@ -95,10 +89,35 @@ void VulkanGraphicsDriver::Terminate()
         vkDeviceWaitIdle(_vkDevice);
     }
 
-    TermSwapChain();
-    _pipelines.clear();
+    // TermSyncObjects
 
-    // TermConstantBuffers();
+    for (auto fence : _vkInFlightFences) {
+        vkDestroyFence(_vkDevice, fence, nullptr);
+        fence = nullptr;
+    }
+
+    for (auto semaphore : _vkRenderingFinishedSemaphores) {
+        vkDestroySemaphore(_vkDevice, semaphore, nullptr);
+        semaphore = nullptr;
+    }
+
+    for (auto semaphore : _vkImageAvailableSemaphores) {
+        vkDestroySemaphore(_vkDevice, semaphore, nullptr);
+        semaphore = nullptr;
+    }
+
+    TermSwapChain();
+
+    for (auto& primitive : _primitiveList) {
+        primitive->Terminate();
+    }
+
+    // TODO: Move
+    _shaderGlobalsBuffer->Terminate();
+
+    for (auto& shader : _shaderList) {
+        shader->Terminate();
+    }
 
     TermAllocator();
     TermLogicalDevice();
@@ -120,7 +139,7 @@ void VulkanGraphicsDriver::Terminate()
 void VulkanGraphicsDriver::InitializeRenderContext()
 {
     _renderContext.reset(New VulkanRenderContext());
-    GraphicsDriver::InitializeRenderContext();
+    SDL2GraphicsDriver::InitializeRenderContext();
 }
 
 DUSK_VULKAN_API
@@ -130,13 +149,23 @@ void VulkanGraphicsDriver::SetBackbufferCount(unsigned backbufferCount)
         ResetSwapChain();
     }
 
-    GraphicsDriver::SetBackbufferCount(backbufferCount);
+    SDL2GraphicsDriver::SetBackbufferCount(backbufferCount);
 }
 
 DUSK_VULKAN_API
 void VulkanGraphicsDriver::Render()
 {
     VkResult vkResult;
+
+    SDL2GraphicsDriver::Render();
+
+    VulkanRenderContext * vkRenderCtx = DUSK_VULKAN_RENDER_CONTEXT(_renderContext.get());
+    vkRenderCtx->SetVkCommandBuffer(nullptr);
+    
+    Scene * scene = GetCurrentScene();
+    if (scene) {
+        scene->Render(_renderContext.get());
+    }
 
     vmaSetCurrentFrameIndex(_vmaAllocator, _currentFrame);
 
@@ -223,7 +252,7 @@ std::shared_ptr<Pipeline> VulkanGraphicsDriver::CreatePipeline(std::shared_ptr<S
     auto ptr = std::shared_ptr<Pipeline>(New VulkanPipeline());
     ptr->SetShader(shader);
     // ptr->Initialize();
-    _pipelines.push_back(ptr);
+    _pipelineList.push_back(ptr);
 
     ResetSwapChain();
     return ptr;
@@ -238,19 +267,25 @@ std::shared_ptr<Texture> VulkanGraphicsDriver::CreateTexture()
 DUSK_VULKAN_API
 std::shared_ptr<Shader> VulkanGraphicsDriver::CreateShader()
 {
-    return std::shared_ptr<Shader>(New VulkanShader());
+    auto ptr = std::shared_ptr<Shader>(New VulkanShader());
+    _shaderList.push_back(ptr);
+    return ptr;
 }
 
 DUSK_VULKAN_API
 std::shared_ptr<Mesh> VulkanGraphicsDriver::CreateMesh()
 {
-    return std::shared_ptr<Mesh>(New VulkanMesh());
+    auto ptr = std::shared_ptr<Mesh>(New VulkanMesh());
+    _meshList.push_back(ptr);
+    return ptr;
 }
 
 DUSK_VULKAN_API
-std::unique_ptr<Primitive> VulkanGraphicsDriver::CreatePrimitive()
+std::shared_ptr<Primitive> VulkanGraphicsDriver::CreatePrimitive()
 {
-    return std::unique_ptr<Primitive>(New VulkanPrimitive());
+    auto ptr = std::shared_ptr<Primitive>(New VulkanPrimitive());
+    _primitiveList.push_back(ptr);
+    return ptr;
 }
 
 uint32_t VulkanGraphicsDriver::FindMemoryType(uint32_t filter, VkMemoryPropertyFlags props)
@@ -349,6 +384,51 @@ bool VulkanGraphicsDriver::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, Vk
     vkResult = vkQueueSubmit(_vkGraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
     vkQueueWaitIdle(_vkGraphicsQueue);
 
+    vkFreeCommandBuffers(_vkDevice, _vkCommandPool, 1, &commandBuffer);
+
+    return true;
+}
+
+bool VulkanGraphicsDriver::CreateDescriptorSet(VkDescriptorSet * descriptorSet)
+{
+    VkResult vkResult;
+
+    VkDescriptorSetLayout setLayouts[] = { _vkDescriptorSetLayout };
+
+    VkDescriptorSetAllocateInfo allocateInfo = {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+        .pNext = nullptr,
+        .descriptorPool = _vkDescriptorPool,
+        .descriptorSetCount = 1,
+        .pSetLayouts = setLayouts,
+    };
+
+    vkResult = vkAllocateDescriptorSets(_vkDevice, &allocateInfo, descriptorSet);
+    if (vkResult != VK_SUCCESS) {
+        DuskLogError("vkAllocateDescriptorSets() failed");
+        return false;
+    }
+
+    VulkanBuffer * vkShaderGlobalsBuffer = DUSK_VULKAN_BUFFER(GetShaderGlobalsBuffer().get());
+
+    VkDescriptorBufferInfo bufferInfo = {
+        .buffer = vkShaderGlobalsBuffer->GetVkBuffer(),
+        .offset = 0,
+        .range = VK_WHOLE_SIZE,
+    };
+
+    VkWriteDescriptorSet writeDescriptorSet = {
+        .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+        .dstSet = *descriptorSet,
+        .dstBinding = DUSK_SHADER_GLOBALS_BINDING,
+        .dstArrayElement = 0,
+        .descriptorCount = 1,
+        .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        .pBufferInfo = &bufferInfo,
+    };
+
+    vkUpdateDescriptorSets(_vkDevice, 1, &writeDescriptorSet, 0, nullptr);
+
     return true;
 }
 
@@ -366,7 +446,7 @@ bool VulkanGraphicsDriver::IsDeviceSuitable(const VkPhysicalDevice device)
         && _vkPhysicalDeviceFeatures.geometryShader;
 }
 
-std::vector<const char *> VulkanGraphicsDriver::GetRequiredDeviceLayers()
+std::vector<const char *> VulkanGraphicsDriver::GetRequiredLayers()
 {
     std::vector<const char *> requiredLayers = { };
 
@@ -376,6 +456,10 @@ std::vector<const char *> VulkanGraphicsDriver::GetRequiredDeviceLayers()
         if (it != _vkAvailableLayers.end()) {
             requiredLayers.push_back("VK_LAYER_KHRONOS_validation");
         }
+
+    #endif
+
+    #if defined(DUSK_ENABLE_RENDERDOC)
 
         it = _vkAvailableLayers.find("VK_LAYER_RENDERDOC_Capture");
         if (it != _vkAvailableLayers.end()) {
@@ -451,28 +535,75 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL _VulkanDebugMessageCallback(
     const VkDebugUtilsMessengerCallbackDataEXT * callbackData,
     void * userData)
 {
-    if (callbackData->messageIdNumber == 0) { // Loader Message
-        return VK_FALSE;
-    }
+    // if (callbackData->messageIdNumber == 0) { // Loader Message
+    //     return VK_FALSE;
+    // }
+
+    LogLevel level = LogLevel::Info;
 
     if ((messageType & VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT) > 0) {
-        Log(LogLevel::Performance, "[PERF](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
+        level = LogLevel::Performance;
     }
     else {
         if ((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) > 0) {
-            Log(LogLevel::Error, "[ERRO](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
+            level = LogLevel::Error;
         }
         else if ((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) > 0) {
-            Log(LogLevel::Warning, "[WARN](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
+            level = LogLevel::Warning;
         }
         else if ((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT) > 0) {
-            Log(LogLevel::Info, "[INFO](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
+            level = LogLevel::Info;
         }
         else if ((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) > 0) {
-            Log(LogLevel::Verbose, "[VERB](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
+            level = LogLevel::Verbose;
         }
-        else {
-            Log(LogLevel::Info, "[????](VkDebugUtilsMessenger) %s\n", callbackData->pMessage);
+    }
+
+    const char * prefix;
+
+    switch (level) {
+    case LogLevel::Error:
+        prefix = "ERRO";
+        break;
+    case LogLevel::Warning:
+        prefix = "WARN";
+        break;
+    case LogLevel::Info:
+        prefix = "INFO";
+        break;
+    case LogLevel::Performance:
+        prefix = "PERF";
+        break;
+    case LogLevel::Verbose:
+        prefix = "VERB";
+        break;
+    default: ;
+    }
+
+    Log(level, "[%s](VkDebugUtilsMessenger) %s %s\n", 
+        prefix, 
+        callbackData->pMessageIdName, 
+        callbackData->pMessage);
+
+    if (callbackData->objectCount > 0) {
+        for (uint32_t i = 0; i < callbackData->objectCount; ++i) {
+            const char * name = callbackData->pObjects[i].pObjectName;
+            if (name) {
+                Log(level, "\t\tObject #%d: Type %d, Value %p, Name '%s'\n",
+                    i,
+                    callbackData->pObjects[i].objectType,
+                    callbackData->pObjects[i].objectHandle,
+                    callbackData->pObjects[i].pObjectName);
+            }
+        }
+    }
+
+    if (callbackData->cmdBufLabelCount > 0) {
+        for (uint32_t i = 0; i < callbackData->cmdBufLabelCount; ++i) {
+            const char * name = callbackData->pCmdBufLabels[i].pLabelName;
+            if (name) {
+                Log(level, "\t\tLabel #%d: %s\n", name);
+            }
         }
     }
 
@@ -510,6 +641,13 @@ bool VulkanGraphicsDriver::InitInstance()
     for (const auto& layer : availableLayers) {
         DuskLogVerbose("\t%s: %s", layer.layerName, layer.description);
         _vkAvailableLayers.emplace(layer.layerName, layer);
+    }
+
+    const auto& requiredLayers = GetRequiredLayers();
+
+    DuskLogVerbose("Required Vulkan Device Layers:");
+    for (const auto& layer : requiredLayers) {
+        DuskLogVerbose("\t%s", layer);
     }
 
     uint32_t availableExtensionCount = 0;
@@ -572,8 +710,8 @@ bool VulkanGraphicsDriver::InitInstance()
         .pNext = nullptr,
         .flags = 0,
         .pApplicationInfo = &applicationInfo,
-        .enabledLayerCount = 0,
-        .ppEnabledLayerNames = nullptr,
+        .enabledLayerCount = static_cast<uint32_t>(requiredLayers.size()),
+        .ppEnabledLayerNames = requiredLayers.data(),
         .enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size()),
         .ppEnabledExtensionNames = requiredExtensions.data(),
     };
@@ -865,12 +1003,7 @@ bool VulkanGraphicsDriver::InitLogicalDevice()
         // TODO
     };
 
-    const auto& requiredLayers = GetRequiredDeviceLayers();
-
-    DuskLogVerbose("Required Vulkan Device Layers:");
-    for (const auto& layer : requiredLayers) {
-        DuskLogVerbose("\t%s", layer);
-    }
+    const auto& requiredLayers = GetRequiredLayers();
 
     const auto& requiredExtensions = GetRequiredDeviceExtensions();
     
@@ -1122,10 +1255,6 @@ bool VulkanGraphicsDriver::InitSwapChain()
         return false;
     }
 
-    if (!InitSyncObjects()) {
-        return false;
-    }
-
     return true;
 }
 
@@ -1150,7 +1279,7 @@ void VulkanGraphicsDriver::TermSwapChain()
         _vkCommandBuffers.assign(_vkCommandBuffers.size(), nullptr);
     }
 
-    for (const auto& pipeline : _pipelines) {
+    for (const auto& pipeline : _pipelineList) {
         pipeline->Terminate();
     }
 
@@ -1187,19 +1316,13 @@ void VulkanGraphicsDriver::TermSwapChain()
         _vkSwapChain = nullptr;
     }
 
-    // for (size_t i = 0; i < _vkSwapChainImages.size(); i++) {
-    //     if (_vkUniformBuffers[i]) {
-    //         vkDestroyBuffer(_vkDevice, _vkUniformBuffers[i], nullptr);
-    //         _vkUniformBuffers[i] = nullptr;
-    //     }
-
-    //     if (_vkUniformBufferAllocations[i]) {
-    //         vmaFreeMemory(_vmaAllocator, _vkUniformBufferAllocations[i]);
-    //         _vkUniformBufferAllocations[i] = nullptr;
-    //     }
-    // }
+    if (_vkDescriptorSetLayout) {
+        vkDestroyDescriptorSetLayout(_vkDevice, _vkDescriptorSetLayout, nullptr);
+        _vkDescriptorSetLayout = nullptr;
+    }
 
     if (_vkDescriptorPool) {
+        vkResetDescriptorPool(_vkDevice, _vkDescriptorPool, 0); // ?
         vkDestroyDescriptorPool(_vkDevice, _vkDescriptorPool, nullptr);
         _vkDescriptorPool = nullptr;
     }
@@ -1311,10 +1434,10 @@ bool VulkanGraphicsDriver::InitDescriptorPool()
 {
     VkResult vkResult;
 
-    std::array<VkDescriptorPoolSize, 2> descriptorPoolSizeList = {
+    std::array<VkDescriptorPoolSize, 1> descriptorPoolSizeList = {
         VkDescriptorPoolSize {
             .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            // .descriptorCount = static_cast<uint32_t>(_constantBufferBindings.size()),
+            .descriptorCount = static_cast<uint32_t>(1 + _meshList.size()), // Can never be 0
         },
         // VkDescriptorPoolSize {
         //     .type = VK_DESCRIPTOR_TYPE_SAMPLER,
@@ -1335,46 +1458,54 @@ bool VulkanGraphicsDriver::InitDescriptorPool()
         return false;
     }
 
-    // Generate one of these for each of the Registered Constant Buffers
+    std::array<VkDescriptorSetLayoutBinding, 2> descriptorSetLayoutBindingList = {
+        VkDescriptorSetLayoutBinding {
+            .binding = DUSK_SHADER_GLOBALS_BINDING,
+            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS,
+            .pImmutableSamplers = nullptr,
+        },
+        VkDescriptorSetLayoutBinding {
+            .binding = DUSK_SHADER_TRANSFORM_BINDING,
+            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS,
+            .pImmutableSamplers = nullptr,
+        },
+    };
 
-    std::vector<VkDescriptorSetLayoutBinding> layoutBindingList;
-    // layoutBindingList.resize(_constantBufferBindings.size());
-
-    // size_t i = 0;
-    // for (const auto& it : _constantBufferBindings) {
-    //     layoutBindingList[i] = {
-    //         .binding = it.first,
-    //         .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-    //         .descriptorCount = 1,
-    //         .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-    //         .pImmutableSamplers = nullptr,
-    //     };
-    // }
-
-    VkDescriptorSetLayoutCreateInfo descriptorLayoutCreateInfo = {
+    VkDescriptorSetLayoutCreateInfo transformDescriptorLayoutCreateInfo = {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
-        .bindingCount = static_cast<uint32_t>(layoutBindingList.size()),
-        .pBindings = layoutBindingList.data(),
+        .bindingCount = static_cast<uint32_t>(descriptorSetLayoutBindingList.size()),
+        .pBindings = descriptorSetLayoutBindingList.data(),
     };
 
-    vkResult = vkCreateDescriptorSetLayout(_vkDevice, &descriptorLayoutCreateInfo, nullptr, &_vkDescriptorSetLayout);
+    vkResult = vkCreateDescriptorSetLayout(_vkDevice, &transformDescriptorLayoutCreateInfo, nullptr, &_vkDescriptorSetLayout);
     if (vkResult != VK_SUCCESS) {
         DuskLogError("vkCreateDescriptorSetLayout() failed");
         return false;
     }
 
-    VkDescriptorSetLayout setLayouts[] = { _vkDescriptorSetLayout };
+    for (auto& mesh : _meshList) {
+        if (!mesh->Initialize()) {
+            return false;
+        }
+    }
+
+    std::array<VkDescriptorSetLayout, 1> setLayouts = {
+        _vkDescriptorSetLayout,
+    };
 
     // TODO: Move into Pipeline
-    // Get "default" Registered Constant Buffers from the graphics driver at creation time
     VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
-        .setLayoutCount = 1,
-        .pSetLayouts = setLayouts,
+        .setLayoutCount = static_cast<uint32_t>(setLayouts.size()),
+        .pSetLayouts = setLayouts.data(),
         .pushConstantRangeCount = 0,
         .pPushConstantRanges = nullptr,
     };
@@ -1384,49 +1515,12 @@ bool VulkanGraphicsDriver::InitDescriptorPool()
         DuskLogFatal("vkCreatePipelineLayout() failed");
     }
 
-
-    std::vector<VkDescriptorSetLayout> layouts(_vkSwapChainImages.size(), _vkDescriptorSetLayout);
-    VkDescriptorSetAllocateInfo allocateInfo = {
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-        .pNext = nullptr,
-        .descriptorPool = _vkDescriptorPool,
-        .descriptorSetCount = static_cast<uint32_t>(_vkSwapChainImages.size()),
-        .pSetLayouts = layouts.data(),
-    };
-
-    // _vkDescriptorSets.resize(_constantBufferBindings.size());
-    vkResult = vkAllocateDescriptorSets(_vkDevice, &allocateInfo, _vkDescriptorSets.data());
-    if (vkResult != VK_SUCCESS) {
-        DuskLogError("vkAllocateDescriptorSets() failed");
-        return false;
-    }
-
-    // for (size_t i = 0; i < _constantBufferBindings.size(); ++i) {
-    //     VkDescriptorBufferInfo bufferInfo = {
-    //         .buffer = _vkUniformBuffers[i],
-    //         .offset = 0,
-    //         .range = sizeof(TransformData),
-    //     };
-
-    //     VkWriteDescriptorSet writeDescriptorSet = {
-    //         .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-    //         .dstSet = _vkDescriptorSets[i],
-    //         .dstBinding = 0,
-    //         .dstArrayElement = 0,
-    //         .descriptorCount = 1,
-    //         .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-    //         .pBufferInfo = &bufferInfo,
-    //     };
-
-    //     vkUpdateDescriptorSets(_vkDevice, 1, &writeDescriptorSet, 0, nullptr);
-    // }
-
     return true;
 }
 
 bool VulkanGraphicsDriver::InitGraphicsPipelines()
 {
-    for (auto& pipeline : _pipelines) {
+    for (auto& pipeline : _pipelineList) {
         if (!pipeline->Initialize()) {
             return false;
         }
@@ -1668,7 +1762,8 @@ bool VulkanGraphicsDriver::FillCommandBuffers()
             .pInheritanceInfo = nullptr,
         };
 
-        vkResetCommandBuffer(_vkCommandBuffers[i], 0);
+        // Requires VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT
+        // vkResetCommandBuffer(_vkCommandBuffers[i], 0);
 
         vkResult = vkBeginCommandBuffer(_vkCommandBuffers[i], &commandBufferBeginInfo);
         if (vkResult != VK_SUCCESS) {
@@ -1678,7 +1773,6 @@ bool VulkanGraphicsDriver::FillCommandBuffers()
 
         VulkanRenderContext * vkRenderContext = DUSK_VULKAN_RENDER_CONTEXT(_renderContext.get());
         vkRenderContext->SetVkCommandBuffer(_vkCommandBuffers[i]);
-
 
         std::array<VkClearValue, 2> clearValues = { };
 
@@ -1706,21 +1800,11 @@ bool VulkanGraphicsDriver::FillCommandBuffers()
 
         vkCmdBeginRenderPass(_vkCommandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        vkCmdBindDescriptorSets(_vkCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _vkPipelineLayout, 0, 1, &_vkDescriptorSets[_currentFrame], 0, nullptr);
+        Scene * scene = GetCurrentScene();
+        if (scene) {
+            scene->Render(_renderContext.get());
+        }
 
-        // if (_currentScene) {
-        //     _currentScene->Render(_renderContext.get());
-        // }
-
-        // for (const auto& p : _pipelines) {
-        //     VulkanPipeline * pipeline = DUSK_VULKAN_PIPELINE(p.get());
-            
-        //     // pipeline->GenerateBindCommands(_vkCommandBuffers[i]);
-            
-        //     // TODO: Move into Pipeline's Generate Commands
-            
-        //     // pipeline->GenerateDrawCommands(_vkCommandBuffers[i]);
-        // }
 
         vkCmdEndRenderPass(_vkCommandBuffers[i]);
 

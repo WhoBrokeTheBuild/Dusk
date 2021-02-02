@@ -24,6 +24,10 @@ public:
 
     virtual ~Mesh() = default;
 
+    virtual bool Initialize();
+
+    virtual void Terminate();
+
     virtual bool Load(const std::vector<std::unique_ptr<PrimitiveData>>& data);
 
     virtual void Render(RenderContext * ctx);
@@ -34,7 +38,7 @@ public:
 
 protected:
 
-    std::vector<std::unique_ptr<Primitive>> _primitiveList;
+    std::vector<std::shared_ptr<Primitive>> _primitiveList;
 
     std::shared_ptr<Pipeline> _pipeline;
 

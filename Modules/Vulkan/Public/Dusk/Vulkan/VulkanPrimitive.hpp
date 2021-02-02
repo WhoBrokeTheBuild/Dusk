@@ -23,7 +23,9 @@ public:
 
     VulkanPrimitive() = default;
 
-    virtual ~VulkanPrimitive();
+    virtual ~VulkanPrimitive() = default;
+
+    void Terminate() override;
 
     bool Load(const std::unique_ptr<PrimitiveData>& data) override;
 

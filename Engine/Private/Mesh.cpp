@@ -5,10 +5,32 @@
 namespace Dusk {
 
 DUSK_ENGINE_API
+bool Mesh::Initialize()
+{
+    bool result = true;
+
+    GraphicsDriver * gfx = GetGraphicsDriver();
+
+    _shaderTransformBuffer = gfx->CreateBuffer();
+    result = _shaderTransformBuffer->Initialize(
+        sizeof(ShaderTransform),
+        nullptr,
+        BufferUsage::Constant,
+        MemoryUsage::UploadOften
+    );
+
+    return result;
+}
+
+DUSK_ENGINE_API
+void Mesh::Terminate()
+{
+    _shaderTransformBuffer->Terminate();
+}
+
+DUSK_ENGINE_API
 bool Mesh::Load(const std::vector<std::unique_ptr<PrimitiveData>>& data)
 {
-    bool result;
-
     GraphicsDriver * gfx = GetGraphicsDriver();
     
     for (const auto& primitiveData : data) {
@@ -19,15 +41,7 @@ bool Mesh::Load(const std::vector<std::unique_ptr<PrimitiveData>>& data)
         _primitiveList.push_back(std::move(primitive));
     }
     
-    _shaderTransformBuffer = gfx->CreateBuffer();
-    result = _shaderTransformBuffer->Initialize(
-        sizeof(ShaderTransform),
-        nullptr,
-        BufferUsage::Constant,
-        MemoryUsage::UploadOften
-    );
-
-    return result;
+    return true;
 }
 
 DUSK_ENGINE_API
@@ -56,8 +70,10 @@ std::shared_ptr<Mesh> LoadMeshFromFile(const string& filename, bool useAssetPath
 
 void Mesh::Render(RenderContext * ctx)
 {
-    uint8_t * data = reinterpret_cast<uint8_t *>(ctx->GetShaderTransform());
-    _shaderTransformBuffer->WriteTo(0, sizeof(ShaderTransform), data);
+    if (_shaderTransformBuffer) {
+        uint8_t * data = reinterpret_cast<uint8_t *>(ctx->GetShaderTransform());
+        _shaderTransformBuffer->WriteTo(0, sizeof(ShaderTransform), data);
+    }
 }
 
 } // namespace Dusk

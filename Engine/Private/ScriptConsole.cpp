@@ -28,6 +28,10 @@ int ScriptConsole::_index = 0;
 
 void ScriptConsole::Initialize()
 {
+#if defined(DUSK_ENABLE_RENDERDOC)
+    return;
+#endif
+
 #if defined(DUSK_PLATFORM_WINDOWS)
 
     _stdinHandle = GetStdHandle(STD_INPUT_HANDLE);
@@ -67,6 +71,10 @@ void ScriptConsole::Initialize()
 
 void ScriptConsole::Terminate()
 {
+#if defined(DUSK_ENABLE_RENDERDOC)
+    return;
+#endif
+
     Py_XDECREF(_locals);
 
 #if !defined(DUSK_PLATFORM_WINDOWS)
@@ -78,6 +86,10 @@ void ScriptConsole::Terminate()
 
 void ScriptConsole::Update()
 {
+#if defined(DUSK_ENABLE_RENDERDOC)
+    return;
+#endif
+
 #if defined(DUSK_PLATFORM_WINDOWS)
 
     DWORD result;

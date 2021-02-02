@@ -5,11 +5,18 @@
 namespace Dusk::Vulkan {
 
 DUSK_VULKAN_API
-VulkanPrimitive::~VulkanPrimitive()
+void VulkanPrimitive::Terminate()
 {
-    VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
+    if (_vertexBuffer) {
+        _vertexBuffer->Terminate();
+    }
+
+    if (_indexBuffer) {
+        _indexBuffer->Terminate();
+    }
 }
 
+DUSK_VULKAN_API
 bool VulkanPrimitive::Load(const std::unique_ptr<PrimitiveData>& data)
 {
     bool result;
@@ -54,6 +61,7 @@ bool VulkanPrimitive::Load(const std::unique_ptr<PrimitiveData>& data)
     return true;
 }
 
+DUSK_VULKAN_API
 void VulkanPrimitive::GenerateCommands(VkCommandBuffer vkCommandBuffer)
 {
     // TODO: Test moving index buffer inside of other if _indexed check

@@ -47,7 +47,7 @@ public:
 
     std::shared_ptr<Mesh> CreateMesh() override;
 
-    std::unique_ptr<Primitive> CreatePrimitive() override;
+    std::shared_ptr<Primitive> CreatePrimitive() override;
 
 private:
 
@@ -57,8 +57,9 @@ private:
 
     SDL_GLContext _glContext = nullptr;
 
-    std::vector<std::weak_ptr<Shader>> _shaders;
+    std::vector<std::weak_ptr<Shader>> _shaderList;
 
+    // TODO: Move to base
     std::shared_ptr<Buffer> _shaderGlobalsBuffer;
     
 }; // class OpenGLGraphicsDriver

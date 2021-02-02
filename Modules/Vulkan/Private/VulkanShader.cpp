@@ -9,6 +9,13 @@
 namespace Dusk::Vulkan {
 
 DUSK_VULKAN_API
+void VulkanShader::Terminate()
+{
+    auto gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
+    vkDestroyShaderModule(gfx->GetDevice(), _shaderModule, nullptr);
+}
+
+DUSK_VULKAN_API
 bool VulkanShader::LoadFromFiles(const std::vector<string>& filenames, bool useAssetPath /*= true*/)
 {
     DuskBenchmarkStart();
@@ -77,8 +84,7 @@ bool VulkanShader::LoadSPV(const string& filename, bool useAssetPath)
         .pCode = reinterpret_cast<const uint32_t *>(data.data()),
     };
 
-    VkShaderModule shaderModule;
-    if (vkCreateShaderModule(gfx->GetDevice(), &shaderModuleCreateInfo, nullptr, &shaderModule) != VK_SUCCESS) {
+    if (vkCreateShaderModule(gfx->GetDevice(), &shaderModuleCreateInfo, nullptr, &_shaderModule) != VK_SUCCESS) {
         DuskLogError("Failed to create shader module");
         return false;
     }
@@ -88,7 +94,7 @@ bool VulkanShader::LoadSPV(const string& filename, bool useAssetPath)
         .pNext = nullptr,
         .flags = 0,
         .stage = type,
-        .module = shaderModule, // This conflicts with the `module` keyword in C++20
+        .module = _shaderModule, // This conflicts with the `module` keyword in C++20
         .pName = "main", // TODO: Update
         .pSpecializationInfo = nullptr,
     };

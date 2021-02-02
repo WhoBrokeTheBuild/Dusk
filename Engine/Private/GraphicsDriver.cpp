@@ -38,6 +38,18 @@ void GraphicsDriver::InitializeRenderContext()
 }
 
 DUSK_ENGINE_API
+void GraphicsDriver::InitializeConstantBuffers()
+{
+    _shaderGlobalsBuffer = CreateBuffer();
+    _shaderGlobalsBuffer->Initialize(
+        sizeof(ShaderGlobals),
+        nullptr,
+        BufferUsage::Constant,
+        MemoryUsage::UploadOften
+    );
+}
+
+DUSK_ENGINE_API
 void GraphicsDriver::Render()
 {
     UpdateContext * updateCtx = GetUpdateContext();
@@ -66,6 +78,8 @@ void GraphicsDriver::Render()
     ++globals->FrameCount;
     globals->TotalTime = (float)_updateContext->GetTotalDuration().count() / 1000.0f;
     globals->FrameSpeedRatio = _updateContext->GetFrameSpeedRatio();
+
+    _shaderGlobalsBuffer->WriteTo(0, sizeof(ShaderGlobals), reinterpret_cast<uint8_t *>(globals));
 }
 
 DUSK_ENGINE_API

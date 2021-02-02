@@ -9,7 +9,7 @@ namespace Dusk::Vulkan {
 
 #define DUSK_VULKAN_SHADER(x) (dynamic_cast<Dusk::Vulkan::VulkanShader *>(x))
 
-class DUSK_VULKAN_API VulkanShader : public Dusk::Shader
+class DUSK_VULKAN_API VulkanShader : public Shader
 {
 public:
 
@@ -18,6 +18,8 @@ public:
     VulkanShader() = default;
 
     virtual ~VulkanShader() = default;
+
+    void Terminate() override;
 
     bool LoadFromFiles(const std::vector<string>& filenames, bool useAssetPath = true) override;
 
@@ -30,6 +32,8 @@ private:
     bool LoadSPV(const string& filename, bool useAssetPath);
 
     VkShaderStageFlagBits GetVkShaderType(const string& filename);
+
+    VkShaderModule _shaderModule;
 
     std::vector<VkPipelineShaderStageCreateInfo> _shaderStages;
 

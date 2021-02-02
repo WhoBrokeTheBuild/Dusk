@@ -19,7 +19,7 @@ struct Vertex
     glm::vec2 TexCoord1;
     glm::vec2 TexCoord2;
 
-    uint16_t Joints[4];
+    uint32_t Joints[4];
     float Weights[4];
     
 }; // struct Vertex

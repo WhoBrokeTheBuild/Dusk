@@ -93,6 +93,9 @@ void run()
 
     // auto pipeline = gfx->CreatePipeline(shader);
 
+    // Force ResetSwapChain
+    gfx->SetWindowSize({ 1024, 768 });
+
     Dusk::ScriptConsole::Initialize();
 
     Dusk::Run([&]() {

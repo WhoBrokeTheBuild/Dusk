@@ -49,7 +49,7 @@ public:
 
     std::shared_ptr<Mesh> CreateMesh() override;
     
-    std::unique_ptr<Primitive> CreatePrimitive() override;
+    std::shared_ptr<Primitive> CreatePrimitive() override;
 
     inline VkDevice GetDevice() const {
         return _vkDevice;
@@ -57,6 +57,10 @@ public:
 
     inline VmaAllocator GetAllocator() const {
         return _vmaAllocator;
+    }
+
+    inline VkDescriptorPool GetDescriptorPool() const {
+        return _vkDescriptorPool;
     }
 
     inline VkExtent2D GetSwapChainExtent() const {
@@ -77,11 +81,13 @@ public:
 
     bool CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
+    bool CreateDescriptorSet(VkDescriptorSet * descriptorSet);
+
 private:
 
     bool IsDeviceSuitable(const VkPhysicalDevice device);
 
-    std::vector<const char *> GetRequiredDeviceLayers();
+    std::vector<const char *> GetRequiredLayers();
 
     std::vector<const char *> GetRequiredDeviceExtensions();
 
@@ -207,11 +213,17 @@ private:
 
     VkPipelineLayout _vkPipelineLayout = nullptr;
 
-    std::vector<VkDescriptorSet> _vkDescriptorSets;
-
     int _currentFrame = 0;
 
-    std::vector<std::shared_ptr<Pipeline>> _pipelines;
+
+
+    std::vector<std::shared_ptr<Shader>> _shaderList;
+
+    std::vector<std::shared_ptr<Mesh>> _meshList;
+
+    std::vector<std::shared_ptr<Primitive>> _primitiveList;
+
+    std::vector<std::shared_ptr<Pipeline>> _pipelineList;
 
 
 

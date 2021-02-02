@@ -169,7 +169,7 @@ DUSK_OPENGL_API
 std::shared_ptr<Shader> OpenGLGraphicsDriver::CreateShader()
 {
     auto shader = std::shared_ptr<Shader>(New OpenGLShader());
-    _shaders.push_back(shader);
+    _shaderList.push_back(shader);
     return shader;
 }
 
@@ -180,9 +180,9 @@ std::shared_ptr<Mesh> OpenGLGraphicsDriver::CreateMesh()
 }
 
 DUSK_OPENGL_API
-std::unique_ptr<Primitive> OpenGLGraphicsDriver::CreatePrimitive()
+std::shared_ptr<Primitive> OpenGLGraphicsDriver::CreatePrimitive()
 {
-    return std::unique_ptr<Primitive>(New OpenGLPrimitive());
+    return std::shared_ptr<Primitive>(New OpenGLPrimitive());
 }
 
 void GLAPIENTRY

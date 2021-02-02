@@ -204,7 +204,7 @@ bool VulkanPipeline::Initialize()
         VkVertexInputAttributeDescription {
             .location = GetVertexAttributeLocation(VertexAttribute::Joints),
             .binding = 0,
-            .format = VK_FORMAT_R16G16B16A16_UINT,
+            .format = VK_FORMAT_R32G32B32A32_UINT,
             .offset = 0,
         },
         VkVertexInputAttributeDescription {

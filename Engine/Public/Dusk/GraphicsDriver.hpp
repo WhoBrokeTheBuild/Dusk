@@ -48,6 +48,8 @@ public:
 
     virtual void InitializeRenderContext();
 
+    virtual void InitializeConstantBuffers();
+
     virtual void SetWindowTitle(const string& title) {
         _windowTitle = title;
         UpdateWindowTitle(title);
@@ -96,13 +98,17 @@ public:
 
     virtual std::shared_ptr<Mesh> CreateMesh() = 0;
 
-    virtual std::unique_ptr<Primitive> CreatePrimitive() = 0;
+    virtual std::shared_ptr<Primitive> CreatePrimitive() = 0;
 
     virtual UpdateContext * GetUpdateContext();
 
     virtual RenderContext * GetRenderContext();
 
     Event<Dusk::WindowResizedEventData> WindowResizedEvent;
+
+    std::shared_ptr<Buffer> GetShaderGlobalsBuffer() {
+        return _shaderGlobalsBuffer;
+    }
 
 protected:
 
@@ -127,6 +133,8 @@ protected:
     std::unique_ptr<RenderContext> _renderContext;
 
     unsigned _backbufferCount = 2;
+
+    std::shared_ptr<Buffer> _shaderGlobalsBuffer;
 
 }; // class GraphicsDriver
 

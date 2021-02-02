@@ -30,6 +30,8 @@ public:
 
     virtual ~Shader() = default;
 
+    virtual void Terminate() { }
+
     virtual bool LoadFromFiles(const std::vector<string>& filenames, bool useAssetPath = true) = 0;
 
     // GetSize()

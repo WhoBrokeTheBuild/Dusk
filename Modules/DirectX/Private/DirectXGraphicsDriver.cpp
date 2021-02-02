@@ -156,7 +156,7 @@ std::shared_ptr<Shader> DirectXGraphicsDriver::CreateShader()
     return std::shared_ptr<Shader>(New DirectXShader());
 }
 
-std::unique_ptr<Primitive> DirectXGraphicsDriver::CreatePrimitive()
+std::shared_ptr<Primitive> DirectXGraphicsDriver::CreatePrimitive()
 {
     return nullptr;
     // return std::unique_ptr<Mesh>(New DirectXPrimitive());

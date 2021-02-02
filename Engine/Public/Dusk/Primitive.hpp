@@ -33,6 +33,8 @@ public:
 
     virtual ~Primitive() = default;
 
+    virtual void Terminate() { }
+
     virtual bool Load(const std::unique_ptr<PrimitiveData>& data) = 0;
 
 }; // class Primitive

@@ -81,7 +81,7 @@ public:
         return std::make_shared<MockMesh>();
     }
 
-    std::unique_ptr<Primitive> CreatePrimitive() override {
+    std::shared_ptr<Primitive> CreatePrimitive() override {
         return std::make_unique<MockPrimitive>();
     }
 

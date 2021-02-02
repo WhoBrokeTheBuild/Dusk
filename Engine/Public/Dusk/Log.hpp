@@ -155,6 +155,7 @@ inline void Log(LogLevel level, const char * format, Args... args)
         const auto& logFiles = GetAllLogFiles();
         for (FILE * file : logFiles) {
             fprintf(file, format, LogWrap(args)...);
+            fflush(file);
         }
 
     #pragma clang diagnostic pop

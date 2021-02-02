@@ -20,9 +20,7 @@ public:
 
     VulkanBuffer() = default;
 
-    virtual inline ~VulkanBuffer() {
-        Terminate();
-    };
+    virtual inline ~VulkanBuffer() = default;
 
     bool Initialize(size_t size, uint8_t * data, BufferUsage bufferUsage, MemoryUsage memoryUsage) override;
 

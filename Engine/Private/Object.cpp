@@ -11,9 +11,9 @@ struct ObjectAllocation
 
     size_t Size;
 
-    std::string Filename;
+    string Filename;
 
-    std::string ClassID;
+    string ClassID;
 };
 
 bool _trackingAllocations = false;

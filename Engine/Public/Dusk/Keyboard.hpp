@@ -2,8 +2,7 @@
 #define DUSK_KEYBOARD_HPP
 
 #include <Dusk/Config.hpp>
-
-#include <string>
+#include <Dusk/String.hpp>
 
 namespace Dusk {
 
@@ -130,7 +129,7 @@ enum class KeyboardKey
 
 }; // enum KeyboardKey
 
-static inline std::string GetKeyboardKeyName(KeyboardKey key)
+static inline string GetKeyboardKeyName(KeyboardKey key)
 {
     switch (key) {
     case KeyboardKey::A:
@@ -368,7 +367,7 @@ static inline std::string GetKeyboardKeyName(KeyboardKey key)
     default: ;
     }
 
-    return std::string();
+    return string();
 };
 
 } // namespace Dusk

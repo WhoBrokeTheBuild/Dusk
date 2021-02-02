@@ -4,8 +4,7 @@
 #include <Dusk/Config.hpp>
 #include <Dusk/Object.hpp>
 #include <Dusk/Math.hpp>
-
-#include <string>
+#include <Dusk/String.hpp>
 
 namespace Dusk {
 
@@ -44,7 +43,7 @@ public:
 
 }; // class TextureData
 
-inline std::string TextureDataTypeToString(TextureDataType textureDataType)
+inline string TextureDataTypeToString(TextureDataType textureDataType)
 {
     switch (textureDataType) {
         case TextureDataType::UnsignedByte:

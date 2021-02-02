@@ -19,7 +19,7 @@ public:
 
     virtual ~VulkanShader() = default;
 
-    bool LoadFromFiles(const std::vector<std::string>& filenames, bool useAssetPath = true) override;
+    bool LoadFromFiles(const std::vector<string>& filenames, bool useAssetPath = true) override;
 
     inline std::vector<VkPipelineShaderStageCreateInfo>& GetStages() {
         return _shaderStages;
@@ -27,9 +27,9 @@ public:
 
 private:
 
-    bool LoadSPV(const std::string& filename, bool useAssetPath);
+    bool LoadSPV(const string& filename, bool useAssetPath);
 
-    VkShaderStageFlagBits GetVkShaderType(const std::string& filename);
+    VkShaderStageFlagBits GetVkShaderType(const string& filename);
 
     std::vector<VkPipelineShaderStageCreateInfo> _shaderStages;
 

@@ -31,7 +31,7 @@ bool Mesh::Load(const std::vector<std::unique_ptr<PrimitiveData>>& data)
 }
 
 DUSK_ENGINE_API
-std::shared_ptr<Mesh> LoadMeshFromFile(const std::string& filename, bool useAssetPath /*= true*/)
+std::shared_ptr<Mesh> LoadMeshFromFile(const string& filename, bool useAssetPath /*= true*/)
 {
     GraphicsDriver * gfx = GetGraphicsDriver();
 

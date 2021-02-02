@@ -5,6 +5,7 @@
 #include <Dusk/Object.hpp>
 #include <Dusk/Math.hpp>
 #include <Dusk/Vertex.hpp>
+#include <Dusk/String.hpp>
 
 #include <memory>
 
@@ -36,7 +37,7 @@ public:
 
 }; // class Primitive
 
-inline std::string PrimitiveTopologyToString(PrimitiveTopology primitiveTopology)
+inline string PrimitiveTopologyToString(PrimitiveTopology primitiveTopology)
 {
     switch (primitiveTopology) {
     case PrimitiveTopology::PointList:

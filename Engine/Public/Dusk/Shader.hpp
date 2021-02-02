@@ -3,8 +3,8 @@
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Object.hpp>
+#include <Dusk/String.hpp>
 
-#include <string>
 #include <vector>
 
 namespace Dusk {
@@ -30,7 +30,7 @@ public:
 
     virtual ~Shader() = default;
 
-    virtual bool LoadFromFiles(const std::vector<std::string>& filenames, bool useAssetPath = true) = 0;
+    virtual bool LoadFromFiles(const std::vector<string>& filenames, bool useAssetPath = true) = 0;
 
     // GetSize()
     // SetPreprocessorDefines()
@@ -38,7 +38,7 @@ public:
 
 };
 
-inline std::string ShaderStageToString(ShaderStage shaderStage)
+inline string ShaderStageToString(ShaderStage shaderStage)
 {
     switch (shaderStage) {
         case ShaderStage::Vertex:

@@ -34,15 +34,15 @@ public:
     {
         const auto& assetPathList = GetAssetPathList();
 
-        std::string filename = ConvertWideStringToUTF8(wfilename);
+        string filename = ConvertWideStringToUTF8(wfilename);
         
         std::ifstream file;
 
         for (const auto& path : assetPathList) {
-            const std::string& fullPath = path + "Shaders" + DUSK_PATH_SLASH + filename;
+            Path fullPath = path / "Shaders" / filename;
             DuskLogVerbose("Checking shader include '%s'", fullPath);
             
-            file.open(fullPath);
+            file.open(fullPath.ToString());
             if (file.is_open()) {
                 break;
             }
@@ -67,14 +67,14 @@ private:
 }; // struct IncludeHandler
 
 DUSK_DIRECTX_API
-bool DirectXShader::LoadFromFiles(const std::vector<std::string>& filenames)
+bool DirectXShader::LoadFromFiles(const std::vector<string>& filenames)
 {
     DuskBenchmarkStart();
 
     DirectXGraphicsDriver * gfx = DUSK_DIRECTX_GRAPHICS_DRIVER(GetGraphicsDriver());
 
     for (const auto& filename : filenames) {
-        const std::string& ext = GetExtension(filename);
+        const string& ext = GetExtension(filename);
 
         if (ext == "cso") {
             if (LoadCSO(filename)) {
@@ -110,7 +110,7 @@ bool DirectXShader::LoadFromFiles(const std::vector<std::string>& filenames)
 }
 
 DUSK_DIRECTX_API
-bool DirectXShader::LoadCSO(const std::string& filename)
+bool DirectXShader::LoadCSO(const string& filename)
 {
     DuskLogVerbose("Looking for Compiled Shader Object '%s'", filename);
 
@@ -124,10 +124,10 @@ bool DirectXShader::LoadCSO(const std::string& filename)
     std::ifstream file;
 
     for (const auto& path : assetPathList) {
-        const std::string& fullPath = path + "Shaders" + DUSK_PATH_SLASH + filename;
+        Path fullPath = path / "Shaders" / filename;
         DuskLogVerbose("Checking '%s'", fullPath);
         
-        file.open(fullPath, std::ios::binary | std::ios::ate);
+        file.open(fullPath.ToString(), std::ios::binary | std::ios::ate);
         if (file.is_open()) {
             break;
         }
@@ -178,7 +178,7 @@ bool DirectXShader::LoadCSO(const std::string& filename)
 }
 
 DUSK_DIRECTX_API
-bool DirectXShader::LoadHLSL(const std::string& filename)
+bool DirectXShader::LoadHLSL(const string& filename)
 {
     DuskLogVerbose("Looking for HLSL shader '%s'", filename);
 
@@ -189,10 +189,10 @@ bool DirectXShader::LoadHLSL(const std::string& filename)
     const auto& assetPathList = GetAssetPathList();
 
     for (const auto& path : assetPathList) {
-        const std::string& fullPath = path + "Shaders" + DUSK_PATH_SLASH + filename;
+        Path fullPath = path / "Shaders" / filename;
         DuskLogVerbose("Checking '%s'", fullPath);
         
-        file.open(fullPath, std::ios::binary);
+        file.open(fullPath.ToString(), std::ios::binary);
         if (file.is_open()) {
             break;
         }
@@ -344,12 +344,12 @@ D3D12_SHADER_BYTECODE DirectXShader::GetShaderBytecode(const ShaderStage& stage)
 }
 
 DUSK_DIRECTX_API
-std::optional<ShaderStage> GetShaderStageFromFilename(const std::string& filename)
+std::optional<ShaderStage> GetShaderStageFromFilename(const string& filename)
 {
-    std::string ext = GetExtension(filename);
+    string ext = GetExtension(filename);
     if (ext == "cso" || ext == "hlsl") {
         size_t pivot = filename.find_last_of('.');
-        if (pivot == std::string::npos) {
+        if (pivot == string::npos) {
             return {};
         }
         ext = GetExtension(filename.substr(0, pivot));

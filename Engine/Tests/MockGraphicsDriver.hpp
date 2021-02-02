@@ -18,7 +18,7 @@ class MockShader : public Shader
 {
 public:
 
-    MOCK_METHOD1(LoadFromFiles, bool(const std::vector<std::string>&));
+    MOCK_METHOD1(LoadFromFiles, bool(const std::vector<string>&));
 
 };
 
@@ -54,8 +54,8 @@ public:
     MOCK_METHOD0(Initialize, bool());
     MOCK_METHOD0(Terminate, void());
 
-    MOCK_METHOD1(SetWindowTitle, void(const std::string&));
-    MOCK_METHOD0(GetWindowTitle, std::string());
+    MOCK_METHOD1(SetWindowTitle, void(const string&));
+    MOCK_METHOD0(GetWindowTitle, string());
 
     MOCK_METHOD1(SetWindowSize, void(const ivec2&));
     MOCK_METHOD0(GetWindowSize, ivec2());

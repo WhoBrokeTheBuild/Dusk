@@ -9,7 +9,7 @@
 namespace Dusk::Vulkan {
 
 DUSK_VULKAN_API
-bool VulkanShader::LoadFromFiles(const std::vector<std::string>& filenames, bool useAssetPath /*= true*/)
+bool VulkanShader::LoadFromFiles(const std::vector<string>& filenames, bool useAssetPath /*= true*/)
 {
     DuskBenchmarkStart();
 
@@ -27,7 +27,7 @@ bool VulkanShader::LoadFromFiles(const std::vector<std::string>& filenames, bool
 }
 
 DUSK_VULKAN_API
-bool VulkanShader::LoadSPV(const std::string& filename, bool useAssetPath)
+bool VulkanShader::LoadSPV(const string& filename, bool useAssetPath)
 {
     VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
 
@@ -37,10 +37,10 @@ bool VulkanShader::LoadSPV(const std::string& filename, bool useAssetPath)
 
     if (useAssetPath) {
         for (const auto& path : assetPaths) {
-            const std::string& fullPath = path + "Shaders" + DUSK_PATH_SLASH + filename;
+            Path fullPath = path / "Shaders" / filename;
             DuskLogVerbose("Checking '%s'", fullPath);
 
-            file.open(fullPath, std::ios::binary);
+            file.open(fullPath.ToString(), std::ios::binary);
             if (file.is_open()) {
                 break;
             }
@@ -99,11 +99,11 @@ bool VulkanShader::LoadSPV(const std::string& filename, bool useAssetPath)
 }
 
 DUSK_VULKAN_API
-VkShaderStageFlagBits VulkanShader::GetVkShaderType(const std::string& filename)
+VkShaderStageFlagBits VulkanShader::GetVkShaderType(const string& filename)
 {
-    std::string ext = GetExtension(filename);
+    string ext = GetExtension(filename);
     size_t pivot = filename.find_last_of('.');
-    if (pivot == std::string::npos) {
+    if (pivot == string::npos) {
         return VK_SHADER_STAGE_ALL; // Invalid
     }
     ext = GetExtension(filename.substr(0, pivot));

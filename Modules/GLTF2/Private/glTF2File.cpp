@@ -9,7 +9,7 @@
 
 namespace Dusk::GLTF2 {
 
-bool glTF2File::LoadFromFile(const std::string& filename)
+bool glTF2File::LoadFromFile(const string& filename)
 {
     DuskBenchmarkStart();
 
@@ -93,14 +93,14 @@ bool glTF2File::LoadFromFile(const std::string& filename)
     const auto VERSION_PATH = json::json_pointer("/asset/version");
 
     if (JSON.contains(VERSION_PATH)) {
-        auto version = JSON[VERSION_PATH].get<std::string>();
+        auto version = JSON[VERSION_PATH].get<string>();
         DuskLogVerbose("glTF2 Version: %s", version);
     }
 
     const auto GENERATOR_PATH = json::json_pointer("/asset/generator");
 
     if (JSON.contains(GENERATOR_PATH)) {
-        auto generator = JSON[GENERATOR_PATH].get<std::string>();
+        auto generator = JSON[GENERATOR_PATH].get<string>();
         DuskLogVerbose("glTF2 Generator: %s", generator);
     }
 
@@ -154,7 +154,7 @@ bool glTF2File::LoadBuffers()
             else {
                 DuskLogVerbose("Loading glTF2 buffer from '%s'", uri);
 
-                std::string path = BaseDir + DUSK_PATH_SLASH + uri;
+                string path = BaseDir + DUSK_PATH_SLASH + uri;
                 std::ifstream file(path, std::ios::in | std::ios::binary);
                 if (!file.is_open()) {
                     DuskLogError("Failed to read glTF2 buffer from '%s'", uri);
@@ -211,7 +211,7 @@ bool glTF2File::LoadAccessors()
                 object.value<int>("bufferView", -1),
                 object.value<size_t>("byteOffset", 0),
                 object.value<size_t>("count", 0),
-                object.value<std::string>("type", ""),
+                object.value<string>("type", ""),
                 object.value<GLenum>("componentType", GL_INVALID_ENUM),
                 object.value<bool>("normalized", false),
             });
@@ -326,7 +326,7 @@ bool glTF2File::LoadTextures()
                 Textures.push_back(texture);
             }
             else {
-                std::string path = BaseDir + DUSK_PATH_SLASH + image.uri;
+                string path = BaseDir + DUSK_PATH_SLASH + image.uri;
                 DuskLogVerbose("Loading glTF2 texture from file: '%s'", path);
                 
                 auto texture = LoadTextureFromFile(path, false, opts);
@@ -397,8 +397,8 @@ bool glTF2File::LoadCameras()
     if (JSON.contains(CAMERAS_PATH)) {
         for (const auto& object : JSON[CAMERAS_PATH]) {
             Cameras.push_back(CameraData{
-                object.value<std::string>("name", ""),
-                object.value<std::string>("type", ""),
+                object.value<string>("name", ""),
+                object.value<string>("type", ""),
             });
             auto& camera = Cameras.back();
 

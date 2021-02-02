@@ -7,10 +7,10 @@
 #include <Dusk/Component.hpp>
 #include <Dusk/UpdateContext.hpp>
 #include <Dusk/RenderContext.hpp>
+#include <Dusk/String.hpp>
 
 #include <vector>
 #include <memory>
-#include <string>
 
 namespace Dusk {
 
@@ -35,7 +35,7 @@ public:
 
     virtual ~Entity() = default;
 
-    bool LoadFromFile(const std::string& filename);
+    bool LoadFromFile(const string& filename);
 
     void SetParent(Entity * parent);
 
@@ -51,9 +51,9 @@ public:
 
     std::vector<Component *> GetComponents() const;
 
-    void SetName(const std::string& name);
+    void SetName(const string& name);
 
-    inline std::string GetName() const {
+    inline string GetName() const {
         return _name;
     }
 
@@ -93,7 +93,7 @@ private:
 
     Entity * _parent = nullptr;
 
-    std::string _name;
+    string _name;
 
     std::vector<std::unique_ptr<Entity>> _children;
 

@@ -2,8 +2,7 @@
 #define DUSK_VERSION_HPP
 
 #include <Dusk/Config.hpp>
-
-#include <string>
+#include <Dusk/String.hpp>
 
 namespace Dusk {
 
@@ -65,7 +64,7 @@ struct DUSK_ENGINE_API Version
         return (res == 0 || res == -1);
     }
 
-    inline std::string GetString() const
+    inline string GetString() const
     {
         return std::to_string(Major) + 
             "." + 
@@ -74,7 +73,7 @@ struct DUSK_ENGINE_API Version
             std::to_string(Patch);
     }
 
-    operator std::string() const {
+    operator string() const {
         return GetString();
     }
 

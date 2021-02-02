@@ -4,6 +4,7 @@
 #include <Dusk/Config.hpp>
 #include <Dusk/Math.hpp>
 #include <Dusk/Entity.hpp>
+#include <Dusk/String.hpp>
 
 namespace Dusk {
 
@@ -112,7 +113,7 @@ private:
 
 };
 
-inline std::string CameraModeToString(CameraMode cameraMode)
+inline string CameraModeToString(CameraMode cameraMode)
 {
     switch (cameraMode) {
         case CameraMode::Perspective:

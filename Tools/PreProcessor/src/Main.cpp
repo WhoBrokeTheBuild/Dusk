@@ -15,7 +15,7 @@ const std::regex ACTOR_REGEX("DUSK_ACTOR\\((.*)\\)");
 const std::regex COMPONENT_REGEX("DUSK_COMPONENT\\((.*)\\)");
 const std::regex PROPERTY_REGEX("DUSK_PROPERTY\\((.*)\\)\\n\\s*(.*)\\n");
 
-void CleanSlashes(std::string& path)
+void CleanSlashes(string& path)
 {
     for (unsigned int i = 0; i < path.size(); ++i)
     {
@@ -26,24 +26,24 @@ void CleanSlashes(std::string& path)
     }
 }
 
-std::string GetDirname(std::string path)
+string GetDirname(string path)
 {
     CleanSlashes(path);
     size_t pivot = path.find_last_of('/');
-    return (pivot == std::string::npos
+    return (pivot == string::npos
         ? "./"
         : path.substr(0, pivot));
 }
 
-std::string GetExtension(std::string path)
+string GetExtension(string path)
 {
     size_t pivot = path.find_last_of('.');
-    return (pivot == std::string::npos
-        ? std::string()
+    return (pivot == string::npos
+        ? string()
         : path.substr(pivot + 1));
 }
 
-std::string StringTrim(const std::string& str)
+string StringTrim(const string& str)
 {
     size_t f = 0;
     size_t b = str.size() - 1;
@@ -57,12 +57,12 @@ std::string StringTrim(const std::string& str)
     return str.substr(f, f - b);
 }
 
-std::vector<std::string> SplitString(std::string str, const char& sep)
+std::vector<string> SplitString(string str, const char& sep)
 {
-    std::vector<std::string> parts;
+    std::vector<string> parts;
 
     size_t i = str.find(sep);
-    while (i != std::string::npos) {
+    while (i != string::npos) {
         parts.push_back(str.substr(0, i));
         str = str.substr(i + 1);
         i = str.find(sep);
@@ -79,17 +79,17 @@ std::vector<std::string> SplitString(std::string str, const char& sep)
 const std::regex PROPERTY_REGEX(R"#(DUSK_PROPERTY\((.*)\)\n\s*(.*)\n)#");
 const std::regex SHADER_REGEX  (R"#(DUSK_SHADER\((.*)\))#");
 
-void FindProperties(const std::string& filename, std::string buffer)
+void FindProperties(const string& filename, string buffer)
 {
     std::smatch match;
-    std::string remaining = buffer;
+    string remaining = buffer;
     while (std::regex_search(remaining, match, PROPERTY_REGEX)) {
         if (match.size() == 3) {
-            std::stringstream paramss(match[1].str());
-            std::stringstream defnss(match[2].str());
+            stringstream paramss(match[1].str());
+            stringstream defnss(match[2].str());
 
-            std::unordered_map<std::string, std::string> params;
-            std::string param;
+            std::unordered_map<string, string> params;
+            string param;
             while (getline(paramss, param, ",")) {
                 char * pch = param.c_str();
                 while (*pch == ' ' || *pch == '\t') ++pch;
@@ -102,13 +102,13 @@ void FindProperties(const std::string& filename, std::string buffer)
 
 
             size_t lastSpace = defn.rfind(' ');
-            if (lastSpace == std::string::npos) {
+            if (lastSpace == string::npos) {
                 lastSpace = defn.rfind('\t');
             }
-            if (lastSpace != std::string::npos) {
-                std::string varName = defn.substr(lastSpace + 1);
+            if (lastSpace != string::npos) {
+                string varName = defn.substr(lastSpace + 1);
                 size_t semicolon = varName.rfind(';');
-                if (semicolon != std::string::npos) {
+                if (semicolon != string::npos) {
                     varName = varName.substr(0, semicolon);
                 }
 
@@ -120,10 +120,10 @@ void FindProperties(const std::string& filename, std::string buffer)
     }
 }
 
-void FindActors(const std::string& filename, std::string buffer)
+void FindActors(const string& filename, string buffer)
 {
     std::smatch match;
-    std::string remaining = buffer;
+    string remaining = buffer;
     while (std::regex_search(remaining, match, ACTOR_REGEX)) {
         if (match.size() == 2) {
             printf("dusk::Actor::RegisterSubclass<%s>(\"%s\");\n", match[1].str().c_str(), match[1].str().c_str());
@@ -136,10 +136,10 @@ void FindActors(const std::string& filename, std::string buffer)
 
 */
 
-void PreProcess(const std::string& filename, nlohmann::json& data)
+void PreProcess(const string& filename, nlohmann::json& data)
 {
     std::ifstream file(filename);
-    std::string buffer((std::istreambuf_iterator<char>(file)),
+    string buffer((std::istreambuf_iterator<char>(file)),
                        std::istreambuf_iterator<char>());
     file.close();
 
@@ -148,7 +148,7 @@ void PreProcess(const std::string& filename, nlohmann::json& data)
 
     for (; sceneIt != end; ++sceneIt) {
         std::smatch match = *sceneIt;
-        std::string name = match[1].str();
+        string name = match[1].str();
 
         data["Scenes"].push_back({
             { "Name", name },
@@ -157,7 +157,7 @@ void PreProcess(const std::string& filename, nlohmann::json& data)
 
 }
 
-void GenerateCache(std::string outputFile, std::string projectName, std::string projectFile, std::vector<std::string> sourceFiles)
+void GenerateCache(string outputFile, string projectName, string projectFile, std::vector<string> sourceFiles)
 {
     json data;
     data["ProjectName"] = projectName;
@@ -169,9 +169,9 @@ void GenerateCache(std::string outputFile, std::string projectName, std::string 
     data["Cameras"] = nlohmann::json::array();
     data["Lights"] = nlohmann::json::array();
 
-    std::string dir = GetDirname(projectFile);
+    string dir = GetDirname(projectFile);
 
-    for (std::string& source : sourceFiles) {
+    for (string& source : sourceFiles) {
         PreProcess(dir + "/" + source, data);
     }
 
@@ -179,7 +179,7 @@ void GenerateCache(std::string outputFile, std::string projectName, std::string 
     file << std::setw(4) << data << "\n";
 }
 
-void GenerateEngineMain(std::string outputFile, std::string cacheFile)
+void GenerateEngineMain(string outputFile, string cacheFile)
 {
     json data;
     std::ifstream cache(cacheFile);
@@ -189,13 +189,13 @@ void GenerateEngineMain(std::string outputFile, std::string cacheFile)
     file << "#include <dusk/Main.hpp>\n";
 
     for (auto inc : data["Files"]) {
-        std::string tmp = inc.get<std::string>();
+        string tmp = inc.get<string>();
         if (GetExtension(tmp) == "hpp") {
             file << "#include <" << tmp << ">\n";
         }
     }
 
-    file << "const std::string PROJECT_FILENAME = \"" << data["ProjectFile"].get<std::string>() << "\";\n";
+    file << "const string PROJECT_FILENAME = \"" << data["ProjectFile"].get<string>() << "\";\n";
     file << R"#(
 int main(int argc, char** argv) {
     dusk::SetAssetPath(DUSK_ASSET_PATH);
@@ -203,9 +203,9 @@ int main(int argc, char** argv) {
 )#";
 
     for (auto type : data["Scenes"]) {
-        std::string typeName = type["Name"].get<std::string>();
+        string typeName = type["Name"].get<string>();
 
-        file << "dusk::Scene::RegisterType(\"" << typeName << "\", [](const std::string& id, const std::string& filename) -> dusk::Scene * { return static_cast<dusk::Scene*>(new " << typeName << "(id, filename)); });\n";
+        file << "dusk::Scene::RegisterType(\"" << typeName << "\", [](const string& id, const string& filename) -> dusk::Scene * { return static_cast<dusk::Scene*>(new " << typeName << "(id, filename)); });\n";
     }
 
     file << R"#(
@@ -217,7 +217,7 @@ int main(int argc, char** argv) {
 )#";
 }
 
-void GenerateEditorMain(std::string outputFile, std::string cacheFile)
+void GenerateEditorMain(string outputFile, string cacheFile)
 {
     json data;
     std::ifstream cache(cacheFile);
@@ -229,16 +229,16 @@ void GenerateEditorMain(std::string outputFile, std::string cacheFile)
 
     // TODO: Just headers
     for (auto inc : data["Files"]) {
-        std::string tmp = inc.get<std::string>();
+        string tmp = inc.get<string>();
         if (GetExtension(tmp) == "hpp") {
             file << "#include <" << tmp << ">\n";
         }
     }
 
-    file << "const std::string PROJECT_FILENAME = \"" << data["ProjectFile"].get<std::string>() << "\";\n";
+    file << "const string PROJECT_FILENAME = \"" << data["ProjectFile"].get<string>() << "\";\n";
 
 #ifdef __linux__
-    file << "const std::string PROJECT_LIBRARY = \"./lib" << data["ProjectName"].get<std::string>() << "-Library.so\";\n";
+    file << "const string PROJECT_LIBRARY = \"./lib" << data["ProjectName"].get<string>() << "-Library.so\";\n";
     file << R"#(
 #include <dlfcn.h>
 void * libraryHandle = nullptr;
@@ -280,9 +280,9 @@ int main(int argc, char** argv) {
 )#";
 
     for (auto type : data["Scenes"]) {
-        std::string typeName = type["Name"].get<std::string>();
+        string typeName = type["Name"].get<string>();
 
-        file << "dusk::Scene::RegisterType(\"" << typeName << "\", [](const std::string& id, const std::string& filename) -> dusk::Scene * { return static_cast<dusk::Scene*>(new " << typeName << "(id, filename)); });\n";
+        file << "dusk::Scene::RegisterType(\"" << typeName << "\", [](const string& id, const string& filename) -> dusk::Scene * { return static_cast<dusk::Scene*>(new " << typeName << "(id, filename)); });\n";
     }
 
 #if defined(WIN32)
@@ -328,7 +328,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    std::string command = argv[1];
+    string command = argv[1];
 
     if (command == "cache") {
         if (argc < 5) {
@@ -336,10 +336,10 @@ int main(int argc, char** argv)
             return 1;
         }
 
-        std::string outputFile(argv[2]);
-        std::string projectName(argv[3]);
-        std::string projectFile(argv[4]);
-        std::vector<std::string> sourceFiles;
+        string outputFile(argv[2]);
+        string projectName(argv[3]);
+        string projectFile(argv[4]);
+        std::vector<string> sourceFiles;
         for (int i = 5; i < argc; ++i) {
             sourceFiles.push_back(argv[i]);
         }
@@ -352,8 +352,8 @@ int main(int argc, char** argv)
             return 1;
         }
 
-        std::string outputFile(argv[2]);
-        std::string cacheFile(argv[3]);
+        string outputFile(argv[2]);
+        string cacheFile(argv[3]);
 
         GenerateEngineMain(outputFile, cacheFile);
     }
@@ -363,8 +363,8 @@ int main(int argc, char** argv)
             return 1;
         }
 
-        std::string outputFile(argv[2]);
-        std::string cacheFile(argv[3]);
+        string outputFile(argv[2]);
+        string cacheFile(argv[3]);
 
         GenerateEditorMain(outputFile, cacheFile);
     }

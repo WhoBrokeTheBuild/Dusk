@@ -26,7 +26,7 @@ public:
 
 protected:
 
-    void UpdateWindowTitle(const std::string& title) override;
+    void UpdateWindowTitle(const string& title) override;
 
     void UpdateWindowSize(const ivec2& size) override;
 

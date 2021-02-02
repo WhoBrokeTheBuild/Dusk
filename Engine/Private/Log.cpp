@@ -7,7 +7,7 @@ namespace Dusk {
 static std::vector<FILE *> _LogFiles;
 
 DUSK_ENGINE_API
-bool AddLogFile(const std::string& filename)
+bool AddLogFile(const string& filename)
 {
     FILE * file = nullptr;
     file = fopen(filename.c_str(), "wt");

@@ -4,6 +4,7 @@
 #include <Dusk/Config.hpp>
 #include <Dusk/Object.hpp>
 #include <Dusk/Mesh.hpp>
+#include <Dusk/String.hpp>
 
 #include <memory>
 #include <vector>
@@ -20,15 +21,15 @@ public:
 
     virtual ~MeshImporter() = default;
 
-    virtual std::vector<std::unique_ptr<PrimitiveData>> LoadFromFile(const std::string& filename, bool useAssetPath = true) = 0;
+    virtual std::vector<std::unique_ptr<PrimitiveData>> LoadFromFile(const string& filename, bool useAssetPath = true) = 0;
 
 }; // class MeshImporter
 
 DUSK_ENGINE_API
-void AddMeshImporter(const std::string& id, std::unique_ptr<MeshImporter> importer);
+void AddMeshImporter(const string& id, std::unique_ptr<MeshImporter> importer);
 
 DUSK_ENGINE_API
-void RemoveMeshImporter(const std::string& id);
+void RemoveMeshImporter(const string& id);
 
 DUSK_ENGINE_API
 const std::vector<MeshImporter *>& GetAllMeshImporters();

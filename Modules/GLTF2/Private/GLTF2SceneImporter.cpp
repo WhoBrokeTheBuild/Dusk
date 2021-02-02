@@ -4,7 +4,7 @@
 
 namespace Dusk::GLTF2 {
 
-bool GLTF2SceneImporter::LoadFromFile(Entity * root, const std::string& filename)
+bool GLTF2SceneImporter::LoadFromFile(Entity * root, const string& filename)
 {
     glTF2File file;
     return file.LoadFromFile(filename);

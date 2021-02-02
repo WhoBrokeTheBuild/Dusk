@@ -11,6 +11,7 @@
 #include <Dusk/Scene.hpp>
 #include <Dusk/Camera.hpp>
 #include <Dusk/MeshImporter.hpp>
+#include <Dusk/Path.hpp>
 
 #include <Dusk/Event.hpp>
 

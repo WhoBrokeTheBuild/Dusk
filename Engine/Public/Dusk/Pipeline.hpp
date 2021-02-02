@@ -5,6 +5,7 @@
 #include <Dusk/Object.hpp>
 #include <Dusk/Shader.hpp>
 #include <Dusk/Primitive.hpp>
+#include <Dusk/String.hpp>
 
 #include <memory>
 
@@ -174,7 +175,7 @@ protected:
 
 }; // class Pipeline
 
-inline std::string FrontFaceToString(FrontFace frontFace)
+inline string FrontFaceToString(FrontFace frontFace)
 {
     switch (frontFace) {
     case FrontFace::Clockwise:
@@ -186,7 +187,7 @@ inline std::string FrontFaceToString(FrontFace frontFace)
     return "Unknown";
 }
 
-inline std::string CullModeToString(CullMode cullMode)
+inline string CullModeToString(CullMode cullMode)
 {
     switch (cullMode) {
     case CullMode::None:
@@ -200,7 +201,7 @@ inline std::string CullModeToString(CullMode cullMode)
     return "Unknown";
 }
 
-inline std::string CullModeToString(FillMode fillMode)
+inline string CullModeToString(FillMode fillMode)
 {
     switch (fillMode) {
     case FillMode::Fill:
@@ -212,7 +213,7 @@ inline std::string CullModeToString(FillMode fillMode)
     return "Unknown";
 }
 
-inline std::string DepthBiasModeToString(DepthBiasMode depthBiasMode)
+inline string DepthBiasModeToString(DepthBiasMode depthBiasMode)
 {
     switch (depthBiasMode) {
     case DepthBiasMode::Clamp:
@@ -224,7 +225,7 @@ inline std::string DepthBiasModeToString(DepthBiasMode depthBiasMode)
     return "Unknown";
 }
 
-inline std::string BlendOperationToString(BlendOperation blendOperation)
+inline string BlendOperationToString(BlendOperation blendOperation)
 {
     switch (blendOperation) {
     case BlendOperation::Add:
@@ -242,7 +243,7 @@ inline std::string BlendOperationToString(BlendOperation blendOperation)
     return "Unknown";
 }
 
-inline std::string BlendFactorToString(BlendFactor blendFactor)
+inline string BlendFactorToString(BlendFactor blendFactor)
 {
     switch (blendFactor) {
         case BlendFactor::Zero:
@@ -280,7 +281,7 @@ inline std::string BlendFactorToString(BlendFactor blendFactor)
     return "Unknown";
 }
 
-inline std::string CompareOperationToString(CompareOperation compareOperation)
+inline string CompareOperationToString(CompareOperation compareOperation)
 {
     switch (compareOperation) {
         case CompareOperation::Never:

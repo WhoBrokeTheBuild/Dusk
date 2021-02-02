@@ -2,8 +2,7 @@
 #define DUSK_CONTROLLER_HPP
 
 #include <Dusk/Config.hpp>
-
-#include <string>
+#include <Dusk/String.hpp>
 
 namespace Dusk {
 
@@ -29,7 +28,7 @@ enum class ControllerButton
 
 }; // enum ControllerButton
 
-static inline std::string GetControllerButtonName(ControllerButton button)
+static inline string GetControllerButtonName(ControllerButton button)
 {
     switch (button) {
     case ControllerButton::A:
@@ -65,7 +64,7 @@ static inline std::string GetControllerButtonName(ControllerButton button)
     default: ;
     }
 
-    return std::string();
+    return string();
 };
 
 } // namespace Dusk

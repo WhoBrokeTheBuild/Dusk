@@ -3,8 +3,8 @@
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Version.hpp>
+#include <Dusk/String.hpp>
 
-#include <string>
 #include <functional>
 
 namespace Dusk {
@@ -25,19 +25,19 @@ DUSK_ENGINE_API
 bool Run(std::function<void()> update);
 
 DUSK_ENGINE_API
-bool RunScriptFile(const std::string& filename);
+bool RunScriptFile(const string& filename);
 
 DUSK_ENGINE_API
-bool RunScriptString(const std::string& code);
+bool RunScriptString(const string& code);
 
 DUSK_ENGINE_API
 Version GetVersion();
 
 DUSK_ENGINE_API
-void SetApplicationName(const std::string& name);
+void SetApplicationName(const string& name);
 
 DUSK_ENGINE_API
-std::string GetApplicationName();
+string GetApplicationName();
 
 DUSK_ENGINE_API
 void SetApplicationVersion(unsigned major, unsigned minor, unsigned patch);

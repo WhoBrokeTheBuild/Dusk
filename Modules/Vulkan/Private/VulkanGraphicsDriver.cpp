@@ -798,7 +798,7 @@ bool VulkanGraphicsDriver::InitLogicalDevice()
     _vkPresentQueueFamilyIndex = UINT32_MAX;
     
     for (const auto& prop : queueFamilyProps) {
-        std::string types;
+        string types;
         if (prop.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
             types += "Graphics ";
         }

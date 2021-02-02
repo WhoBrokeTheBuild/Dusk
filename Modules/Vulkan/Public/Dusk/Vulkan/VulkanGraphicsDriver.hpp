@@ -133,11 +133,11 @@ private:
 
     bool FillCommandBuffers();
 
-    std::unordered_map<std::string, VkLayerProperties> _vkAvailableLayers;
+    std::unordered_map<string, VkLayerProperties> _vkAvailableLayers;
 
-    std::unordered_map<std::string, VkExtensionProperties> _vkAvailableInstanceExtensions;
+    std::unordered_map<string, VkExtensionProperties> _vkAvailableInstanceExtensions;
 
-    std::unordered_map<std::string, VkExtensionProperties> _vkAvailableDeviceExtensions;
+    std::unordered_map<string, VkExtensionProperties> _vkAvailableDeviceExtensions;
 
     VkInstance _vkInstance = nullptr;
 

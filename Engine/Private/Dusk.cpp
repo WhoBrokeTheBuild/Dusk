@@ -39,6 +39,7 @@ bool Initialize(int argc, char ** argv)
     DuskLogVerbose("Dusk Version: %s", GetVersion().GetString());
     DuskLogVerbose("Application Name: %s", GetApplicationName());
     DuskLogVerbose("Application Version: %s", GetApplicationVersion().GetString());
+    DuskLogVerbose("Current Path: %s", Dusk::GetCurrentPath());
 
     return true;
 }
@@ -115,17 +116,17 @@ bool Run(std::function<void()> update)
 }
 
 DUSK_ENGINE_API
-bool RunScriptFile(const std::string& filename)
+bool RunScriptFile(const string& filename)
 {
     FILE * file = nullptr;
     
     const auto& assetPaths = GetAssetPathList();
 
     for (const auto& path : assetPaths) {
-        const std::string& fullPath = path + "Scripts/" + filename;
+        Path fullPath = path / "Scripts" / filename;
         DuskLogVerbose("Checking '%s'", fullPath);
 
-        file = fopen(fullPath.c_str(), "rt");
+        file = fopen(fullPath.ToCString(), "rt");
         if (file) {
             break;
         }
@@ -149,7 +150,7 @@ bool RunScriptFile(const std::string& filename)
 }
 
 DUSK_ENGINE_API
-bool RunScriptString(const std::string& code)
+bool RunScriptString(const string& code)
 {
     PyObject * pyMain = PyImport_AddModule("__main__");
     PyObject * pyMainDict = PyModule_GetDict(pyMain);
@@ -167,16 +168,16 @@ Version GetVersion()
     return Version(DUSK_VERSION_MAJOR, DUSK_VERSION_MINOR, DUSK_VERSION_PATCH);
 }
 
-static std::string _ApplicationName;
+static string _ApplicationName;
 
 DUSK_ENGINE_API
-void SetApplicationName(const std::string& name)
+void SetApplicationName(const string& name)
 {
     _ApplicationName = name;
 }
 
 DUSK_ENGINE_API
-std::string GetApplicationName()
+string GetApplicationName()
 {
     return _ApplicationName;
 }

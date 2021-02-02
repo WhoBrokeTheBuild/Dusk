@@ -2,8 +2,7 @@
 #define DUSK_MOUSE_HPP
 
 #include <Dusk/Config.hpp>
-
-#include <string>
+#include <Dusk/String.hpp>
 
 namespace Dusk {
 
@@ -17,7 +16,7 @@ enum class MouseButton
     
 }; // enum MouseButton
 
-static inline std::string GetMouseButtonName(MouseButton button)
+static inline string GetMouseButtonName(MouseButton button)
 {
     switch (button) {
     case MouseButton::Left:
@@ -29,7 +28,7 @@ static inline std::string GetMouseButtonName(MouseButton button)
     default: ;
     }
 
-    return std::string();
+    return string();
 };
 
 } // namespace Dusk

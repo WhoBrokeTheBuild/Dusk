@@ -3,9 +3,9 @@
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Object.hpp>
+#include <Dusk/String.hpp>
 
 #include <cstdint>
-#include <string>
 
 namespace Dusk {
 
@@ -56,7 +56,7 @@ protected:
 
 }; // class Buffer
 
-inline std::string BufferUsageToString(BufferUsage bufferUsage)
+inline string BufferUsageToString(BufferUsage bufferUsage)
 {
     switch (bufferUsage) {
         case BufferUsage::Index:
@@ -70,7 +70,7 @@ inline std::string BufferUsageToString(BufferUsage bufferUsage)
     return "Unknown";
 }
 
-inline std::string MemoryUsageToString(MemoryUsage memoryUsage)
+inline string MemoryUsageToString(MemoryUsage memoryUsage)
 {
     switch (memoryUsage) {
         case MemoryUsage::GPU:

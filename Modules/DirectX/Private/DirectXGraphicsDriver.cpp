@@ -63,16 +63,16 @@ void DirectXGraphicsDriver::Terminate()
     TermWindow();
 }
 
-void DirectXGraphicsDriver::SetWindowTitle(const std::string& title)
+void DirectXGraphicsDriver::SetWindowTitle(const string& title)
 {
     SetWindowText(_window, title.c_str());
 }
 
-std::string DirectXGraphicsDriver::GetWindowTitle()
+string DirectXGraphicsDriver::GetWindowTitle()
 {
     char buffer[256];
     GetWindowText(_window, buffer, sizeof(buffer));
-    return std::string(buffer);
+    return string(buffer);
 }
 
 void DirectXGraphicsDriver::SetWindowSize(const ivec2& size)
@@ -222,9 +222,9 @@ bool DirectXGraphicsDriver::InitWindow()
         return false;
     }
     
-    std::string name = GetApplicationName();
+    string name = GetApplicationName();
 
-    std::string title = name + " (" + GetApplicationVersion().GetString() + ")";
+    string title = name + " (" + GetApplicationVersion().GetString() + ")";
 
     DWORD dwStyle = WS_OVERLAPPEDWINDOW;
 

@@ -28,9 +28,9 @@ public:
 
     void Terminate() override;
 
-    void SetWindowTitle(const std::string& title) override;
+    void SetWindowTitle(const string& title) override;
 
-    std::string GetWindowTitle() override;
+    string GetWindowTitle() override;
 
     void SetWindowSize(const ivec2& size) override;
 

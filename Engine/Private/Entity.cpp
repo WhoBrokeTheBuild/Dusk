@@ -5,7 +5,7 @@
 namespace Dusk {
 
 DUSK_ENGINE_API
-bool Entity::LoadFromFile(const std::string& filename)
+bool Entity::LoadFromFile(const string& filename)
 {
     const auto& importers = GetAllSceneImporters();
     for (const auto& importer : importers) {
@@ -55,7 +55,7 @@ std::vector<Component *> Entity::GetComponents() const
 }
 
 DUSK_ENGINE_API
-void Entity::SetName(const std::string& name)
+void Entity::SetName(const string& name)
 {
     _name = name;
 }

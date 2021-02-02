@@ -3,8 +3,8 @@
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Version.hpp>
+#include <Dusk/String.hpp>
 
-#include <string>
 #include <initializer_list>
 
 namespace Dusk {
@@ -18,10 +18,10 @@ struct DUSK_ENGINE_API DuskModuleDefinition
 };
 
 DUSK_ENGINE_API
-bool LoadModule(const std::string& name, Version minVersion = Version());
+bool LoadModule(const string& name, Version minVersion = Version());
 
 DUSK_ENGINE_API
-void FreeModule(const std::string& name);
+void FreeModule(const string& name);
 
 DUSK_ENGINE_API
 void FreeAllModules();

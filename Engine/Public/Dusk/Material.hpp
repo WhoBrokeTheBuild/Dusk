@@ -46,7 +46,7 @@ public:
     // std::shared_ptr<Texture> EmissiveMap;
     // std::shared_ptr<Texture> OcclusionMap;
 
-    // std::unordered_map<std::string, std::string> GetDefines() const;
+    // std::unordered_map<string, string> GetDefines() const;
     
 private:
 

@@ -6,62 +6,62 @@
 namespace Dusk {
 
 DUSK_ENGINE_API
-std::string GetDirname(std::string path)
+string GetDirname(string path)
 {
     size_t pivot = path.find_last_of('/');
-    if (pivot == std::string::npos) {
+    if (pivot == string::npos) {
         pivot = path.find_last_of('\\');
     }
     return (
-        pivot == std::string::npos
+        pivot == string::npos
         ? path
         : path.substr(0, pivot)
     );
 }
 
 DUSK_ENGINE_API
-std::string GetBasename(std::string path)
+string GetBasename(string path)
 {
     size_t pivot = path.find_last_of('/');
-    if (pivot == std::string::npos) {
+    if (pivot == string::npos) {
         pivot = path.find_last_of('\\');
     }
     return (
-        pivot == std::string::npos
+        pivot == string::npos
         ? path
         : path.substr(pivot + 1)
     );
 }
 
 DUSK_ENGINE_API
-std::string GetExtension(std::string path)
+string GetExtension(string path)
 {
     size_t pivot = path.find_last_of('.');
     return (
-        pivot == std::string::npos
-        ? std::string()
+        pivot == string::npos
+        ? string()
         : path.substr(pivot + 1)
     );
 }
 
 DUSK_ENGINE_API
-std::vector<std::string> GetAssetPathList()
+std::vector<Path> GetAssetPathList()
 {
-    static std::vector<std::string> paths;
+    static std::vector<Path> paths;
     if (!paths.empty()) {
         return paths;
     }
 
-    paths.push_back("Assets/");
+    paths.push_back(Path("Assets"));
 
     const char * path = getenv("DUSK_ASSET_PATH");
     DuskLogVerbose("DUSK_ASSET_PATH=%s", path);
     
     if (path) {
         std::istringstream iss(path);
-        std::string p;
+        string p;
         while (std::getline(iss, p, DUSK_PATH_SEPARATOR)) {
-            paths.push_back(p);
+            paths.push_back(Path(p));
         }
     }
     
@@ -71,7 +71,7 @@ std::vector<std::string> GetAssetPathList()
 #if defined(DUSK_PLATFORM_WINDOWS)
 
 DUSK_ENGINE_API
-std::wstring ConvertUTF8ToWideString(std::string str)
+std::wstring ConvertUTF8ToWideString(string str)
 {
     size_t maxSize = str.size() + 1;
 
@@ -91,7 +91,7 @@ std::wstring ConvertUTF8ToWideString(std::string str)
 }
 
 DUSK_ENGINE_API
-std::string ConvertWideStringToUTF8(std::wstring wstr)
+string ConvertWideStringToUTF8(std::wstring wstr)
 {
     size_t maxSize = (wstr.size() * 4) + 1;
 
@@ -105,10 +105,10 @@ std::string ConvertWideStringToUTF8(std::wstring wstr)
         NULL, NULL);
         
     if (result <= 0) {
-        return std::string();
+        return string();
     }
 
-    return std::string(utf8.data());
+    return string(utf8.data());
 }
 
 #endif // defined(DUSK_PLATFORM_WINDOWS)

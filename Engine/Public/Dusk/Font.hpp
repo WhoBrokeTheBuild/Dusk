@@ -2,6 +2,7 @@
 #define DUSK_FONT_HPP
 
 #include <Dusk/Config.hpp>
+#include <Dusk/String.hpp>
 
 namespace Dusk {
 
@@ -11,7 +12,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Font);
 
-    bool LoadFromFile(const std::string& filename);
+    bool LoadFromFile(const string& filename);
 
 }; // class Font
 

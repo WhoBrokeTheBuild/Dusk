@@ -11,7 +11,7 @@
 namespace Dusk::TinyOBJ {
 
 DUSK_TINYOBJ_API
-std::vector<std::unique_ptr<PrimitiveData>> TinyOBJMeshImporter::LoadFromFile(const std::string& filename, bool useAssetPath /*= true*/)
+std::vector<std::unique_ptr<PrimitiveData>> TinyOBJMeshImporter::LoadFromFile(const string& filename, bool useAssetPath /*= true*/)
 {
     DuskBenchmarkStart();
 
@@ -21,22 +21,22 @@ std::vector<std::unique_ptr<PrimitiveData>> TinyOBJMeshImporter::LoadFromFile(co
     std::vector<tinyobj::shape_t> shapeList;
     std::vector<tinyobj::material_t> materialList;
 
-    std::string warn, err;
+    string warn, err;
     bool result = false;
 
     if (useAssetPath) {
         const auto& assetPathList = GetAssetPathList();
 
         for (const auto& path : assetPathList) {
-            std::string fullPath = path + "Models" + DUSK_PATH_SLASH + filename;
+            Path fullPath = path / "Models" / filename;
             DuskLogVerbose("Checking '%s'", fullPath);
 
-            std::string dir = GetDirname(fullPath);
+            string dir = GetDirname(fullPath);
 
             warn = "";
             err = "";
 
-            result = tinyobj::LoadObj(&attrib, &shapeList, &materialList, &warn, &err, fullPath.c_str(), dir.c_str());
+            result = tinyobj::LoadObj(&attrib, &shapeList, &materialList, &warn, &err, fullPath.ToCString(), dir.c_str());
 
             // If the error isn't 'Cannot open file', the .obj file is probably
             // broken, and we should fail
@@ -50,7 +50,7 @@ std::vector<std::unique_ptr<PrimitiveData>> TinyOBJMeshImporter::LoadFromFile(co
         }
     }
     else {
-        std::string dir = GetDirname(filename);
+        string dir = GetDirname(filename);
         result = tinyobj::LoadObj(&attrib, &shapeList, &materialList, &warn, &err, filename.c_str(), dir.c_str());
     }
 

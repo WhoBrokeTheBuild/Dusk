@@ -3,6 +3,7 @@
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Math.hpp>
+#include <Dusk/String.hpp>
 
 namespace Dusk {
 
@@ -37,7 +38,7 @@ enum class VertexAttribute
 
 }; // enum class VertexAttribute
 
-inline std::string VertexAttributeToString(VertexAttribute vertexAttribute)
+inline string VertexAttributeToString(VertexAttribute vertexAttribute)
 {
     switch (vertexAttribute) {
         case VertexAttribute::Position:

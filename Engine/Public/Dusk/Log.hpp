@@ -3,8 +3,9 @@
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Util.hpp>
+#include <Dusk/Path.hpp>
+#include <Dusk/String.hpp>
 
-#include <string>
 #include <cstdio>
 
 #if !defined(DUSK_PLATFORM_WINDOWS)
@@ -28,7 +29,7 @@ enum class LogLevel
 }; // enum class LogLevel
 
 DUSK_ENGINE_API
-bool AddLogFile(const std::string& filename);
+bool AddLogFile(const string& filename);
 
 DUSK_ENGINE_API
 std::vector<FILE *> GetAllLogFiles();
@@ -48,8 +49,13 @@ inline auto LogWrap(const T& v) {
 #pragma GCC diagnostic ignored "-Wunused-function"
 
 template <>
-inline auto LogWrap<std::string>(const std::string& v) {
+inline auto LogWrap<string>(const string& v) {
     return v.c_str();
+}
+
+template <>
+inline auto LogWrap<Path>(const Path& v) {
+    return v.ToCString();
 }
 
 #if defined(DUSK_PLATFORM_WINDOWS)

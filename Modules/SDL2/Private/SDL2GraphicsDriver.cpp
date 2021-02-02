@@ -97,7 +97,7 @@ void SDL2GraphicsDriver::ProcessEvents()
     }
 }
 
-void SDL2GraphicsDriver::UpdateWindowTitle(const std::string& title)
+void SDL2GraphicsDriver::UpdateWindowTitle(const string& title)
 {
     SDL_SetWindowTitle(_sdlWindow, title.c_str());
 }

@@ -22,7 +22,7 @@
 namespace Dusk::STBI {
 
 DUSK_STBI_API
-std::unique_ptr<TextureData> STBITextureImporter::LoadFromFile(const std::string& filename, bool useAssetPath)
+std::unique_ptr<TextureData> STBITextureImporter::LoadFromFile(const string& filename, bool useAssetPath)
 {
     DuskBenchmarkStart();
 
@@ -34,8 +34,8 @@ std::unique_ptr<TextureData> STBITextureImporter::LoadFromFile(const std::string
         const auto& assetPathList = Dusk::GetAssetPathList();
 
         for (const auto& path : assetPathList) {
-            std::string fullPath = path + "Textures" + DUSK_PATH_SLASH + filename;
-            data = stbi_load(fullPath.c_str(), &size.x, &size.y, &components, 0);
+            Path fullPath = path / "Textures" / filename;
+            data = stbi_load(fullPath.ToCString(), &size.x, &size.y, &components, 0);
             if (data) {
                 break;
             }

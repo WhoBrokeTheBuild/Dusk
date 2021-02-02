@@ -8,6 +8,7 @@
 #include <Dusk/Pipeline.hpp>
 #include <Dusk/RenderContext.hpp>
 #include <Dusk/Buffer.hpp>
+#include <Dusk/String.hpp>
 
 #include <vector>
 
@@ -42,7 +43,7 @@ protected:
 }; // class Mesh
 
 DUSK_ENGINE_API
-std::shared_ptr<Mesh> LoadMeshFromFile(const std::string& filename, bool useAssetPath = true);
+std::shared_ptr<Mesh> LoadMeshFromFile(const string& filename, bool useAssetPath = true);
 
 } // namespace Dusk
 

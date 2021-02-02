@@ -13,8 +13,8 @@
 #include <Dusk/Event.hpp>
 #include <Dusk/Buffer.hpp>
 #include <Dusk/Time.hpp>
+#include <Dusk/String.hpp>
 
-#include <string>
 #include <vector>
 #include <memory>
 
@@ -48,12 +48,12 @@ public:
 
     virtual void InitializeRenderContext();
 
-    virtual void SetWindowTitle(const std::string& title) {
+    virtual void SetWindowTitle(const string& title) {
         _windowTitle = title;
         UpdateWindowTitle(title);
     }
 
-    virtual std::string GetWindowTitle() {
+    virtual string GetWindowTitle() {
         return _windowTitle;
     }
 
@@ -106,11 +106,11 @@ public:
 
 protected:
 
-    virtual void UpdateWindowTitle(const std::string& title) = 0;
+    virtual void UpdateWindowTitle(const string& title) = 0;
 
     virtual void UpdateWindowSize(const ivec2& size) = 0;
 
-    std::string _windowTitle = "Dusk";
+    string _windowTitle = "Dusk";
 
     ivec2 _windowSize = { 640, 480 };
 

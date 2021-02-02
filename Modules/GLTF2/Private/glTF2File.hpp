@@ -107,7 +107,7 @@ struct AccessorData
     int bufferView;
     size_t byteOffset;
     size_t count;
-    std::string type;
+    string type;
     GLenum componentType;
     bool normalized;
     // TODO: min, max
@@ -115,16 +115,16 @@ struct AccessorData
 
 struct ImageData
 {
-    std::string uri;
+    string uri;
     
     int bufferView;
-    std::string mimeType;
+    string mimeType;
 };
 
 struct CameraData
 {
-    std::string name;
-    std::string type;
+    string name;
+    string type;
 
     // Perspective
     float aspectRatio;
@@ -152,7 +152,7 @@ public:
 
     virtual ~glTF2File() = default;
 
-    bool LoadFromFile(const std::string& filename);
+    bool LoadFromFile(const string& filename);
 
     const uint32_t MAGIC = 0x46546C67; // glTF
 
@@ -162,9 +162,9 @@ public:
         BIN     = 0x004E4942, // BIN
     };
 
-    std::string Filename;
+    string Filename;
 
-    std::string BaseDir;
+    string BaseDir;
 
     json JSON;
 

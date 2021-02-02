@@ -22,9 +22,9 @@ namespace Dusk {
 
 #endif
 
-std::unordered_map<std::string, ModuleHandle> _Modules;
+std::unordered_map<string, ModuleHandle> _Modules;
 
-ModuleHandle _dlopen(const std::string& filename)
+ModuleHandle _dlopen(const string& filename)
 {
     ModuleHandle handle = nullptr;
 
@@ -45,11 +45,11 @@ ModuleHandle _dlopen(const std::string& filename)
 
         #if defined(DUSK_PLATFORM_APPLE)
 
-            std::string libFilename = "lib" + filename + ".dylib";
+            string libFilename = "lib" + filename + ".dylib";
 
         #else
 
-            std::string libFilename = "lib" + filename + ".so";
+            string libFilename = "lib" + filename + ".so";
 
         #endif
 
@@ -64,7 +64,7 @@ ModuleHandle _dlopen(const std::string& filename)
     return handle;
 }
 
-void * _dlsym(ModuleHandle handle, const std::string& symbol)
+void * _dlsym(ModuleHandle handle, const string& symbol)
 {
     #if defined(DUSK_PLATFORM_WINDOWS)
 
@@ -90,7 +90,7 @@ void _dlclose(ModuleHandle handle)
     #endif
 }
 
-bool LoadModule(const std::string& name, Version minVersion /*= Version()*/)
+bool LoadModule(const string& name, Version minVersion /*= Version()*/)
 {
     DuskLogLoad("Loading module '%s'", name);
 
@@ -133,7 +133,7 @@ bool LoadModule(const std::string& name, Version minVersion /*= Version()*/)
 }
 
 DUSK_ENGINE_API
-void FreeModule(const std::string& name)
+void FreeModule(const string& name)
 {
     auto it = _Modules.find(name);
     if (it == _Modules.end()) {

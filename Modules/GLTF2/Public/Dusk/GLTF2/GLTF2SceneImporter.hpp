@@ -15,7 +15,7 @@ public:
 
     GLTF2SceneImporter() = default;
 
-    virtual bool LoadFromFile(Entity * root, const std::string& filename) override;
+    virtual bool LoadFromFile(Entity * root, const string& filename) override;
 
 private:
 

@@ -5,10 +5,10 @@
 #include <Dusk/Object.hpp>
 #include <Dusk/Math.hpp>
 #include <Dusk/TextureData.hpp>
+#include <Dusk/String.hpp>
 
 #include <cstdint>
 #include <cstdlib>
-#include <string>
 #include <tuple>
 #include <memory>
 
@@ -63,12 +63,12 @@ public:
 }; // class Texture
 
 DUSK_ENGINE_API
-std::shared_ptr<Texture> LoadTextureFromFile(const std::string& filename, bool useAssetPath = true, Texture::Options opts = Texture::Options());
+std::shared_ptr<Texture> LoadTextureFromFile(const string& filename, bool useAssetPath = true, Texture::Options opts = Texture::Options());
 
 DUSK_ENGINE_API
 std::shared_ptr<Texture> LoadTextureFromMemory(const uint8_t * buffer, size_t length, Texture::Options opts = Texture::Options());
 
-inline std::string TextureWrapTypeToString(TextureWrapType textureWrapType)
+inline string TextureWrapTypeToString(TextureWrapType textureWrapType)
 {
     switch (textureWrapType) {
         case TextureWrapType::Repeat:
@@ -84,7 +84,7 @@ inline std::string TextureWrapTypeToString(TextureWrapType textureWrapType)
     return "Unknown";
 }
 
-inline std::string TextureWrapTypeToString(TextureFilterType textureFilterType)
+inline string TextureWrapTypeToString(TextureFilterType textureFilterType)
 {
     switch (textureFilterType) {
         case TextureFilterType::Nearest:

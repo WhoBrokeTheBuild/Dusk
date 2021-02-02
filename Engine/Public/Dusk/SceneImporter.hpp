@@ -4,6 +4,7 @@
 #include <Dusk/Config.hpp>
 #include <Dusk/Object.hpp>
 #include <Dusk/Entity.hpp>
+#include <Dusk/String.hpp>
 
 namespace Dusk {
 
@@ -17,15 +18,15 @@ public:
 
     virtual ~SceneImporter() = default;
 
-    virtual bool LoadFromFile(Entity * root, const std::string& filename) = 0;
+    virtual bool LoadFromFile(Entity * root, const string& filename) = 0;
 
 }; // class SceneImporter
 
 DUSK_ENGINE_API
-void AddSceneImporter(const std::string& id, std::unique_ptr<SceneImporter> importer);
+void AddSceneImporter(const string& id, std::unique_ptr<SceneImporter> importer);
 
 DUSK_ENGINE_API
-void RemoveSceneImporter(const std::string& id);
+void RemoveSceneImporter(const string& id);
 
 DUSK_ENGINE_API
 const std::vector<SceneImporter *>& GetAllSceneImporters();

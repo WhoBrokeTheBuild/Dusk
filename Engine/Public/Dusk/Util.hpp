@@ -3,31 +3,32 @@
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Platform.hpp>
+#include <Dusk/String.hpp>
+#include <Dusk/Path.hpp>
 
-#include <string>
 #include <vector>
 
 namespace Dusk {
 
 DUSK_ENGINE_API
-std::string GetDirname(std::string path);
+string GetDirname(string path);
 
 DUSK_ENGINE_API
-std::string GetBasename(std::string path);
+string GetBasename(string path);
 
 DUSK_ENGINE_API
-std::string GetExtension(std::string path);
+string GetExtension(string path);
 
 DUSK_ENGINE_API
-std::vector<std::string> GetAssetPathList();
+std::vector<Path> GetAssetPathList();
 
 #if defined(DUSK_PLATFORM_WINDOWS)
 
 DUSK_ENGINE_API
-std::wstring ConvertUTF8ToWideString(std::string str);
+std::wstring ConvertUTF8ToWideString(string str);
 
 DUSK_ENGINE_API
-std::string ConvertWideStringToUTF8(std::wstring str);
+string ConvertWideStringToUTF8(std::wstring str);
 
 class WindowsErrorMessage
 {

@@ -10,7 +10,7 @@ namespace Dusk {
 
 PyObject * ScriptConsole::_locals = nullptr;
 
-std::vector<std::string> ScriptConsole::_history;
+std::vector<string> ScriptConsole::_history;
 
 int ScriptConsole::_cursor = 0;
 int ScriptConsole::_index = 0;
@@ -58,7 +58,7 @@ void ScriptConsole::Initialize()
     
     PyRun_String("import Dusk", Py_single_input, pyMainDict, _locals);
 
-    _history.push_back(std::string());
+    _history.push_back(string());
     _index = _history.size() - 1;
 
     printf(">>> ");
@@ -158,7 +158,7 @@ void ScriptConsole::ReadNextCharacter()
     static char modifier = '\0';
     
     if (inEscapeSequence) {       
-        // static std::string escapeSequence;
+        // static string escapeSequence;
         // escapeSequence += c;
 
         if (c == '[' || c == ';') {
@@ -227,7 +227,7 @@ void ScriptConsole::ReadNextCharacter()
             }
 
             if (RunCommand(_history.back())) {
-                _history.push_back(std::string());
+                _history.push_back(string());
                 _index = _history.size() - 1;
             }
             else {
@@ -266,7 +266,7 @@ void ScriptConsole::ReadNextCharacter()
 
 }
 
-bool ScriptConsole::RunCommand(const std::string& command)
+bool ScriptConsole::RunCommand(const string& command)
 {
     if (command[0] == '#') {
         return true;

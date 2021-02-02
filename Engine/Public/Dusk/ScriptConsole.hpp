@@ -2,6 +2,7 @@
 #define DUSK_SCRIPT_CONSOLE_HPP
 
 #include <Dusk/Config.hpp>
+#include <Dusk/String.hpp>
 
 #if defined(DUSK_PLATFORM_WINDOWS)
 
@@ -15,7 +16,6 @@
 #endif // defined(DUSK_PLATFORM_WINDOWS)
 
 #include <vector>
-#include <string>
 
 #include <Python.h>
 
@@ -35,14 +35,14 @@ public:
 
 private:
 
-    static inline std::string& GetCurrentLine()
+    static inline string& GetCurrentLine()
     {
         return _history[_index];
     }
 
     static void ReadNextCharacter();
 
-    static bool RunCommand(const std::string& command);
+    static bool RunCommand(const string& command);
 
     static void JumpCursorLeft();
     static void JumpCursorRight();
@@ -61,7 +61,7 @@ private:
 
     static PyObject * _locals;
 
-    static std::vector<std::string> _history;
+    static std::vector<string> _history;
 
     static int _cursor;
     static int _index;

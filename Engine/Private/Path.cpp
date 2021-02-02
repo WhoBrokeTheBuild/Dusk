@@ -173,7 +173,7 @@ Path GetCurrentPath()
 
     std::unique_ptr<char> cwd(_getcwd(nullptr, 0));
     if (cwd) {
-        return Path(cwd);
+        return Path(string(cwd.get()));
     }
 
 #else

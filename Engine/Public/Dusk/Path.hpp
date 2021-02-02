@@ -196,6 +196,7 @@ private:
 
 // }; // class Iterator
 
+DUSK_ENGINE_API
 Path GetCurrentPath();
 
 } // namespace Dusk

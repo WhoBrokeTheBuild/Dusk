@@ -20,8 +20,6 @@ bool OpenGLGraphicsDriver::Initialize()
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, GL_TRUE);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
     #if defined(DUSK_BUILD_DEBUG)
 
@@ -97,15 +95,7 @@ bool OpenGLGraphicsDriver::Initialize()
 
     InitializeUpdateContext();
     InitializeRenderContext();
-
-    // TODO: Move
-    _shaderGlobalsBuffer = CreateBuffer();
-    _shaderGlobalsBuffer->Initialize(
-        sizeof(ShaderGlobals),
-        nullptr,
-        BufferUsage::Constant,
-        MemoryUsage::UploadOften
-    );
+    InitializeConstantBuffers();
 
     return true;
 }
@@ -176,7 +166,9 @@ std::shared_ptr<Shader> OpenGLGraphicsDriver::CreateShader()
 DUSK_OPENGL_API
 std::shared_ptr<Mesh> OpenGLGraphicsDriver::CreateMesh()
 {
-    return std::shared_ptr<Mesh>(New OpenGLMesh());
+    auto ptr = std::shared_ptr<Mesh>(New OpenGLMesh());
+    ptr->Initialize();
+    return ptr;
 }
 
 DUSK_OPENGL_API

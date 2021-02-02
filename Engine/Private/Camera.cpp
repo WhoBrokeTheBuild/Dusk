@@ -13,6 +13,8 @@ Camera::Camera()
     SetAspect(size);
     SetViewportSize(size);
 
+    _flipY = gfx->IsYFlipped();
+
     _windowResizedEventHandlerID = gfx->WindowResizedEvent.AddListener(
         [=](const WindowResizedEventData * data) {
             SetAspect(data->Size);
@@ -37,15 +39,22 @@ mat4 Camera::GetView() const
 DUSK_ENGINE_API
 mat4 Camera::GetProjection() const 
 {
+    mat4 projection = mat4(1.0f);
+
     if (_mode == CameraMode::Perspective) {
-        return glm::perspective(_fovX, GetAspect(), _clip[0], _clip[1]);
+        projection = glm::perspective(_fovX, GetAspect(), _clip[0], _clip[1]);
     }
     else if (_mode == CameraMode::Orthographic) {
         const auto& view = GetViewport();
-        return glm::ortho(view[0], view[1], view[2], view[3], _clip[0], _clip[1]);
+        projection = glm::ortho(view[0], view[1], view[2], view[3], _clip[0], _clip[1]);
     }
 
-    return mat4(1.f);
+    if (_flipY) {
+        // TODO: Investigate
+        projection = glm::scale(projection, { -1.0f, -1.0f, 1.0f });
+    }
+
+    return projection;
 }
 
 DUSK_ENGINE_API
@@ -69,8 +78,8 @@ void Camera::SetUp(const vec3& up)
 DUSK_ENGINE_API
 void Camera::SetForward(const vec3& forward)
 {
-    if ((glm::normalize(forward) + _up) == vec3(0.f)) {
-        SetOrientation(glm::angleAxis(glm::radians(-90.f), glm::vec3(1.f, 0.f, 0.f)));
+    if ((glm::normalize(forward) + _up) == vec3(0.0f)) {
+        SetOrientation(glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
     }
     else {
         SetOrientation(glm::quatLookAt(glm::normalize(forward), _up));
@@ -110,7 +119,7 @@ void Camera::SetFOVX(float fovX)
 DUSK_ENGINE_API
 void Camera::SetFOVY(float fovY)
 {
-    _fovX = 2.f * atanf(tanf(fovY * .5f) * _aspect);
+    _fovX = 2.0f * atanf(tanf(fovY * .5f) * _aspect);
 }
 
 DUSK_ENGINE_API
@@ -137,7 +146,7 @@ vec4 Camera::GetViewport() const
     const vec4& scale = GetViewportScale();
     vec2 size = GetViewportSize();
 
-    if (_aspect > 1.f) {
+    if (_aspect > 1.0f) {
         size.y /= _aspect;
     }
     else {

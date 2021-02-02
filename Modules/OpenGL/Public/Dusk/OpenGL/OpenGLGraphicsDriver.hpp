@@ -49,6 +49,10 @@ public:
 
     std::shared_ptr<Primitive> CreatePrimitive() override;
 
+    bool IsYFlipped() const override {
+        return true;
+    }
+
 private:
 
     void BindUniformBufferObjects();
@@ -59,9 +63,6 @@ private:
 
     std::vector<std::weak_ptr<Shader>> _shaderList;
 
-    // TODO: Move to base
-    std::shared_ptr<Buffer> _shaderGlobalsBuffer;
-    
 }; // class OpenGLGraphicsDriver
 
 } // namespace Dusk::OpenGL

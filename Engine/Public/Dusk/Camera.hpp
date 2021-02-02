@@ -93,9 +93,11 @@ private:
 
     CameraMode _mode = CameraMode::Perspective;
 
+    bool _flipY = false;
+
     vec2 _clip = { 0.1f, 10000.f };
 
-    vec3 _up = { 0.f, 1.f, 0.f };
+    vec3 _up = GetWorldUp();
 
     float _aspect = 16.f / 9.f; // 16:9
 

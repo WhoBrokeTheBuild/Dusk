@@ -145,7 +145,7 @@ protected:
 
     FrontFace _frontFace = FrontFace::CounterClockwise;
 
-    CullMode _cullMode = CullMode::Back;
+    CullMode _cullMode = CullMode::None;
 
     FillMode _fillMode = FillMode::Fill;
 

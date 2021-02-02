@@ -1118,11 +1118,12 @@ bool VulkanGraphicsDriver::InitSwapChain()
     vkGetPhysicalDeviceSurfacePresentModesKHR(_vkPhysicalDevice, _vkSurface, &presentModeCount, presentModes.data());
 
     // VK_FORMAT_R8G8B8A8_UNORM
+    // VK_FORMAT_B8G8R8A8_SRGB
 
     _vkSwapChainImageFormat = formats[0];
     for (const auto& format : formats) {
         // TODO: Investigate
-        if (format.format == VK_FORMAT_B8G8R8A8_SRGB && format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+        if (format.format == VK_FORMAT_R8G8B8A8_UNORM && format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
             _vkSwapChainImageFormat = format;
             break;
         }
@@ -1470,7 +1471,7 @@ bool VulkanGraphicsDriver::InitDescriptorPool()
             .binding = DUSK_SHADER_TRANSFORM_BINDING,
             .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
             .descriptorCount = 1,
-            .stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS,
+            .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
             .pImmutableSamplers = nullptr,
         },
     };

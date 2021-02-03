@@ -53,17 +53,9 @@ bool OpenGLBuffer::MapBufferToMemory()
 {
     glBindBuffer(_glTarget, _glID);
     
-    GLenum access = GL_INVALID_ENUM;
+    GLbitfield flags = GetGLMemoryUsage(_memoryUsage);
 
-    if (_memoryUsage == MemoryUsage::UploadOnce ||
-        _memoryUsage == MemoryUsage::UploadOften) {
-        access = GL_WRITE_ONLY;
-    }
-    else if (_memoryUsage == MemoryUsage::Download) {
-        access = GL_READ_ONLY;
-    }
-
-    _mappedBufferMemory = glMapBuffer(_glTarget, access);
+    _mappedBufferMemory = glMapBufferRange(_glTarget, 0, _size, flags);
     if (!_mappedBufferMemory) {
         DuskLogError("glMapBuffer() failed");
         return false;

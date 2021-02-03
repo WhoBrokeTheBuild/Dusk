@@ -58,7 +58,10 @@ bool VulkanGraphicsDriver::Initialize()
 
     InitializeUpdateContext();
     InitializeRenderContext();
-    InitializeConstantBuffers();
+
+    if (!InitializeConstantBuffers()) {
+        return false;
+    }
     
     if (!InitSwapChain()) {
         return false;

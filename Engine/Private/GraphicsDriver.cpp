@@ -38,15 +38,19 @@ void GraphicsDriver::InitializeRenderContext()
 }
 
 DUSK_ENGINE_API
-void GraphicsDriver::InitializeConstantBuffers()
+bool GraphicsDriver::InitializeConstantBuffers()
 {
+    bool result;
+
     _shaderGlobalsBuffer = CreateBuffer();
-    _shaderGlobalsBuffer->Initialize(
+    result = _shaderGlobalsBuffer->Initialize(
         sizeof(ShaderGlobals),
         nullptr,
         BufferUsage::Constant,
         MemoryUsage::UploadOften
     );
+
+    return result;
 }
 
 DUSK_ENGINE_API

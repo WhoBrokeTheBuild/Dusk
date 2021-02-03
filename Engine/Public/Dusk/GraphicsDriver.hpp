@@ -48,7 +48,7 @@ public:
 
     virtual void InitializeRenderContext();
 
-    virtual void InitializeConstantBuffers();
+    virtual bool InitializeConstantBuffers();
 
     virtual void SetWindowTitle(const string& title) {
         _windowTitle = title;

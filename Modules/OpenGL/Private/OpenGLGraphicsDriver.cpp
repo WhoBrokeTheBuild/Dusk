@@ -95,7 +95,10 @@ bool OpenGLGraphicsDriver::Initialize()
 
     InitializeUpdateContext();
     InitializeRenderContext();
-    InitializeConstantBuffers();
+
+    if (!InitializeConstantBuffers()) {
+        return false;
+    }
 
     return true;
 }
@@ -124,8 +127,8 @@ void OpenGLGraphicsDriver::Render()
     uint8_t * data = reinterpret_cast<uint8_t *>(_renderContext->GetShaderGlobals());
     _shaderGlobalsBuffer->WriteTo(0, sizeof(ShaderGlobals), data);
 
-    OpenGLBuffer * buffer = DUSK_OPENGL_BUFFER(_shaderGlobalsBuffer.get());
-    glBindBufferBase(GL_UNIFORM_BUFFER, DUSK_SHADER_GLOBALS_BINDING, buffer->GetGLID());
+    OpenGLBuffer * glGlobalsBuffer = DUSK_OPENGL_BUFFER(_shaderGlobalsBuffer.get());
+    glBindBufferBase(GL_UNIFORM_BUFFER, DUSK_SHADER_GLOBALS_BINDING, glGlobalsBuffer->GetGLID());
 
     Scene * scene = GetCurrentScene();
     if (scene) {

@@ -5,6 +5,10 @@
 #include <Dusk/Log.hpp>
 
 namespace Dusk {
+
+PyObject * PyDusk_SetVerboseLoggingEnabled(PyObject * self, PyObject * args);
+
+PyObject * PyDusk_IsVerboseLoggingEnabled(PyObject * self, PyObject * args);
     
 PyObject * PyDusk_LogVerbose(PyObject * self, PyObject * args);
 

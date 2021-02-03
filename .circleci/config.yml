@@ -32,12 +32,11 @@ jobs:
           cmake --version
           mkdir Build && cd Build
           cmake \
-            -DVERBOSE_LOGGING=ON \
             -DBUILD_DEMOS=ON \
             -DBUILD_TESTS=ON \
             -G"Unix Makefiles" \
             ..
-          make -l all test
+          DUSK_VERBOSE=1 make -l all test
 
 workflows:
   all:

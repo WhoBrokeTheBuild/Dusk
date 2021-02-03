@@ -4,7 +4,21 @@
 
 namespace Dusk {
 
+static bool _VerboseLoggingEnabled = false;
+
 static std::vector<FILE *> _LogFiles;
+
+DUSK_ENGINE_API
+void SetVerboseLoggingEnabled(bool enabled)
+{
+    _VerboseLoggingEnabled = enabled;
+}
+
+DUSK_ENGINE_API
+bool IsVerboseLoggingEnabled()
+{
+    return _VerboseLoggingEnabled;
+}
 
 DUSK_ENGINE_API
 bool AddLogFile(const string& filename)

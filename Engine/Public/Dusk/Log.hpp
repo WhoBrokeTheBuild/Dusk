@@ -29,6 +29,12 @@ enum class LogLevel
 }; // enum class LogLevel
 
 DUSK_ENGINE_API
+void SetVerboseLoggingEnabled(bool enabled);
+
+DUSK_ENGINE_API
+bool IsVerboseLoggingEnabled();
+
+DUSK_ENGINE_API
 bool AddLogFile(const string& filename);
 
 DUSK_ENGINE_API
@@ -181,10 +187,12 @@ inline void Log(LogLevel level, const char * format, Args... args)
 
 #define DUSK_FILENAME (&__FILE__[DUSK_SOURCE_PATH_LENGTH])
 
-#if defined(DUSK_ENABLE_VERBOSE_LOGGING)
+#if defined(DUSK_BUILD_DEBUG)
     #define DuskLogVerbose(M, ...) \
-        do { Dusk::Log(Dusk::LogLevel::Verbose, "[VERB](%s:%d) " M "\n", \
-            DUSK_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
+        if (Dusk::IsVerboseLoggingEnabled()) { \
+            Dusk::Log(Dusk::LogLevel::Verbose, "[VERB](%s:%d) " M "\n", \
+                DUSK_FILENAME, __LINE__, ##__VA_ARGS__); \
+        }
 #else
     #define DuskLogVerbose(M, ...) do { } while (0)
 #endif

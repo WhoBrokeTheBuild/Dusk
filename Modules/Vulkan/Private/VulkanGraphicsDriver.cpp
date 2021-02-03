@@ -550,6 +550,10 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL _VulkanDebugMessageCallback(
         }
         else if ((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) > 0) {
             level = LogLevel::Verbose;
+
+            if (!IsVerboseLoggingEnabled()) {
+                return VK_FALSE;
+            }
         }
     }
 
@@ -719,7 +723,7 @@ bool VulkanGraphicsDriver::InitInstance()
             VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
             VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT;
 
-        #if defined(DUSK_ENABLE_VERBOSE_LOGGING)
+        #if defined(DUSK_BUILD_DEBUG)
             messageSeverity |= VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT;
         #endif
 
@@ -780,7 +784,7 @@ bool VulkanGraphicsDriver::InitDebugUtilsMessenger()
         VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
         VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT;
 
-    #if defined(DUSK_ENABLE_VERBOSE_LOGGING)
+    #if defined(DUSK_BUILD_DEBUG)
         messageSeverity |= VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT;
     #endif
 

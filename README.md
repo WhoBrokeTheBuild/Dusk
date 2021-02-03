@@ -26,10 +26,6 @@ cmake -DOPTION=VALUE ..
 
 ### Available Build Options
 
-> `VERBOSE_LOGGING`, default `OFF`
->
-> Enables verbose logging with the `DuskLogVerbose` function.
-
 > `BUILD_TESTS`, default `OFF`
 >
 > Build tests, which can then be run with `ctest` or `make test`.
@@ -46,7 +42,7 @@ cmake -DOPTION=VALUE ..
 >
 > Build packages for distribution (`.deb`, `.rpm`, `.tgz`, etc.).
 
-> `MODULES`, defaults to modules required by demos
+> `BUILD_MODULES`, defaults to modules required by demos
 >
 > A semicolon-separated list of modules to build. Wrap in "" in order to keep
 > it from being misinterpreted by the shell. Run CMake to display a list of
@@ -63,6 +59,8 @@ make -l run-HelloWorld
 # or
 cmake --build . --target run-HelloWorld
 ```
+
+Set the environment variable `DUSK_VERBOSE=1` on a debug build to enable verbose logging.
 
 ## Contributing
 

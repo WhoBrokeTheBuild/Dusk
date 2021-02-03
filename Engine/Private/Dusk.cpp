@@ -17,11 +17,39 @@
 #include <cstdio>
 #include <thread>
 
+#include <cflags.h>
+
 namespace Dusk {
 
 DUSK_ENGINE_API
 bool Initialize(int argc, char ** argv)
 {
+    cflags_t * flags = cflags_init();
+
+    bool help = false;
+    cflags_add_bool(flags, '\0', "help", &help, "Display this help and exit");
+
+    bool verbose = false;
+    cflags_add_bool(flags, 'v', "verbose", &verbose, "Enable verbose logging");
+
+    cflags_parse(flags, argc, argv);
+
+    if (help) {
+        cflags_print_usage(flags,
+            "[OPTION]...",
+            "Dusk game and simulation engine",
+            "Additional information about this library can be found at:\n"
+            "  https://github.com/WhoBrokeTheBuild/Dusk"
+        );
+    }
+
+    const char * envVerbose = getenv("DUSK_VERBOSE");
+
+    if (verbose || envVerbose) {
+        DuskLogInfo("Enabling verbose logging");
+        SetVerboseLoggingEnabled(true);
+    }
+
     InitMemoryTracking();
 
     PyImport_AppendInittab("Dusk", PyInit_Dusk);

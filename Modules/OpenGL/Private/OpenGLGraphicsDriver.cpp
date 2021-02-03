@@ -198,10 +198,12 @@ _OpenGLDebugMessageCallback(
             Log(LogLevel::Warning, "[WARN](OpenGLDebugMessage) %s\n", message);
             break;
 
-        #if defined(DUSK_ENABLE_VERBOSE_LOGGING)
+        #if defined(DUSK_BUILD_DEBUG)
 
             case GL_DEBUG_SEVERITY_NOTIFICATION:
-                Log(LogLevel::Verbose, "[VERB](OpenGLDebugMessage) %s\n", message);
+                if (IsVerboseLoggingEnabled()) {
+                    Log(LogLevel::Verbose, "[VERB](OpenGLDebugMessage) %s\n", message);
+                }
                 break;
                 
         #endif

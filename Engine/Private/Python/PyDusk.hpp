@@ -25,7 +25,7 @@ PyObject * PyDusk_GetApplicationVersion(PyObject * self, PyObject * args);
 
 PyObject * PyDusk_SetApplicationVersion(PyObject * self, PyObject * args);
 
-PyObject * PyDusk_LadModule(PyObject * self, PyObject * args);
+PyObject * PyDusk_LoadModule(PyObject * self, PyObject * args);
 
 PyMODINIT_FUNC PyInit_Dusk();
 

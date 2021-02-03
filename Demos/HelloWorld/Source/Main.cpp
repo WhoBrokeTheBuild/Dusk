@@ -28,16 +28,16 @@ void run()
     // Dusk::LoadModule("DuskGLTF2");
     // Dusk::LoadModule("DuskFreeType");
 
-    const char * graphicsDriver = getenv("DUSK_GRAPHICS_DRIVER");
+    const char * envGraphicsDriver = getenv("DUSK_GRAPHICS_DRIVER");
     
-    if (!graphicsDriver) {
-        graphicsDriver = "Vulkan";
+    if (!envGraphicsDriver) {
+        envGraphicsDriver = "Vulkan";
     }
 
-    if (strcmp(graphicsDriver, "OpenGL") == 0) {
+    if (strcmp(envGraphicsDriver, "OpenGL") == 0) {
         Dusk::LoadModule("DuskOpenGL");
     }
-    else if (strcmp(graphicsDriver, "DirectX") == 0) {
+    else if (strcmp(envGraphicsDriver, "DirectX") == 0) {
         Dusk::LoadModule("DuskDirectX");
     }
     else {

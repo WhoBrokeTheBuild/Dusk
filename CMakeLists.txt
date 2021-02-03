@@ -13,46 +13,18 @@ PROJECT(Dusk)
 INCLUDE(Version)
 
 ###
-### General Configuration
-###
-
-# Allow for custom organization of files in VisualStudio, Code::Blocks, etc.
-SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
-
-# Don't use the install RPATH when building
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-SET(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
-
-IF(MSVC)
-    # Disable Default Exception Handling
-    STRING(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-ENDIF()
-
-###
 ### Options
 ###
-
-OPTION(
-    VERBOSE_LOGGING
-    "Build Dusk with Verbose Logging"
-    OFF
-)
-IF(VERBOSE_LOGGING)
-    ADD_DEFINITIONS(-DDUSK_ENABLE_VERBOSE_LOGGING)
-ENDIF()
 
 OPTION(
     BUILD_TESTS
     "Build Tests"
     OFF
 )
-IF(BUILD_TESTS)
-    ENABLE_TESTING()
-ENDIF()
 
 OPTION(
     BUILD_DEMOS
-    "Build Demo Projects"
+    "Build Demo Projects. Enabling this will set BUILD_MODULES=All."
     ON
 )
 
@@ -69,11 +41,31 @@ OPTION(
 )
 
 ###
+### General Configuration
+###
+
+IF(BUILD_TESTS)
+    ENABLE_TESTING()
+ENDIF()
+
+# Allow for custom organization of files in VisualStudio, Code::Blocks, etc.
+SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
+
+# Don't use the install RPATH when building
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+SET(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
+
+IF(MSVC)
+    # Disable Default Exception Handling
+    STRING(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+ENDIF()
+
+###
 ### Modules and Dependencies
 ###
 
 SET(
-    MODULES 
+    BUILD_MODULES 
     "All" 
     CACHE STRING
     "Semicolon-separated list of required modules, use 'All' to build all modules"
@@ -94,13 +86,13 @@ IF(WIN32)
     LIST(APPEND AVAILABLE_MODULES "DirectX")
 ENDIF()
 
-IF(BUILD_DEMOS OR MODULES STREQUAL "All")
-    SET(MODULES "${AVAILABLE_MODULES}")
+IF(BUILD_DEMOS OR BUILD_MODULES STREQUAL "All")
+    SET(BUILD_MODULES "${AVAILABLE_MODULES}")
 ENDIF()
 
 # Filter requested modules that are not available
 SET(REQUIRED_MODULES "")
-FOREACH(_module ${MODULES})
+FOREACH(_module ${BUILD_MODULES})
     IF(${_module} IN_LIST AVAILABLE_MODULES)
         LIST(APPEND REQUIRED_MODULES ${_module})
     ELSE()
@@ -113,6 +105,7 @@ SET(REQUIRED_DEPENDENCIES
     "glm"
     "GSL"
     "nlohmann_json"
+    "cflags"
     "Python3"
 )
 
@@ -168,6 +161,7 @@ IF(BUILD_THIRDPARTY)
     # Set _ROOT variables for config-based packages
     SET(glm_ROOT            ${THIRDPARTY_BINARY_DIR}/glm/cmake)
     SET(nlohmann_json_ROOT  ${THIRDPARTY_BINARY_DIR}/nlohmann_json)
+    SET(cflags_ROOT         ${THIRDPARTY_BINARY_DIR}/cflags)
     SET(SDL2_ROOT           ${THIRDPARTY_BINARY_DIR}/SDL2)
     SET(OpenAL_ROOT         ${THIRDPARTY_BINARY_DIR}/OpenAL)
     SET(freetype_ROOT       ${THIRDPARTY_BINARY_DIR}/freetype)
@@ -233,6 +227,10 @@ ENDIF()
 
 IF("nlohmann_json" IN_LIST REQUIRED_DEPENDENCIES)
     FIND_PACKAGE(nlohmann_json CONFIG REQUIRED)
+ENDIF()
+
+IF("cflags" IN_LIST REQUIRED_DEPENDENCIES)
+    FIND_PACKAGE(cflags CONFIG REQUIRED)
 ENDIF()
 
 IF("Python3" IN_LIST REQUIRED_DEPENDENCIES)

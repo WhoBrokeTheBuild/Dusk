@@ -2,17 +2,38 @@
 
 namespace Dusk {
 
-PyObject * PyDusk_LogVerbose(PyObject * self, PyObject * args)
+PyObject * PyDusk_SetVerboseLoggingEnabled(PyObject * self, PyObject * args)
 {
-#if defined(DUSK_ENABLE_VERBOSE_LOGGING)
-    const char * msg;
+    bool enabled = false;
 
-    if (!PyArg_ParseTuple(args, "s", &msg)) {
+    if (!PyArg_ParseTuple(args, "b", &enabled)) {
+        PyErr_BadArgument();
         Py_RETURN_NONE;
     }
 
-    Log(LogLevel::Verbose, "[VERB](Py): %s\n", msg);
-#endif
+    SetVerboseLoggingEnabled(enabled);
+    Py_RETURN_NONE;
+}
+
+PyObject * PyDusk_IsVerboseLoggingEnabled(PyObject * self, PyObject * args)
+{
+    return PyBool_FromLong(IsVerboseLoggingEnabled());
+}
+    
+
+PyObject * PyDusk_LogVerbose(PyObject * self, PyObject * args)
+{
+    #if defined(DUSK_BUILD_DEBUG)
+        if (IsVerboseLoggingEnabled()) {
+            const char * msg;
+
+            if (!PyArg_ParseTuple(args, "s", &msg)) {
+                Py_RETURN_NONE;
+            }
+
+            Log(LogLevel::Verbose, "[VERB](Py): %s\n", msg);
+        }
+    #endif
 
     Py_RETURN_NONE;
 }

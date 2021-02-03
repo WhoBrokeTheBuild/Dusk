@@ -23,6 +23,15 @@ TARGET_LINK_LIBRARIES(
 
 FILE(
     GLOB_RECURSE
+    _shader_includes
+    Assets/Shaders/*.inc.glsl
+    Assets/Shaders/*.inc.hlsl
+)
+
+SET(ENGINE_SHADER_INCLUDES ${_shader_includes} PARENT_SCOPE)
+
+FILE(
+    GLOB_RECURSE
     _shaders_in
     Assets/Shaders/*.glsl
     Assets/Shaders/*.hlsl
@@ -37,7 +46,7 @@ LIST(APPEND ASSET_PATH
 
 SET(ASSET_PATH ${ASSET_PATH} PARENT_SCOPE)
 
-COMPILE_SHADERS("${_shaders_in}" _shaders_out)
+COMPILE_SHADERS("${_shader_includes}" "${_shaders_in}" _shaders_out)
 
 TARGET_SOURCES(
     ${_target}

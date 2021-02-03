@@ -1,5 +1,5 @@
 
-MACRO(COMPILE_SHADERS shaders_in shaders_out)
+MACRO(COMPILE_SHADERS shader_includes shaders_in shaders_out)
     IF(VulkanSDK_FOUND)
         FOREACH(file ${shaders_in})
             GET_FILENAME_COMPONENT(shader_ext ${file} LAST_EXT)
@@ -34,7 +34,7 @@ MACRO(COMPILE_SHADERS shaders_in shaders_out)
                 ADD_CUSTOM_COMMAND(
                     OUTPUT ${shader_out}
                     COMMAND ${VulkanSDK_glslc_PROGRAM} ${shader_cflags} -o ${shader_out} ${file}
-                    DEPENDS ${file}
+                    DEPENDS ${file} ${shader_includes}
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                 )
                 
@@ -93,7 +93,7 @@ MACRO(COMPILE_SHADERS shaders_in shaders_out)
                 ADD_CUSTOM_COMMAND(
                     OUTPUT ${shader_out}
                     COMMAND ${WindowsSDK_dxc_PROGRAM} ${shader_cflags} -Fo ${shader_out} ${file}
-                    DEPENDS ${file}
+                    DEPENDS ${file} ${shader_includes}
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                 )
 

@@ -46,6 +46,15 @@ MACRO(DEFINE_DEMO _target)
 
     FILE(
         GLOB_RECURSE
+        _shader_includes
+        Assets/Shaders/*.inc.glsl
+        Assets/Shaders/*.inc.hlsl
+    )
+
+    LIST(APPEND _shader_includes ${ENGINE_SHADER_INCLUDES})
+
+    FILE(
+        GLOB_RECURSE
         _shaders_in
         Assets/Shaders/*.glsl
         Assets/Shaders/*.hlsl
@@ -56,7 +65,7 @@ MACRO(DEFINE_DEMO _target)
         ${CMAKE_CURRENT_BINARY_DIR}/Assets/
     )
 
-    COMPILE_SHADERS("${_shaders_in}" _shaders_out)
+    COMPILE_SHADERS("${_shader_includes}" "${_shaders_in}" _shaders_out)
 
     ###
     ### Asset Processing

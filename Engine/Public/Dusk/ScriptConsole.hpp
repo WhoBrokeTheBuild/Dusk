@@ -59,6 +59,8 @@ private:
     static void HandleBackspace();
     static void HandleDelete();
 
+    static bool _initialized;
+
     static PyObject * _locals;
 
     static std::vector<string> _history;

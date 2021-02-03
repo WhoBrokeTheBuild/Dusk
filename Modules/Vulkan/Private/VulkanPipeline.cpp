@@ -35,11 +35,20 @@ bool VulkanPipeline::Initialize()
     VkExtent2D extent = gfx->GetSwapChainExtent();
 
     VkViewport viewport = {
+        .x = 0,
+        .y = static_cast<float>(extent.height),
         .width = static_cast<float>(extent.width),
-        .height = static_cast<float>(extent.height),
+        .height = -1.0f * static_cast<float>(extent.height),
         .minDepth = 0.0f,
         .maxDepth = 1.0f,
     };
+
+    DuskLogInfo("%f %f %f %f",
+        viewport.x,
+        viewport.y,
+        viewport.width,
+        viewport.height
+    );
 
     VkRect2D scissor = {
         .offset = { 0, 0 },

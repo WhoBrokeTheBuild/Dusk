@@ -13,8 +13,6 @@ Camera::Camera()
     SetAspect(size);
     SetViewportSize(size);
 
-    _flipY = gfx->IsYFlipped();
-
     _windowResizedEventHandlerID = gfx->WindowResizedEvent.AddListener(
         [=](const WindowResizedEventData * data) {
             SetAspect(data->Size);
@@ -47,11 +45,6 @@ mat4 Camera::GetProjection() const
     else if (_mode == CameraMode::Orthographic) {
         const auto& view = GetViewport();
         projection = glm::ortho(view[0], view[1], view[2], view[3], _clip[0], _clip[1]);
-    }
-
-    if (_flipY) {
-        // TODO: Investigate
-        projection = glm::scale(projection, { -1.0f, -1.0f, 1.0f });
     }
 
     return projection;

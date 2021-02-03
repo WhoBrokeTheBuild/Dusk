@@ -462,15 +462,6 @@ std::vector<const char *> VulkanGraphicsDriver::GetRequiredLayers()
 
     #endif
 
-    #if defined(DUSK_ENABLE_RENDERDOC)
-
-        it = _vkAvailableLayers.find("VK_LAYER_RENDERDOC_Capture");
-        if (it != _vkAvailableLayers.end()) {
-            requiredLayers.push_back("VK_LAYER_RENDERDOC_Capture");
-        }
-
-    #endif
-
     return requiredLayers;
 }
 

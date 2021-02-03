@@ -110,10 +110,6 @@ public:
         return _shaderGlobalsBuffer;
     }
 
-    virtual bool IsYFlipped() const {
-        return false;
-    }
-
 protected:
 
     virtual void UpdateWindowTitle(const string& title) = 0;

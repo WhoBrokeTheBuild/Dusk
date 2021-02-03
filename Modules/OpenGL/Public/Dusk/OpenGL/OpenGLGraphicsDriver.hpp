@@ -49,10 +49,6 @@ public:
 
     std::shared_ptr<Primitive> CreatePrimitive() override;
 
-    bool IsYFlipped() const override {
-        return true;
-    }
-
 private:
 
     void BindUniformBufferObjects();

@@ -8,6 +8,8 @@
 
 namespace Dusk {
 
+bool ScriptConsole::_initialized = false;
+
 PyObject * ScriptConsole::_locals = nullptr;
 
 std::vector<string> ScriptConsole::_history;
@@ -28,11 +30,11 @@ int ScriptConsole::_index = 0;
 
 void ScriptConsole::Initialize()
 {
-#if defined(DUSK_ENABLE_RENDERDOC)
-    return;
-#endif
-
 #if defined(DUSK_PLATFORM_WINDOWS)
+
+    if (!_isatty(_fileno(stdin))) {
+        return;
+    }
 
     _stdinHandle = GetStdHandle(STD_INPUT_HANDLE);
     _stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -45,6 +47,10 @@ void ScriptConsole::Initialize()
     SetConsoleMode(_stdoutHandle, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
 
 #else
+
+    if (!isatty(STDIN_FILENO)) {
+        return;
+    }
 
     struct termios tmp;
 
@@ -67,14 +73,16 @@ void ScriptConsole::Initialize()
 
     printf(">>> ");
     fflush(stdout);
+
+    _initialized = true;
 }
 
 void ScriptConsole::Terminate()
 {
-#if defined(DUSK_ENABLE_RENDERDOC)
-    return;
-#endif
-
+    if (!_initialized) {
+        return;
+    }
+    
     Py_XDECREF(_locals);
 
 #if !defined(DUSK_PLATFORM_WINDOWS)
@@ -82,13 +90,15 @@ void ScriptConsole::Terminate()
     tcsetattr(STDIN_FILENO, TCSANOW, &_termios);
 
 #endif
+
+    _initialized = false;
 }
 
 void ScriptConsole::Update()
 {
-#if defined(DUSK_ENABLE_RENDERDOC)
-    return;
-#endif
+    if (!_initialized) {
+        return;
+    }
 
 #if defined(DUSK_PLATFORM_WINDOWS)
 
@@ -113,7 +123,7 @@ void ScriptConsole::Update()
     FD_ZERO(&fds);
     FD_SET(STDIN_FILENO, &fds);
 
-    while (select(1, &fds, NULL, NULL, &tv)) {
+    while (select(1, &fds, NULL, NULL, &tv) > 0) {
         ReadNextCharacter();
     }
 
@@ -122,6 +132,10 @@ void ScriptConsole::Update()
 
 void ScriptConsole::ReadNextCharacter()
 {
+    if (!_initialized) {
+        return;
+    }
+
     // TODO: Support UTF-8
     
     unsigned char c;
@@ -280,6 +294,10 @@ void ScriptConsole::ReadNextCharacter()
 
 bool ScriptConsole::RunCommand(const string& command)
 {
+    if (!_initialized) {
+        return false;
+    }
+
     if (command[0] == '#') {
         return true;
     }
@@ -321,6 +339,10 @@ bool ScriptConsole::RunCommand(const string& command)
 
 void ScriptConsole::JumpCursorLeft()
 {
+    if (!_initialized) {
+        return;
+    }
+
     const auto& str = GetCurrentLine();
 
     if (_cursor == 0) {
@@ -344,6 +366,10 @@ void ScriptConsole::JumpCursorLeft()
 
 void ScriptConsole::JumpCursorRight()
 {
+    if (!_initialized) {
+        return;
+    }
+    
     const auto& str = GetCurrentLine();
 
     if (_cursor == str.length()) {
@@ -367,6 +393,10 @@ void ScriptConsole::JumpCursorRight()
 
 void ScriptConsole::MoveCursorLeft(int amount)
 {
+    if (!_initialized) {
+        return;
+    }
+    
     amount = std::clamp(amount, 0, _cursor);
     if (amount > 0) {
         printf("\033[%dD", amount);
@@ -377,6 +407,10 @@ void ScriptConsole::MoveCursorLeft(int amount)
 
 void ScriptConsole::MoveCursorRight(int amount)
 {
+    if (!_initialized) {
+        return;
+    }
+    
     int maxLen = static_cast<int>(GetCurrentLine().size());
     amount = std::clamp(amount, 0, maxLen - _cursor);
     if (amount > 0) {
@@ -388,6 +422,10 @@ void ScriptConsole::MoveCursorRight(int amount)
 
 void ScriptConsole::HandleUp()
 {
+    if (!_initialized) {
+        return;
+    }
+    
     if (_index > 0) {
         --_index;
 
@@ -409,6 +447,10 @@ void ScriptConsole::HandleUp()
 
 void ScriptConsole::HandleDown()
 {
+    if (!_initialized) {
+        return;
+    }
+    
     if (_index < _history.size() - 1) {
         ++_index;
 
@@ -430,6 +472,10 @@ void ScriptConsole::HandleDown()
 
 void ScriptConsole::HandleRight(bool ctrl)
 {
+    if (!_initialized) {
+        return;
+    }
+    
     if (_cursor < GetCurrentLine().size()) {
         if (ctrl) {
             JumpCursorRight();
@@ -442,6 +488,10 @@ void ScriptConsole::HandleRight(bool ctrl)
 
 void ScriptConsole::HandleLeft(bool ctrl)
 {
+    if (!_initialized) {
+        return;
+    }
+    
     if (_cursor > 0) {
         if (ctrl) {
             JumpCursorLeft();
@@ -454,16 +504,28 @@ void ScriptConsole::HandleLeft(bool ctrl)
 
 void ScriptConsole::HandleHome()
 {
+    if (!_initialized) {
+        return;
+    }
+    
     MoveCursorLeft(_cursor);
 }
 
 void ScriptConsole::HandleEnd()
 {
+    if (!_initialized) {
+        return;
+    }
+    
     MoveCursorRight(_history.back().size() - _cursor);
 }
 
 void ScriptConsole::HandleBackspace()
 {
+    if (!_initialized) {
+        return;
+    }
+    
     if (_cursor > 0) {
         printf("\010\033[K");
         fflush(stdout);
@@ -488,8 +550,10 @@ void ScriptConsole::HandleBackspace()
 
 void ScriptConsole::HandleDelete()
 {
-    // Helo
-    //   ^ 
+    if (!_initialized) {
+        return;
+    }
+    
     if (_cursor < GetCurrentLine().size()) {
         printf("\033[K");
         fflush(stdout);

@@ -42,15 +42,6 @@ IF(VERBOSE_LOGGING)
 ENDIF()
 
 OPTION(
-    RENDERDOC
-    "Build Dusk with RenderDoc Support"
-    OFF
-)
-IF(RENDERDOC)
-    ADD_DEFINITIONS(-DDUSK_ENABLE_RENDERDOC)
-ENDIF()
-
-OPTION(
     BUILD_TESTS
     "Build Tests"
     OFF

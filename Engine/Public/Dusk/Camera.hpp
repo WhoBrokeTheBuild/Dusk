@@ -93,8 +93,6 @@ private:
 
     CameraMode _mode = CameraMode::Perspective;
 
-    bool _flipY = false;
-
     vec2 _clip = { 0.1f, 10000.f };
 
     vec3 _up = GetWorldUp();

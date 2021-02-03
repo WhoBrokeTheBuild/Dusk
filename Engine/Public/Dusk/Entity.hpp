@@ -16,14 +16,13 @@ namespace Dusk {
 
 DUSK_ENGINE_API
 constexpr vec3 GetWorldUp() {
-    return { 0.f, -1.f, 0.f };
+    return { 0.f, 1.f, 0.f };
 }
 
 DUSK_ENGINE_API 
 constexpr vec3 GetWorldForward() {
     return { 0.f, 0.f, -1.f };
 }
-
 
 class DUSK_ENGINE_API Entity : public Object
 {

@@ -1,103 +1,103 @@
 
-MACRO(COMPILE_SHADERS shader_includes shaders_in shaders_out)
+MACRO(COMPILE_SHADERS _shader_includes _shaders_in _shaders_out)
     IF(VulkanSDK_FOUND)
-        FOREACH(file ${shaders_in})
-            GET_FILENAME_COMPONENT(shader_ext ${file} LAST_EXT)
-            IF(shader_ext STREQUAL ".glsl")
-                GET_FILENAME_COMPONENT(shader_name ${file} NAME_WLE)
-                GET_FILENAME_COMPONENT(shader_path ${file} DIRECTORY)
+        FOREACH(file ${_shaders_in})
+            GET_FILENAME_COMPONENT(_shader_ext ${file} LAST_EXT)
+            IF(_shader_ext STREQUAL ".glsl")
+                GET_FILENAME_COMPONENT(_shader_name ${file} NAME_WLE)
+                GET_FILENAME_COMPONENT(_shader_path ${file} DIRECTORY)
                 STRING(REPLACE 
                     ${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
-                    shader_out_path
-                    ${shader_path}
+                    _shader_out_path
+                    ${_shader_path}
                 )
 
-                FILE(MAKE_DIRECTORY ${shader_out_path})
+                FILE(MAKE_DIRECTORY ${_shader_out_path})
 
-                SET(shader_cflags "")
-                FOREACH(dir ${ASSET_PATH})
-                    SET(shader_cflags ${shader_cflags} -I"${dir}/Shaders/")
+                SET(_shader_cflags "")
+                FOREACH(dir ${DUSK_ASSET_PATH})
+                    SET(_shader_cflags ${_shader_cflags} -I"${dir}/Shaders/")
                 ENDFOREACH()
 
-                SET(shader_out "${shader_out_path}/${shader_name}.spv")
+                SET(_shader_out "${_shader_out_path}/${_shader_name}.spv")
 
-                GET_FILENAME_COMPONENT(shader_type ${shader_name} LAST_EXT)
-                STRING(SUBSTRING ${shader_type} 1 -1 shader_type)
+                GET_FILENAME_COMPONENT(_shader_type ${_shader_name} LAST_EXT)
+                STRING(SUBSTRING ${_shader_type} 1 -1 _shader_type)
 
-                IF(shader_type STREQUAL "inc")
+                IF(_shader_type STREQUAL "inc")
                     CONTINUE()
                 ELSE()
-                    SET(shader_cflags ${shader_cflags} -fshader-stage=${shader_type})
+                    SET(_shader_cflags ${_shader_cflags} -fshader-stage=${_shader_type})
                 ENDIF()
 
                 ADD_CUSTOM_COMMAND(
-                    OUTPUT ${shader_out}
-                    COMMAND ${VulkanSDK_glslc_PROGRAM} ${shader_cflags} -o ${shader_out} ${file}
-                    DEPENDS ${file} ${shader_includes}
+                    OUTPUT ${_shader_out}
+                    COMMAND ${VulkanSDK_glslc_PROGRAM} ${_shader_cflags} -o ${_shader_out} ${file}
+                    DEPENDS ${file} ${_shader_includes}
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                 )
                 
-                LIST(APPEND ${shaders_out} ${shader_out})
+                LIST(APPEND ${_shaders_out} ${_shader_out})
             ENDIF()
         ENDFOREACH()
     ENDIF()
 
     IF(WindowsSDK_FOUND)
-        FOREACH(file ${shaders_in})
+        FOREACH(file ${_shaders_in})
             FILE(TO_NATIVE_PATH "${file}" file)
             
-            GET_FILENAME_COMPONENT(shader_ext ${file} LAST_EXT)
-            IF(shader_ext STREQUAL ".hlsl")
-                GET_FILENAME_COMPONENT(shader_name ${file} NAME_WLE)
-                GET_FILENAME_COMPONENT(shader_path ${file} DIRECTORY)
+            GET_FILENAME_COMPONENT(_shader_ext ${file} LAST_EXT)
+            IF(_shader_ext STREQUAL ".hlsl")
+                GET_FILENAME_COMPONENT(_shader_name ${file} NAME_WLE)
+                GET_FILENAME_COMPONENT(_shader_path ${file} DIRECTORY)
                 STRING(REPLACE 
                     ${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
-                    shader_out_path
-                    ${shader_path}
+                    _shader_out_path
+                    ${_shader_path}
                 )
 
-                FILE(MAKE_DIRECTORY ${shader_out_path})
+                FILE(MAKE_DIRECTORY ${_shader_out_path})
 
-                SET(shader_cflags "")
-                FOREACH(dir ${ASSET_PATH})
+                SET(_shader_cflags "")
+                FOREACH(dir ${DUSK_ASSET_PATH})
                     FILE(TO_NATIVE_PATH "${dir}" dir)
-                    SET(shader_cflags ${shader_cflags} -I"${dir}/Shaders/")
+                    SET(_shader_cflags ${_shader_cflags} -I"${dir}/Shaders/")
                 ENDFOREACH()
 
-                SET(shader_out "${shader_out_path}/${shader_name}.cso")
+                SET(_shader_out "${_shader_out_path}/${_shader_name}.cso")
 
-                GET_FILENAME_COMPONENT(shader_type ${shader_name} LAST_EXT)
-                STRING(SUBSTRING ${shader_type} 1 -1 shader_type)
+                GET_FILENAME_COMPONENT(_shader_type ${_shader_name} LAST_EXT)
+                STRING(SUBSTRING ${_shader_type} 1 -1 _shader_type)
 
                 # Use row-major matricies
-                SET(shader_cflags ${shader_cflags} -Zpc)
+                SET(_shader_cflags ${_shader_cflags} -Zpc)
 
-                IF(shader_type STREQUAL "inc")
+                IF(_shader_type STREQUAL "inc")
                     CONTINUE()
-                ELSEIF(shader_type STREQUAL "vert" OR shader_type STREQUAL "vertex")
-                    SET(shader_cflags ${shader_cflags} -T vs_6_0 -E VSMain)
-                ELSEIF(shader_type STREQUAL "frag" OR shader_type STREQUAL "fragment" OR shader_type STREQUAL "pixel")
-                    SET(shader_cflags ${shader_cflags} -T ps_6_0 -E PSMain)
-                ELSEIF(shader_type STREQUAL "hull")
-                    SET(shader_cflags ${shader_cflags} -T hs_6_0 -E HSMain)
-                ELSEIF(shader_type STREQUAL "domain")
-                    SET(shader_cflags ${shader_cflags} -T ds_6_0 -E DSMain)
-                ELSEIF(shader_type STREQUAL "geom" OR shader_type STREQUAL "geometry")
-                    SET(shader_cflags ${shader_cflags} -T gs_6_0 -E GSMain)
-                ELSEIF(shader_type STREQUAL "comp" OR shader_type STREQUAL "compute")
-                    SET(shader_cflags ${shader_cflags} -T cs_6_0 -E CSMain)
+                ELSEIF(_shader_type STREQUAL "vert" OR _shader_type STREQUAL "vertex")
+                    SET(_shader_cflags ${_shader_cflags} -T vs_6_0 -E VSMain)
+                ELSEIF(_shader_type STREQUAL "frag" OR _shader_type STREQUAL "fragment" OR _shader_type STREQUAL "pixel")
+                    SET(_shader_cflags ${_shader_cflags} -T ps_6_0 -E PSMain)
+                ELSEIF(_shader_type STREQUAL "hull")
+                    SET(_shader_cflags ${_shader_cflags} -T hs_6_0 -E HSMain)
+                ELSEIF(_shader_type STREQUAL "domain")
+                    SET(_shader_cflags ${_shader_cflags} -T ds_6_0 -E DSMain)
+                ELSEIF(_shader_type STREQUAL "geom" OR _shader_type STREQUAL "geometry")
+                    SET(_shader_cflags ${_shader_cflags} -T gs_6_0 -E GSMain)
+                ELSEIF(_shader_type STREQUAL "comp" OR _shader_type STREQUAL "compute")
+                    SET(_shader_cflags ${_shader_cflags} -T cs_6_0 -E CSMain)
                 ENDIF()
 
                 ADD_CUSTOM_COMMAND(
-                    OUTPUT ${shader_out}
-                    COMMAND ${WindowsSDK_dxc_PROGRAM} ${shader_cflags} -Fo ${shader_out} ${file}
-                    DEPENDS ${file} ${shader_includes}
+                    OUTPUT ${_shader_out}
+                    COMMAND ${WindowsSDK_dxc_PROGRAM} ${_shader_cflags} -Fo ${_shader_out} ${file}
+                    DEPENDS ${file} ${_shader_includes}
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                 )
 
-                LIST(APPEND ${shaders_out} ${shader_out})
+                LIST(APPEND ${_shaders_out} ${_shader_out})
             ENDIF()
         ENDFOREACH()
     ENDIF()

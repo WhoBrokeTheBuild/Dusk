@@ -51,7 +51,7 @@ MACRO(DEFINE_DEMO _target)
         Assets/Shaders/*.inc.hlsl
     )
 
-    LIST(APPEND _shader_includes ${ENGINE_SHADER_INCLUDES})
+    LIST(APPEND _shader_includes ${DUSK_ENGINE_SHADER_INCLUDES})
 
     FILE(
         GLOB_RECURSE
@@ -60,7 +60,7 @@ MACRO(DEFINE_DEMO _target)
         Assets/Shaders/*.hlsl
     )
 
-    LIST(INSERT ASSET_PATH 0
+    LIST(INSERT DUSK_ASSET_PATH 0
         ${CMAKE_CURRENT_SOURCE_DIR}/Assets/
         ${CMAKE_CURRENT_BINARY_DIR}/Assets/
     )
@@ -115,7 +115,7 @@ MACRO(DEFINE_DEMO _target)
             ${CMAKE_CURRENT_BINARY_DIR}/Source
     )
 
-    STRING(LENGTH "${CMAKE_SOURCE_DIR}/" SOURCE_PATH_LENGTH)
+    STRING(LENGTH "${CMAKE_SOURCE_DIR}/" _source_path_length)
 
     TARGET_COMPILE_DEFINITIONS(
         ${_target}
@@ -123,7 +123,7 @@ MACRO(DEFINE_DEMO _target)
             # Disable VS "not secure" warnings
             $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
         PRIVATE
-            DUSK_SOURCE_PATH_LENGTH=${SOURCE_PATH_LENGTH}
+            DUSK_SOURCE_PATH_LENGTH=${_source_path_length}
     )
 
     TARGET_COMPILE_OPTIONS(
@@ -161,11 +161,11 @@ MACRO(DEFINE_DEMO _target)
         DESTINATION bin
     )
 
-    FILE(RELATIVE_PATH folder ${CMAKE_SOURCE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/..")
+    FILE(RELATIVE_PATH _folder ${CMAKE_SOURCE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/..")
     SET_TARGET_PROPERTIES(
         ${_target}
         PROPERTIES
-            FOLDER "${folder}"
+            FOLDER "${_folder}"
     )
 
     IF(MSVC)
@@ -173,12 +173,12 @@ MACRO(DEFINE_DEMO _target)
             ${_target}
             PROPERTIES 
                 VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                VS_DEBUGGER_ENVIRONMENT "PATH=${RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${RUNTIME_SEARCH_PATH_DEBUG};>$<$<CONFIG:Release>:${RUNTIME_SEARCH_PATH_RELEASE};>$ENV{PATH}\nDUSK_ASSET_PATH=${ASSET_PATH}"
+                VS_DEBUGGER_ENVIRONMENT "PATH=${DUSK_RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${DUSK_RUNTIME_SEARCH_PATH_DEBUG};>$<$<CONFIG:Release>:${DUSK_RUNTIME_SEARCH_PATH_RELEASE};>$ENV{PATH}\nDUSK_ASSET_PATH=${DUSK_ASSET_PATH}"
         )
 
         ADD_CUSTOM_TARGET(
             run-${_target}
-            COMMAND ${CMAKE_COMMAND} -E env "PATH=${RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${RUNTIME_SEARCH_PATH_DEBUG};>$<$<CONFIG:Release>:${RUNTIME_SEARCH_PATH_RELEASE};>$ENV{PATH}" "DUSK_ASSET_PATH=${ASSET_PATH}" $<TARGET_FILE:${_target}>
+            COMMAND ${CMAKE_COMMAND} -E env "PATH=${DUSK_RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${DUSK_RUNTIME_SEARCH_PATH_DEBUG};>$<$<CONFIG:Release>:${DUSK_RUNTIME_SEARCH_PATH_RELEASE};>$ENV{PATH}" "DUSK_ASSET_PATH=${DUSK_ASSET_PATH}" $<TARGET_FILE:${_target}>
             DEPENDS ${_target}
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         )
@@ -194,15 +194,15 @@ MACRO(DEFINE_DEMO _target)
             SET(_launch_json ${CMAKE_SOURCE_DIR}/.vscode/launch.json)
             SET(_graphics_drivers "")
 
-            IF("OpenGL" IN_LIST REQUIRED_MODULES)
+            IF("OpenGL" IN_LIST DUSK_REQUIRED_MODULES)
                 LIST(APPEND _graphics_drivers "OpenGL")
             ENDIF()
 
-            IF("Vulkan" IN_LIST REQUIRED_MODULES)
+            IF("Vulkan" IN_LIST DUSK_REQUIRED_MODULES)
                 LIST(APPEND _graphics_drivers "Vulkan")
             ENDIF()
 
-            IF("DirectX" IN_LIST REQUIRED_MODULES)
+            IF("DirectX" IN_LIST DUSK_REQUIRED_MODULES)
                 LIST(APPEND _graphics_drivers "DirectX")
             ENDIF()
 
@@ -210,17 +210,17 @@ MACRO(DEFINE_DEMO _target)
                 ADD_CUSTOM_COMMAND(
                     TARGET ${_target} POST_BUILD
                     BYPRODUCTS ${_launch_json}
-                    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Scripts/add-vscode-launch-target.py ${_launch_json} "${_target} (${_driver}, $<CONFIG>)" $<TARGET_FILE:${_target}> ${CMAKE_CURRENT_BINARY_DIR} "PATH=${RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${RUNTIME_SEARCH_PATH_DEBUG};>$<$<CONFIG:Release>:${RUNTIME_SEARCH_PATH_RELEASE};>$ENV{PATH}" "DUSK_ASSET_PATH=${ASSET_PATH}" "DUSK_GRAPHICS_DRIVER=${_driver}"
+                    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Scripts/add-vscode-launch-target.py ${_launch_json} "${_target} (${_driver}, $<CONFIG>)" $<TARGET_FILE:${_target}> ${CMAKE_CURRENT_BINARY_DIR} "PATH=${DUSK_RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${DUSK_RUNTIME_SEARCH_PATH_DEBUG};>$<$<CONFIG:Release>:${DUSK_RUNTIME_SEARCH_PATH_RELEASE};>$ENV{PATH}" "DUSK_ASSET_PATH=${DUSK_ASSET_PATH}" "DUSK_GRAPHICS_DRIVER=${_driver}"
                 )
             ENDFOREACH()
         ENDIF()
     ELSE()
-        STRING(JOIN ":" LD_LIBRARY_PATH ${RUNTIME_SEARCH_PATH})
-        STRING(JOIN ":" ASSET_PATH ${ASSET_PATH})
+        STRING(JOIN ":" LD_LIBRARY_PATH ${DUSK_RUNTIME_SEARCH_PATH})
+        STRING(JOIN ":" DUSK_ASSET_PATH ${DUSK_ASSET_PATH})
         
         ADD_CUSTOM_TARGET(
             run-${_target}
-            COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${ASSET_PATH}" $<TARGET_FILE:${_target}>
+            COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${DUSK_ASSET_PATH}" $<TARGET_FILE:${_target}>
             DEPENDS ${_target}
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         )
@@ -234,7 +234,7 @@ MACRO(DEFINE_DEMO _target)
         IF(gdb_COMMAND)
             ADD_CUSTOM_TARGET(
                 gdb-${_target}
-                COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${ASSET_PATH}" gdb --args $<TARGET_FILE:${_target}>
+                COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${DUSK_ASSET_PATH}" gdb --args $<TARGET_FILE:${_target}>
                 DEPENDS ${_target}
                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             )
@@ -249,7 +249,7 @@ MACRO(DEFINE_DEMO _target)
         IF(valgrind_COMMAND)
             ADD_CUSTOM_TARGET(
                 valgrind-${_target}
-                COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${ASSET_PATH}" valgrind $<TARGET_FILE:${_target}>
+                COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${DUSK_ASSET_PATH}" valgrind $<TARGET_FILE:${_target}>
                 DEPENDS ${_target}
                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             )
@@ -265,11 +265,11 @@ MACRO(DEFINE_DEMO _target)
             SET(_launch_json ${CMAKE_SOURCE_DIR}/.vscode/launch.json)
             SET(_graphics_drivers "")
 
-            IF("OpenGL" IN_LIST REQUIRED_MODULES)
+            IF("OpenGL" IN_LIST DUSK_REQUIRED_MODULES)
                 LIST(APPEND _graphics_drivers "OpenGL")
             ENDIF()
 
-            IF("Vulkan" IN_LIST REQUIRED_MODULES)
+            IF("Vulkan" IN_LIST DUSK_REQUIRED_MODULES)
                 LIST(APPEND _graphics_drivers "Vulkan")
             ENDIF()
 
@@ -277,7 +277,7 @@ MACRO(DEFINE_DEMO _target)
                 ADD_CUSTOM_COMMAND(
                     TARGET ${_target} POST_BUILD
                     BYPRODUCTS ${_launch_json}
-                    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Scripts/add-vscode-launch-target.py ${_launch_json} "${_target} \\(${_driver}\\)" $<TARGET_FILE:${_target}> ${CMAKE_CURRENT_BINARY_DIR} "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${ASSET_PATH}" "DUSK_GRAPHICS_DRIVER=${_driver}"
+                    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Scripts/add-vscode-launch-target.py ${_launch_json} "${_target} \\(${_driver}\\)" $<TARGET_FILE:${_target}> ${CMAKE_CURRENT_BINARY_DIR} "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${DUSK_ASSET_PATH}" "DUSK_GRAPHICS_DRIVER=${_driver}"
                 )
             ENDFOREACH()
         ENDIF()

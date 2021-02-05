@@ -90,7 +90,7 @@ IF("cflags" IN_LIST DUSK_REQUIRED_DEPENDENCIES)
 
     IF(NOT cflags_FOUND)
         ExternalProject_Add(
-            ThirdParty_GSL
+            ThirdParty_cflags
             URL                 "https://github.com/WhoBrokeTheBuild/cflags/archive/v2.0.1.zip"
             URL_HASH            MD5=957b2e6a481efd96c0ce72f291176cb4
             SOURCE_DIR          ${GSL_SOURCE_DIR}

@@ -92,22 +92,7 @@ void VulkanGraphicsDriver::Terminate()
         vkDeviceWaitIdle(_vkDevice);
     }
 
-    // TermSyncObjects
-
-    for (auto fence : _vkInFlightFences) {
-        vkDestroyFence(_vkDevice, fence, nullptr);
-        fence = nullptr;
-    }
-
-    for (auto semaphore : _vkRenderingFinishedSemaphores) {
-        vkDestroySemaphore(_vkDevice, semaphore, nullptr);
-        semaphore = nullptr;
-    }
-
-    for (auto semaphore : _vkImageAvailableSemaphores) {
-        vkDestroySemaphore(_vkDevice, semaphore, nullptr);
-        semaphore = nullptr;
-    }
+    TermSyncObjects();
 
     TermSwapChain();
 
@@ -253,11 +238,8 @@ DUSK_VULKAN_API
 std::shared_ptr<Pipeline> VulkanGraphicsDriver::CreatePipeline(std::shared_ptr<Shader> shader)
 {
     auto ptr = std::shared_ptr<Pipeline>(New VulkanPipeline());
-    ptr->SetShader(shader);
-    // ptr->Initialize();
+    ptr->Initialize(shader);
     _pipelineList.push_back(ptr);
-
-    ResetSwapChain();
     return ptr;
 }
 
@@ -271,6 +253,7 @@ DUSK_VULKAN_API
 std::shared_ptr<Shader> VulkanGraphicsDriver::CreateShader()
 {
     auto ptr = std::shared_ptr<Shader>(New VulkanShader());
+    // ptr->Initialize();
     _shaderList.push_back(ptr);
     return ptr;
 }
@@ -279,7 +262,10 @@ DUSK_VULKAN_API
 std::shared_ptr<Mesh> VulkanGraphicsDriver::CreateMesh()
 {
     auto ptr = std::shared_ptr<Mesh>(New VulkanMesh());
+    ptr->Initialize();
     _meshList.push_back(ptr);
+
+    // Reset swap chain?
     return ptr;
 }
 
@@ -291,52 +277,7 @@ std::shared_ptr<Primitive> VulkanGraphicsDriver::CreatePrimitive()
     return ptr;
 }
 
-uint32_t VulkanGraphicsDriver::FindMemoryType(uint32_t filter, VkMemoryPropertyFlags props)
-{
-    VkPhysicalDeviceMemoryProperties memoryProperties;
-    vkGetPhysicalDeviceMemoryProperties(_vkPhysicalDevice, &memoryProperties);
-
-    for (unsigned i = 0; i < memoryProperties.memoryTypeCount; ++i) {
-        if ((filter & (1 << i)) && 
-            (memoryProperties.memoryTypes[i].propertyFlags & props) == props) {
-            return i;
-        }
-    }
-
-    DuskLogError("Failed to find suitable memory type");
-    return UINT32_MAX;
-}
-
-bool VulkanGraphicsDriver::CreateBuffer(VkBuffer * buffer, VmaAllocation * vmaAllocation, VkDeviceSize size, VkBufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage)
-{
-    VkResult vkResult;
-    
-    VkBufferCreateInfo bufferCreateInfo = {
-        .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-        .pNext = nullptr,
-        .flags = 0,
-        .size = size,
-        .usage = bufferUsage,
-        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-    };
-
-    VmaAllocationCreateInfo allocationCreateInfo = {
-        .flags = VMA_ALLOCATION_CREATE_MAPPED_BIT,
-        .usage = memoryUsage,
-    };
-
-    VmaAllocationInfo allocationInfo = {
-    };
-
-    vkResult = vmaCreateBuffer(_vmaAllocator, &bufferCreateInfo, &allocationCreateInfo, buffer, vmaAllocation, &allocationInfo);
-    if (vkResult != VK_SUCCESS) {
-        DuskLogError("Failed to create buffer");
-        return false;
-    }
-
-    return true;
-}
-
+DUSK_VULKAN_API
 bool VulkanGraphicsDriver::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 {
     VkResult vkResult;
@@ -392,6 +333,7 @@ bool VulkanGraphicsDriver::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, Vk
     return true;
 }
 
+DUSK_VULKAN_API
 bool VulkanGraphicsDriver::CreateDescriptorSet(VkDescriptorSet * descriptorSet)
 {
     VkResult vkResult;
@@ -435,6 +377,7 @@ bool VulkanGraphicsDriver::CreateDescriptorSet(VkDescriptorSet * descriptorSet)
     return true;
 }
 
+DUSK_VULKAN_API
 bool VulkanGraphicsDriver::IsDeviceSuitable(const VkPhysicalDevice device)
 {
     vkGetPhysicalDeviceProperties(device, &_vkPhysicalDeviceProperties);
@@ -449,6 +392,7 @@ bool VulkanGraphicsDriver::IsDeviceSuitable(const VkPhysicalDevice device)
         && _vkPhysicalDeviceFeatures.geometryShader;
 }
 
+DUSK_VULKAN_API
 std::vector<const char *> VulkanGraphicsDriver::GetRequiredLayers()
 {
     std::vector<const char *> requiredLayers = { };
@@ -465,6 +409,7 @@ std::vector<const char *> VulkanGraphicsDriver::GetRequiredLayers()
     return requiredLayers;
 }
 
+DUSK_VULKAN_API
 std::vector<const char *> VulkanGraphicsDriver::GetRequiredDeviceExtensions()
 {
     std::vector<const char *> requiredExtensions = {
@@ -494,6 +439,7 @@ std::vector<const char *> VulkanGraphicsDriver::GetRequiredDeviceExtensions()
     return requiredExtensions;
 }
 
+DUSK_VULKAN_API
 std::vector<const char *> VulkanGraphicsDriver::GetRequiredInstanceExtensions()
 {
     SDL_bool sdlResult;
@@ -608,6 +554,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL _VulkanDebugMessageCallback(
     return VK_FALSE;
 }
 
+DUSK_VULKAN_API
 bool VulkanGraphicsDriver::InitInstance()
 {
     VkResult vkResult;
@@ -761,6 +708,7 @@ bool VulkanGraphicsDriver::InitInstance()
     return true;
 }
 
+DUSK_VULKAN_API
 void VulkanGraphicsDriver::TermInstance()
 {
     if (!_vkInstance) {
@@ -769,6 +717,7 @@ void VulkanGraphicsDriver::TermInstance()
     }
 }
 
+DUSK_VULKAN_API
 bool VulkanGraphicsDriver::InitDebugUtilsMessenger()
 {
     VkResult vkResult;
@@ -817,6 +766,7 @@ bool VulkanGraphicsDriver::InitDebugUtilsMessenger()
     return true;
 }
 
+DUSK_VULKAN_API
 void VulkanGraphicsDriver::TermDebugUtilsMessenger()
 {
     if (!_vkDebugMessenger) {
@@ -831,6 +781,7 @@ void VulkanGraphicsDriver::TermDebugUtilsMessenger()
     vkDestroyDebugUtilsMessengerEXT(_vkInstance, _vkDebugMessenger, nullptr);
 }
 
+DUSK_VULKAN_API
 bool VulkanGraphicsDriver::InitSurface()
 {
     SDL_bool sdlResult;
@@ -844,6 +795,7 @@ bool VulkanGraphicsDriver::InitSurface()
     return true;
 }
 
+DUSK_VULKAN_API
 void VulkanGraphicsDriver::TermSurface()
 {
     if (_vkSurface) {
@@ -852,6 +804,7 @@ void VulkanGraphicsDriver::TermSurface()
     }
 }
 
+DUSK_VULKAN_API
 bool VulkanGraphicsDriver::InitPhysicalDevice()
 {
     VkResult vkResult;
@@ -916,6 +869,7 @@ bool VulkanGraphicsDriver::InitPhysicalDevice()
     return true;
 }
 
+DUSK_VULKAN_API
 bool VulkanGraphicsDriver::InitLogicalDevice()
 {
     VkResult vkResult;
@@ -1042,6 +996,7 @@ bool VulkanGraphicsDriver::InitLogicalDevice()
     return true;
 }
 
+DUSK_VULKAN_API
 void VulkanGraphicsDriver::TermLogicalDevice()
 {
     if (_vkDevice) {
@@ -1050,6 +1005,7 @@ void VulkanGraphicsDriver::TermLogicalDevice()
     }
 }
 
+DUSK_VULKAN_API
 bool VulkanGraphicsDriver::InitAllocator()
 {
     VkResult vkResult;
@@ -1091,11 +1047,13 @@ bool VulkanGraphicsDriver::InitAllocator()
     return true;
 }
 
+DUSK_VULKAN_API
 void VulkanGraphicsDriver::TermAllocator()
 {
     vmaDestroyAllocator(_vmaAllocator);
 }
 
+DUSK_VULKAN_API
 bool VulkanGraphicsDriver::InitSwapChain()
 {
     VkResult vkResult;
@@ -1238,8 +1196,9 @@ bool VulkanGraphicsDriver::InitSwapChain()
         return false;
     }
 
-    if (!InitGraphicsPipelines()) {
-        return false;
+    for (const auto& pipeline : _pipelineList) {
+        VulkanPipeline * vkPipeline = DUSK_VULKAN_PIPELINE(pipeline.get());
+        vkPipeline->Create();
     }
 
     if (!InitFramebuffers()) {
@@ -1257,51 +1216,37 @@ bool VulkanGraphicsDriver::InitSwapChain()
     return true;
 }
 
-void VulkanGraphicsDriver::TermSwapChain()
+DUSK_VULKAN_API
+void VulkanGraphicsDriver::TermSwapChain(bool resetting /*= false*/)
 {
-    if (_vkDepthImageMemory) {
-        vkFreeMemory(_vkDevice, _vkDepthImageMemory, nullptr);
-        _vkDepthImageMemory = nullptr;
-    }
+    TermCommandBuffers();
+    TermCommandPool();
+    TermFramebuffers();
 
-    // TODO: Move
-    for (auto& framebuffer : _vkFramebuffers) {
-        if (framebuffer) {
-            vkDestroyFramebuffer(_vkDevice, framebuffer, nullptr);
-            framebuffer = nullptr;
+    if (resetting) {
+        for (const auto& pipeline : _pipelineList) {
+            VulkanPipeline * vkPipeline = DUSK_VULKAN_PIPELINE(pipeline.get());
+            vkPipeline->Destroy();
+        }
+
+        for (const auto& mesh : _meshList) {
+            VulkanMesh * vkMesh = DUSK_VULKAN_MESH(mesh.get());
+            vkMesh->Destroy();
+        }
+    }
+    else {
+        for (const auto& pipeline : _pipelineList) {
+            pipeline->Terminate();
+        }
+
+        for (const auto& mesh : _meshList) {
+            mesh->Terminate();
         }
     }
 
-    // TODO: Move
-    if (!_vkCommandBuffers.empty()) {
-        vkFreeCommandBuffers(_vkDevice, _vkCommandPool, static_cast<size_t>(_vkCommandBuffers.size()), _vkCommandBuffers.data());
-        _vkCommandBuffers.assign(_vkCommandBuffers.size(), nullptr);
-    }
-
-    for (const auto& pipeline : _pipelineList) {
-        pipeline->Terminate();
-    }
-
-    if (_vkPipelineLayout) {
-        vkDestroyPipelineLayout(_vkDevice, _vkPipelineLayout, nullptr);
-        _vkPipelineLayout = nullptr;
-    }
-
-    if (_vkRenderPass) {
-        vkDestroyRenderPass(_vkDevice, _vkRenderPass, nullptr);
-        _vkRenderPass = nullptr;
-    }
-
-    // TODO: Move
-    if (_vkDepthImageView) {
-        vkDestroyImageView(_vkDevice, _vkDepthImageView, nullptr);
-        _vkDepthImageView = nullptr;
-    }
-
-    if (_vkDepthImage) {
-        vkDestroyImage(_vkDevice, _vkDepthImage, nullptr);
-        _vkDepthImage = nullptr;
-    }
+    TermDescriptorPool();
+    TermRenderPass();
+    TermDepthBuffer();
 
     for (auto& imageView : _vkSwapChainImageViews) {
         if (imageView) {
@@ -1314,26 +1259,16 @@ void VulkanGraphicsDriver::TermSwapChain()
         vkDestroySwapchainKHR(_vkDevice, _vkSwapChain, nullptr);
         _vkSwapChain = nullptr;
     }
-
-    if (_vkDescriptorSetLayout) {
-        vkDestroyDescriptorSetLayout(_vkDevice, _vkDescriptorSetLayout, nullptr);
-        _vkDescriptorSetLayout = nullptr;
-    }
-
-    if (_vkDescriptorPool) {
-        vkResetDescriptorPool(_vkDevice, _vkDescriptorPool, 0); // ?
-        vkDestroyDescriptorPool(_vkDevice, _vkDescriptorPool, nullptr);
-        _vkDescriptorPool = nullptr;
-    }
 }
 
+DUSK_VULKAN_API
 bool VulkanGraphicsDriver::ResetSwapChain()
 {
     DuskBenchmarkStart();
 
     vkDeviceWaitIdle(_vkDevice);
 
-    TermSwapChain();
+    TermSwapChain(true);
 
     if (!InitSwapChain()) {
         return false;
@@ -1343,6 +1278,120 @@ bool VulkanGraphicsDriver::ResetSwapChain()
     return true;
 }
 
+DUSK_VULKAN_API
+bool VulkanGraphicsDriver::InitDepthBuffer()
+{
+    VkResult vkResult;
+
+    std::vector<VkFormat> potentialDepthFormats = {
+        VK_FORMAT_D32_SFLOAT,
+        VK_FORMAT_D32_SFLOAT_S8_UINT,
+        VK_FORMAT_D24_UNORM_S8_UINT,
+    };
+
+    _vkDepthImageFormat = VK_FORMAT_UNDEFINED;
+
+    for (VkFormat format : potentialDepthFormats) {
+        VkFormatProperties formatProperties;
+        vkGetPhysicalDeviceFormatProperties(_vkPhysicalDevice, format, &formatProperties);
+
+        VkFormatFeatureFlags features = (formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+        if (features == VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) {
+            _vkDepthImageFormat = format;
+            break;
+        }
+    }
+
+    if (_vkDepthImageFormat == VK_FORMAT_UNDEFINED) {
+        DuskLogError("Unable to find suitable depth buffer image format");
+        return false;
+    }
+
+    VkImageCreateInfo imageCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .imageType = VK_IMAGE_TYPE_2D,
+        .format = _vkDepthImageFormat,
+        .extent = {
+            .width = _vkSwapChainExtent.width,
+            .height = _vkSwapChainExtent.height,
+            .depth = 1,
+        },
+        .mipLevels = 1,
+        .arrayLayers = 1,
+        .samples = VK_SAMPLE_COUNT_1_BIT,
+        .tiling = VK_IMAGE_TILING_OPTIMAL,
+        .usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+    };
+
+    VmaAllocationCreateInfo allocationCreateInfo = {
+        .flags = 0,
+        .usage = VMA_MEMORY_USAGE_GPU_ONLY,
+    };
+
+    vkResult = vmaCreateImage(
+        _vmaAllocator,
+        &imageCreateInfo,
+        &allocationCreateInfo,
+        &_vkDepthImage,
+        &_vmaDepthImageAllocation,
+        nullptr
+    );
+
+    if (vkResult != VK_SUCCESS) {
+        DuskLogError("vmaCreateImage() failed, unable to create depth buffer image");
+        return false;
+    }
+
+    VkImageViewCreateInfo imageViewCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .image = _vkDepthImage,
+        .viewType = VK_IMAGE_VIEW_TYPE_2D,
+        .format = VK_FORMAT_D32_SFLOAT,
+        // .components
+        .subresourceRange = {
+            .aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
+            .baseMipLevel = 0,
+            .levelCount = 1,
+            .baseArrayLayer = 0,
+            .layerCount = 1,
+        },
+    };
+
+    if (vkCreateImageView(_vkDevice, &imageViewCreateInfo, nullptr, &_vkDepthImageView) != VK_SUCCESS) {
+        DuskLogError("Failed to create depth buffer image view");
+        return false;
+    }
+
+    return true;
+}
+
+DUSK_VULKAN_API
+void VulkanGraphicsDriver::TermDepthBuffer()
+{
+    if (_vkDepthImageView) {
+        vkDestroyImageView(_vkDevice, _vkDepthImageView, nullptr);
+        _vkDepthImageView = nullptr;
+    }
+
+    if (_vkDepthImage) {
+        vkDestroyImage(_vkDevice, _vkDepthImage, nullptr);
+        _vkDepthImage = nullptr;
+    }
+
+    if (_vmaDepthImageAllocation) {
+        vmaFreeMemory(_vmaAllocator, _vmaDepthImageAllocation);
+        _vmaDepthImageAllocation = nullptr;
+    }
+
+}
+
+DUSK_VULKAN_API
 bool VulkanGraphicsDriver::InitRenderPass()
 {
     VkResult vkResult;
@@ -1429,6 +1478,16 @@ bool VulkanGraphicsDriver::InitRenderPass()
     return true;
 }
 
+DUSK_VULKAN_API
+void VulkanGraphicsDriver::TermRenderPass()
+{
+    if (_vkRenderPass) {
+        vkDestroyRenderPass(_vkDevice, _vkRenderPass, nullptr);
+        _vkRenderPass = nullptr;
+    }
+}
+
+DUSK_VULKAN_API
 bool VulkanGraphicsDriver::InitDescriptorPool()
 {
     VkResult vkResult;
@@ -1474,7 +1533,7 @@ bool VulkanGraphicsDriver::InitDescriptorPool()
         },
     };
 
-    VkDescriptorSetLayoutCreateInfo transformDescriptorLayoutCreateInfo = {
+    VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
@@ -1482,14 +1541,15 @@ bool VulkanGraphicsDriver::InitDescriptorPool()
         .pBindings = descriptorSetLayoutBindingList.data(),
     };
 
-    vkResult = vkCreateDescriptorSetLayout(_vkDevice, &transformDescriptorLayoutCreateInfo, nullptr, &_vkDescriptorSetLayout);
+    vkResult = vkCreateDescriptorSetLayout(_vkDevice, &descriptorSetLayoutCreateInfo, nullptr, &_vkDescriptorSetLayout);
     if (vkResult != VK_SUCCESS) {
         DuskLogError("vkCreateDescriptorSetLayout() failed");
         return false;
     }
 
     for (auto& mesh : _meshList) {
-        if (!mesh->Initialize()) {
+        VulkanMesh * vkMesh = DUSK_VULKAN_MESH(mesh.get());
+        if (!vkMesh->Create()) {
             return false;
         }
     }
@@ -1517,110 +1577,27 @@ bool VulkanGraphicsDriver::InitDescriptorPool()
     return true;
 }
 
-bool VulkanGraphicsDriver::InitGraphicsPipelines()
+DUSK_VULKAN_API
+void VulkanGraphicsDriver::TermDescriptorPool()
 {
-    for (auto& pipeline : _pipelineList) {
-        if (!pipeline->Initialize()) {
-            return false;
-        }
+    if (_vkPipelineLayout) {
+        vkDestroyPipelineLayout(_vkDevice, _vkPipelineLayout, nullptr);
+        _vkPipelineLayout = nullptr;
     }
 
-    return true;
+    if (_vkDescriptorSetLayout) {
+        vkDestroyDescriptorSetLayout(_vkDevice, _vkDescriptorSetLayout, nullptr);
+        _vkDescriptorSetLayout = nullptr;
+    }
+
+    if (_vkDescriptorPool) {
+        vkResetDescriptorPool(_vkDevice, _vkDescriptorPool, 0); // ?
+        vkDestroyDescriptorPool(_vkDevice, _vkDescriptorPool, nullptr);
+        _vkDescriptorPool = nullptr;
+    }
 }
 
-bool VulkanGraphicsDriver::InitDepthBuffer()
-{
-    std::vector<VkFormat> potentialDepthFormats = {
-        VK_FORMAT_D32_SFLOAT,
-        VK_FORMAT_D32_SFLOAT_S8_UINT,
-        VK_FORMAT_D24_UNORM_S8_UINT,
-    };
-
-    _vkDepthImageFormat = VK_FORMAT_UNDEFINED;
-
-    for (VkFormat format : potentialDepthFormats) {
-        VkFormatProperties formatProperties;
-        vkGetPhysicalDeviceFormatProperties(_vkPhysicalDevice, format, &formatProperties);
-
-        VkFormatFeatureFlags features = (formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
-        if (features == VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) {
-            _vkDepthImageFormat = format;
-            break;
-        }
-    }
-
-    if (_vkDepthImageFormat == VK_FORMAT_UNDEFINED) {
-        DuskLogError("Failed to find suitable depth buffer image format");
-        return false;
-    }
-
-    VkImageCreateInfo imageCreateInfo = {
-        .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-        .pNext = nullptr,
-        .flags = 0,
-        .imageType = VK_IMAGE_TYPE_2D,
-        .format = _vkDepthImageFormat,
-        .extent = {
-            .width = _vkSwapChainExtent.width,
-            .height = _vkSwapChainExtent.height,
-            .depth = 1,
-        },
-        .mipLevels = 1,
-        .arrayLayers = 1,
-        .samples = VK_SAMPLE_COUNT_1_BIT,
-        .tiling = VK_IMAGE_TILING_OPTIMAL,
-        .usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-    };
-
-    if (vkCreateImage(_vkDevice, &imageCreateInfo, nullptr, &_vkDepthImage) != VK_SUCCESS) {
-        DuskLogError("Failed to create depth buffer image");
-        return false;
-    }
-
-    VkMemoryRequirements memoryRequirements;
-    vkGetImageMemoryRequirements(_vkDevice, _vkDepthImage, &memoryRequirements);
-
-    VkMemoryAllocateInfo memoryAllocateInfo = {
-        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-        .pNext = nullptr,
-        .allocationSize = memoryRequirements.size,
-        .memoryTypeIndex = FindMemoryType(memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT),
-    };
-
-    if (vkAllocateMemory(_vkDevice, &memoryAllocateInfo, nullptr, &_vkDepthImageMemory) != VK_SUCCESS) {
-        DuskLogError("Failed to allocate depth buffer image memory");
-        return false;
-    }
-
-    vkBindImageMemory(_vkDevice, _vkDepthImage, _vkDepthImageMemory, 0);
-
-    VkImageViewCreateInfo imageViewCreateInfo = {
-        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-        .pNext = nullptr,
-        .flags = 0,
-        .image = _vkDepthImage,
-        .viewType = VK_IMAGE_VIEW_TYPE_2D,
-        .format = VK_FORMAT_D32_SFLOAT,
-        // .components
-        .subresourceRange = {
-            .aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
-            .baseMipLevel = 0,
-            .levelCount = 1,
-            .baseArrayLayer = 0,
-            .layerCount = 1,
-        },
-    };
-
-    if (vkCreateImageView(_vkDevice, &imageViewCreateInfo, nullptr, &_vkDepthImageView) != VK_SUCCESS) {
-        DuskLogError("Failed to create depth buffer image view");
-        return false;
-    }
-
-    return true;
-}
-
+DUSK_VULKAN_API
 bool VulkanGraphicsDriver::InitFramebuffers()
 {
     VkResult vkResult;
@@ -1655,6 +1632,18 @@ bool VulkanGraphicsDriver::InitFramebuffers()
     return true;
 }
 
+DUSK_VULKAN_API
+void VulkanGraphicsDriver::TermFramebuffers()
+{
+    for (auto& framebuffer : _vkFramebuffers) {
+        if (framebuffer) {
+            vkDestroyFramebuffer(_vkDevice, framebuffer, nullptr);
+        }
+    }
+    _vkFramebuffers.clear();
+}
+
+DUSK_VULKAN_API
 bool VulkanGraphicsDriver::InitCommandPool()
 {
     VkResult vkResult;
@@ -1675,6 +1664,16 @@ bool VulkanGraphicsDriver::InitCommandPool()
     return true;
 }
 
+DUSK_VULKAN_API
+void VulkanGraphicsDriver::TermCommandPool()
+{
+    if (_vkCommandPool) {
+        vkDestroyCommandPool(_vkDevice, _vkCommandPool, nullptr);
+        _vkCommandPool = nullptr;
+    }
+}
+
+DUSK_VULKAN_API
 bool VulkanGraphicsDriver::InitCommandBuffers()
 {
     VkResult vkResult;
@@ -1702,6 +1701,16 @@ bool VulkanGraphicsDriver::InitCommandBuffers()
     return true;
 }
 
+DUSK_VULKAN_API
+void VulkanGraphicsDriver::TermCommandBuffers()
+{
+    if (!_vkCommandBuffers.empty()) {
+        vkFreeCommandBuffers(_vkDevice, _vkCommandPool, static_cast<size_t>(_vkCommandBuffers.size()), _vkCommandBuffers.data());
+        _vkCommandBuffers.clear();
+    }
+}
+
+DUSK_VULKAN_API
 bool VulkanGraphicsDriver::InitSyncObjects()
 {
     VkResult vkResult;
@@ -1748,6 +1757,26 @@ bool VulkanGraphicsDriver::InitSyncObjects()
     return true;
 }
 
+DUSK_VULKAN_API
+void VulkanGraphicsDriver::TermSyncObjects()
+{
+    for (auto fence : _vkInFlightFences) {
+        vkDestroyFence(_vkDevice, fence, nullptr);
+        fence = nullptr;
+    }
+
+    for (auto semaphore : _vkRenderingFinishedSemaphores) {
+        vkDestroySemaphore(_vkDevice, semaphore, nullptr);
+        semaphore = nullptr;
+    }
+
+    for (auto semaphore : _vkImageAvailableSemaphores) {
+        vkDestroySemaphore(_vkDevice, semaphore, nullptr);
+        semaphore = nullptr;
+    }
+}
+
+DUSK_VULKAN_API
 bool VulkanGraphicsDriver::FillCommandBuffers()
 {
     VkResult vkResult;
@@ -1816,41 +1845,5 @@ bool VulkanGraphicsDriver::FillCommandBuffers()
 
     return true;
 }
-
-// bool VulkanGraphicsDriver::InitGraphicsPipeline()
-// {
-//     _shader = CreateShader();
-//     _shader->LoadFromFiles({
-//         "flat.vert",
-//         "flat.frag",
-//     });
-    
-//     _mesh = CreateMesh();
-//     const auto& meshImporters = GetAllMeshImporters();
-//     auto meshDatas = meshImporters[0]->LoadFromFile("crate/crate.obj");
-//     if (meshDatas.empty()) {
-//         DuskLogFatal("Failed to init hacky code in InitGraphicsPipeline()");
-//     }
-//     _mesh->Load(meshDatas[0].get());
-
-//     _pipeline = CreatePipeline();
-
-//     _pipeline->SetCullMode(CullMode::Back);
-//     _pipeline->SetFrontFace(FrontFace::CounterClockwise);
-//     _pipeline->SetPrimitiveTopology(PrimitiveTopology::Triangles);
-
-//     _pipeline->SetShader(_shader.get());
-//     _pipeline->SetMesh(_mesh.get());
-//     _pipeline->Create();
-
-//     return true;
-// }
-
-// void VulkanGraphicsDriver::TermGraphicsPipeline()
-// {
-//     _pipeline = nullptr;
-//     _mesh = nullptr;
-//     _shader = nullptr;
-// }
 
 } // namespace Dusk::Vulkan

@@ -12,7 +12,11 @@ DUSK_VULKAN_API
 void VulkanShader::Terminate()
 {
     auto gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
-    vkDestroyShaderModule(gfx->GetDevice(), _shaderModule, nullptr);
+
+    for (auto& shaderModule : _shaderModuleList) {
+        vkDestroyShaderModule(gfx->GetDevice(), shaderModule, nullptr);
+    }
+    _shaderModuleList.clear();
 }
 
 DUSK_VULKAN_API
@@ -84,7 +88,9 @@ bool VulkanShader::LoadSPV(const string& filename, bool useAssetPath)
         .pCode = reinterpret_cast<const uint32_t *>(data.data()),
     };
 
-    if (vkCreateShaderModule(gfx->GetDevice(), &shaderModuleCreateInfo, nullptr, &_shaderModule) != VK_SUCCESS) {
+    VkShaderModule shaderModule;
+
+    if (vkCreateShaderModule(gfx->GetDevice(), &shaderModuleCreateInfo, nullptr, &shaderModule) != VK_SUCCESS) {
         DuskLogError("Failed to create shader module");
         return false;
     }
@@ -94,12 +100,13 @@ bool VulkanShader::LoadSPV(const string& filename, bool useAssetPath)
         .pNext = nullptr,
         .flags = 0,
         .stage = type,
-        .module = _shaderModule, // This conflicts with the `module` keyword in C++20
+        .module = shaderModule, // This conflicts with the `module` keyword in C++20
         .pName = "main", // TODO: Update
         .pSpecializationInfo = nullptr,
     };
 
-    _shaderStages.push_back(shaderStageCreateInfo);
+    _shaderModuleList.push_back(shaderModule);
+    _shaderStageList.push_back(shaderStageCreateInfo);
 
     return true;
 }

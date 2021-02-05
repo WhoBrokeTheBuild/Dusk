@@ -12,7 +12,21 @@ bool VulkanMesh::Initialize()
     if (!Mesh::Initialize()) {
         return false;
     }
-    
+
+    return true;
+}
+
+DUSK_VULKAN_API
+void VulkanMesh::Terminate()
+{
+    Destroy();
+
+    Mesh::Terminate();
+}
+
+DUSK_VULKAN_API
+bool VulkanMesh::Create()
+{
     VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
     if (!gfx->CreateDescriptorSet(&_vkDescriptorSet)) {
         return false;
@@ -37,7 +51,15 @@ bool VulkanMesh::Initialize()
     };
 
     vkUpdateDescriptorSets(gfx->GetDevice(), 1, &writeDescriptorSet, 0, nullptr);
+
     return true;
+}
+
+DUSK_VULKAN_API
+void VulkanMesh::Destroy()
+{
+    // Descriptor Sets are automatically freed (I hope)
+    _vkDescriptorSet = nullptr;
 }
 
 DUSK_VULKAN_API

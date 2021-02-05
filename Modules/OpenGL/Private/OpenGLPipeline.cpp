@@ -9,17 +9,6 @@
 namespace Dusk::OpenGL {
 
 DUSK_OPENGL_API
-bool OpenGLPipeline::Initialize()
-{
-    return true;
-}
-
-DUSK_OPENGL_API
-void OpenGLPipeline::Terminate()
-{
-}
-
-DUSK_OPENGL_API
 bool OpenGLPipeline::Bind()
 {
     auto gfx = GetGraphicsDriver();

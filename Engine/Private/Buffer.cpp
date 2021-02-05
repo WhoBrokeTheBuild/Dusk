@@ -14,8 +14,8 @@ bool Buffer::ReadFrom(size_t offset, size_t length, uint8_t * data)
         return false;
     }
 
-    if (!_mappedBufferMemory && !MapBufferToMemory()) {
-        DuskLogError("Failed to map buffer for reading");
+    if (!_mappedBufferMemory) {
+        DuskLogError("Buffer is not mapped for reading");
         return false;
     }
 
@@ -33,8 +33,8 @@ bool Buffer::WriteTo(size_t offset, size_t length, uint8_t * data)
         return false;
     }
 
-    if (!_mappedBufferMemory && !MapBufferToMemory()) {
-        DuskLogError("Failed to map buffer for writing");
+    if (!_mappedBufferMemory) {
+        DuskLogError("Buffer is not mapped for writing");
         return false;
     }
 

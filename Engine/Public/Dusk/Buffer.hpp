@@ -44,8 +44,6 @@ public:
 
     virtual bool WriteTo(size_t offset, size_t length, uint8_t * data);
 
-    virtual bool MapBufferToMemory() = 0;
-
 protected:
 
     BufferUsage _bufferUsage;

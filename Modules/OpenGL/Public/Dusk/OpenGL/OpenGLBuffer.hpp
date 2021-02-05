@@ -24,8 +24,6 @@ public:
 
     void Terminate() override;
 
-    bool MapBufferToMemory() override;
-
     void Bind();
 
     GLuint GetGLID() const {

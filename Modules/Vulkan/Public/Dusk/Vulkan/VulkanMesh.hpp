@@ -21,6 +21,12 @@ public:
 
     bool Initialize() override;
 
+    void Terminate() override;
+
+    bool Create();
+
+    void Destroy();
+
     void Render(RenderContext * ctx) override;
     
 private:

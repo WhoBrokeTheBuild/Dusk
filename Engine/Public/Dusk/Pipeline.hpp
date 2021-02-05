@@ -93,8 +93,18 @@ public:
 
     virtual ~Pipeline() = default;
 
+    inline virtual bool Initialize(std::shared_ptr<Shader> shader) {
+        _shader = shader;
+        return true;
+    }
+
+    inline virtual void Terminate() {
+        _shader.reset();
+    }
+
     inline void SetShader(std::shared_ptr<Shader> shader) {
         _shader = shader;
+        // Reset?
     }
 
     inline void SetPrimitiveTopology(PrimitiveTopology primitiveTopology) {
@@ -132,10 +142,6 @@ public:
     inline void SetDepthCompareOperation(CompareOperation op) {
         _depthCompareOperation = op;
     }
-
-    virtual bool Initialize() = 0;
-
-    virtual void Terminate() = 0;
 
 protected:
 

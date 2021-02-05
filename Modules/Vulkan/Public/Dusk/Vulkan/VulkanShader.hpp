@@ -23,8 +23,8 @@ public:
 
     bool LoadFromFiles(const std::vector<string>& filenames, bool useAssetPath = true) override;
 
-    inline std::vector<VkPipelineShaderStageCreateInfo>& GetStages() {
-        return _shaderStages;
+    inline std::vector<VkPipelineShaderStageCreateInfo>& GetStageList() {
+        return _shaderStageList;
     }
 
 private:
@@ -33,9 +33,9 @@ private:
 
     VkShaderStageFlagBits GetVkShaderType(const string& filename);
 
-    VkShaderModule _shaderModule;
+    std::vector<VkShaderModule> _shaderModuleList;
 
-    std::vector<VkPipelineShaderStageCreateInfo> _shaderStages;
+    std::vector<VkPipelineShaderStageCreateInfo> _shaderStageList;
 
 }; // class VulkanShader
 

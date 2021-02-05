@@ -10,27 +10,37 @@
 namespace Dusk::Vulkan {
 
 DUSK_VULKAN_API
-void VulkanPipeline::Terminate()
+bool VulkanPipeline::Initialize(std::shared_ptr<Shader> shader)
 {
-    VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
- 
-    vkDestroyPipeline(gfx->GetDevice(), _vkPipeline, nullptr);
+    if (!Pipeline::Initialize(shader)) {
+        return false;
+    }
+
+    return Create();
 }
 
 DUSK_VULKAN_API
-bool VulkanPipeline::Initialize()
+void VulkanPipeline::Terminate()
+{
+    _shader.reset();
+
+    Destroy();
+}
+
+DUSK_VULKAN_API
+bool VulkanPipeline::Create()
 {
     VkResult vkResult;
 
     VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
 
-    VulkanShader * shader = DUSK_VULKAN_SHADER(_shader.get());
-    if (!shader) {
+    VulkanShader * vkShader = DUSK_VULKAN_SHADER(_shader.get());
+    if (!vkShader) {
         DuskLogError("Trying to bind a Vulkan VulkanPipeline with no shader");
         return false;
     }
 
-    const auto& stages = shader->GetStages();
+    const auto& stageList = vkShader->GetStageList();
 
     VkExtent2D extent = gfx->GetSwapChainExtent();
 
@@ -42,13 +52,6 @@ bool VulkanPipeline::Initialize()
         .minDepth = 0.0f,
         .maxDepth = 1.0f,
     };
-
-    DuskLogInfo("%f %f %f %f",
-        viewport.x,
-        viewport.y,
-        viewport.width,
-        viewport.height
-    );
 
     VkRect2D scissor = {
         .offset = { 0, 0 },
@@ -248,8 +251,8 @@ bool VulkanPipeline::Initialize()
         .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
-        .stageCount = static_cast<uint32_t>(stages.size()),
-        .pStages = stages.data(),
+        .stageCount = static_cast<uint32_t>(stageList.size()),
+        .pStages = stageList.data(),
         .pVertexInputState = &vertexInputStateCreateInfo,
         .pInputAssemblyState = &vertexInputAssemblyStateCreateInfo,
         .pTessellationState = nullptr,
@@ -266,6 +269,10 @@ bool VulkanPipeline::Initialize()
         .basePipelineIndex = 0,
     };
 
+    if (_vkPipeline) {
+        vkDestroyPipeline(gfx->GetDevice(), _vkPipeline, nullptr);
+    }
+
     vkResult = vkCreateGraphicsPipelines(gfx->GetDevice(), nullptr, 1, &pipelineCreateInfo, nullptr, &_vkPipeline);
     if (vkResult != VK_SUCCESS) {
         DuskLogError("Failed to create graphics pipeline");
@@ -273,6 +280,17 @@ bool VulkanPipeline::Initialize()
     }
 
     return true;
+}
+
+DUSK_VULKAN_API
+void VulkanPipeline::Destroy()
+{
+    VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
+ 
+    if (_vkPipeline) {
+        vkDestroyPipeline(gfx->GetDevice(), _vkPipeline, nullptr);
+        _vkPipeline = nullptr;
+    }
 }
 
 DUSK_VULKAN_API

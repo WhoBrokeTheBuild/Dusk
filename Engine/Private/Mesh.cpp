@@ -25,7 +25,9 @@ bool Mesh::Initialize()
 DUSK_ENGINE_API
 void Mesh::Terminate()
 {
-    _shaderTransformBuffer->Terminate();
+    if (_shaderTransformBuffer) {
+        _shaderTransformBuffer->Terminate();
+    }
 }
 
 DUSK_ENGINE_API

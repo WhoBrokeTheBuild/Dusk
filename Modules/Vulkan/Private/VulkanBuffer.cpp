@@ -29,35 +29,67 @@ bool VulkanBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUsa
 
     // If we are uploading to a GPU only buffer, use a staging buffer
     if (_memoryUsage == MemoryUsage::GPU) {
+        VkBufferCreateInfo stagingBufferCreateInfo = {
+            .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .pNext = nullptr,
+            .flags = 0,
+            .size = _size,
+            .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+            .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+        };
+
+        VmaAllocationCreateInfo stagingAllocationCreateInfo = {
+            .flags = VMA_ALLOCATION_CREATE_MAPPED_BIT,
+            .usage = VMA_MEMORY_USAGE_CPU_ONLY,
+        };
+
         VkBuffer stagingBuffer;
         VmaAllocation stagingAllocation;
+        VmaAllocationInfo stagingAllocationInfo;
+        
+        vkResult = vmaCreateBuffer(
+            gfx->GetAllocator(),
+            &stagingBufferCreateInfo,
+            &stagingAllocationCreateInfo,
+            &stagingBuffer,
+            &stagingAllocation,
+            &stagingAllocationInfo
+        );
 
-        result = gfx->CreateBuffer(&stagingBuffer, &stagingAllocation, _size, 
-            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-            VMA_MEMORY_USAGE_CPU_ONLY);
-
-        if (!result) {
-            DuskLogError("CreateBuffer() failed, unable to create staging buffer");
-            return false;
-        }
-
-        void * ptr;
-        vkResult = vmaMapMemory(gfx->GetAllocator(), stagingAllocation, &ptr);
         if (vkResult != VK_SUCCESS) {
-            DuskLogError("vmaMapMemory() failed");
+            DuskLogError("vmaCreateBuffer() failed, unable to create staging buffer");
             return false;
         }
 
-        memcpy(ptr, data, _size);
+        memcpy(stagingAllocationInfo.pMappedData, data, _size);
 
-        vmaUnmapMemory(gfx->GetAllocator(), stagingAllocation);
+        VkBufferUsageFlags bufferUsageFlags = VK_BUFFER_USAGE_TRANSFER_DST_BIT | vkBufferUsage.value();
 
-        result = gfx->CreateBuffer(&_vkBuffer, &_vmaAllocation, _size, 
-            VK_BUFFER_USAGE_TRANSFER_DST_BIT | vkBufferUsage.value(),
-            VMA_MEMORY_USAGE_GPU_ONLY);
+        VkBufferCreateInfo bufferCreateInfo = {
+            .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .pNext = nullptr,
+            .flags = 0,
+            .size = _size,
+            .usage = bufferUsageFlags,
+            .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+        };
+
+        VmaAllocationCreateInfo allocationCreateInfo = {
+            .flags = 0,
+            .usage = vkMemoryUsage.value(),
+        };
+
+        vkResult = vmaCreateBuffer(
+            gfx->GetAllocator(),
+            &bufferCreateInfo,
+            &allocationCreateInfo,
+            &_vkBuffer,
+            &_vmaAllocation,
+            nullptr
+        );
             
-        if (!result) {
-            DuskLogError("CreateBuffer() failed, unable to create buffer");
+        if (vkResult != VK_SUCCESS) {
+            DuskLogError("vmaCreateBuffer() failed, unable to create buffer");
             return false;
         }
 
@@ -71,22 +103,37 @@ bool VulkanBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUsa
         vmaFreeMemory(gfx->GetAllocator(), stagingAllocation);
     }
     else {
-        result = gfx->CreateBuffer(
-            &_vkBuffer, 
-            &_vmaAllocation, 
-            _size, 
-            vkBufferUsage.value(),
-            vkMemoryUsage.value()
+        VkBufferCreateInfo bufferCreateInfo = {
+            .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .pNext = nullptr,
+            .flags = 0,
+            .size = _size,
+            .usage = vkBufferUsage.value(),
+            .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+        };
+
+        VmaAllocationCreateInfo allocationCreateInfo = {
+            .flags = VMA_ALLOCATION_CREATE_MAPPED_BIT,
+            .usage = vkMemoryUsage.value(),
+        };
+
+        VmaAllocationInfo allocationInfo;
+
+        vkResult = vmaCreateBuffer(
+            gfx->GetAllocator(),
+            &bufferCreateInfo,
+            &allocationCreateInfo,
+            &_vkBuffer,
+            &_vmaAllocation,
+            &allocationInfo
         );
             
-        if (!result) {
+        if (vkResult != VK_SUCCESS) {
             DuskLogError("CreateBuffer() failed, unable to create buffer");
             return false;
         }
 
-        if (!MapBufferToMemory()) {
-            return false;
-        }
+        _mappedBufferMemory = allocationInfo.pMappedData;
 
         bool upload = (_memoryUsage == MemoryUsage::UploadOnce || _memoryUsage == MemoryUsage::UploadOften);
 
@@ -110,22 +157,6 @@ void VulkanBuffer::Terminate()
 
     vkDestroyBuffer(gfx->GetDevice(), _vkBuffer, nullptr);
     vmaFreeMemory(gfx->GetAllocator(), _vmaAllocation);
-}
-
-DUSK_VULKAN_API
-bool VulkanBuffer::MapBufferToMemory()
-{
-    VkResult vkResult;
-
-    VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
-
-    vkResult = vmaMapMemory(gfx->GetAllocator(), _vmaAllocation, &_mappedBufferMemory);
-    if (vkResult != VK_SUCCESS) {
-        DuskLogError("vmaMapMemory() failed");
-        return false;
-    }
-
-    return true;
 }
 
 } // namespace Dusk::Vulkan

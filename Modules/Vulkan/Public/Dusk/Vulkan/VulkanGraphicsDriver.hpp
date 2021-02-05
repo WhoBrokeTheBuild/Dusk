@@ -75,10 +75,6 @@ public:
         return _vkRenderPass;
     }
 
-    uint32_t FindMemoryType(uint32_t filter, VkMemoryPropertyFlags props);
-
-    bool CreateBuffer(VkBuffer * buffer, VmaAllocation * vmaAllocation, VkDeviceSize size, VkBufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage);
-
     bool CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
     bool CreateDescriptorSet(VkDescriptorSet * descriptorSet);
@@ -117,25 +113,39 @@ private:
     
     bool InitSwapChain();
 
-    void TermSwapChain();
+    void TermSwapChain(bool resetting = false);
 
     bool ResetSwapChain();
 
     bool InitRenderPass();
 
+    void TermRenderPass();
+
     bool InitDescriptorPool();
 
-    bool InitGraphicsPipelines();
+    void TermDescriptorPool();
+
+    bool ResetGraphicsPipelines();
 
     bool InitDepthBuffer();
 
+    void TermDepthBuffer();
+
     bool InitFramebuffers();
+
+    void TermFramebuffers();
 
     bool InitCommandPool();
 
+    void TermCommandPool();
+
     bool InitCommandBuffers();
 
+    void TermCommandBuffers();
+
     bool InitSyncObjects();
+
+    void TermSyncObjects();
 
     bool FillCommandBuffers();
 
@@ -185,7 +195,7 @@ private:
 
     VkImage _vkDepthImage = nullptr;
 
-    VkDeviceMemory _vkDepthImageMemory = nullptr;
+    VmaAllocation _vmaDepthImageAllocation = nullptr;
 
     VkImageView _vkDepthImageView = nullptr;
 

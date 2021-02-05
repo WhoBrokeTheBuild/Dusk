@@ -27,9 +27,14 @@ bool OpenGLBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUsa
     glBindBuffer(_glTarget, _glID);
     glBufferStorage(_glTarget, _size, data, flags);
 
-    if (!MapBufferToMemory()) {
+    // TODO: Limit to only mappable memory usages
+    _mappedBufferMemory = glMapBufferRange(_glTarget, 0, _size, flags);
+    if (!_mappedBufferMemory) {
+        DuskLogError("glMapBuffer() failed");
         return false;
     }
+
+    glBindBuffer(_glTarget, 0);
 
     return true;
 }
@@ -46,23 +51,6 @@ void OpenGLBuffer::Terminate()
     }
 
     glDeleteBuffers(1, &_glID);
-}
-
-DUSK_OPENGL_API
-bool OpenGLBuffer::MapBufferToMemory()
-{
-    glBindBuffer(_glTarget, _glID);
-    
-    GLbitfield flags = GetGLMemoryUsage(_memoryUsage);
-
-    _mappedBufferMemory = glMapBufferRange(_glTarget, 0, _size, flags);
-    if (!_mappedBufferMemory) {
-        DuskLogError("glMapBuffer() failed");
-        return false;
-    }
-
-    glBindBuffer(_glTarget, 0);
-    return true;
 }
 
 DUSK_OPENGL_API

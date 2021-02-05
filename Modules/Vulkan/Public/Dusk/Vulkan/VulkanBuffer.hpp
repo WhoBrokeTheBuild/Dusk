@@ -26,8 +26,6 @@ public:
 
     void Terminate() override;
 
-    bool MapBufferToMemory() override;
-
     inline VkBuffer GetVkBuffer() {
         return _vkBuffer;
     }

@@ -100,12 +100,16 @@ void VulkanGraphicsDriver::Terminate()
         primitive->Terminate();
     }
 
+    _primitiveList.clear();
+
     // TODO: Move
     _shaderGlobalsBuffer->Terminate();
 
     for (auto& shader : _shaderList) {
         shader->Terminate();
     }
+
+    _shaderList.clear();
 
     TermAllocator();
     TermLogicalDevice();
@@ -1238,10 +1242,12 @@ void VulkanGraphicsDriver::TermSwapChain(bool resetting /*= false*/)
         for (const auto& pipeline : _pipelineList) {
             pipeline->Terminate();
         }
+        _pipelineList.clear();
 
         for (const auto& mesh : _meshList) {
             mesh->Terminate();
         }
+        _meshList.clear();
     }
 
     TermDescriptorPool();

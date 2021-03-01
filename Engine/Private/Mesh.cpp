@@ -27,6 +27,7 @@ void Mesh::Terminate()
 {
     if (_shaderTransformBuffer) {
         _shaderTransformBuffer->Terminate();
+        _shaderTransformBuffer.reset();
     }
 }
 

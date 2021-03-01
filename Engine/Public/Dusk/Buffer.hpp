@@ -50,7 +50,7 @@ protected:
 
     MemoryUsage _memoryUsage;
 
-    void * _mappedBufferMemory;
+    void * _mappedBufferMemory = nullptr;
 
 }; // class Buffer
 

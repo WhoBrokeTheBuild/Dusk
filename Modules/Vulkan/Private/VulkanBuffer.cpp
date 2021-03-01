@@ -103,12 +103,15 @@ bool VulkanBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUsa
         vmaFreeMemory(gfx->GetAllocator(), stagingAllocation);
     }
     else {
+
+        VkBufferUsageFlags bufferUsageFlags = vkBufferUsage.value();
+
         VkBufferCreateInfo bufferCreateInfo = {
             .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
             .pNext = nullptr,
             .flags = 0,
             .size = _size,
-            .usage = vkBufferUsage.value(),
+            .usage = bufferUsageFlags,
             .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
         };
 
@@ -156,7 +159,10 @@ void VulkanBuffer::Terminate()
     }
 
     vkDestroyBuffer(gfx->GetDevice(), _vkBuffer, nullptr);
+    _vkBuffer = nullptr;
+
     vmaFreeMemory(gfx->GetAllocator(), _vmaAllocation);
+    _vmaAllocation = nullptr;
 }
 
 } // namespace Dusk::Vulkan

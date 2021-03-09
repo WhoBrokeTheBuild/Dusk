@@ -161,7 +161,7 @@ bool RunScriptFile(const string& filename)
     }
 
     if (!file) {
-        DuskLogError("Failed to script '%s'", filename);
+        DuskLogError("Failed to run script file '%s'", filename);
         return false;
     }
 

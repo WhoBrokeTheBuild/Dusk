@@ -4,6 +4,7 @@
 
 namespace Dusk::GLTF2 {
 
+DUSK_GLTF2_API
 bool GLTF2SceneImporter::LoadFromFile(Entity * root, const string& filename)
 {
     glTF2File file;

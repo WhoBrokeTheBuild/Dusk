@@ -71,6 +71,7 @@ std::shared_ptr<Mesh> LoadMeshFromFile(const string& filename, bool useAssetPath
     return nullptr;
 }
 
+DUSK_ENGINE_API
 void Mesh::Render(RenderContext * ctx)
 {
     if (_shaderTransformBuffer) {

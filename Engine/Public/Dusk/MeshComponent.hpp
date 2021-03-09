@@ -2,6 +2,7 @@
 #define DUSK_MESH_COMPONENT_HPP
 
 #include <Dusk/Config.hpp>
+#include <Dusk/Buffer.hpp>
 #include <Dusk/Component.hpp>
 #include <Dusk/Mesh.hpp>
 
@@ -27,8 +28,6 @@ public:
 private:
 
     std::shared_ptr<Mesh> _mesh;
-
-    std::shared_ptr<Buffer> _transformDataBuffer;
 
 }; // class MeshComponent
 

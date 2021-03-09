@@ -48,6 +48,6 @@ void SetApplicationVersion(const Version& version);
 DUSK_ENGINE_API
 Version GetApplicationVersion();
 
-}
+} // namespace Dusk
 
 #endif // DUSK_HPP

@@ -57,12 +57,6 @@ bool OpenGLTexture::Load(const std::unique_ptr<TextureData>& data, Options opts 
 }
 
 DUSK_OPENGL_API
-void OpenGLTexture::Bind() 
-{
-    glBindTexture(GL_TEXTURE_2D, _glID);
-}
-
-DUSK_OPENGL_API
 GLenum OpenGLTexture::GetGLDataFormat(int components)
 {
     switch (components) {

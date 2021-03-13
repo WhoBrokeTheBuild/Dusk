@@ -54,24 +54,24 @@ inline auto LogWrap(const T& v) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
 
-template <>
-inline auto LogWrap<string>(const string& v) {
-    return v.c_str();
-}
-
-template <>
-inline auto LogWrap<Path>(const Path& v) {
-    return v.ToCString();
-}
-
-#if defined(DUSK_PLATFORM_WINDOWS)
-
     template <>
-    inline auto LogWrap<WindowsErrorMessage>(const WindowsErrorMessage& v) {
-        return v.GetMessage();
+    inline auto LogWrap<string>(const string& v) {
+        return v.c_str();
     }
 
-#endif
+    template <>
+    inline auto LogWrap<Path>(const Path& v) {
+        return v.ToCString();
+    }
+
+    #if defined(DUSK_PLATFORM_WINDOWS)
+
+        template <>
+        inline auto LogWrap<WindowsErrorMessage>(const WindowsErrorMessage& v) {
+            return v.GetMessage();
+        }
+
+    #endif
 
 #pragma clang diagnostic pop
 

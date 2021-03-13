@@ -3,11 +3,27 @@
 #include <Dusk/GraphicsDriver.hpp>
 #include <Dusk/Benchmark.hpp>
 #include <Dusk/Log.hpp>
+#include <Dusk/GLTF2/GLTF2PrimitiveData.hpp>
 
 #include <Base64.h>
 #include <fstream>
 
 namespace Dusk::GLTF2 {
+
+bool glTF2File::IsValidTexture(int index, int texCoord)
+{
+    if (index < 0 || index > static_cast<int>(Textures.size())) {
+        DuskLogError("Invalid glTF2 Texture Index: %d", index);
+        return false;
+    }
+
+    if (texCoord > 0) {
+        DuskLogWarn("Multiple glTF2 TEXCOORDs not supported");
+        return false;
+    }
+
+    return true;
+}
 
 bool glTF2File::LoadFromFile(const string& filename)
 {
@@ -20,7 +36,6 @@ bool glTF2File::LoadFromFile(const string& filename)
     file.open(Filename, std::ios::in | std::ios::binary);
 
     if (!file.is_open()) {
-        DuskLogError("Failed to load glTF2, '%s'", Filename);
         return false;
     }
 
@@ -127,12 +142,6 @@ bool glTF2File::LoadFromFile(const string& filename)
     if (!LoadCameras()) {
         return false;
     }
-
-    if (!LoadMeshes()) {
-        return false;
-    }
-
-    DuskLogLoad("glTF2 file '%s'", Filename);
 
     DuskBenchmarkEnd();
     return true;
@@ -348,8 +357,117 @@ bool glTF2File::LoadMaterials()
 {
     const auto MATERIALS_PATH = json::json_pointer("/materials");
 
-    // if (JSON.contains(MATERIALS_PATH)) {
-    //     for (const auto& object : JSON[MATERIALS_PATH]) {
+    if (JSON.contains(MATERIALS_PATH)) {
+        for (const auto& object : JSON[MATERIALS_PATH]) {
+            auto material = std::make_shared<Material>();
+
+            auto it = object.find("normalTexture");
+            if (it != object.end()) {
+                const auto& value = it.value();
+                if (value.is_object()) {
+                    int index = value.value("index", -1);
+                    int texCoord = value.value("texCoord", 0);
+
+                    if (IsValidTexture(index, texCoord)) {
+                        material->SetNormalMap(Textures[index]);
+                    }
+
+                    material->SetNormalScale(value.value("scale", material->GetNormalScale()));
+                }
+                else {
+                    DuskLogWarn("Malformed glTF2 normalTexture");
+                }
+            }
+
+            it = object.find("emissiveFactor");
+            if (it != object.end()) {
+                material->SetEmissiveFactor(ExtractVec3(it.value(), material->GetEmissiveFactor()));
+            }
+
+            it = object.find("emissiveTexture");
+            if (it != object.end()) {
+                const auto& value = it.value();
+                if (value.is_object()) {
+                    int index = value.value("index", -1);
+                    int texCoord = value.value("texCoord", 0);
+
+                    if (IsValidTexture(index, texCoord)) {
+                        material->SetEmissiveMap(Textures[index]);
+                    }
+                }
+                else {
+                    DuskLogWarn("Malformed glTF2 emissiveTexture");
+                }
+            }
+
+            it = object.find("occlusionTexture");
+            if (it != object.end()) {
+                const auto& value = it.value();
+                if (value.is_object()) {
+                    int index = value.value("index", -1);
+                    int texCoord = value.value("texCoord", 0);
+
+                    if (IsValidTexture(index, texCoord)) {
+                        material->SetOcclusionMap(Textures[index]);
+                    }
+
+                    material->SetOcclusionStrength(value.value("strength", material->GetOcclusionStrength()));
+                }
+                else {
+                    DuskLogWarn("Malformed glTF2 occlusionTexture");
+                }
+            }
+
+            it = object.find("pbrMetallicRoughness");
+            if (it != object.end()) {
+                const auto& group = it.value();
+                if (group.is_object()) {
+                    it = group.find("baseColorFactor");
+                    if (it != group.end()) {
+                        material->SetBaseColorFactor(ExtractVec4(it.value(), material->GetBaseColorFactor()));
+                    }
+
+                    it = group.find("baseColorTexture");
+                    if (it != group.end()) {
+                        const auto& value = it.value();
+                        if (value.is_object()) {
+                            int index = value.value("index", -1);
+                            int texCoord = value.value("texCoord", 0);
+
+                            if (IsValidTexture(index, texCoord)) {
+                                material->SetBaseColorMap(Textures[index]);
+                            }
+                        }
+                        else {
+                            DuskLogWarn("Malformed glTF2 baseColorTexture");
+                        }
+                    }
+
+                    material->SetMetallicFactor(group.value("metallicFactor", material->GetMetallicFactor()));
+
+                    material->SetRoughnessFactor(group.value("roughnessFactor", material->GetRoughnessFactor()));
+
+                    it = group.find("metallicRoughnessTexture");
+                    if (it != group.end()) {
+                        const auto& value = it.value();
+                        if (value.is_object()) {
+                            int index = value.value("index", -1);
+                            int texCoord = value.value("texCoord", 0);
+
+                            if (IsValidTexture(index, texCoord)) {
+                                material->SetMetallicRoughnessMap(Textures[index]);
+                            }
+                        }
+                        else {
+                            DuskLogWarn("Malformed glTF2 metallicRoughnessTexture");
+                        }
+                    }
+                }
+            }
+
+            // it = object.find("pbrSpecularGlossiness");
+            // if (it != object.end()) {
+            // }
 
             // extensions
             /// KHR_materials_transmission
@@ -358,11 +476,6 @@ bool glTF2File::LoadMaterials()
             /// KHR_materials_variants
             /// KHR_techniques_webgl
 
-            // each texture
-            /// [scale] = 1
-            /// index
-            /// [texCoord] = 0
-
             // name
 
             // [alphaMode] ?
@@ -370,20 +483,9 @@ bool glTF2File::LoadMaterials()
 
             // [doubleSided]
 
-            // [normal]
-            // [occlusionTexture]
-            // [emissiveTexture]
-            // [emissiveFactor]
-
-            // [pbrMetallicRoughness]
-            /// [baseColorFactor]
-            /// [baseColorTexture]
-            /// [metallicFactor]
-            /// [roughnessFactor]
-            /// [metallicRoughnessTexture]
-
-    //     }
-    // }
+            Materials.push_back(material);
+        }
+    }
 
     DuskLogVerbose("Loaded %d Material(s)", Materials.size());
 
@@ -439,83 +541,128 @@ bool glTF2File::LoadCameras()
     return true;
 }
 
-// gltf2 Node
-    // camera (Camera Component?)
-    // children[]
-    // skin (needs mesh)
-    // matrix (rip apart into TRS? Error out instead)
-    // mesh (Mesh Component)
-    // translate
-    // rotation
-    // scale
-    // weights (needs mesh)
-
-// gltf2 
-
-// Entity -> glft2 Node
-// Mesh -> gltf2 Primitive
-// MeshComponent -> gltf2 Mesh
-
-bool glTF2File::LoadMeshes()
+std::vector<std::unique_ptr<PrimitiveData>> glTF2File::LoadMesh()
 {
     const auto MESHES_PATH = json::json_pointer("/meshes");
 
     if (JSON.contains(MESHES_PATH)) {
+        std::vector<std::unique_ptr<PrimitiveData>> primitiveDataList;
         for (const auto& object : JSON[MESHES_PATH]) {
-            // std::vector<GLTF2PrimitiveData>
 
-            auto it = object.find("primitives");
-            if (it != object.end()) {
-                const auto& primitives = it.value();
+            auto iter = object.find("primitives");
+            if (iter != object.end()) {
+                const auto& primitives = iter.value();
                 if (!primitives.is_array()) {
                     DuskLogError("Invalid glTF2 mesh, missing primitives array");
-                    return false;
+                    continue;
                 }
 
                 for (const auto& primitive : primitives) {
-                    int indicesIndex = primitives.value("indices", -1);
+                    // TODO: Possibly change
+                    GLTF2PrimitiveData * primitiveData = New GLTF2PrimitiveData();
+                    primitiveDataList.push_back(std::unique_ptr<PrimitiveData>(primitiveData));
+
+                    int indicesIndex = primitive.value("indices", -1);
+                    GLenum primitiveType = primitive.value<GLenum>("mode", GL_TRIANGLES);
+
+                    if (primitiveType == GL_LINE_LOOP) {
+                        DuskLogWarn("Unsupported glTF2 primitive mode: GL_LINE_LOOP");
+                        continue;
+                    }
+                    else if (primitiveType == GL_TRIANGLE_FAN) {
+                        DuskLogWarn("Unsupported glTF2 primitive mode: GL_TRIANGLE_FAN");
+                        continue;
+                    }
+
+                    switch (primitiveType) {
+                    case GL_POINTS:
+                        primitiveData->Topology = PrimitiveTopology::PointList;
+                        break;
+                    case GL_LINES:
+                        primitiveData->Topology = PrimitiveTopology::LineList;
+                        break;
+                    case GL_LINE_STRIP:
+                        primitiveData->Topology = PrimitiveTopology::LineStrip;
+                        break;
+                    case GL_TRIANGLES:
+                        primitiveData->Topology = PrimitiveTopology::TriangleList;
+                        break;
+                    case GL_TRIANGLE_STRIP:
+                        primitiveData->Topology = PrimitiveTopology::TriangleStrip;
+                        break;
+                    }
                     
                     if (indicesIndex >= 0) {
-                        // const auto& indexAccessor = Accessors[indicesIndex];
-                        // const auto& indexBufferView = BufferViews[indexAccessor.bufferView];
-                        // const auto& indexBuffer = Buffers[indexBufferView.buffer];
+                        const auto& accessor = Accessors[indicesIndex];
+                        primitiveData->IndexList.resize(accessor.count);
 
-
+                        AccessorIterator iterIndex(this, indicesIndex);
+                        for (auto& index : primitiveData->IndexList) {
+                            index = iterIndex.getInteger();
+                            ++iterIndex;
+                        }
                     }
 
-                    it = primitive.find("attributes");
-                    if (it != object.end()) {
-                        const auto& attributes = it.value();
+                    iter = primitive.find("attributes");
+                    if (iter != primitive.end()) {
+                        const auto& attributes = iter.value();
                         if (!attributes.is_object()) {
                             DuskLogError("Invalid glTF2 primitive, missing attributes dictionary");
-                            return false;
+                            continue;
                         }
 
-                        // for (const auto& [name, index] : attributes.items()) {
+                        unsigned positionIndex = attributes.value("POSITION", -1);
+                        if (positionIndex < 0) {
+                            DuskLogError("Invalid glTF2 primitive, missing POSITION");
+                            continue;
+                        }
 
-                        // }
+                        const auto& positionAccessor = Accessors[positionIndex];
+                        primitiveData->VertexList.resize(positionAccessor.count);
+
+                        AccessorIterator iterPosition (this, positionIndex);
+                        AccessorIterator iterNormal   (this, attributes.value("NORMAL", -1));
+                        AccessorIterator iterTangent  (this, attributes.value("TANGENT", -1));
+                        AccessorIterator iterTexCoord1(this, attributes.value("TEXCOORD_0", -1));
+                        AccessorIterator iterTexCoord2(this, attributes.value("TEXCOORD_1", -1));
+                        AccessorIterator iterColor    (this, attributes.value("COLOR_0", -1));
+                        AccessorIterator iterJoints   (this, attributes.value("JOINTS_0", -1));
+                        AccessorIterator iterWeights  (this, attributes.value("WEIGHTS_0", -1));
+
+                        for (auto& vertex : primitiveData->VertexList) {
+                            vertex.Position = iterPosition.getVec4({ 0.0f, 0.0f, 0.0f, 1.0f });
+                            ++iterPosition;
+
+                            vertex.Normal = iterNormal.getVec4({ 0.0f, 0.0f, 0.0f, 1.0f });
+                            ++iterNormal;
+
+                            vertex.Tangent = iterTangent.getVec4();
+                            ++iterTangent;
+
+                            vertex.TexCoord1 = iterTexCoord1.getVec2();
+                            ++iterTexCoord1;
+
+                            vertex.TexCoord2 = iterTexCoord2.getVec2();
+                            ++iterTexCoord2;
+
+                            vertex.Color = iterColor.getVec4({ 0.0f, 0.0f, 0.0f, 1.0f });
+                            ++iterColor;
+
+                            vertex.Joints = iterJoints.getUVec4();
+                            ++iterJoints;
+
+                            vertex.Weights = iterWeights.getVec4();
+                            ++iterWeights;
+                        }
                     }
                 }
-
-                if (auto it = object.find("attributes"); it != primitives.end()) {
-                    // const auto& attributes = it.value();
-
-                }
-
-
-
-
-                // attributes
-                // material
-                // mode
-                // targets (animation)
             }
-
-            // Meshes.push_back()
+            
+            return primitiveDataList;
         }
     }
 
-    return true;
+    return { };
 }
 
 } // namespace Dusk::GLTF2

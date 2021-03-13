@@ -9,18 +9,18 @@ namespace Dusk {
 
 struct Vertex
 {
-    glm::vec4 Position;
-    glm::vec4 Normal;
-    glm::vec4 Tangent;
-    glm::vec4 Bitangent;
+    vec4 Position;
+    vec4 Normal;
+    vec4 Tangent;
+    vec4 Bitangent;
     
-    glm::vec4 Color;
+    vec4 Color;
 
-    glm::vec2 TexCoord1;
-    glm::vec2 TexCoord2;
+    vec2 TexCoord1;
+    vec2 TexCoord2;
 
-    uint32_t Joints[4];
-    float Weights[4];
+    uvec2 Joints;
+    vec4 Weights;
     
 }; // struct Vertex
 

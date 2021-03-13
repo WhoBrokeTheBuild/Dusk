@@ -6,38 +6,29 @@ MACRO(DEFINE_MODULE _target _prefix)
 
     FILE(
         GLOB_RECURSE
-        _public
-        Public/*.h
-        Public/*.hh
-        Public/*.hpp
+        _sources
+        "Public/*.h"
+        "Public/*.hh"
+        "Public/*.hpp"
+        "Private/*.h"
+        "Private/*.hh"
+        "Private/*.hpp"
+        "Private/*.c"
+        "Private/*.cc"
+        "Private/*.cpp"
     )
 
     FILE(GLOB_RECURSE
-        _public_in
-        Public/*.in
-    )
-
-    FILE(
-        GLOB_RECURSE
-        _private
-        Private/*.h
-        Private/*.hh
-        Private/*.hpp
-        Private/*.c
-        Private/*.cc
-        Private/*.cpp
-    )
-
-    FILE(GLOB_RECURSE
-        _private_in
-        Private/*.in
+        _sources_in
+        "Public/*.in"
+        "Private/*.in"
     )
 
     ###
     ### Template Files
     ###
 
-    FOREACH(file ${_public_in})
+    FOREACH(file ${_sources_in})
         STRING(REPLACE 
             ${CMAKE_CURRENT_SOURCE_DIR}
             ${CMAKE_CURRENT_BINARY_DIR}
@@ -49,24 +40,9 @@ MACRO(DEFINE_MODULE _target _prefix)
         set(file_out ${CMAKE_MATCH_1})
 
         CONFIGURE_FILE(${file} ${file_out})
-        LIST(APPEND _public_out ${file_out})
+        LIST(APPEND _sources_out ${file_out})
     ENDFOREACH()
-        
-    FOREACH(file ${_private_in})
-        STRING(REPLACE 
-            ${CMAKE_CURRENT_SOURCE_DIR}
-            ${CMAKE_CURRENT_BINARY_DIR}
-            file_out
-            ${file}
-        )
-
-        string(REGEX MATCH "^(.*)\\.[^.]*$" file_out ${file_out})
-        set(file_out ${CMAKE_MATCH_1})
-
-        CONFIGURE_FILE(${file} ${file_out})
-        LIST(APPEND _private_out ${file_out})
-    ENDFOREACH()
-
+    
     ###
     ### Asset Processing
     ###
@@ -89,15 +65,14 @@ MACRO(DEFINE_MODULE _target _prefix)
     
     ADD_LIBRARY(
         ${_target} SHARED
-        ${_public}
-        ${_private}
-        ${_assets}
+        ${_sources}
+        ${_sources_in}
+        ${_sources_out}
     )
 
-    SET_SOURCE_GROUPS(${CMAKE_CURRENT_SOURCE_DIR} "${_public}")
-    SET_SOURCE_GROUPS(${CMAKE_CURRENT_BINARY_DIR} "${_public_out}")
-    SET_SOURCE_GROUPS(${CMAKE_CURRENT_SOURCE_DIR} "${_private}")
-    SET_SOURCE_GROUPS(${CMAKE_CURRENT_BINARY_DIR} "${_private_out}")
+    SET_SOURCE_GROUPS(${CMAKE_CURRENT_SOURCE_DIR} "${_sources}")
+    SET_SOURCE_GROUPS(${CMAKE_CURRENT_SOURCE_DIR} "${_sources_in}")
+    SET_SOURCE_GROUPS(${CMAKE_CURRENT_BINARY_DIR} "${_sources_out}")
     SET_SOURCE_GROUPS(${CMAKE_CURRENT_SOURCE_DIR} "${_assets}")
     
     IF(NOT _target STREQUAL "DuskEngine")

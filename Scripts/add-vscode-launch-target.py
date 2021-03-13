@@ -17,7 +17,13 @@ if os.name == 'nt':
     debugType = 'cppvsdbg'
 
 # Pairs of KEY=VALUE environment variables
-environment = []
+environment = [
+    {
+        'name': 'DUSK_VERBOSE',
+        'value': '1',
+    }
+]
+
 for i in range(5, len(sys.argv)):
     parts = sys.argv[i].split('=')
     environment.append({

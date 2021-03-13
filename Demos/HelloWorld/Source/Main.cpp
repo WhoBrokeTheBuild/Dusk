@@ -24,8 +24,8 @@ using namespace std::chrono;
 void run()
 {
     Dusk::LoadModule("DuskSTBI");
-    Dusk::LoadModule("DuskTinyOBJ");
-    // Dusk::LoadModule("DuskGLTF2");
+    // Dusk::LoadModule("DuskTinyOBJ");
+    Dusk::LoadModule("DuskGLTF2");
     // Dusk::LoadModule("DuskFreeType");
 
     const char * envGraphicsDriver = getenv("DUSK_GRAPHICS_DRIVER");
@@ -62,8 +62,8 @@ void run()
 
     auto shader = gfx->CreateShader();
     if (!shader->LoadFromFiles({
-        "Dusk/DebugNormalColor.vert",
-        "Dusk/DebugNormalColor.frag",
+        "Dusk/Debug/NormalColor.vert",
+        "Dusk/Debug/NormalColor.frag",
     })) {
         return;
     }
@@ -73,7 +73,7 @@ void run()
     Dusk::Scene scene;
     Dusk::SetCurrentScene(&scene);
 
-    auto mesh = Dusk::LoadMeshFromFile("monkey.obj");
+    auto mesh = Dusk::LoadMeshFromFile("Dusk/suzanne.glb");
     mesh->SetPipeline(pipeline);
 
     auto entity = std::unique_ptr<Dusk::Entity>(New Dusk::Entity());
@@ -96,10 +96,10 @@ void run()
     // Force ResetSwapChain
     gfx->SetWindowSize({ 1024, 768 });
 
-    Dusk::ScriptConsole::Initialize();
+    // Dusk::ScriptConsole::Initialize();
 
     Dusk::Run([&]() {
-        Dusk::ScriptConsole::Update();
+        // Dusk::ScriptConsole::Update();
 
         transformData->View = camera.GetView();
         transformData->Projection = camera.GetProjection();
@@ -108,7 +108,7 @@ void run()
         tmpEntity->SetOrientation(orient);
     });
 
-    Dusk::ScriptConsole::Terminate();
+    // Dusk::ScriptConsole::Terminate();
 }
 
 int main(int argc, char** argv)

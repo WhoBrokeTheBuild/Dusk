@@ -2,55 +2,141 @@
 #define DUSK_MATERIAL_HPP
 
 #include <Dusk/Config.hpp>
+#include <Dusk/Math.hpp>
+#include <Dusk/Buffer.hpp>
 #include <Dusk/Texture.hpp>
+#include <Dusk/ShaderMaterial.hpp>
 
 namespace Dusk {
 
-class DUSK_ENGINE_API Material 
+class DUSK_ENGINE_API Material : public Object
 {
 public:
 
-    // LOD?
+    DISALLOW_COPY_AND_ASSIGN(Material);
 
-    // enum TextureID : int
-    // {
-    //     BASE_COLOR = 0,
-    //     NORMAL,
-    //     METALLIC_ROUGHNESS,
-    //     EMISSIVE,
-    //     OCCLUSION,
-    // };
+    Material() = default;
 
-    enum class AlphaMode
-    {
-        OPAQUE,
-        MASK,
-        BLEND,
-    };
+    virtual ~Material() = default;
 
-    // glm::vec4 BaseColorFactor = glm::vec4(1.0f);
-    // glm::vec3 EmissiveFactor  = glm::vec3(1.0f);
-    
-    // float MetallicFactor    = 1.0f;
-    // float RoughnessFactor   = 1.0f;
-    // float OcclusionStrength = 1.0f;
-    // float NormalScale       = 1.0f;
+    virtual void Initialize();
 
-    // int RefractiveIndex
-    // bool DoubleSided
-    // AlphaMode AlphaMode
+    virtual void Terminate();
 
-    // std::shared_ptr<Texture> BaseColorMap;
-    // std::shared_ptr<Texture> NormalMap;
-    // std::shared_ptr<Texture> MetallicRoughnessMap;
-    // std::shared_ptr<Texture> EmissiveMap;
-    // std::shared_ptr<Texture> OcclusionMap;
+    virtual inline vec4 GetBaseColorFactor() const {
+        return _shaderMaterial.BaseColorFactor;
+    }
 
-    // std::unordered_map<string, string> GetDefines() const;
-    
-private:
+    virtual inline vec3 GetEmissiveFactor() const {
+        return _shaderMaterial.EmissiveFactor;
+    }
 
-};
+    virtual inline float GetMetallicFactor() const {
+        return _shaderMaterial.MetallicFactor;
+    }
+
+    virtual inline float GetRoughnessFactor() const {
+        return _shaderMaterial.RoughnessFactor;
+    }
+
+    virtual inline float GetOcclusionStrength() const {
+        return _shaderMaterial.OcclusionStrength;
+    }
+
+    virtual inline float GetNormalScale() const {
+        return _shaderMaterial.NormalScale;
+    }
+
+    virtual inline void SetBaseColorFactor(vec4 factor) {
+        _shaderMaterial.BaseColorFactor = factor;
+        UpdateBuffer();
+    }
+
+    virtual inline void SetEmissiveFactor(vec3 factor) {
+        _shaderMaterial.EmissiveFactor = factor;
+        UpdateBuffer();
+    }
+
+    virtual inline void SetMetallicFactor(float factor) {
+        _shaderMaterial.MetallicFactor = factor;
+        UpdateBuffer();
+    }
+
+    virtual inline void SetRoughnessFactor(float factor) {
+        _shaderMaterial.RoughnessFactor = factor;
+        UpdateBuffer();
+    }
+
+    virtual inline void SetOcclusionStrength(float strength) {
+        _shaderMaterial.OcclusionStrength = strength;
+        UpdateBuffer();
+    }
+
+    virtual inline void SetNormalScale(float scale) {
+        _shaderMaterial.NormalScale = scale;
+        UpdateBuffer();
+    }
+
+    virtual inline void SetBaseColorMap(std::shared_ptr<Texture> map) {
+        _baseColorMap = map;
+    }
+
+    virtual inline void SetNormalMap(std::shared_ptr<Texture> map) {
+        _normalMap = map;
+    }
+
+    virtual inline void SetMetallicRoughnessMap(std::shared_ptr<Texture> map) {
+        _metallicRoughnessMap = map;
+    }
+
+    virtual inline void SetEmissiveMap(std::shared_ptr<Texture> map) {
+        _emissiveMap = map;
+    }
+
+    virtual inline void SetOcclusionMap(std::shared_ptr<Texture> map) {
+        _occlusionMap = map;
+    }
+
+    virtual inline std::shared_ptr<Texture> GetBaseColorMap() {
+        return _baseColorMap;
+    }
+
+    virtual inline std::shared_ptr<Texture> GetNormalMap() {
+        return _normalMap;
+    }
+
+    virtual inline std::shared_ptr<Texture> GetMetallicRoughnessMap() {
+        return _metallicRoughnessMap;
+    }
+
+    virtual inline std::shared_ptr<Texture> GetEmissiveMap() {
+        return _emissiveMap;
+    }
+
+    virtual inline std::shared_ptr<Texture> GetOcclusionMap() {
+        return _occlusionMap;
+    }
+
+    // TODO: Fix buffer thrashing when setting multiple variables
+    virtual void UpdateBuffer();
+
+protected:
+
+    std::shared_ptr<Buffer> _shaderMaterialBuffer;
+
+    ShaderMaterial _shaderMaterial;
+
+    std::shared_ptr<Texture> _baseColorMap;
+
+    std::shared_ptr<Texture> _normalMap;
+
+    std::shared_ptr<Texture> _metallicRoughnessMap;
+
+    std::shared_ptr<Texture> _emissiveMap;
+
+    std::shared_ptr<Texture> _occlusionMap;
+
+}; // class Material
 
 }; // namespace Dusk
 

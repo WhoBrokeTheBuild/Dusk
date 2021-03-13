@@ -7,37 +7,38 @@ MACRO(DEFINE_DEMO _target)
     FILE(
         GLOB_RECURSE
         _sources
-        Source/*.h
-        Source/*.hh
-        Source/*.hpp
-        Source/*.c
-        Source/*.cc
-        Source/*.cpp
+        "Source/*.h"
+        "Source/*.hh"
+        "Source/*.hpp"
+        "Source/*.c"
+        "Source/*.cc"
+        "Source/*.cpp"
     )
 
     FILE(
         GLOB_RECURSE
         _sources_in
-        Source/*.in
+        "Source/*.in"
     )
 
     ###
     ### Template Files
     ###
 
-    FOREACH(file ${_sources_in})
+    FOREACH(_file ${_sources_in})
         STRING(REPLACE 
             ${CMAKE_CURRENT_SOURCE_DIR}
             ${CMAKE_CURRENT_BINARY_DIR}
-            file_out
-            ${file}
+            _file_out
+            ${_file}
         )
 
-        string(REGEX MATCH "^(.*)\\.[^.]*$" file_out ${file_out})
-        set(file_out ${CMAKE_MATCH_1})
+        # Remove .in
+        string(REGEX MATCH "^(.*)\\.[^.]*$" _file_out ${_file_out})
+        set(_file_out ${CMAKE_MATCH_1})
 
-        CONFIGURE_FILE(${file} ${file_out})
-        LIST(APPEND _sources_out ${file_out})
+        CONFIGURE_FILE(${_file} ${_file_out})
+        LIST(APPEND _sources_out ${_file_out})
     ENDFOREACH()
 
     ###
@@ -275,7 +276,7 @@ MACRO(DEFINE_DEMO _target)
 
             FOREACH(_driver ${_graphics_drivers})
                 ADD_CUSTOM_COMMAND(
-                    TARGET ${_target} POST_BUILD
+                    TARGET ${_target} 
                     BYPRODUCTS ${_launch_json}
                     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Scripts/add-vscode-launch-target.py ${_launch_json} "${_target} \\(${_driver}\\)" $<TARGET_FILE:${_target}> ${CMAKE_CURRENT_BINARY_DIR} "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${DUSK_ASSET_PATH}" "DUSK_GRAPHICS_DRIVER=${_driver}"
                 )

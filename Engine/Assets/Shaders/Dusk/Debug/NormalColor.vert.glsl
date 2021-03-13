@@ -4,7 +4,7 @@
 #include <Dusk/Transform.inc.glsl>
 #include <Dusk/VertexAttributes.inc.glsl>
 
-layout(location = 1) out vec4 v_Normal;
+layout(location = 0) out vec4 v_Normal;
 
 void main()
 {

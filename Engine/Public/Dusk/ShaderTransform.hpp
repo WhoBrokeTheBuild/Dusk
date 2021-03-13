@@ -12,10 +12,13 @@ struct DUSK_ENGINE_API ShaderTransform
 {
 public:
 
-    alignas(64) mat4 Model;
-    alignas(64) mat4 View;
-    alignas(64) mat4 Projection;
-    alignas(64) mat4 MVP;
+    alignas(4) mat4 Model;
+    
+    alignas(4) mat4 View;
+    
+    alignas(4) mat4 Projection;
+    
+    alignas(4) mat4 MVP;
 
     inline void UpdateMVP() {
         MVP = Projection * View * Model;

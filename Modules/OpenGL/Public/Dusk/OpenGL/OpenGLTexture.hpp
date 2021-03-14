@@ -28,8 +28,6 @@ public:
 
 private:
 
-    GLenum GetGLDataFormat(int components);
-    
     GLenum GetGLDataType(const TextureDataType& type);
 
     GLenum GetGLWrapType(const TextureWrapType& type);

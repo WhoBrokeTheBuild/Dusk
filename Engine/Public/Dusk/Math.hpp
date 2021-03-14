@@ -42,6 +42,7 @@ constexpr float NormalizeInteger(T value)
         :  static_cast<float>(value) / static_cast<float>(std::numeric_limits<T>::max())
     );
 }
-}
+
+} // namespace Dusk
 
 #endif // DUSK_MATH_HPP

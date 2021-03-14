@@ -1,4 +1,6 @@
 #include <Dusk/OpenGL/OpenGLPrimitive.hpp>
+#include <Dusk/OpenGL/OpenGLMaterial.hpp>
+#include <Dusk/GraphicsDriver.hpp>
 
 #include <Dusk/Log.hpp>
 #include <Dusk/Benchmark.hpp>
@@ -9,6 +11,11 @@ DUSK_OPENGL_API
 void OpenGLPrimitive::Render()
 {
     glBindVertexArray(_glVAO);
+
+    OpenGLMaterial * glMaterial = DUSK_OPENGL_MATERIAL(_material.get());
+    if (glMaterial) {
+        glMaterial->Bind();
+    }
 
     if (_indexed) {
         glDrawElements(_glMode, _glCount, GL_UNSIGNED_INT, NULL);
@@ -24,6 +31,13 @@ DUSK_OPENGL_API
 bool OpenGLPrimitive::Load(const std::unique_ptr<PrimitiveData>& data)
 {
     DuskBenchmarkStart();
+
+    auto gfx = GetGraphicsDriver();
+
+    _material = data->GetMaterial();
+    if (!_material) {
+        _material = gfx->GetDefaultMaterial();
+    }
 
     glGenVertexArrays(1, &_glVAO);
     glBindVertexArray(_glVAO);

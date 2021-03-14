@@ -50,6 +50,8 @@ public:
 
     virtual bool InitializeConstantBuffers();
 
+    virtual bool InitializeDefaults();
+
     virtual void SetWindowTitle(const string& title) {
         _windowTitle = title;
         UpdateWindowTitle(title);
@@ -98,6 +100,8 @@ public:
 
     virtual std::shared_ptr<Mesh> CreateMesh() = 0;
 
+    virtual std::shared_ptr<Material> CreateMaterial() = 0;
+
     virtual std::shared_ptr<Primitive> CreatePrimitive() = 0;
 
     virtual UpdateContext * GetUpdateContext();
@@ -106,8 +110,20 @@ public:
 
     Event<Dusk::WindowResizedEventData> WindowResizedEvent;
 
-    std::shared_ptr<Buffer> GetShaderGlobalsBuffer() {
+    virtual inline std::shared_ptr<Buffer> GetShaderGlobalsBuffer() {
         return _shaderGlobalsBuffer;
+    }
+
+    virtual inline std::shared_ptr<Texture> GetDefaultTexture() {
+        return _defaultTexture;
+    }
+
+    virtual inline std::shared_ptr<Pipeline> GetDefaultPipeline() {
+        return _defaultPipeline;
+    }
+
+    virtual inline std::shared_ptr<Material> GetDefaultMaterial() {
+        return _defaultMaterial;
     }
 
 protected:
@@ -135,6 +151,12 @@ protected:
     unsigned _backbufferCount = 2;
 
     std::shared_ptr<Buffer> _shaderGlobalsBuffer;
+
+    std::shared_ptr<Texture> _defaultTexture;
+
+    std::shared_ptr<Pipeline> _defaultPipeline;
+
+    std::shared_ptr<Material> _defaultMaterial;
 
 }; // class GraphicsDriver
 

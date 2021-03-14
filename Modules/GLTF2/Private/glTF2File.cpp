@@ -77,7 +77,12 @@ bool glTF2File::LoadFromFile(const string& filename)
         file.read(jsonChunk.data(), jsonChunkLength);
         jsonChunk.back() = '\0';
 
-        JSON = json::parse(jsonChunk.data());
+        try {
+            JSON = json::parse(jsonChunk.data());
+        }
+        catch (...) {
+            return false;
+        }
 
         // Buffer Chunk (Optional)
 
@@ -98,7 +103,12 @@ bool glTF2File::LoadFromFile(const string& filename)
         }
     }
     else {
-        file >> JSON;
+        try {
+            file >> JSON;
+        }
+        catch (...) {
+            return false;
+        }
 
         if (!LoadBuffers()) {
             return false;
@@ -136,6 +146,10 @@ bool glTF2File::LoadFromFile(const string& filename)
     }
 
     if (!LoadTextures()) {
+        return false;
+    }
+
+    if (!LoadMaterials()) {
         return false;
     }
 
@@ -357,9 +371,16 @@ bool glTF2File::LoadMaterials()
 {
     const auto MATERIALS_PATH = json::json_pointer("/materials");
 
+    GraphicsDriver * gfx = Dusk::GetGraphicsDriver();
+    if (!gfx) {
+        DuskLogError("Unable to load textures from a glTF2 file without a graphics driver");
+        return false;
+    }
+
     if (JSON.contains(MATERIALS_PATH)) {
         for (const auto& object : JSON[MATERIALS_PATH]) {
-            auto material = std::make_shared<Material>();
+            auto material = gfx->CreateMaterial();
+            material->Initialize();
 
             auto it = object.find("normalTexture");
             if (it != object.end()) {
@@ -379,11 +400,6 @@ bool glTF2File::LoadMaterials()
                 }
             }
 
-            it = object.find("emissiveFactor");
-            if (it != object.end()) {
-                material->SetEmissiveFactor(ExtractVec3(it.value(), material->GetEmissiveFactor()));
-            }
-
             it = object.find("emissiveTexture");
             if (it != object.end()) {
                 const auto& value = it.value();
@@ -393,11 +409,19 @@ bool glTF2File::LoadMaterials()
 
                     if (IsValidTexture(index, texCoord)) {
                         material->SetEmissiveMap(Textures[index]);
+                        
+                        // TODO: Improve, this is a fix for (map * factor) == 0
+                        material->SetEmissiveFactor(vec3(1.0f));
                     }
                 }
                 else {
                     DuskLogWarn("Malformed glTF2 emissiveTexture");
                 }
+            }
+
+            it = object.find("emissiveFactor");
+            if (it != object.end()) {
+                material->SetEmissiveFactor(ExtractVec3(it.value(), material->GetEmissiveFactor()));
             }
 
             it = object.find("occlusionTexture");
@@ -562,6 +586,11 @@ std::vector<std::unique_ptr<PrimitiveData>> glTF2File::LoadMesh()
                     GLTF2PrimitiveData * primitiveData = New GLTF2PrimitiveData();
                     primitiveDataList.push_back(std::unique_ptr<PrimitiveData>(primitiveData));
 
+                    int materialIndex = primitive.value("material", -1);
+                    if (materialIndex >= 0) {
+                        primitiveData->material = Materials[materialIndex];
+                    }
+
                     int indicesIndex = primitive.value("indices", -1);
                     GLenum primitiveType = primitive.value<GLenum>("mode", GL_TRIANGLES);
 
@@ -576,28 +605,28 @@ std::vector<std::unique_ptr<PrimitiveData>> glTF2File::LoadMesh()
 
                     switch (primitiveType) {
                     case GL_POINTS:
-                        primitiveData->Topology = PrimitiveTopology::PointList;
+                        primitiveData->topology = PrimitiveTopology::PointList;
                         break;
                     case GL_LINES:
-                        primitiveData->Topology = PrimitiveTopology::LineList;
+                        primitiveData->topology = PrimitiveTopology::LineList;
                         break;
                     case GL_LINE_STRIP:
-                        primitiveData->Topology = PrimitiveTopology::LineStrip;
+                        primitiveData->topology = PrimitiveTopology::LineStrip;
                         break;
                     case GL_TRIANGLES:
-                        primitiveData->Topology = PrimitiveTopology::TriangleList;
+                        primitiveData->topology = PrimitiveTopology::TriangleList;
                         break;
                     case GL_TRIANGLE_STRIP:
-                        primitiveData->Topology = PrimitiveTopology::TriangleStrip;
+                        primitiveData->topology = PrimitiveTopology::TriangleStrip;
                         break;
                     }
                     
                     if (indicesIndex >= 0) {
                         const auto& accessor = Accessors[indicesIndex];
-                        primitiveData->IndexList.resize(accessor.count);
+                        primitiveData->indexList.resize(accessor.count);
 
                         AccessorIterator iterIndex(this, indicesIndex);
-                        for (auto& index : primitiveData->IndexList) {
+                        for (auto& index : primitiveData->indexList) {
                             index = iterIndex.getInteger();
                             ++iterIndex;
                         }
@@ -618,7 +647,7 @@ std::vector<std::unique_ptr<PrimitiveData>> glTF2File::LoadMesh()
                         }
 
                         const auto& positionAccessor = Accessors[positionIndex];
-                        primitiveData->VertexList.resize(positionAccessor.count);
+                        primitiveData->vertexList.resize(positionAccessor.count);
 
                         AccessorIterator iterPosition (this, positionIndex);
                         AccessorIterator iterNormal   (this, attributes.value("NORMAL", -1));
@@ -629,7 +658,7 @@ std::vector<std::unique_ptr<PrimitiveData>> glTF2File::LoadMesh()
                         AccessorIterator iterJoints   (this, attributes.value("JOINTS_0", -1));
                         AccessorIterator iterWeights  (this, attributes.value("WEIGHTS_0", -1));
 
-                        for (auto& vertex : primitiveData->VertexList) {
+                        for (auto& vertex : primitiveData->vertexList) {
                             vertex.Position = iterPosition.getVec4({ 0.0f, 0.0f, 0.0f, 1.0f });
                             ++iterPosition;
 
@@ -655,6 +684,8 @@ std::vector<std::unique_ptr<PrimitiveData>> glTF2File::LoadMesh()
                             ++iterWeights;
                         }
                     }
+
+                    primitiveData->CalculateTBN();
                 }
             }
             

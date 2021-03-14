@@ -18,22 +18,28 @@ public:
 
     virtual ~GLTF2PrimitiveData() = default;
 
-    PrimitiveTopology Topology;
+    PrimitiveTopology topology;
 
-    std::vector<uint32_t> IndexList;
+    std::vector<uint32_t> indexList;
 
-    std::vector<Vertex> VertexList;
+    std::vector<Vertex> vertexList;
 
-    virtual PrimitiveTopology GetTopology() const {
-        return Topology;
+    std::shared_ptr<Material> material;
+
+    PrimitiveTopology GetTopology() const override {
+        return topology;
     }
 
-    virtual gsl::span<uint32_t> GetIndexList() {
-        return IndexList;
+    gsl::span<uint32_t> GetIndexList() override {
+        return indexList;
     }
 
-    virtual gsl::span<Vertex> GetVertexList() {
-        return VertexList;
+    gsl::span<Vertex> GetVertexList() override {
+        return vertexList;
+    }
+
+    std::shared_ptr<Material> GetMaterial() override {
+        return material;
     }
 
 }; // class GLTF2PrimitiveData

@@ -24,7 +24,7 @@ using namespace std::chrono;
 void run()
 {
     Dusk::LoadModule("DuskSTBI");
-    // Dusk::LoadModule("DuskTinyOBJ");
+    Dusk::LoadModule("DuskTinyOBJ");
     Dusk::LoadModule("DuskGLTF2");
     // Dusk::LoadModule("DuskFreeType");
 
@@ -54,27 +54,36 @@ void run()
 
     Dusk::Camera camera;
     camera.SetFOVX(45.0f);
-    camera.SetPosition({ 3, 3, 3 });
+    camera.SetPosition({ 1.1f, 1.1f, 1.1f });
     camera.SetLookAt({ 0, 0, 0 });
 
     static float rotation = 0.0f;
     rotation += 0.01f;
 
-    auto shader = gfx->CreateShader();
-    if (!shader->LoadFromFiles({
-        "Dusk/Debug/NormalColor.vert",
-        "Dusk/Debug/NormalColor.frag",
-    })) {
-        return;
-    }
+    // auto shader = gfx->CreateShader();
+    // if (!shader->LoadFromFiles({
+    //     "Dusk/Debug/NormalColor.vert",
+    //     "Dusk/Debug/NormalColor.frag",
+    // })) {
+    //     return;
+    // }
 
-    auto pipeline = gfx->CreatePipeline(shader);
+    // auto pipeline = gfx->CreatePipeline(shader);
 
     Dusk::Scene scene;
     Dusk::SetCurrentScene(&scene);
 
-    auto mesh = Dusk::LoadMeshFromFile("Dusk/suzanne.glb");
-    mesh->SetPipeline(pipeline);
+    // auto mesh = Dusk::LoadMeshFromFile("/home/stephen/repos/glTF-Sample-Models/2.0/Sponza/glTF/Sponza.gltf", false);
+    // auto mesh = Dusk::LoadMeshFromFile("/home/stephen/Downloads/rungholt/rungholt.glb", false);
+    // auto mesh = Dusk::LoadMeshFromFile("/home/stephen/Downloads/DamagedHelmet.gltf", false);
+    // auto mesh = Dusk::LoadMeshFromFile("BoomBox.glb");
+    auto mesh = Dusk::LoadMeshFromFile("DamagedHelmet.glb");
+    if (!mesh) {
+        return;
+    }
+
+    // auto mesh = Dusk::LoadMeshFromFile("SciFiHelmet/SciFiHelmet.gltf");
+    // mesh->SetPipeline(pipeline);
 
     auto entity = std::unique_ptr<Dusk::Entity>(New Dusk::Entity());
     Dusk::Entity * tmpEntity = entity.get();

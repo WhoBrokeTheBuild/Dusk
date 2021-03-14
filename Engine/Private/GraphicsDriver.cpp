@@ -53,6 +53,39 @@ bool GraphicsDriver::InitializeConstantBuffers()
     return result;
 }
 
+
+
+DUSK_ENGINE_API
+bool GraphicsDriver::InitializeDefaults()
+{
+    uint8_t pixel[4] = { 255, 255, 255, 255 };
+    std::unique_ptr<TextureData> textureData(New ConstantTextureData(
+        pixel, uvec2(1, 1), 4, TextureDataType::UnsignedByte
+    ));
+
+    _defaultTexture = CreateTexture();
+    if (!_defaultTexture->Load(textureData, Texture::Options())) {
+        DuskLogError("Failed to create default texture");
+        return false;
+    }
+
+    _defaultMaterial = CreateMaterial();
+    _defaultMaterial->Initialize();
+
+    auto shader = CreateShader();
+    if (!shader->LoadFromFiles({
+        "Dusk/Default.vert",
+        "Dusk/Default.frag",
+    })) {
+        DuskLogError("Failed to create default shader");
+        return false;
+    }
+
+    _defaultPipeline = CreatePipeline(shader);
+
+    return true;
+}
+
 DUSK_ENGINE_API
 void GraphicsDriver::Render()
 {

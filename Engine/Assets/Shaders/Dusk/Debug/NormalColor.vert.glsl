@@ -8,6 +8,6 @@ layout(location = 0) out vec4 v_Normal;
 
 void main()
 {
-    gl_Position = MVP * a_Position;
+    gl_Position = u_MVP * a_Position;
     v_Normal = a_Normal;
 }

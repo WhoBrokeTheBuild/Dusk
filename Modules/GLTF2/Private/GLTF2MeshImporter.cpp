@@ -12,6 +12,8 @@ namespace Dusk::GLTF2 {
 DUSK_GLTF2_API
 std::vector<std::unique_ptr<PrimitiveData>> GLTF2MeshImporter::LoadFromFile(const string& filename, bool useAssetPath /*= true*/)
 {
+    DuskBenchmarkStart();
+
     glTF2File file;
     bool result = false;
 
@@ -37,7 +39,10 @@ std::vector<std::unique_ptr<PrimitiveData>> GLTF2MeshImporter::LoadFromFile(cons
         return { };
     }
 
-    return file.LoadMesh();
+    auto primitiveList = file.LoadMesh();
+
+    DuskBenchmarkEnd();
+    return primitiveList;
 }
 
 } // namespace Dusk::GLTF2

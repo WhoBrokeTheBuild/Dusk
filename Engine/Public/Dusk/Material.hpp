@@ -13,7 +13,7 @@ class DUSK_ENGINE_API Material : public Object
 {
 public:
 
-    DISALLOW_COPY_AND_ASSIGN(Material);
+    DISALLOW_COPY_AND_ASSIGN(Material)
 
     Material() = default;
 

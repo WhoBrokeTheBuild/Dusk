@@ -1,6 +1,7 @@
 #include <Dusk/Mesh.hpp>
 #include <Dusk/MeshImporter.hpp>
 #include <Dusk/GraphicsDriver.hpp>
+#include <Dusk/Benchmark.hpp>
 
 namespace Dusk {
 
@@ -10,6 +11,8 @@ bool Mesh::Initialize()
     bool result = true;
 
     GraphicsDriver * gfx = GetGraphicsDriver();
+
+    _pipeline = gfx->GetDefaultPipeline();
 
     _shaderTransformBuffer = gfx->CreateBuffer();
     result = _shaderTransformBuffer->Initialize(
@@ -50,6 +53,7 @@ bool Mesh::Load(const std::vector<std::unique_ptr<PrimitiveData>>& data)
 DUSK_ENGINE_API
 std::shared_ptr<Mesh> LoadMeshFromFile(const string& filename, bool useAssetPath /*= true*/)
 {
+    DuskBenchmarkStart();
     GraphicsDriver * gfx = GetGraphicsDriver();
 
     const auto& importers = GetAllMeshImporters();
@@ -64,6 +68,7 @@ std::shared_ptr<Mesh> LoadMeshFromFile(const string& filename, bool useAssetPath
             break;
         }
 
+        DuskBenchmarkEnd();
         return mesh;
     }
 

@@ -14,6 +14,11 @@ void Material::Initialize()
         BufferUsage::Constant,
         MemoryUsage::UploadOften
     );
+
+    // TODO:
+    (void)(result);
+
+    UpdateBuffer();
 }
 
 void Material::Terminate()

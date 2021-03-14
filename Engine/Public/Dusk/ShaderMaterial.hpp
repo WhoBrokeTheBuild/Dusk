@@ -13,9 +13,9 @@ struct DUSK_ENGINE_API ShaderMaterial
 {
 public:
 
-    alignas(16) vec4 BaseColorFactor = vec4(1.0f);
+    alignas(16) vec4 BaseColorFactor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-    alignas(16) vec3 EmissiveFactor = vec3(1.0f);
+    alignas(16) vec3 EmissiveFactor = vec3(0.0f, 0.0f, 0.0f);
     
     alignas(4) float NormalScale = 1.0f;
 

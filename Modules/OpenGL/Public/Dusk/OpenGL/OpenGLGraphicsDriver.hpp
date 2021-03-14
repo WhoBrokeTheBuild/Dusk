@@ -8,16 +8,11 @@
 #include <Dusk/OpenGL/OpenGLTexture.hpp>
 #include <Dusk/OpenGL/OpenGLShader.hpp>
 #include <Dusk/OpenGL/OpenGLMesh.hpp>
+#include <Dusk/OpenGL/OpenGLMaterial.hpp>
 #include <Dusk/OpenGL/OpenGLPrimitive.hpp>
 #include <Dusk/OpenGL/OpenGLBuffer.hpp>
 
 namespace Dusk::OpenGL {
-
-struct ShaderDataBindingInfo
-{
-    GLuint glID;
-    size_t size;
-};
 
 #define DUSK_OPENGL_GRAPHICS_DRIVER(x) (dynamic_cast<Dusk::OpenGL::OpenGLGraphicsDriver *>(x))
 
@@ -46,6 +41,8 @@ public:
     std::shared_ptr<Shader> CreateShader() override;
 
     std::shared_ptr<Mesh> CreateMesh() override;
+
+    std::shared_ptr<Material> CreateMaterial() override;
 
     std::shared_ptr<Primitive> CreatePrimitive() override;
 

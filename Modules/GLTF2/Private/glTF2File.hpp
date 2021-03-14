@@ -216,7 +216,7 @@ public:
         }
     }
 
-    float getFloat(size_t index = 0, float def = 0.0f)
+    inline float getFloat(size_t index = 0, float def = 0.0f)
     {
         if (_ptr && index < _componentCount) {
             switch (_accessor->componentType) {
@@ -234,7 +234,7 @@ public:
         return def;
     }
 
-    uint32_t getInteger(size_t index = 0, unsigned def = 0)
+    inline uint32_t getInteger(size_t index = 0, unsigned def = 0)
     {
         if (_ptr && index < _componentCount) {
             switch (_accessor->componentType) {
@@ -252,14 +252,14 @@ public:
         return def;
     }
 
-    vec2 getVec2(vec2 def = vec2()) {
+    inline vec2 getVec2(vec2 def = vec2()) {
         return vec2(
             getFloat(0, def[0]),
             getFloat(1, def[1])
         );
     }
 
-    vec4 getVec4(vec4 def = vec4()) {
+    inline vec4 getVec4(vec4 def = vec4()) {
         return vec4(
             getFloat(0, def[0]),
             getFloat(1, def[1]),
@@ -268,7 +268,7 @@ public:
         );
     }
 
-    uvec4 getUVec4(uvec4 def = uvec4()) {
+    inline uvec4 getUVec4(uvec4 def = uvec4()) {
         return vec4(
             getInteger(0, def[0]),
             getInteger(1, def[1]),
@@ -277,7 +277,7 @@ public:
         );
     }
 
-    AccessorIterator& operator++() {
+    inline AccessorIterator& operator++() {
         if (_ptr) {
             _ptr += _stride;
             if (_ptr >= _buffer->data() + _buffer->size()) {
@@ -291,7 +291,7 @@ public:
 private: 
 
     template <typename T>
-    T getAs(size_t index) {
+    inline T getAs(size_t index) {
         return *reinterpret_cast<T *>(_ptr + (sizeof(T) * index));
     }
 
@@ -307,7 +307,7 @@ private:
 
     std::vector<uint8_t> * _buffer = nullptr;
 
-};
+}; // class AccessorIterator
 
 } // namespace Dusk::GLTF2
 

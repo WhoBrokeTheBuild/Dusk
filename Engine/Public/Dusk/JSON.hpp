@@ -5,7 +5,6 @@
 #include <Dusk/String.hpp>
 #include <Dusk/Math.hpp>
 
-#define JSON_NOEXCEPTION
 #include <nlohmann/json.hpp>
 
 namespace Dusk {

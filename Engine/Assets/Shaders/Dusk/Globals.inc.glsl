@@ -3,11 +3,11 @@
 
 layout(binding = 0, std140) uniform DuskGlobals
 {
-    vec2 Resolution;
-    vec2 Mouse;
-    int FrameCount;
-    float TotalTime;
-    float FrameSpeedRatio;
+    vec2 u_Resolution;
+    vec2 u_Mouse;
+    int u_FrameCount;
+    float u_TotalTime;
+    float u_FrameSpeedRatio;
     
 };
 

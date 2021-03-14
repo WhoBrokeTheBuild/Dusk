@@ -6,6 +6,8 @@
 #include <Dusk/Math.hpp>
 #include <Dusk/String.hpp>
 
+#include <gsl/gsl>
+
 namespace Dusk {
 
 enum class TextureDataType
@@ -35,13 +37,42 @@ public:
     // Width and Height in pixels
     virtual uvec2 GetSize() const = 0;
 
-    // Number of components (R, RG, RGB, RGBA)
-    virtual int GetComponents() const = 0;
-
     // Format of the data in the buffer
     virtual TextureDataType GetDataType() const = 0;
 
 }; // class TextureData
+
+class ConstantTextureData : public TextureData
+{
+public:
+
+    ConstantTextureData(uint8_t * data, uvec2 size, int components, TextureDataType dataType)
+        : _data(data)
+        , _size(size)
+        , _dataType(dataType)
+    { }
+
+    uint8_t * GetData() const override {
+        return _data;
+    }
+
+    uvec2 GetSize() const override {
+        return _size;
+    }
+
+    TextureDataType GetDataType() const override {
+        return _dataType;
+    }
+
+private:
+
+    uint8_t * _data;
+
+    uvec2 _size;
+
+    TextureDataType _dataType;
+
+}; // class ConstantTextureData
 
 inline string TextureDataTypeToString(TextureDataType textureDataType)
 {

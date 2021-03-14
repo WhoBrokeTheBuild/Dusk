@@ -7,6 +7,8 @@
 
 namespace Dusk::OpenGL {
 
+#define DUSK_OPENGL_MATERIAL(x) (dynamic_cast<Dusk::OpenGL::OpenGLMaterial *>(x))
+
 class DUSK_OPENGL_API OpenGLMaterial : public Material
 {
 public:

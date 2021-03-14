@@ -62,6 +62,10 @@ bool VulkanGraphicsDriver::Initialize()
     if (!InitializeConstantBuffers()) {
         return false;
     }
+
+    if (!InitializeDefaults()) {
+        return false;
+    }
     
     if (!InitSwapChain()) {
         return false;
@@ -271,6 +275,15 @@ std::shared_ptr<Mesh> VulkanGraphicsDriver::CreateMesh()
 
     // Reset swap chain?
     return ptr;
+}
+
+DUSK_VULKAN_API
+std::shared_ptr<Material> VulkanGraphicsDriver::CreateMaterial()
+{
+    // auto ptr = std::shared_ptr<Material>(New VulkanMaterial());
+    // _primitiveList.push_back(ptr);
+    // return ptr;
+    return nullptr;
 }
 
 DUSK_VULKAN_API
@@ -1501,6 +1514,7 @@ bool VulkanGraphicsDriver::InitDescriptorPool()
     std::array<VkDescriptorPoolSize, 1> descriptorPoolSizeList = {
         VkDescriptorPoolSize {
             .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            // + _materialList.size()
             .descriptorCount = static_cast<uint32_t>(1 + _meshList.size()), // Can never be 0
         },
         // VkDescriptorPoolSize {

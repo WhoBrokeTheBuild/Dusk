@@ -1,6 +1,6 @@
 #include <Dusk/Vulkan/VulkanPrimitive.hpp>
-
 #include <Dusk/Vulkan/VulkanGraphicsDriver.hpp>
+#include <Dusk/Benchmark.hpp>
 
 namespace Dusk::Vulkan {
 
@@ -19,7 +19,16 @@ void VulkanPrimitive::Terminate()
 DUSK_VULKAN_API
 bool VulkanPrimitive::Load(const std::unique_ptr<PrimitiveData>& data)
 {
+    DuskBenchmarkStart();
+
+    auto gfx = GetGraphicsDriver();
+
     bool result;
+
+    _material = data->GetMaterial();
+    if (_material) {
+        _material = gfx->GetDefaultMaterial();
+    }
 
     const auto& indexList = data->GetIndexList();
     const auto& vertexList = data->GetVertexList();
@@ -58,6 +67,7 @@ bool VulkanPrimitive::Load(const std::unique_ptr<PrimitiveData>& data)
         }
     }
 
+    DuskBenchmarkEnd();
     return true;
 }
 

@@ -35,7 +35,7 @@ std::unique_ptr<TextureData> STBITextureImporter::LoadFromFile(const string& fil
 
         for (const auto& path : assetPathList) {
             Path fullPath = path / "Textures" / filename;
-            data = stbi_load(fullPath.ToCString(), &size.x, &size.y, &components, 0);
+            data = stbi_load(fullPath.ToCString(), &size.x, &size.y, &components, STBI_rgb_alpha);
             if (data) {
                 break;
             }
@@ -54,7 +54,6 @@ std::unique_ptr<TextureData> STBITextureImporter::LoadFromFile(const string& fil
     STBITextureData * textureData = New STBITextureData();
     textureData->Data = data;
     textureData->Size = size;
-    textureData->Components = components;
 
     DuskBenchmarkEnd();
     return std::unique_ptr<TextureData>(textureData);
@@ -68,7 +67,7 @@ std::unique_ptr<TextureData> STBITextureImporter::LoadFromMemory(const uint8_t *
     ivec2 size;
     int components;
 
-    uint8_t * data = stbi_load_from_memory(buffer, length, &size.x, &size.y, &components, 0);
+    uint8_t * data = stbi_load_from_memory(buffer, length, &size.x, &size.y, &components, STBI_rgb_alpha);
     if (!data) {
         return nullptr;
     }
@@ -78,7 +77,6 @@ std::unique_ptr<TextureData> STBITextureImporter::LoadFromMemory(const uint8_t *
     STBITextureData * textureData = New STBITextureData();
     textureData->Data = data;
     textureData->Size = size;
-    textureData->Components = components;
 
     DuskBenchmarkEnd();
     return std::unique_ptr<TextureData>(textureData);

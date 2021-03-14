@@ -28,7 +28,7 @@ layout(location = 0) out vec4 o_Color;
 // Shlick's approximation of the Fresnel factor
 vec3 fresnelSchlick(vec3 F0, float cosTheta)
 {
-    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+    return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
 // GGX/Towbridge-Reitz normal distribution functions
@@ -58,18 +58,30 @@ float gaSchlickGGX(float cosLi, float cosLo, float roughness)
 
 void main() 
 {
-    vec3 albedo = SRGBToLinear(texture(u_BaseColorMap, v_TexCoord)).rgb;
+
+//     vec3 N = normalize(2.0 * texture(u_NormalMap, v_TexCoord).rgb - 1.0);
+//     N = normalize(N * v_TBN);
+
+//     vec3 L = -c_LightDirection;
+
+//     float D = max(0.0, dot(N, L));
+
+//     o_Color = vec4(D, D, D, 1.0);
+
+
+
+    vec4 albedo = SRGBToLinear(texture(u_BaseColorMap, v_TexCoord)) * u_BaseColorFactor;
 
     vec3 metallicRoughness = texture(u_MetallicRoughnessMap, v_TexCoord).rgb;
-    float roughness = metallicRoughness.g;
-    float metallic = metallicRoughness.b;
+    float roughness = metallicRoughness.g * u_RoughnessFactor;
+    float metallic = metallicRoughness.b * u_MetallicFactor;
 
     // Outgoing light direction (vector from world space fragment position to the eye)
     vec3 Lo = normalize(c_EyePosition - v_Position);
 
     // Get current normal and transform to world space
     vec3 N = normalize(2.0 * texture(u_NormalMap, v_TexCoord).rgb - 1.0);
-    N = normalize(v_TBN[2] * N);
+    N = normalize(v_TBN * N);
 
     // Angle between surface normal and outgoing light direction
     float cosLo = max(0.0, dot(N, Lo));
@@ -78,78 +90,43 @@ void main()
     vec3 Lr = 2.0 * cosLo * N - Lo;
 
     // Fresnel reflectance at normal incidence (for metals use albedo color)
-    vec3 F0 = mix(c_FresnelDielectric, albedo, metallic);
+    vec3 F0 = mix(c_FresnelDielectric, albedo.rgb, metallic);
 
-    vec3 directLighting = vec3(0.0);
-    // foreach Light
-    {
-        vec3 Li = -c_LightDirection;
-        vec3 Lradiance = c_LightRadiance;
+    vec3 Li = -c_LightDirection;
+    vec3 Lradiance = c_LightRadiance;
 
-        // Half-vector between Li and Lo
-        vec3 Lh = normalize(Li + Lo);
+    // Half-vector between Li and Lo
+    vec3 Lh = normalize(Li + Lo);
 
-        // Calculate angles between surface normal and light vectors
-        float cosLi = max(0.0, dot(N, Li));
-        float cosLh = max(0.0, dot(N, Lh));
+    // Calculate angles between surface normal and light vectors
+    // float cosLi = max(0.0, dot(N, Li));
+    float cosLi = max(0.0, dot(N, Li));
+    float cosLh = max(0.0, dot(N, Lh));
 
-        // Calculate Fresnel term for direct lighting
-        vec3 F = fresnelSchlick(F0, max(0.0, dot(Lh, Lo)));
+    // Calculate Fresnel term for direct lighting
+    vec3 F = fresnelSchlick(F0, max(0.0, dot(Lh, Lo)));
 
-        // Calculate normal distribution for specular BRDF
-        float D = ndfGGX(cosLh, roughness);
+    // Calculate normal distribution for specular BRDF
+    float D = ndfGGX(cosLh, roughness);
 
-        // Calculate geometric attenuation for specular BRDF
-        float G = gaSchlickGGX(cosLi, cosLo, roughness);
+    // Calculate geometric attenuation for specular BRDF
+    float G = gaSchlickGGX(cosLi, cosLo, roughness);
 
-        // Diffuse scattering happens due to light being refracted multiple times by a dielectric medium
-        // Metals on the other hand, either reflect or absorb energy, so diffuse contribution is always zero
-        // To be energy conserving, we must scale diffuse BRDF contribution based on Fresnel factor and metalness
-        vec3 kd = mix(vec3(1.0) - F, vec3(0.0), metallic);
+    // Diffuse scattering happens due to light being refracted multiple times by a dielectric medium
+    // Metals on the other hand, either reflect or absorb energy, so diffuse contribution is always zero
+    // To be energy conserving, we must scale diffuse BRDF contribution based on Fresnel factor and metalness
+    vec3 kd = mix(vec3(1.0) - F, vec3(0.0), metallic);
 
-        // Lambert diffuse BRDF
-        // We don't scale by 1/PI for lighting and material units to be more convenient
-        // See https://seblagarde.wordpress.com/2012/01/08/pi-or-not-to-pi-in-game-lighting-equation/
-        vec3 diffuseBRDF = kd * albedo;
+    // Lambert diffuse BRDF
+    // We don't scale by 1/PI for lighting and material units to be more convenient
+    // See https://seblagarde.wordpress.com/2012/01/08/pi-or-not-to-pi-in-game-lighting-equation/
+    vec3 diffuseBRDF = kd * (albedo.rgb / M_PI);
 
-        // Cook-Torrance specular microfacet BRDF
-        vec3 specularBRDF = (F * D * G) / max(c_Epsilon, 4.0 * cosLi * cosLo);
+    // Cook-Torrance specular microfacet BRDF
+    vec3 specularBRDF = (F * D * G) / max(c_Epsilon, 4.0 * cosLi * cosLo);
 
-        // Total contribution for this light
-        directLighting += (diffuseBRDF + specularBRDF) * Lradiance * cosLi;
-    }
-
-    vec3 ambientLighting = vec3(0.0);
-    {
-        // Sample diffuse irradiance at normal direction
-        // TODO:
-
-        vec3 Li = -c_LightDirection;
-
-        // Half-vector between Li and Lo
-        vec3 Lh = normalize(Li + Lo);
-
-        // Calculate angles between surface normal and light vectors
-        float cosLi = max(0.0, dot(N, Li));
-        float cosLh = max(0.0, dot(N, Lh));
-
-
-
-        // Calculate Fresnel term for ambient lighting
-        vec3 F = fresnelSchlick(F0, cosLh);
-
-        // Get diffuse contribution factor (as with direct lighting)
-        vec3 kd = mix(vec3(1.0) - F, vec3(0.0), metallic);
-
-        // Irradiance?
-        vec3 diffuseIBL = kd * albedo; // * irradiance
-
-        // TODO:
-
-        ambientLighting = diffuseIBL;
-    }
-
-    vec3 color = directLighting + ambientLighting;
+    // Total contribution for this light
+    vec3 color = (diffuseBRDF + specularBRDF) * Lradiance * cosLi;
 
     // Ambient Occlusion
     float AO = texture(u_OcclusionMap, v_TexCoord).r;
@@ -159,5 +136,5 @@ void main()
     vec3 emissiveLighting = SRGBToLinear(texture(u_EmissiveMap, v_TexCoord)).rgb * u_EmissiveFactor;
     color += emissiveLighting;
 
-    o_Color = vec4(color, 1.0);
+    o_Color = vec4(pow(color, vec3(1.0 / c_Gamma)), albedo.a);
 }

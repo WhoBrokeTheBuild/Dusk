@@ -54,7 +54,7 @@ void run()
 
     Dusk::Camera camera;
     camera.SetFOVX(45.0f);
-    camera.SetPosition({ 1.1f, 1.1f, 1.1f });
+    camera.SetPosition(glm::vec3(10.0f));
     camera.SetLookAt({ 0, 0, 0 });
 
     static float rotation = 0.0f;
@@ -77,7 +77,9 @@ void run()
     // auto mesh = Dusk::LoadMeshFromFile("/home/stephen/Downloads/rungholt/rungholt.glb", false);
     // auto mesh = Dusk::LoadMeshFromFile("/home/stephen/Downloads/DamagedHelmet.gltf", false);
     // auto mesh = Dusk::LoadMeshFromFile("BoomBox.glb");
-    auto mesh = Dusk::LoadMeshFromFile("DamagedHelmet.glb");
+    // auto mesh = Dusk::LoadMeshFromFile("WaterBottle.glb");
+    // auto mesh = Dusk::LoadMeshFromFile("DamagedHelmet.glb");
+    auto mesh = Dusk::LoadMeshFromFile("TestScene.glb");
     if (!mesh) {
         return;
     }

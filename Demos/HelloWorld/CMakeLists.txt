@@ -8,6 +8,7 @@ ADD_DEPENDENCIES(
     DuskOpenGL
     DuskSTBI
     DuskTinyOBJ
+    DuskGLTF2
 )
 
 IF(TARGET DuskVulkan)

@@ -640,18 +640,20 @@ std::vector<std::unique_ptr<PrimitiveData>> glTF2File::LoadMesh()
                             continue;
                         }
 
-                        unsigned positionIndex = attributes.value("POSITION", -1);
+                        int positionIndex = attributes.value("POSITION", -1);
                         if (positionIndex < 0) {
                             DuskLogError("Invalid glTF2 primitive, missing POSITION");
                             continue;
                         }
+
+                        int tangentIndex = attributes.value("TANGENT", -1);
 
                         const auto& positionAccessor = Accessors[positionIndex];
                         primitiveData->vertexList.resize(positionAccessor.count);
 
                         AccessorIterator iterPosition (this, positionIndex);
                         AccessorIterator iterNormal   (this, attributes.value("NORMAL", -1));
-                        AccessorIterator iterTangent  (this, attributes.value("TANGENT", -1));
+                        AccessorIterator iterTangent  (this, tangentIndex);
                         AccessorIterator iterTexCoord1(this, attributes.value("TEXCOORD_0", -1));
                         AccessorIterator iterTexCoord2(this, attributes.value("TEXCOORD_1", -1));
                         AccessorIterator iterColor    (this, attributes.value("COLOR_0", -1));
@@ -683,14 +685,16 @@ std::vector<std::unique_ptr<PrimitiveData>> glTF2File::LoadMesh()
                             vertex.Weights = iterWeights.getVec4();
                             ++iterWeights;
                         }
-                    }
 
-                    primitiveData->CalculateTBN();
+                        if (tangentIndex < 0) {
+                            primitiveData->CalculateTBN();
+                        }
+                    }
                 }
             }
-            
-            return primitiveDataList;
         }
+
+        return primitiveDataList;
     }
 
     return { };

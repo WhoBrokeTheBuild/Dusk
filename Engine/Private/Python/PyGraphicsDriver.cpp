@@ -19,6 +19,8 @@ static PyMethodDef PyGraphicsDriver_methods[] = {
     { "SetWindowTitle",         PyGraphicsDriver_SetWindowTitle,        METH_VARARGS,   nullptr },
     { "GetWindowSize",          PyGraphicsDriver_GetWindowSize,         METH_NOARGS,    nullptr },
     { "SetWindowSize",          PyGraphicsDriver_SetWindowSize,         METH_VARARGS,   nullptr },
+    { "EnableDebugShader",      PyGraphicsDriver_EnableDebugShader,     METH_VARARGS,   nullptr },
+    { "DisableDebugShader",     PyGraphicsDriver_DisableDebugShader,    METH_NOARGS,    nullptr },
     { nullptr, nullptr, 0, nullptr },
 };
 
@@ -143,6 +145,27 @@ PyObject * PyGraphicsDriver_SetWindowSize(PyObject * self, PyObject * args)
     }
 
     gfx->Pointer->SetWindowSize(size);
+    Py_RETURN_NONE;
+}
+
+PyObject * PyGraphicsDriver_EnableDebugShader(PyObject * self, PyObject * args)
+{
+    PyGraphicsDriver * gfx = (PyGraphicsDriver *)self;
+    const char * name;
+
+    if (!PyArg_ParseTuple(args, "s", &name)) {
+        PyErr_BadArgument();
+        Py_RETURN_NONE;
+    }
+
+    gfx->Pointer->EnableDebugShader(name);
+    Py_RETURN_NONE;
+}
+
+PyObject * PyGraphicsDriver_DisableDebugShader(PyObject * self, PyObject * args)
+{
+    PyGraphicsDriver * gfx = (PyGraphicsDriver *)self;
+    gfx->Pointer->DisableDebugShader();
     Py_RETURN_NONE;
 }
 

@@ -84,7 +84,7 @@ void SDL2GraphicsDriver::ProcessEvents()
             case SDL_WINDOWEVENT_RESIZED:
             {
                 ivec2 size = { event.window.data1, event.window.data2 };
-                GraphicsDriver::SetWindowSize(size);
+                _windowSize = size;
 
                 WindowResizedEventData data;
                 data.Size = size;

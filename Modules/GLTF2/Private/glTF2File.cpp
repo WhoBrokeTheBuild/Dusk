@@ -506,7 +506,8 @@ bool glTF2File::LoadMaterials()
             /// OPAQUE, MASK, BLEND
 
             // [doubleSided]
-
+            
+            DuskLogLoad("Loaded Material '%s'", object.value<string>("name", ""));
             Materials.push_back(material);
         }
     }
@@ -687,7 +688,7 @@ std::vector<std::unique_ptr<PrimitiveData>> glTF2File::LoadMesh()
                         }
 
                         if (tangentIndex < 0) {
-                            primitiveData->CalculateTBN();
+                            primitiveData->CalculateTangents();
                         }
                     }
                 }

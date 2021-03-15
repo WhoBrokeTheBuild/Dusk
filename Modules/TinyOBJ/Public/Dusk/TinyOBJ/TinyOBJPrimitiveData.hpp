@@ -11,14 +11,20 @@ class DUSK_TINYOBJ_API TinyOBJPrimitiveData : public PrimitiveData
 {
 public:
 
-    std::vector<Vertex> VertexList;
+    std::vector<Vertex> vertexList;
+
+    std::shared_ptr<Material> material;
 
     PrimitiveTopology GetTopology() const override {
         return PrimitiveTopology::TriangleList;
     }
 
     gsl::span<Vertex> GetVertexList() override {
-        return VertexList;
+        return vertexList;
+    }
+
+    std::shared_ptr<Material> GetMaterial() override {
+        return material;
     }
 
 }; // class TinyOBJPrimitiveData

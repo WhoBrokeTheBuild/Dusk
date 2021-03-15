@@ -87,10 +87,6 @@ bool OpenGLPrimitive::Load(const std::unique_ptr<PrimitiveData>& data)
     glEnableVertexAttribArray(location);
     glVertexAttribPointer(location, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Tangent));
 
-    location = GetVertexAttributeLocation(VertexAttribute::Bitangent);
-    glEnableVertexAttribArray(location);
-    glVertexAttribPointer(location, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Bitangent));
-
     location = GetVertexAttributeLocation(VertexAttribute::Color);
     glEnableVertexAttribArray(location);
     glVertexAttribPointer(location, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Color));

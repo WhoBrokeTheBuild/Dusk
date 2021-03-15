@@ -4,7 +4,7 @@
 
 namespace Dusk {
 
-void PrimitiveData::CalculateTBN()
+void PrimitiveData::CalculateTangents()
 {
     auto topology = GetTopology();
     auto indexList = GetIndexList();
@@ -27,28 +27,10 @@ void PrimitiveData::CalculateTBN()
             dir * (w.y * s.y - v.y * t.y),
             dir * (w.z * s.y - v.z * t.y),
         };
-        
-        glm::vec3 bitangent = {
-            dir * (w.x * s.x - v.x * t.x),
-            dir * (w.y * s.x - v.y * t.x),
-            dir * (w.z * s.x - v.z * t.x),
-        };
 
-        v1.Tangent = vec4(tangent - vec3(v1.Normal) * (tangent * vec3(v1.Normal)), 1.0f);
-        v2.Tangent = vec4(tangent - vec3(v2.Normal) * (tangent * vec3(v2.Normal)), 1.0f);
-        v3.Tangent = vec4(tangent - vec3(v3.Normal) * (tangent * vec3(v3.Normal)), 1.0f);
-
-        v1.Tangent = normalize(v1.Tangent);
-        v2.Tangent = normalize(v2.Tangent);
-        v3.Tangent = normalize(v3.Tangent);
-
-        v1.Bitangent = vec4(bitangent - vec3(v1.Normal) * (bitangent * vec3(v1.Normal)), 1.0f);
-        v2.Bitangent = vec4(bitangent - vec3(v2.Normal) * (bitangent * vec3(v2.Normal)), 1.0f);
-        v3.Bitangent = vec4(bitangent - vec3(v3.Normal) * (bitangent * vec3(v3.Normal)), 1.0f);
-
-        v1.Bitangent = normalize(v1.Bitangent);
-        v2.Bitangent = normalize(v2.Bitangent);
-        v3.Bitangent = normalize(v3.Bitangent);
+        v1.Tangent = normalize(vec4(tangent - vec3(v1.Normal) * (tangent * vec3(v1.Normal)), 1.0f));
+        v2.Tangent = normalize(vec4(tangent - vec3(v2.Normal) * (tangent * vec3(v2.Normal)), 1.0f));
+        v3.Tangent = normalize(vec4(tangent - vec3(v3.Normal) * (tangent * vec3(v3.Normal)), 1.0f));
 
         // TODO: Account for NaN and smoothing
     };

@@ -126,6 +126,12 @@ public:
         return _defaultMaterial;
     }
 
+    virtual void EnableDebugShader(const std::string& name);
+
+    virtual void DisableDebugShader();
+
+    virtual Shader * GetActiveDebugShader();
+
 protected:
 
     virtual void UpdateWindowTitle(const string& title) = 0;
@@ -157,6 +163,10 @@ protected:
     std::shared_ptr<Pipeline> _defaultPipeline;
 
     std::shared_ptr<Material> _defaultMaterial;
+
+    std::unordered_map<std::string, std::shared_ptr<Dusk::Shader>> _debugShaderMap;
+
+    std::shared_ptr<Shader> _activeDebugShader;
 
 }; // class GraphicsDriver
 

@@ -14,7 +14,9 @@ bool OpenGLPipeline::Bind()
     auto gfx = GetGraphicsDriver();
     glm::ivec2 windowSize = gfx->GetWindowSize();
 
-    OpenGLShader * shader = DUSK_OPENGL_SHADER(_shader.get());
+    Shader * debugShader = gfx->GetActiveDebugShader();
+
+    OpenGLShader * shader = DUSK_OPENGL_SHADER(debugShader ? debugShader : _shader.get());
     if (shader) {
         shader->Bind();
     }

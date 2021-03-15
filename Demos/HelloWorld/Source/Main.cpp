@@ -54,38 +54,38 @@ void run()
 
     Dusk::Camera camera;
     camera.SetFOVX(45.0f);
-    camera.SetPosition(glm::vec3(10.0f));
+    camera.SetPosition(glm::vec3(2.0f));
     camera.SetLookAt({ 0, 0, 0 });
 
     static float rotation = 0.0f;
     rotation += 0.01f;
-
-    // auto shader = gfx->CreateShader();
-    // if (!shader->LoadFromFiles({
-    //     "Dusk/Debug/NormalColor.vert",
-    //     "Dusk/Debug/NormalColor.frag",
-    // })) {
-    //     return;
-    // }
-
-    // auto pipeline = gfx->CreatePipeline(shader);
-
     Dusk::Scene scene;
     Dusk::SetCurrentScene(&scene);
 
-    // auto mesh = Dusk::LoadMeshFromFile("/home/stephen/repos/glTF-Sample-Models/2.0/Sponza/glTF/Sponza.gltf", false);
-    // auto mesh = Dusk::LoadMeshFromFile("/home/stephen/Downloads/rungholt/rungholt.glb", false);
-    // auto mesh = Dusk::LoadMeshFromFile("/home/stephen/Downloads/DamagedHelmet.gltf", false);
-    // auto mesh = Dusk::LoadMeshFromFile("BoomBox.glb");
-    // auto mesh = Dusk::LoadMeshFromFile("WaterBottle.glb");
-    // auto mesh = Dusk::LoadMeshFromFile("DamagedHelmet.glb");
-    auto mesh = Dusk::LoadMeshFromFile("TestScene.glb");
+
+    // auto shader = gfx->CreateShader();
+    // shader->LoadFromFiles({
+    //     "Dusk/Debug/Material.vert",
+    //     "Dusk/Debug/MaterialEmissiveMap.frag",
+    // });
+
+    // gfx->GetDefaultPipeline()->SetShader(shader);
+
+    // auto mesh = Dusk::LoadMeshFromFile("WaterBottle/WaterBottle.gltf");
+    // camera.SetPosition(glm::vec3(0.2f));
+
+    // auto mesh = Dusk::LoadMeshFromFile("SciFiHelmet/SciFiHelmet.gltf");
+    // camera.SetPosition(glm::vec3(2.0f));
+
+    auto mesh = Dusk::LoadMeshFromFile("DamagedHelmet/DamagedHelmet.gltf");
+    camera.SetPosition(glm::vec3(1.5f));
+
+    // auto mesh = Dusk::LoadMeshFromFile("BoomBox/BoomBox.gltf");
+    // camera.SetPosition(glm::vec3(1.0f));
+
     if (!mesh) {
         return;
     }
-
-    // auto mesh = Dusk::LoadMeshFromFile("SciFiHelmet/SciFiHelmet.gltf");
-    // mesh->SetPipeline(pipeline);
 
     auto entity = std::unique_ptr<Dusk::Entity>(New Dusk::Entity());
     Dusk::Entity * tmpEntity = entity.get();
@@ -96,21 +96,13 @@ void run()
 
     scene.AddChild(std::move(entity));
 
-    // auto meshImporters = Dusk::GetAllMeshImporters();
-    // auto meshDatas = meshImporters[0]->LoadFromFile("sphere.obj");
-    // auto mesh = Dusk::LoadMeshFromFile("monkey.obj");
-    // auto meshDatas = meshImporters[0]->LoadFromFile("crate/crate.obj");
-    // auto meshDatas = meshImporters[0]->LoadFromFile("BoomBox.glb");
-
-    // auto pipeline = gfx->CreatePipeline(shader);
-
     // Force ResetSwapChain
     gfx->SetWindowSize({ 1024, 768 });
 
-    // Dusk::ScriptConsole::Initialize();
+    Dusk::ScriptConsole::Initialize();
 
     Dusk::Run([&]() {
-        // Dusk::ScriptConsole::Update();
+        Dusk::ScriptConsole::Update();
 
         transformData->View = camera.GetView();
         transformData->Projection = camera.GetProjection();
@@ -119,7 +111,7 @@ void run()
         tmpEntity->SetOrientation(orient);
     });
 
-    // Dusk::ScriptConsole::Terminate();
+    Dusk::ScriptConsole::Terminate();
 }
 
 int main(int argc, char** argv)

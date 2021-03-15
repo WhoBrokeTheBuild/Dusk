@@ -12,7 +12,6 @@ struct Vertex
     vec4 Position;
     vec4 Normal;
     vec4 Tangent;
-    vec4 Bitangent;
     
     vec4 Color;
 
@@ -29,7 +28,6 @@ enum class VertexAttribute
     Position,
     Normal,
     Tangent,
-    Bitangent,
     Color,
     TexCoord1,
     TexCoord2,
@@ -47,8 +45,6 @@ inline string VertexAttributeToString(VertexAttribute vertexAttribute)
             return "Normal";
         case VertexAttribute::Tangent:
             return "Tangent";
-        case VertexAttribute::Bitangent:
-            return "Bitangent";
         case VertexAttribute::Color:
             return "Color";
         case VertexAttribute::TexCoord1:
@@ -73,18 +69,16 @@ inline uint32_t GetVertexAttributeLocation(VertexAttribute attribute)
         return 1;
     case VertexAttribute::Tangent:
         return 2;
-    case VertexAttribute::Bitangent:
-        return 3;
     case VertexAttribute::Color:
-        return 4;
+        return 3;
     case VertexAttribute::TexCoord1:
-        return 5;
+        return 4;
     case VertexAttribute::TexCoord2:
-        return 6;
+        return 5;
     case VertexAttribute::Joints:
-        return 7;
+        return 6;
     case VertexAttribute::Weights:
-        return 8;
+        return 7;
     }
 
     return UINT32_MAX;

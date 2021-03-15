@@ -170,7 +170,7 @@ bool VulkanPipeline::Create()
         }
     };
 
-    std::array<VkVertexInputAttributeDescription, 9> attributes = {
+    std::array<VkVertexInputAttributeDescription, 8> attributes = {
         VkVertexInputAttributeDescription {
             .location = GetVertexAttributeLocation(VertexAttribute::Position),
             .binding = 0,
@@ -188,12 +188,6 @@ bool VulkanPipeline::Create()
             .binding = 0,
             .format = VK_FORMAT_R32G32B32A32_SFLOAT,
             .offset = offsetof(Vertex, Tangent),
-        },
-        VkVertexInputAttributeDescription {
-            .location = GetVertexAttributeLocation(VertexAttribute::Bitangent),
-            .binding = 0,
-            .format = VK_FORMAT_R32G32B32A32_SFLOAT,
-            .offset = offsetof(Vertex, Bitangent),
         },
         VkVertexInputAttributeDescription {
             .location = GetVertexAttributeLocation(VertexAttribute::Color),

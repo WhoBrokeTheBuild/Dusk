@@ -83,6 +83,70 @@ bool GraphicsDriver::InitializeDefaults()
 
     _defaultPipeline = CreatePipeline(shader);
 
+
+    std::vector<std::string> attributeShaders = {
+        "AttributeColor",
+        "AttributeNormal",
+        "AttributeTangent",
+        "AttributeTexCoord1",
+        "AttributeTexCoord2",
+    };
+
+    for (const auto& name : attributeShaders) {
+        auto shader = CreateShader();
+        shader->LoadFromFiles({
+            "Dusk/Debug/" + name + ".vert",
+            "Dusk/Debug/Attribute.frag",
+        });
+
+        _debugShaderMap[name] = shader;
+    }
+
+    std::vector<std::string> materialShaders = {
+        "MaterialBaseColorFactor",
+        "MaterialBaseColorMap",
+        "MaterialBaseColor",
+        "MaterialNormalScale",
+        "MaterialNormalMap",
+        "MaterialNormal",
+        "MaterialMetallicFactor",
+        "MaterialMetallicMap",
+        "MaterialMetallic",
+        "MaterialRoughnessFactor",
+        "MaterialRoughnessMap",
+        "MaterialRoughness",
+        "MaterialEmissiveFactor",
+        "MaterialEmissiveMap",
+        "MaterialEmissive",
+        "MaterialOcclusionStrength",
+        "MaterialOcclusionMap",
+        "MaterialOcclusion",
+    };
+
+    for (const auto& name : materialShaders) {
+        auto shader = CreateShader();
+        shader->LoadFromFiles({
+            "Dusk/Debug/Material.vert",
+            "Dusk/Debug/" + name + ".frag",
+        });
+
+        _debugShaderMap[name] = shader;
+    }
+
+    std::vector<std::string> customShaders = {
+        "Normal"
+    };
+
+    for (const auto& name : customShaders) {
+        auto shader = CreateShader();
+        shader->LoadFromFiles({
+            "Dusk/Debug/" + name + ".vert",
+            "Dusk/Debug/" + name + ".frag",
+        });
+
+        _debugShaderMap[name] = shader;
+    }
+
     return true;
 }
 
@@ -131,6 +195,30 @@ RenderContext * GraphicsDriver::GetRenderContext()
     return _renderContext.get();
 }
 
+DUSK_ENGINE_API
+void GraphicsDriver::EnableDebugShader(const std::string& name)
+{
+    DisableDebugShader();
+
+    auto it = _debugShaderMap.find(name);
+    if (it != _debugShaderMap.end()) {
+        _activeDebugShader = _debugShaderMap[name];
+    }
+}
+
+DUSK_ENGINE_API
+void GraphicsDriver::DisableDebugShader()
+{
+    _activeDebugShader = nullptr;
+}
+
+DUSK_ENGINE_API
+Shader * GraphicsDriver::GetActiveDebugShader()
+{
+    return _activeDebugShader.get();
+}
+
+DUSK_ENGINE_API
 PyObject * WindowResizedEventData::GetPyObject() const
 {
     PyObject * dict = PyDict_New();

@@ -50,4 +50,9 @@ void CloseAllLogFiles()
     _LogFiles.clear();
 }
 
+void Log(LogLevel level, const std::string& message)
+{
+    
+}
+
 } // namespace Dusk

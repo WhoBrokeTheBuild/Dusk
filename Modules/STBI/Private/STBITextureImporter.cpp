@@ -42,7 +42,7 @@ std::unique_ptr<TextureData> STBITextureImporter::LoadFromFile(const string& fil
         }
     }
     else {
-        data = stbi_load(filename.c_str(), &size.x, &size.y, &components, 0);
+        data = stbi_load(filename.c_str(), &size.x, &size.y, &components, STBI_rgb_alpha);
     }
 
     if (!data) {

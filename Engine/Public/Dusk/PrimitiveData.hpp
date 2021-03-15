@@ -31,7 +31,7 @@ public:
         return nullptr;
     }
 
-    virtual void CalculateTBN();
+    virtual void CalculateTangents();
 
 }; // class PrimitiveData
 

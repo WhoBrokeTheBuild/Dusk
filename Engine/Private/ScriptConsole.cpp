@@ -226,7 +226,7 @@ void ScriptConsole::ReadNextCharacter()
         inEscapeSequence = false;
 
         // for (char c : escapeSequence) {
-        //     DuskLogVerbose("%c", c);
+        //     LogVerbose(DUSK_ANCHOR, "%c", c);
         // }
         // escapeSequence.clear();
 
@@ -252,13 +252,12 @@ void ScriptConsole::ReadNextCharacter()
                 _history.back() = GetCurrentLine();
             }
 
-            if (RunCommand(_history.back())) {
-                _history.push_back(string());
-                _index = _history.size() - 1;
-            }
-            else {
-                _history.back().clear();
-            }
+            // TODO: Possibly check errors?
+            RunCommand(_history.back());
+
+            // Add command to history
+            _history.push_back(string());
+            _index = _history.size() - 1;
 
             _cursor = 0;
             printf(">>> ");

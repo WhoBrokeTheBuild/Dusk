@@ -5,11 +5,11 @@
 namespace Dusk {
 
 DUSK_ENGINE_API
-bool Entity::LoadFromFile(const string& filename)
+bool Entity::LoadFromFile(const Path& path)
 {
     const auto& importers = GetAllSceneImporters();
     for (const auto& importer : importers) {
-        if (importer->LoadFromFile(this, filename)) {
+        if (importer->LoadFromFile(this, path)) {
             return true;
         }
     }
@@ -55,7 +55,7 @@ std::vector<Component *> Entity::GetComponents() const
 }
 
 DUSK_ENGINE_API
-void Entity::SetName(const string& name)
+void Entity::SetName(string_view name)
 {
     _name = name;
 }

@@ -7,7 +7,7 @@ namespace Dusk {
 unsigned ScriptEvent::AddPythonListener(PyObject * listener)
 {
     if (!PyCallable_Check(listener)) {
-        DuskLogError("PyObject not callable");
+        LogError(DUSK_ANCHOR, "PyObject not callable");
         return 0;
     }
 
@@ -55,7 +55,7 @@ void ScriptEvent::CallPython(const EventData * data)
     for (const auto& it : _pythonListeners) {
         PyObject * result = PyObject_Call(it.second, arg, nullptr);
         if (!result) {
-            DuskLogError("Failed to call Python Event Listener");
+            LogError(DUSK_ANCHOR, "Failed to call Python Event Listener");
             PyCheckError();
         }
         Py_XDECREF(result);

@@ -41,7 +41,7 @@ bool VulkanPrimitive::Load(const std::unique_ptr<PrimitiveData>& data)
         BufferUsage::Vertex, MemoryUsage::GPU);
 
     if (!result) {
-        DuskLogError("Failed to upload vertex list to GPU buffer");
+        LogError(DUSK_ANCHOR, "Failed to upload vertex list to GPU buffer");
         return false;
     }
 
@@ -50,7 +50,7 @@ bool VulkanPrimitive::Load(const std::unique_ptr<PrimitiveData>& data)
         _count = vertexList.size();
     }
     else {
-        DuskLogFatal("UNTESTED");
+        LogFatal(DUSK_ANCHOR, "UNTESTED");
 
         _indexed = true;
         _count = indexList.size();

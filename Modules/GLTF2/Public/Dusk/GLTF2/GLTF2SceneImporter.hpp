@@ -2,8 +2,8 @@
 #define DUSK_GLTF2_SCENE_IMPORTER_HPP
 
 #include <Dusk/GLTF2/GLTF2Config.hpp>
-
 #include <Dusk/SceneImporter.hpp>
+#include <Dusk/Path.hpp>
 
 namespace Dusk::GLTF2 {
 
@@ -15,7 +15,7 @@ public:
 
     GLTF2SceneImporter() = default;
 
-    virtual bool LoadFromFile(Entity * root, const string& filename) override;
+    virtual bool LoadFromFile(Entity * root, const Path& path) override;
 
 private:
 

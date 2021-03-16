@@ -6,23 +6,23 @@
 
 namespace Dusk {
 
-PyObject * PyDusk_SetVerboseLoggingEnabled(PyObject * self, PyObject * args);
+PyObject * PyDusk_SetMinimumLogLevel(PyObject * self, PyObject * args);
 
-PyObject * PyDusk_IsVerboseLoggingEnabled(PyObject * self, PyObject * args);
-    
+PyObject * PyDusk_GetMinimumLogLevel(PyObject * self, PyObject * args);
+
 PyObject * PyDusk_LogVerbose(PyObject * self, PyObject * args);
+
+PyObject * PyDusk_LogPerformance(PyObject * self, PyObject * args);
+
+PyObject * PyDusk_LogDebug(PyObject * self, PyObject * args);
 
 PyObject * PyDusk_LogInfo(PyObject * self, PyObject * args);
 
-PyObject * PyDusk_LogWarn(PyObject * self, PyObject * args);
+PyObject * PyDusk_LogWarning(PyObject * self, PyObject * args);
 
 PyObject * PyDusk_LogError(PyObject * self, PyObject * args);
 
 PyObject * PyDusk_LogFatal(PyObject * self, PyObject * args);
-
-PyObject * PyDusk_LogPerf(PyObject * self, PyObject * args);
-
-PyObject * PyDusk_LogLoad(PyObject * self, PyObject * args);
 
 } // namespace Dusk
 

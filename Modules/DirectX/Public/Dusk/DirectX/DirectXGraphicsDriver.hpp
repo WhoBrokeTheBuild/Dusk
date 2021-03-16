@@ -28,7 +28,7 @@ public:
 
     void Terminate() override;
 
-    void SetWindowTitle(const string& title) override;
+    void SetWindowTitle(string_view title) override;
 
     string GetWindowTitle() override;
 

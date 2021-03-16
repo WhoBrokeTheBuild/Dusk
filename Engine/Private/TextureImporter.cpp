@@ -4,39 +4,63 @@
 
 namespace Dusk {
 
-static std::unordered_map<string, std::unique_ptr<TextureImporter>> _TextureImporters;
+static std::unordered_map<string, std::unique_ptr<TextureImporter>> _TextureImporterByID;
 
 static std::vector<TextureImporter *> _TextureImporterList;
 
-void updateTextureImporterList()
+static std::unordered_map<string, std::vector<TextureImporter *>> _TextureImporterListByMediaType;
+
+void updateTextureImporterCache()
 {
     _TextureImporterList.clear();
-    for (const auto& it : _TextureImporters) {
-        _TextureImporterList.push_back(it.second.get());
+    _TextureImporterListByMediaType.clear();
+
+    for (const auto& [id, importer] : _TextureImporterByID) {
+        _TextureImporterList.push_back(importer.get());
+
+        for (const auto& mediaType : importer->GetSupportedMediaTypes()) {
+            auto it = _TextureImporterListByMediaType.find(mediaType);
+            if (it == _TextureImporterListByMediaType.end()) {
+                _TextureImporterListByMediaType[mediaType] = std::vector<TextureImporter *>();
+            }
+
+            _TextureImporterListByMediaType[mediaType].push_back(importer.get());
+        }
     }
 }
 
 DUSK_ENGINE_API
 void AddTextureImporter(const string& id, std::unique_ptr<TextureImporter> importer)
 {
-    _TextureImporters[id] = std::move(importer);
-    updateTextureImporterList();
+    _TextureImporterByID[id] = std::move(importer);
+    updateTextureImporterCache();
 }
 
 DUSK_ENGINE_API
 void RemoveTextureImporter(const string& id)
 {
-    auto it = _TextureImporters.find(id);
-    if (it != _TextureImporters.end()) {
-        _TextureImporters.erase(it);
+    auto it = _TextureImporterByID.find(id);
+    if (it != _TextureImporterByID.end()) {
+        _TextureImporterByID.erase(it);
     }
     
-    updateTextureImporterList();
+    updateTextureImporterCache();
 }
 
 DUSK_ENGINE_API
 const std::vector<TextureImporter *>& GetAllTextureImporters()
 {
+    return _TextureImporterList;
+}
+
+DUSK_ENGINE_API
+const std::vector<TextureImporter *>& GetTextureImporterListForMediaType(std::string mediaType)
+{
+    auto it = _TextureImporterListByMediaType.find(mediaType);
+    if (it != _TextureImporterListByMediaType.end()) {
+        return it->second;
+    }
+
     return _TextureImporterList;
 }
 

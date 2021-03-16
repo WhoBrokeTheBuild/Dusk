@@ -17,15 +17,15 @@ public:
 
     DirectXShader() = default;
 
-    bool LoadFromFiles(const std::vector<string>& filenames) override;
+    bool LoadFromFiles(const std::vector<string>& filenameList) override;
     
     D3D12_SHADER_BYTECODE GetShaderBytecode(const ShaderStage& stage);
 
 private:
 
-    bool LoadCSO(const string& filename);
+    bool LoadCSO(const Path& path, bool useAssetPath);
 
-    bool LoadHLSL(const string& filename);
+    bool LoadHLSL(const Path& path, bool useAssetPath);
 
     std::vector<uint8_t> _vertex;
 
@@ -42,7 +42,7 @@ private:
 }; // class DirectXShader
 
 DUSK_DIRECTX_API
-std::optional<ShaderStage> GetShaderStageFromFilename(const string& filename);
+std::optional<ShaderStage> GetShaderStageFromFilename(string_view filename);
 
 DUSK_DIRECTX_API
 std::optional<const wchar_t *> GetShaderEntrypoint(const ShaderStage& stage);

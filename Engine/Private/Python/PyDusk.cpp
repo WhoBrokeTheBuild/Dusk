@@ -13,13 +13,14 @@ namespace Dusk {
 PyObject * PyDusk_RunScriptFile(PyObject * self, PyObject * args)
 {
     const char * filename;
+    int useAssetPath = true;
 
-    if (!PyArg_ParseTuple(args, "s", &filename)) {
+    if (!PyArg_ParseTuple(args, "s|p", &filename, &useAssetPath)) {
         PyErr_BadArgument();
         Py_RETURN_NONE;
     }
 
-    RunScriptFile(filename);
+    RunScriptFile(filename, useAssetPath);
     Py_RETURN_NONE;
 }
 
@@ -132,15 +133,15 @@ static struct PyMethodDef PyDusk_methods[] = {
     { "SetApplicationName",         PyDusk_SetApplicationName,          METH_VARARGS,   "Dusk::SetApplicationName(string)" },
     { "GetApplicationVersion",      PyDusk_GetApplicationVersion,       METH_NOARGS,    "Dusk::GetApplicationVersion(), returns a tuple of (Major, Minor, Patch)" },
     { "SetApplicationVersion",      PyDusk_SetApplicationVersion,       METH_VARARGS,   "Dusk::SetApplicationVersion(version), version must be a tuple of (Major, Minor, Patch)" },
-    { "SetVerboseLoggingEnabled",   PyDusk_SetVerboseLoggingEnabled,    METH_VARARGS,   "Dusk::SetVerboseLoggingEnabled(), enables or disables verbose logging" },
-    { "IsVerboseLoggingEnabled",    PyDusk_IsVerboseLoggingEnabled,     METH_NOARGS,    "Dusk::IsVerboseLoggingEnabled(), returns true if verbose logging is enabled" },
-    { "LogVerbose",                 PyDusk_LogVerbose,                  METH_VARARGS,   "DuskLogVerbose()" },
-    { "LogInfo",                    PyDusk_LogInfo,                     METH_VARARGS,   "DuskLogInfo()" },
-    { "LogWarn",                    PyDusk_LogWarn,                     METH_VARARGS,   "DuskLogWarn()" },
-    { "LogError",                   PyDusk_LogError,                    METH_VARARGS,   "DuskLogError()" },
-    { "LogFatal",                   PyDusk_LogFatal,                    METH_VARARGS,   "DuskLogFatal()" },
-    { "LogPerf",                    PyDusk_LogPerf,                     METH_VARARGS,   "DuskLogPerf()" },
-    { "LogLoad",                    PyDusk_LogLoad,                     METH_VARARGS,   "DuskLogLoad()" },
+    { "SetMinimumLogLevel",         PyDusk_SetMinimumLogLevel,          METH_VARARGS,   "Dusk::SetMinimumLogLevel(level)" },
+    { "GetMinimumLogLevel",         PyDusk_GetMinimumLogLevel,          METH_NOARGS,    "Dusk::GetMinimumLogLevel()" },
+    { "LogVerbose",                 PyDusk_LogVerbose,                  METH_VARARGS,   "Dusk::LogVerbose()" },
+    { "LogPerformance",             PyDusk_LogPerformance,              METH_VARARGS,   "Dusk::LogPerformance()" },
+    { "LogDebug",                   PyDusk_LogDebug,                    METH_VARARGS,   "Dusk::LogDebug()" },
+    { "LogInfo",                    PyDusk_LogInfo,                     METH_VARARGS,   "Dusk::LogInfo()" },
+    { "LogWarning",                 PyDusk_LogWarning,                  METH_VARARGS,   "Dusk::LogWarning()" },
+    { "LogError",                   PyDusk_LogError,                    METH_VARARGS,   "Dusk::LogError()" },
+    { "LogFatal",                   PyDusk_LogFatal,                    METH_VARARGS,   "Dusk::LogFatal()" },
     { "LoadModule",                 PyDusk_LoadModule,                  METH_VARARGS,   "Dusk::LoadModule(name, [minVersion]), minVersion must be a tuple of (Major, Minor, Patch)" },
     { "FreeModule",                 PyDusk_FreeModule,                  METH_VARARGS,   "Dusk::FreeModule(name)" },
     { "GetGraphicsDriver",          PyDusk_GetGraphicsDriver,           METH_NOARGS,    "Dusk::GetGraphicsDriver()" },
@@ -189,9 +190,7 @@ bool PyCheckError()
         if (pyValueRepr) {
             PyObject * pyValueStr = PyUnicode_AsEncodedString(pyValueRepr, "utf-8", "~E~");
 
-            fprintf(stderr,
-                "[ERRO](Python) Exception %s\n", 
-                PyBytes_AS_STRING(pyValueStr));
+            LogError("Python", "Exception {}", PyBytes_AS_STRING(pyValueStr));
 
             Py_XDECREF(pyValueStr);
             Py_XDECREF(pyValueRepr);
@@ -200,9 +199,7 @@ bool PyCheckError()
             PyObject * pyTypeName = PyObject_GetAttrString(pyType, "__name__");
             PyObject * pyTypeNameStr = PyUnicode_AsEncodedString(pyTypeName, "utf-8", "~E~");
 
-            fprintf(stderr,
-                "[ERRO](Python) Exception %s\n", 
-                PyBytes_AS_STRING(pyTypeNameStr));
+            LogError("Python", "Exception {}", PyBytes_AS_STRING(pyTypeNameStr));
 
             Py_XDECREF(pyTypeNameStr);
             Py_XDECREF(pyTypeName);

@@ -6,6 +6,7 @@
 #include <Dusk/Math.hpp>
 #include <Dusk/TextureData.hpp>
 #include <Dusk/String.hpp>
+#include <Dusk/Path.hpp>
 
 #include <memory>
 #include <vector>
@@ -22,7 +23,11 @@ public:
 
     virtual ~TextureImporter() = default;
 
-    virtual std::unique_ptr<TextureData> LoadFromFile(const string& filename, bool useAssetPath = true) = 0;
+    virtual std::vector<string> GetSupportedMediaTypes() {
+        return { };
+    }
+
+    virtual std::unique_ptr<TextureData> LoadFromFile(const Path& filename, bool useAssetPath = true) = 0;
 
     virtual std::unique_ptr<TextureData> LoadFromMemory(const uint8_t * buffer, size_t length) = 0;
 
@@ -35,7 +40,10 @@ DUSK_ENGINE_API
 void RemoveTextureImporter(const string& id);
 
 DUSK_ENGINE_API
-const std::vector<TextureImporter *>& GetAllTextureImporters();
+const std::vector<TextureImporter *>& GetTextureImporterList();
+
+DUSK_ENGINE_API
+const std::vector<TextureImporter *>& GetTextureImporterListForMediaType(string mediaType);
 
 }
 

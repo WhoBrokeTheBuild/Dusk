@@ -5,6 +5,7 @@
 #include <Dusk/Object.hpp>
 #include <Dusk/Entity.hpp>
 #include <Dusk/String.hpp>
+#include <Dusk/Path.hpp>
 
 namespace Dusk {
 
@@ -18,7 +19,7 @@ public:
 
     virtual ~SceneImporter() = default;
 
-    virtual bool LoadFromFile(Entity * root, const string& filename) = 0;
+    virtual bool LoadFromFile(Entity * root, const Path& path) = 0;
 
 }; // class SceneImporter
 

@@ -4,6 +4,7 @@
 #include <Dusk/Config.hpp>
 #include <Dusk/Version.hpp>
 #include <Dusk/String.hpp>
+#include <Dusk/Path.hpp>
 
 #include <functional>
 
@@ -25,7 +26,7 @@ DUSK_ENGINE_API
 bool Run(std::function<void()> update);
 
 DUSK_ENGINE_API
-bool RunScriptFile(const string& filename);
+bool RunScriptFile(const Path& path, bool useAssetPath = true);
 
 DUSK_ENGINE_API
 bool RunScriptString(const string& code);

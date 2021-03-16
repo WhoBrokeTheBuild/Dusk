@@ -12,7 +12,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Font);
 
-    bool LoadFromFile(const string& filename);
+    bool LoadFromFile(string_view filename);
 
 }; // class Font
 

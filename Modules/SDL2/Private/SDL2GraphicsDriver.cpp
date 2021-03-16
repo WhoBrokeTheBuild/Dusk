@@ -9,13 +9,13 @@ DUSK_SDL2_API
 bool SDL2GraphicsDriver::Initialize()
 {
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
-        DuskLogError("Failed to initialize SDL, %s", SDL_GetError());
+        LogError(DUSK_ANCHOR, "Failed to initialize SDL, {}", SDL_GetError());
         return false;
     }
 
     SDL_version version;
     SDL_GetVersion(&version);
-    DuskLogVerbose("SDL Version: %d.%d.%d", (int)version.major, (int)version.minor, (int)version.patch);
+    LogVerbose(DUSK_ANCHOR, "SDL Version: {}.{}.{}", (int)version.major, (int)version.minor, (int)version.patch);
 
     _inputDriver = New SDL2InputDriver();
     SetInputDriver(std::unique_ptr<InputDriver>(_inputDriver));
@@ -38,7 +38,7 @@ void SDL2GraphicsDriver::Terminate()
 DUSK_SDL2_API
 bool SDL2GraphicsDriver::CreateWindow(unsigned flags)
 {
-    _windowTitle = GetApplicationName() + " (" + GetApplicationVersion().GetString() + ")";
+    _windowTitle = GetApplicationName() + " (" + GetApplicationVersion().ToString() + ")";
 
     ivec2 size = GetWindowSize();
 
@@ -54,7 +54,7 @@ bool SDL2GraphicsDriver::CreateWindow(unsigned flags)
         flags | SDL_WINDOW_RESIZABLE);
 
     if (!_sdlWindow) {
-        DuskLogError("SDL_CreateWindow() failed, %s", SDL_GetError());
+        LogError(DUSK_ANCHOR, "SDL_CreateWindow() failed, {}", SDL_GetError());
         return false;
     }
 

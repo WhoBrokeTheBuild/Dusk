@@ -36,7 +36,7 @@ bool VulkanPipeline::Create()
 
     VulkanShader * vkShader = DUSK_VULKAN_SHADER(_shader.get());
     if (!vkShader) {
-        DuskLogError("Trying to bind a Vulkan VulkanPipeline with no shader");
+        LogError(DUSK_ANCHOR, "Trying to bind a Vulkan VulkanPipeline with no shader");
         return false;
     }
 
@@ -269,7 +269,7 @@ bool VulkanPipeline::Create()
 
     vkResult = vkCreateGraphicsPipelines(gfx->GetDevice(), nullptr, 1, &pipelineCreateInfo, nullptr, &_vkPipeline);
     if (vkResult != VK_SUCCESS) {
-        DuskLogError("Failed to create graphics pipeline");
+        LogError(DUSK_ANCHOR, "Failed to create graphics pipeline");
         return false;
     }
 

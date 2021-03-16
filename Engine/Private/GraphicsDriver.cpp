@@ -65,7 +65,7 @@ bool GraphicsDriver::InitializeDefaults()
 
     _defaultTexture = CreateTexture();
     if (!_defaultTexture->Load(textureData, Texture::Options())) {
-        DuskLogError("Failed to create default texture");
+        LogError(DUSK_ANCHOR, "Failed to create default texture");
         return false;
     }
 
@@ -77,7 +77,7 @@ bool GraphicsDriver::InitializeDefaults()
         "Dusk/Default.vert",
         "Dusk/Default.frag",
     })) {
-        DuskLogError("Failed to create default shader");
+        LogError(DUSK_ANCHOR, "Failed to create default shader");
         return false;
     }
 

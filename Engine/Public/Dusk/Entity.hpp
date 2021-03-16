@@ -8,6 +8,7 @@
 #include <Dusk/UpdateContext.hpp>
 #include <Dusk/RenderContext.hpp>
 #include <Dusk/String.hpp>
+#include <Dusk/Path.hpp>
 
 #include <vector>
 #include <memory>
@@ -34,7 +35,7 @@ public:
 
     virtual ~Entity() = default;
 
-    bool LoadFromFile(const string& filename);
+    bool LoadFromFile(const Path& path);
 
     void SetParent(Entity * parent);
 
@@ -50,7 +51,7 @@ public:
 
     std::vector<Component *> GetComponents() const;
 
-    void SetName(const string& name);
+    void SetName(string_view name);
 
     inline string GetName() const {
         return _name;

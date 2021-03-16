@@ -55,12 +55,13 @@ std::vector<Path> GetAssetPathList()
     paths.push_back(Path("Assets"));
 
     const char * path = getenv("DUSK_ASSET_PATH");
-    DuskLogVerbose("DUSK_ASSET_PATH=%s", path);
+    LogVerbose(DUSK_ANCHOR, "DUSK_ASSET_PATH={}", path);
     
     if (path) {
         std::istringstream iss(path);
         string p;
         while (std::getline(iss, p, DUSK_PATH_SEPARATOR)) {
+            LogVerbose(DUSK_ANCHOR, "Adding Asset Path: '{}'", p);
             paths.push_back(Path(p));
         }
     }

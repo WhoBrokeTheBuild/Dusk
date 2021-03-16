@@ -15,7 +15,9 @@ public:
 
     STBITextureImporter() = default;
 
-    std::unique_ptr<TextureData> LoadFromFile(const string& filename, bool useAssetPath = true) override;
+    std::vector<string> GetSupportedMediaTypes() override;
+
+    std::unique_ptr<TextureData> LoadFromFile(const Path& filename, bool useAssetPath = true) override;
 
     std::unique_ptr<TextureData> LoadFromMemory(const uint8_t * buffer, size_t length) override;
 

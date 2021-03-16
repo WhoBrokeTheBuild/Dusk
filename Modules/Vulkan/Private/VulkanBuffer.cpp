@@ -14,7 +14,7 @@ bool VulkanBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUsa
     _size = static_cast<VkDeviceSize>(size);
 
     if (!data && _memoryUsage == MemoryUsage::GPU) {
-        DuskLogError("Attempting to create an empty buffer with MemoryUsage GPU");
+        LogError(DUSK_ANCHOR, "Attempting to create an empty buffer with MemoryUsage GPU");
         return false;
     }
 
@@ -57,7 +57,7 @@ bool VulkanBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUsa
         );
 
         if (vkResult != VK_SUCCESS) {
-            DuskLogError("vmaCreateBuffer() failed, unable to create staging buffer");
+            LogError(DUSK_ANCHOR, "vmaCreateBuffer() failed, unable to create staging buffer");
             return false;
         }
 
@@ -89,14 +89,14 @@ bool VulkanBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUsa
         );
             
         if (vkResult != VK_SUCCESS) {
-            DuskLogError("vmaCreateBuffer() failed, unable to create buffer");
+            LogError(DUSK_ANCHOR, "vmaCreateBuffer() failed, unable to create buffer");
             return false;
         }
 
         result = gfx->CopyBuffer(stagingBuffer, _vkBuffer, _size);
 
         if (!result) {
-            DuskLogError("CopyBuffer() failed, unable to copy staging buffer to buffer");
+            LogError(DUSK_ANCHOR, "CopyBuffer() failed, unable to copy staging buffer to buffer");
         }
 
         vkDestroyBuffer(gfx->GetDevice(), stagingBuffer, nullptr);
@@ -132,7 +132,7 @@ bool VulkanBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUsa
         );
             
         if (vkResult != VK_SUCCESS) {
-            DuskLogError("CreateBuffer() failed, unable to create buffer");
+            LogError(DUSK_ANCHOR, "CreateBuffer() failed, unable to create buffer");
             return false;
         }
 

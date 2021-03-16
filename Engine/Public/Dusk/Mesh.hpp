@@ -47,7 +47,7 @@ protected:
 }; // class Mesh
 
 DUSK_ENGINE_API
-std::shared_ptr<Mesh> LoadMeshFromFile(const string& filename, bool useAssetPath = true);
+std::shared_ptr<Mesh> LoadMeshFromFile(const Path& filename, string mediaType = "", bool useAssetPath = true);
 
 } // namespace Dusk
 

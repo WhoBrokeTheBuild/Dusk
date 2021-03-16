@@ -9,13 +9,13 @@ DUSK_ENGINE_API
 bool Buffer::ReadFrom(size_t offset, size_t length, uint8_t * data)
 {
     if (_memoryUsage != MemoryUsage::Download) {
-        DuskLogError("Unable to read data from buffer with MemoryUsage: %s",
+        LogError(DUSK_ANCHOR, "Unable to read data from buffer with MemoryUsage: {}",
             MemoryUsageToString(_memoryUsage));
         return false;
     }
 
     if (!_mappedBufferMemory) {
-        DuskLogError("Buffer is not mapped for reading");
+        LogError(DUSK_ANCHOR, "Buffer is not mapped for reading");
         return false;
     }
 
@@ -28,13 +28,13 @@ DUSK_ENGINE_API
 bool Buffer::WriteTo(size_t offset, size_t length, uint8_t * data)
 {
     if (_memoryUsage != MemoryUsage::UploadOnce && _memoryUsage != MemoryUsage::UploadOften) {
-        DuskLogError("Unable to write data to buffer with MemoryUsage: %s",
+        LogError(DUSK_ANCHOR, "Unable to write data to buffer with MemoryUsage: {}",
             MemoryUsageToString(_memoryUsage));
         return false;
     }
 
     if (!_mappedBufferMemory) {
-        DuskLogError("Buffer is not mapped for writing");
+        LogError(DUSK_ANCHOR, "Buffer is not mapped for writing");
         return false;
     }
 

@@ -10,25 +10,25 @@ void SDL2InputDriver::ProcessEvent(SDL_Event * event)
     case SDL_KEYDOWN:
         {
             KeyboardKey key = GetSDLKey(event->key.keysym.sym);
-            DuskLogInfo("%s Pressed", GetKeyboardKeyName(key));
+            LogInfo(DUSK_ANCHOR, "{} Pressed", GetKeyboardKeyName(key));
         }
         break;
     case SDL_KEYUP:
         {
             KeyboardKey key = GetSDLKey(event->key.keysym.sym);
-            DuskLogInfo("%s Released", GetKeyboardKeyName(key));
+            LogInfo(DUSK_ANCHOR, "{} Released", GetKeyboardKeyName(key));
         }
         break;
     case SDL_MOUSEBUTTONDOWN:
         {
             MouseButton button = GetSDLMouseButton(event->button.button);
-            DuskLogInfo("Mouse %s Pressed", GetMouseButtonName(button));
+            LogInfo(DUSK_ANCHOR, "Mouse {} Pressed", GetMouseButtonName(button));
         }
         break;
     case SDL_MOUSEBUTTONUP:
         {
             MouseButton button = GetSDLMouseButton(event->button.button);
-            DuskLogInfo("Mouse %s Released", GetMouseButtonName(button));
+            LogInfo(DUSK_ANCHOR, "Mouse {} Released", GetMouseButtonName(button));
         }
         break;
     case SDL_MOUSEMOTION:
@@ -38,13 +38,13 @@ void SDL2InputDriver::ProcessEvent(SDL_Event * event)
     case SDL_CONTROLLERBUTTONDOWN:
         {
             ControllerButton button = GetSDLControllerButton(event->cbutton.button);
-            DuskLogInfo("%s Pressed", GetControllerButtonName(button));
+            LogInfo(DUSK_ANCHOR, "{} Pressed", GetControllerButtonName(button));
         }
         break;
     case SDL_CONTROLLERBUTTONUP:
         {
             ControllerButton button = GetSDLControllerButton(event->cbutton.button);
-            DuskLogInfo("%s Released", GetControllerButtonName(button));
+            LogInfo(DUSK_ANCHOR, "{} Released", GetControllerButtonName(button));
         }
         break;
     case SDL_CONTROLLERDEVICEADDED:

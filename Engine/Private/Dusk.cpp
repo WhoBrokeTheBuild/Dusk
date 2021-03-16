@@ -6,6 +6,7 @@
 #include <Dusk/GraphicsDriver.hpp>
 #include <Dusk/Time.hpp>
 #include <Dusk/Scene.hpp>
+#include <Dusk/Util.hpp>
 
 #include <Python/PyDusk.hpp>
 
@@ -43,13 +44,6 @@ bool Initialize(int argc, char ** argv)
         );
     }
 
-    const char * envVerbose = getenv("DUSK_VERBOSE");
-
-    if (verbose || envVerbose) {
-        DuskLogInfo("Enabling verbose logging");
-        SetVerboseLoggingEnabled(true);
-    }
-
     InitMemoryTracking();
 
     PyImport_AppendInittab("Dusk", PyInit_Dusk);
@@ -64,10 +58,12 @@ bool Initialize(int argc, char ** argv)
     Py_Initialize();
     PyImport_ImportModule("Dusk");
 
-    DuskLogVerbose("Dusk Version: %s", GetVersion().GetString());
-    DuskLogVerbose("Application Name: %s", GetApplicationName());
-    DuskLogVerbose("Application Version: %s", GetApplicationVersion().GetString());
-    DuskLogVerbose("Current Path: %s", Dusk::GetCurrentPath());
+    RunScriptFile("Dusk/Dusk.py");
+
+    LogVerbose(DUSK_ANCHOR, "Dusk Version: {}", GetVersion());
+    LogVerbose(DUSK_ANCHOR, "Application Name: {}", GetApplicationName());
+    LogVerbose(DUSK_ANCHOR, "Application Version: {}", GetApplicationVersion());
+    LogVerbose(DUSK_ANCHOR, "Current Path: {}", GetCurrentPath());
 
     return true;
 }
@@ -144,24 +140,27 @@ bool Run(std::function<void()> update)
 }
 
 DUSK_ENGINE_API
-bool RunScriptFile(const string& filename)
+bool RunScriptFile(const Path& path, bool useAssetPath /*= true*/)
 {
     FILE * file = nullptr;
     
-    const auto& assetPaths = GetAssetPathList();
+    if (useAssetPath) {
+        for (const auto& assetPath : GetAssetPathList()) {
+            Path fullPath = assetPath / "Scripts" / path;
+            LogVerbose(DUSK_ANCHOR, "Checking '{}'", fullPath);
 
-    for (const auto& path : assetPaths) {
-        Path fullPath = path / "Scripts" / filename;
-        DuskLogVerbose("Checking '%s'", fullPath);
-
-        file = fopen(fullPath.ToCString(), "rt");
-        if (file) {
-            break;
+            file = fopen(fullPath.ToCString(), "rt");
+            if (file) {
+                break;
+            }
         }
+    }
+    else {
+        file = fopen(path.ToCString(), "rt");
     }
 
     if (!file) {
-        DuskLogError("Failed to run script file '%s'", filename);
+        LogError(DUSK_ANCHOR, "Failed to run script file '{}'", path);
         return false;
     }
 
@@ -169,7 +168,7 @@ bool RunScriptFile(const string& filename)
     PyObject * pyMainDict = PyModule_GetDict(pyMain);
     PyObject * pyLocalDict = PyDict_New();
 
-    PyRun_File(file, filename.c_str(), Py_file_input, pyMainDict, pyLocalDict);
+    PyRun_File(file, path.ToCString(), Py_file_input, pyMainDict, pyLocalDict);
 
     PyCheckError();
 

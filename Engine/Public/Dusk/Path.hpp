@@ -26,6 +26,8 @@ public:
 
     Path(const string& str);
 
+    Path(const char * cstr);
+
     // Appends a new element to the path with a separator
     Path& Append(const Path& rhs);
 
@@ -70,7 +72,7 @@ public:
         if (HasRootDirectory()) {
             return string(1, Separator);
         }
-        return string();
+        return Path();
     }
 
     inline bool HasRootPath() const {
@@ -128,11 +130,6 @@ public:
         return Append(rhs);
     }
 
-    inline Path& operator/=(const string& rhs) {
-        return Append(Path(rhs));
-    }
-
-
     inline Path& operator+=(const Path& rhs) {
         return Concatenate(rhs);
     }
@@ -151,13 +148,6 @@ public:
     {
         Path tmp(lhs);
         tmp /= rhs;
-        return tmp;
-    }
-
-    inline friend Path operator/(const Path& lhs, const string& rhs)
-    {
-        Path tmp(lhs);
-        tmp /= Path(rhs);
         return tmp;
     }
 

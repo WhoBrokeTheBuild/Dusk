@@ -64,7 +64,7 @@ struct DUSK_ENGINE_API Version
         return (res == 0 || res == -1);
     }
 
-    inline string GetString() const
+    inline string ToString() const
     {
         return std::to_string(Major) + 
             "." + 
@@ -74,7 +74,7 @@ struct DUSK_ENGINE_API Version
     }
 
     operator string() const {
-        return GetString();
+        return ToString();
     }
 
     inline static int Compare(const Version& a, const Version& b)

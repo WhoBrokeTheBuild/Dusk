@@ -54,7 +54,7 @@ public:
     MOCK_METHOD0(Initialize, bool());
     MOCK_METHOD0(Terminate, void());
 
-    MOCK_METHOD1(SetWindowTitle, void(const string&));
+    MOCK_METHOD1(SetWindowTitle, void(string_view));
     MOCK_METHOD0(GetWindowTitle, string());
 
     MOCK_METHOD1(SetWindowSize, void(const ivec2&));

@@ -2,6 +2,7 @@
 #include <Dusk/MeshImporter.hpp>
 #include <Dusk/GraphicsDriver.hpp>
 #include <Dusk/Benchmark.hpp>
+#include <Dusk/MediaType.hpp>
 
 namespace Dusk {
 
@@ -51,14 +52,20 @@ bool Mesh::Load(const std::vector<std::unique_ptr<PrimitiveData>>& data)
 }
 
 DUSK_ENGINE_API
-std::shared_ptr<Mesh> LoadMeshFromFile(const string& filename, bool useAssetPath /*= true*/)
+std::shared_ptr<Mesh> LoadMeshFromFile(const Path& path, string mediaType /*= ""*/, bool useAssetPath /*= true*/)
 {
     DuskBenchmarkStart();
     GraphicsDriver * gfx = GetGraphicsDriver();
 
-    const auto& importers = GetAllMeshImporters();
+    string ext = path.GetExtension();
+    
+    if (mediaType.empty()) {
+        mediaType = GetMediaTypeFromExtension(ext);
+    }
+
+    const auto& importers = GetMeshImporterListForMediaType(mediaType);
     for (const auto& importer : importers) {
-        const auto& primitiveList = importer->LoadFromFile(filename, useAssetPath);
+        const auto& primitiveList = importer->LoadFromFile(path, useAssetPath);
         if (primitiveList.empty()) {
             continue;
         }
@@ -72,7 +79,7 @@ std::shared_ptr<Mesh> LoadMeshFromFile(const string& filename, bool useAssetPath
         return mesh;
     }
 
-    DuskLogError("Failed to load mesh '%s'", filename);
+    LogError(DUSK_ANCHOR, "Failed to load mesh '{}'", path);
     return nullptr;
 }
 

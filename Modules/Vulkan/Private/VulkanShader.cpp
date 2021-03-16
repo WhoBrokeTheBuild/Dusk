@@ -1,6 +1,7 @@
 #include <Dusk/Vulkan/VulkanShader.hpp>
 
 #include <Dusk/Log.hpp>
+#include <Dusk/Util.hpp>
 #include <Dusk/Benchmark.hpp>
 #include <Dusk/Vulkan/VulkanGraphicsDriver.hpp>
 
@@ -20,14 +21,14 @@ void VulkanShader::Terminate()
 }
 
 DUSK_VULKAN_API
-bool VulkanShader::LoadFromFiles(const std::vector<string>& filenames, bool useAssetPath /*= true*/)
+bool VulkanShader::LoadFromFiles(const std::vector<string>& filenameList, bool useAssetPath /*= true*/)
 {
     DuskBenchmarkStart();
 
-    for (const auto& filename : filenames) {
-        if (!LoadSPV(filename, useAssetPath)) {
-            if (!LoadSPV(filename + ".spv", useAssetPath)) {
-                DuskLogError("Failed to load '%s'", filename);
+    for (const auto& filename : filenameList) {
+        if (!LoadSPV(Path(filename), useAssetPath)) {
+            if (!LoadSPV(Path(filename + ".spv"), useAssetPath)) {
+                LogError(DUSK_ANCHOR, "Failed to load '{}'", filename);
                 return false;
             }
         }
@@ -38,27 +39,25 @@ bool VulkanShader::LoadFromFiles(const std::vector<string>& filenames, bool useA
 }
 
 DUSK_VULKAN_API
-bool VulkanShader::LoadSPV(const string& filename, bool useAssetPath)
+bool VulkanShader::LoadSPV(const Path& path, bool useAssetPath)
 {
     VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
-
-    const auto& assetPaths = GetAssetPathList();
 
     std::ifstream file;
 
     if (useAssetPath) {
-        for (const auto& path : assetPaths) {
-            Path fullPath = path / "Shaders" / filename;
-            DuskLogVerbose("Checking '%s'", fullPath);
+        for (const auto& assetPath : GetAssetPathList()) {
+            Path fullPath = assetPath / "Shaders" / path;
+            LogVerbose(DUSK_ANCHOR, "Checking '{}'", fullPath);
 
-            file.open(fullPath.ToString(), std::ios::binary);
+            file.open(fullPath, std::ios::binary);
             if (file.is_open()) {
                 break;
             }
         }
     }
     else {
-        file.open(filename, std::ios::binary);
+        file.open(path, std::ios::binary);
     }
 
     if (!file.is_open()) {
@@ -67,16 +66,16 @@ bool VulkanShader::LoadSPV(const string& filename, bool useAssetPath)
 
     file.unsetf(std::ios::skipws);
 
-    DuskLogLoad("Loading SPIR-V shader '%s'", filename);
+    LogVerbose(DUSK_ANCHOR, "Loading SPIR-V shader '{}'", path);
 
     std::vector<uint8_t> data(
         (std::istreambuf_iterator<char>(file)),
         std::istreambuf_iterator<char>()
     );
 
-    VkShaderStageFlagBits type = GetVkShaderType(filename);
+    VkShaderStageFlagBits type = GetVkShaderType(path);
     if (type == VK_SHADER_STAGE_ALL) {
-        DuskLogError("Failed to determine shader type of '%s'", filename);
+        LogError(DUSK_ANCHOR, "Failed to determine shader type of '{}'", path);
         return false;
     }
 
@@ -91,7 +90,7 @@ bool VulkanShader::LoadSPV(const string& filename, bool useAssetPath)
     VkShaderModule shaderModule;
 
     if (vkCreateShaderModule(gfx->GetDevice(), &shaderModuleCreateInfo, nullptr, &shaderModule) != VK_SUCCESS) {
-        DuskLogError("Failed to create shader module");
+        LogError(DUSK_ANCHOR, "Failed to create shader module");
         return false;
     }
 
@@ -112,9 +111,11 @@ bool VulkanShader::LoadSPV(const string& filename, bool useAssetPath)
 }
 
 DUSK_VULKAN_API
-VkShaderStageFlagBits VulkanShader::GetVkShaderType(const string& filename)
+VkShaderStageFlagBits VulkanShader::GetVkShaderType(const Path& path)
 {
-    string ext = GetExtension(filename);
+    string filename = path.GetFilename();
+    string ext = path.GetExtension();
+
     size_t pivot = filename.find_last_of('.');
     if (pivot == string::npos) {
         return VK_SHADER_STAGE_ALL; // Invalid

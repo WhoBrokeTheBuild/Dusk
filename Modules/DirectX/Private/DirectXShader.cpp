@@ -40,9 +40,9 @@ public:
 
         for (const auto& path : assetPathList) {
             Path fullPath = path / "Shaders" / filename;
-            DuskLogVerbose("Checking shader include '%s'", fullPath);
+            LogVerbose(DUSK_ANCHOR, "Checking shader include '{}'", fullPath);
             
-            file.open(fullPath.ToString());
+            file.open(fullPath);
             if (file.is_open()) {
                 break;
             }
@@ -74,14 +74,14 @@ bool DirectXShader::LoadFromFiles(const std::vector<string>& filenames)
     DirectXGraphicsDriver * gfx = DUSK_DIRECTX_GRAPHICS_DRIVER(GetGraphicsDriver());
 
     for (const auto& filename : filenames) {
-        const string& ext = GetExtension(filename);
+        string_view ext = GetExtension(filename);
 
         if (ext == "cso") {
             if (LoadCSO(filename)) {
                 break;
             }
             else {
-                DuskLogError("Failed to load shader '%s'", filename);
+                LogError(DUSK_ANCHOR, "Failed to load shader '{}'", filename);
                 return false;
             }
         }
@@ -90,7 +90,7 @@ bool DirectXShader::LoadFromFiles(const std::vector<string>& filenames)
                 break;
             }
             else {
-                DuskLogError("Failed to load shader '%s'", filename);
+                LogError(DUSK_ANCHOR, "Failed to load shader '{}'", filename);
                 return false;
             }
         }
@@ -99,7 +99,7 @@ bool DirectXShader::LoadFromFiles(const std::vector<string>& filenames)
                 break;
             }
             else {
-                DuskLogError("Failed to load shader '%s', tried extensions '.cso' and '.hlsl'", filename);
+                LogError(DUSK_ANCHOR, "Failed to load shader '{}', tried extensions '.cso' and '.hlsl'", filename);
                 return false;
             }
         }
@@ -110,27 +110,29 @@ bool DirectXShader::LoadFromFiles(const std::vector<string>& filenames)
 }
 
 DUSK_DIRECTX_API
-bool DirectXShader::LoadCSO(const string& filename)
+bool DirectXShader::LoadCSO(const Path& path, bool useAssetPath)
 {
-    DuskLogVerbose("Looking for Compiled Shader Object '%s'", filename);
+    LogVerbose(DUSK_ANCHOR, "Looking for Compiled Shader Object '{}'", filename);
 
-    auto stage = GetShaderStageFromFilename(filename);
+    auto stage = GetShaderStageFromFilename(path);
     if (!stage) {
         return false;
     }
 
-    const auto& assetPathList = GetAssetPathList();
-
     std::ifstream file;
 
-    for (const auto& path : assetPathList) {
-        Path fullPath = path / "Shaders" / filename;
-        DuskLogVerbose("Checking '%s'", fullPath);
-        
-        file.open(fullPath.ToString(), std::ios::binary | std::ios::ate);
-        if (file.is_open()) {
-            break;
+    if (useAssetPath) {
+        for (const auto& assetPath : GetAssetPathList()) {
+            Path fullPath = assetPath / "Shaders" / path;
+            LogVerbose(DUSK_ANCHOR, "Checking '{}'", fullPath);
+            
+            file.open(fullPath, std::ios::binary | std::ios::ate);
+            if (file.is_open()) {
+                break;
+            }
         }
+    else {
+        file.open(path, std::ios::binary | std::ios::ate);
     }
 
     if (!file.is_open()) {
@@ -142,7 +144,7 @@ bool DirectXShader::LoadCSO(const string& filename)
     size_t size = file.tellg();
     file.seekg(0, std::ios::beg);
 
-    DuskLogLoad("Loading Compiled Shader Object '%s'", filename);
+    LogVerbose(DUSK_ANCHOR, "Loading Compiled Shader Object '{}'", filename);
 
     auto begin = std::istreambuf_iterator<char>(file);
     auto end = std::istreambuf_iterator<char>();
@@ -178,24 +180,26 @@ bool DirectXShader::LoadCSO(const string& filename)
 }
 
 DUSK_DIRECTX_API
-bool DirectXShader::LoadHLSL(const string& filename)
+bool DirectXShader::LoadHLSL(string_view path, bool useAssetPath)
 {
-    DuskLogVerbose("Looking for HLSL shader '%s'", filename);
+    LogVerbose(DUSK_ANCHOR, "Looking for HLSL shader '{}'", path);
 
     HRESULT result;
 
     std::ifstream file;
 
-    const auto& assetPathList = GetAssetPathList();
-
-    for (const auto& path : assetPathList) {
-        Path fullPath = path / "Shaders" / filename;
-        DuskLogVerbose("Checking '%s'", fullPath);
-        
-        file.open(fullPath.ToString(), std::ios::binary);
-        if (file.is_open()) {
-            break;
+    if (useAssetPath) {
+        for (const auto& assetPath : GetAssetPathList()) {
+            Path fullPath = assetPath / "Shaders" / path;
+            LogVerbose(DUSK_ANCHOR, "Checking '{}'", fullPath);
+            
+            file.open(fullPath);
+            if (file.is_open()) {
+                break;
+            }
         }
+    else {
+        file.open(path);
     }
 
     if (!file.is_open()) {
@@ -204,7 +208,7 @@ bool DirectXShader::LoadHLSL(const string& filename)
 
     file.unsetf(std::ios::skipws);
 
-    DuskLogLoad("Loading HLSL shader '%s'", filename);
+    LogVerbose(DUSK_ANCHOR, "Loading HLSL shader '{}'", path);
 
     std::vector<uint8_t> data(
         (std::istreambuf_iterator<char>(file)),
@@ -214,21 +218,21 @@ bool DirectXShader::LoadHLSL(const string& filename)
     ComPtr<IDxcLibrary> library;
     result = DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(library.GetAddressOf()));
     if (FAILED(result)) {
-        DuskLogError("Failed to create IDxcLibrary");
+        LogError(DUSK_ANCHOR, "Failed to create IDxcLibrary");
         return false;
     }
 
     ComPtr<IDxcCompiler> compiler;
     result = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(compiler.GetAddressOf()));
     if (FAILED(result)) {
-        DuskLogError("Failed to create IDxcCompiler");
+        LogError(DUSK_ANCHOR, "Failed to create IDxcCompiler");
         return false;
     }
 
     ComPtr<IDxcBlobEncoding> sourceBlob;
     result = library->CreateBlobWithEncodingFromPinned(data.data(), (uint32_t)data.size(), CP_UTF8, sourceBlob.GetAddressOf());
     if (FAILED(result)) {
-        DuskLogError("CreateBlobWithEncodingFromPinned failed");
+        LogError(DUSK_ANCHOR, "CreateBlobWithEncodingFromPinned failed");
         return false;
     }
 
@@ -238,7 +242,7 @@ bool DirectXShader::LoadHLSL(const string& filename)
 
     std::wstring wfilename = ConvertUTF8ToWideString(filename);
     if (wfilename.empty()) {
-        DuskLogError("Failed to convert filename '%s' to wstring", filename);
+        LogError(DUSK_ANCHOR, "Failed to convert filename '{}' to wstring", filename);
         return false;
     }
 
@@ -247,13 +251,20 @@ bool DirectXShader::LoadHLSL(const string& filename)
     auto stage = GetShaderStageFromFilename(filename);
 
     if (!stage) {
+        LogError(DUSK_ANCHOR, "Failed to determine shader stage");
         return false;
     }
 
     auto entrypoint = GetShaderEntrypoint(stage.value());
     auto targetProfile = GetShaderTargetProfile(stage.value());
 
-    if (!entrypoint || !targetProfile) {
+    if (!entrypoint) {
+        LogError(DUSK_ANCHOR, "Failed to determine shader entrypoint");
+        return false;
+    }
+
+    if (!targetProfile) {
+        LogError(DUSK_ANCHOR, "Failed to determine shader target profile");
         return false;
     }
 
@@ -271,7 +282,7 @@ bool DirectXShader::LoadHLSL(const string& filename)
     );
     
     if (FAILED(result)) {
-        DuskLogError("Failed to compile '%s'", filename);
+        LogError(DUSK_ANCHOR, "Failed to compile '{}'", filename);
         return false;
     }
 
@@ -281,7 +292,7 @@ bool DirectXShader::LoadHLSL(const string& filename)
         ComPtr<IDxcBlobEncoding> errorBlob;
         result = compileResult->GetErrorBuffer(errorBlob.GetAddressOf());
         if (SUCCEEDED(result)) {
-            DuskLogError("Failed to compile shader '%s'\n%s", filename, (char *)errorBlob->GetBufferPointer());
+            LogError(DUSK_ANCHOR, "Failed to compile shader '{}'\n{}", filename, (char *)errorBlob->GetBufferPointer());
             return false;
         }
     }
@@ -344,7 +355,7 @@ D3D12_SHADER_BYTECODE DirectXShader::GetShaderBytecode(const ShaderStage& stage)
 }
 
 DUSK_DIRECTX_API
-std::optional<ShaderStage> GetShaderStageFromFilename(const string& filename)
+std::optional<ShaderStage> GetShaderStageFromFilename(string_view filename)
 {
     string ext = GetExtension(filename);
     if (ext == "cso" || ext == "hlsl") {

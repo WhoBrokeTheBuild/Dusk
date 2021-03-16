@@ -2,27 +2,34 @@
 
 #include <Dusk/Log.hpp>
 #include <Dusk/Math.hpp>
+#include <Dusk/Util.hpp>
 #include <Dusk/Benchmark.hpp>
 #include <Dusk/GraphicsDriver.hpp>
 #include <Dusk/STBI/STBITextureData.hpp>
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-function"
+DISABLE_WARNINGS()
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
+    #define STB_IMAGE_IMPLEMENTATION
+    #include <stb/stb_image.h>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
-
-#pragma clang diagnostic pop
-
-#pragma GCC diagnostic pop
+ENABLE_WARNINGS()
 
 namespace Dusk::STBI {
 
 DUSK_STBI_API
-std::unique_ptr<TextureData> STBITextureImporter::LoadFromFile(const string& filename, bool useAssetPath)
+std::vector<string> STBITextureImporter::GetSupportedMediaTypes()
+{
+    return {
+        "image/jpeg",
+        "image/png",
+        "image/bmp",
+        "image/tga",
+        "image/gif",
+    };
+}
+
+DUSK_STBI_API
+std::unique_ptr<TextureData> STBITextureImporter::LoadFromFile(const Path& path, bool useAssetPath)
 {
     DuskBenchmarkStart();
 
@@ -33,8 +40,8 @@ std::unique_ptr<TextureData> STBITextureImporter::LoadFromFile(const string& fil
     if (useAssetPath) {
         const auto& assetPathList = Dusk::GetAssetPathList();
 
-        for (const auto& path : assetPathList) {
-            Path fullPath = path / "Textures" / filename;
+        for (const auto& assetPath : assetPathList) {
+            Path fullPath = assetPath / "Textures" / path;
             data = stbi_load(fullPath.ToCString(), &size.x, &size.y, &components, STBI_rgb_alpha);
             if (data) {
                 break;
@@ -42,14 +49,14 @@ std::unique_ptr<TextureData> STBITextureImporter::LoadFromFile(const string& fil
         }
     }
     else {
-        data = stbi_load(filename.c_str(), &size.x, &size.y, &components, STBI_rgb_alpha);
+        data = stbi_load(path.ToCString(), &size.x, &size.y, &components, STBI_rgb_alpha);
     }
 
     if (!data) {
         return nullptr;
     }
 
-    DuskLogLoad("Loaded texture from '%s'", filename);
+    LogVerbose(DUSK_ANCHOR, "Loaded texture from '{}'", path);
 
     STBITextureData * textureData = New STBITextureData();
     textureData->Data = data;
@@ -72,7 +79,7 @@ std::unique_ptr<TextureData> STBITextureImporter::LoadFromMemory(const uint8_t *
         return nullptr;
     }
 
-    DuskLogLoad("Loaded texture from memory");
+    LogVerbose(DUSK_ANCHOR, "Loaded texture from memory");
 
     STBITextureData * textureData = New STBITextureData();
     textureData->Data = data;

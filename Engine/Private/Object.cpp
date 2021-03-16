@@ -82,12 +82,12 @@ void TermMemoryTracking()
     _trackingAllocations = false;
 
     if (!_allocations.empty()) {
-        DuskLogError("Remaining Memory Allocations:");
+        LogError(DUSK_ANCHOR, "Remaining Memory Allocations:");
         for (const auto& it : _allocations) {
             void * ptr = it.first;
             const ObjectAllocation& allocation = it.second;
 
-            DuskLogError("%p: %zu byte(s) allocated at %s:%d",
+            LogError(DUSK_ANCHOR, "{}: {} byte(s) allocated at {}:{}",
                 ptr,
                 allocation.Size,
                 allocation.Filename,

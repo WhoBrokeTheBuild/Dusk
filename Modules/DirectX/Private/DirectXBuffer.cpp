@@ -14,7 +14,7 @@ bool DirectXBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUs
     _size = size;
 
     if (!data && _memoryUsage == MemoryUsage::GPU) {
-        DuskLogError("Attempting to create an empty buffer with MemoryUsage GPU");
+        LogError(DUSK_ANCHOR, "Attempting to create an empty buffer with MemoryUsage GPU");
         return false;
     }
 
@@ -59,8 +59,8 @@ bool DirectXBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUs
     );
 
     if (FAILED(hResult)) {
-        WindowsErrorMessage msg(hResult);
-        DuskLogError("CreateResource() failed: %s", msg);
+        fmt::windows_error msg(hResult);
+        LogError(DUSK_ANCHOR, "CreateResource() failed: {}", msg);
         return false;
     }
 
@@ -70,8 +70,8 @@ bool DirectXBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUs
         void * ptr;
         hResult = _dxResource->Map(0, &readRange, &ptr);
         if (FAILED(hResult)) {
-            WindowsErrorMessage msg(hResult);
-            DuskLogError("Map() failed: %s", msg);
+            fmt::windows_error msg(hResult);
+            LogError(DUSK_ANCHOR, "Map() failed: {}", msg);
             return false;
         }
 
@@ -98,7 +98,7 @@ bool DirectXBuffer::ReadFrom(size_t offset, size_t length, uint8_t * data)
     HRESULT hResult;
     
     if (_memoryUsage != MemoryUsage::Download) {
-        DuskLogError("Unable to read data from buffer with MemoryUsage: %s",
+        LogError(DUSK_ANCHOR, "Unable to read data from buffer with MemoryUsage: {}",
             MemoryUsageToString(_memoryUsage));
         return false;
     }
@@ -108,8 +108,8 @@ bool DirectXBuffer::ReadFrom(size_t offset, size_t length, uint8_t * data)
     void * ptr;
     hResult = _dxResource->Map(0, &readRange, &ptr);
     if (FAILED(hResult)) {
-        WindowsErrorMessage msg(hResult);
-        DuskLogError("Map() failed: %s", msg);
+        fmt::windows_error msg(hResult);
+        LogError(DUSK_ANCHOR, "Map() failed: {}", msg);
         return false;
     }
 
@@ -126,7 +126,7 @@ bool DirectXBuffer::WriteTo(size_t offset, size_t length, uint8_t * data)
     HRESULT hResult;
 
     if (_memoryUsage != MemoryUsage::UploadOnce && _memoryUsage != MemoryUsage::UploadOften) {
-        DuskLogError("Unable to write data to buffer with MemoryUsage: %s",
+        LogError(DUSK_ANCHOR, "Unable to write data to buffer with MemoryUsage: {}",
             MemoryUsageToString(_memoryUsage));
         return false;
     }
@@ -136,8 +136,8 @@ bool DirectXBuffer::WriteTo(size_t offset, size_t length, uint8_t * data)
     void * ptr;
     hResult = _dxResource->Map(0, &readRange, &ptr);
     if (FAILED(hResult)) {
-        WindowsErrorMessage msg(hResult);
-        DuskLogError("Map() failed: %s", msg);
+        fmt::windows_error msg(hResult);
+        LogError(DUSK_ANCHOR, "Map() failed: {}", msg);
         return false;
     }
 

@@ -2,7 +2,6 @@
 #define DUSK_VULKAN_SHADER_HPP
 
 #include <Dusk/Vulkan/VulkanConfig.hpp>
-
 #include <Dusk/Shader.hpp>
 
 namespace Dusk::Vulkan {
@@ -21,7 +20,7 @@ public:
 
     void Terminate() override;
 
-    bool LoadFromFiles(const std::vector<string>& filenames, bool useAssetPath = true) override;
+    bool LoadFromFiles(const std::vector<string>& pathList, bool useAssetPath = true) override;
 
     inline std::vector<VkPipelineShaderStageCreateInfo>& GetStageList() {
         return _shaderStageList;
@@ -29,9 +28,9 @@ public:
 
 private:
 
-    bool LoadSPV(const string& filename, bool useAssetPath);
+    bool LoadSPV(const Path& path, bool useAssetPath);
 
-    VkShaderStageFlagBits GetVkShaderType(const string& filename);
+    VkShaderStageFlagBits GetVkShaderType(const Path& path);
 
     std::vector<VkShaderModule> _shaderModuleList;
 

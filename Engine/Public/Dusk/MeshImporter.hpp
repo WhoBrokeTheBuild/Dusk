@@ -21,7 +21,11 @@ public:
 
     virtual ~MeshImporter() = default;
 
-    virtual std::vector<std::unique_ptr<PrimitiveData>> LoadFromFile(const string& filename, bool useAssetPath = true) = 0;
+    virtual std::vector<string> GetSupportedMediaTypes() {
+        return { };
+    }
+
+    virtual std::vector<std::unique_ptr<PrimitiveData>> LoadFromFile(const Path& filename, bool useAssetPath = true) = 0;
 
 }; // class MeshImporter
 
@@ -33,6 +37,9 @@ void RemoveMeshImporter(const string& id);
 
 DUSK_ENGINE_API
 const std::vector<MeshImporter *>& GetAllMeshImporters();
+
+DUSK_ENGINE_API
+const std::vector<MeshImporter *>& GetMeshImporterListForMediaType(std::string mediaType);
 
 } // namespace Dusk
 

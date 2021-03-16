@@ -2,228 +2,107 @@
 #define DUSK_LOG_HPP
 
 #include <Dusk/Config.hpp>
-#include <Dusk/Util.hpp>
 #include <Dusk/Path.hpp>
-#include <Dusk/String.hpp>
+#include <Dusk/Version.hpp>
 
-#include <cstdio>
+#include <fmt/core.h>
+#include <fmt/ranges.h>
+#include <fmt/chrono.h>
+#include <fmt/os.h>
+#include <fmt/color.h>
 
-#if !defined(DUSK_PLATFORM_WINDOWS)
+template<>
+struct fmt::formatter<Dusk::Path> : public fmt::formatter<string_view>
+{
+    template <typename FormatContext>
+    auto format(const Dusk::Path& path, FormatContext& ctx) {
+        return formatter<string_view>::format(string_view(path.ToString()), ctx);
+    }
 
-    #include <unistd.h>
+};
 
-#endif
+template<>
+struct fmt::formatter<Dusk::Version> : public fmt::formatter<string_view>
+{
+    template <typename FormatContext>
+    auto format(const Dusk::Version& version, FormatContext& ctx) {
+        return formatter<string_view>::format(string_view(version.ToString()), ctx);
+    }
+
+};
 
 namespace Dusk {
 
-enum class LogLevel 
+enum class LogLevel
 {
-    Fatal,
-    Error,
-    Warning,
-    Info,
+    Verbose = 0,
     Performance,
-    Load,
-    Verbose,
+    Debug,
+    Info,
+    Warning,
+    Error,
+    Fatal,
+    Silent,
 
 }; // enum class LogLevel
 
 DUSK_ENGINE_API
-void SetVerboseLoggingEnabled(bool enabled);
+void SetMinimumLogLevel(LogLevel level);
 
 DUSK_ENGINE_API
-bool IsVerboseLoggingEnabled();
+LogLevel GetMinimumLogLevel();
 
 DUSK_ENGINE_API
-bool AddLogFile(const string& filename);
-
-DUSK_ENGINE_API
-std::vector<FILE *> GetAllLogFiles();
+bool AddLogFile(Path path);
 
 DUSK_ENGINE_API
 void CloseAllLogFiles();
 
-template <class T>
-inline auto LogWrap(const T& v) {
-    return v;
+DUSK_ENGINE_API
+void LogMessage(LogLevel level, string_view tag, string_view message);
+
+#define DUSK_ANCHOR (fmt::format("{}:{}", Dusk::Path(__FILE__).GetFilename().ToCString(), __LINE__))
+
+template <class... Args>
+inline void Log(LogLevel level, string_view tag, string_view format, const Args&... args) {
+    LogMessage(level, tag, fmt::format(format, args...));
 }
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-function"
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-
-    template <>
-    inline auto LogWrap<string>(const string& v) {
-        return v.c_str();
-    }
-
-    template <>
-    inline auto LogWrap<Path>(const Path& v) {
-        return v.ToCString();
-    }
-
-    #if defined(DUSK_PLATFORM_WINDOWS)
-
-        template <>
-        inline auto LogWrap<WindowsErrorMessage>(const WindowsErrorMessage& v) {
-            return v.GetMessage();
-        }
-
-    #endif
-
-#pragma clang diagnostic pop
-
-#pragma GCC diagnostic pop
-
-template <class ...Args>
-inline void Log(LogLevel level, const char * format, Args... args)
-{
-    #if defined(DUSK_PLATFORM_WINDOWS)
-
-        static HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-        
-        const int Default = 7; // White on Black
-
-        int color = Default;
-
-        switch (level)
-        {
-        case LogLevel::Info:
-            color = 7; // White on Black
-            break;
-        case LogLevel::Warning:
-            color = 6; // Yellow on Black
-            break;
-        case LogLevel::Error:
-        case LogLevel::Fatal:
-            color = 4; // Red on Black
-            break;
-        case LogLevel::Performance:
-            color = 5; // Magenta on Black
-            break;
-        case LogLevel::Verbose:
-            color = 8; // Grey on Black
-            break;
-        case LogLevel::Load:
-            color = 2; // Green on Black
-            break;
-        }
-
-        SetConsoleTextAttribute(hConsole, color);
-
-    #else
-
-        static bool isTTY = isatty(fileno(stdout));
-
-        const char * Default = "0;39";
-
-        const char * color = Default;
-
-        switch (level)
-        {
-        case LogLevel::Info:
-            color = "0;97"; // White
-            break;
-        case LogLevel::Warning:
-            color = "0;33"; // Yellow
-            break;
-        case LogLevel::Error:
-        case LogLevel::Fatal:
-            color = "0;31"; // Red
-            break;
-        case LogLevel::Performance:
-            color = "0;35"; // Magenta
-            break;
-        case LogLevel::Verbose:
-            color = "1;30"; // Grey
-            break;
-        case LogLevel::Load:
-            color = "0;32"; // Green
-            break;
-        }
-
-        if (isTTY) {
-            printf("\033[%sm", color);
-        }
-
-    #endif
-
-    #pragma clang diagnostic push
-    #pragma clang diagnostic ignored "-Wformat-security"
-
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wformat-security"
-                
-        printf(format, LogWrap(args)...);
-
-        const auto& logFiles = GetAllLogFiles();
-        for (FILE * file : logFiles) {
-            fprintf(file, format, LogWrap(args)...);
-            fflush(file);
-        }
-
-    #pragma clang diagnostic pop
-
-    #pragma GCC diagnostic pop
-
-    #if defined(DUSK_PLATFORM_WINDOWS)
-
-        SetConsoleTextAttribute(hConsole, Default);
-
-    #else
-
-        if (isTTY) {
-            printf("\033[%sm", Default);
-        }
-        
-    #endif
+template <class... Args>
+inline void LogVerbose(string_view tag, string_view format, const Args&... args) {
+    LogMessage(LogLevel::Verbose, tag, fmt::format(format, args...));
 }
 
-#if !defined(DUSK_SOURCE_PATH_LENGTH)
-    #define DUSK_SOURCE_PATH_LENGTH 0
-#endif
+template <class... Args>
+inline void LogDebug(string_view tag, string_view format, const Args&... args) {
+    LogMessage(LogLevel::Debug, tag, fmt::format(format, args...));
+}
 
-#define DUSK_FILENAME (&__FILE__[DUSK_SOURCE_PATH_LENGTH])
+template <class... Args>
+inline void LogPerformance(string_view tag, string_view format, const Args&... args) {
+    LogMessage(LogLevel::Performance, tag, fmt::format(format, args...));
+}
 
-#if defined(DUSK_BUILD_DEBUG)
-    #define DuskLogVerbose(M, ...) \
-        if (Dusk::IsVerboseLoggingEnabled()) { \
-            Dusk::Log(Dusk::LogLevel::Verbose, "[VERB](%s:%d) " M "\n", \
-                DUSK_FILENAME, __LINE__, ##__VA_ARGS__); \
-        }
-#else
-    #define DuskLogVerbose(M, ...) do { } while (0)
-#endif
+template <class... Args>
+inline void LogInfo(string_view tag, string_view format, const Args&... args) {
+    LogMessage(LogLevel::Info, tag, fmt::format(format, args...));
+}
 
-#define DuskLog(M, ...) \
-    do { Dusk::Log(Dusk::LogLevel::Info, M "\n", ##__VA_ARGS__); } while (0)
+template <class... Args>
+inline void LogWarning(string_view tag, string_view format, const Args&... args) {
+    LogMessage(LogLevel::Warning, tag, fmt::format(format, args...));
+}
 
-#define DuskLogInfo(M, ...) \
-    do { Dusk::Log(Dusk::LogLevel::Info, "[INFO](%s:%d) " M "\n", \
-        DUSK_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
+template <class... Args>
+inline void LogError(string_view tag, string_view format, const Args&... args) {
+    LogMessage(LogLevel::Error, tag, fmt::format(format, args...));
+}
 
-#define DuskLogWarn(M, ...) \
-    do { Dusk::Log(Dusk::LogLevel::Warning, "[WARN](%s:%d) " M "\n", \
-        DUSK_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
-
-#define DuskLogError(M, ...) \
-    do { Dusk::Log(Dusk::LogLevel::Error, "[ERRO](%s:%d) " M "\n", \
-        DUSK_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
-
-#define DuskLogFatal(M, ...) \
-    do { Dusk::Log(Dusk::LogLevel::Fatal, "[FATL](%s:%d) " M "\n", \
-        DUSK_FILENAME, __LINE__, ##__VA_ARGS__); \
-        std::terminate(); } while (0)
-
-#define DuskLogPerf(M, ...) \
-    do { Dusk::Log(Dusk::LogLevel::Performance, "[PERF](%s:%d) " M "\n", \
-        DUSK_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
-
-#define DuskLogLoad(M, ...) \
-    do { Dusk::Log(Dusk::LogLevel::Load, "[LOAD](%s:%d) " M "\n", \
-        DUSK_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
+template <class... Args>
+inline void LogFatal(string_view tag, string_view format, const Args&... args) {
+    LogMessage(LogLevel::Fatal, tag, fmt::format(format, args...));
+    std::terminate();
+}
 
 } // namespace Dusk
 

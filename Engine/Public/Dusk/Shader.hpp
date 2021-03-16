@@ -4,6 +4,7 @@
 #include <Dusk/Config.hpp>
 #include <Dusk/Object.hpp>
 #include <Dusk/String.hpp>
+#include <Dusk/Path.hpp>
 
 #include <vector>
 
@@ -32,7 +33,7 @@ public:
 
     virtual void Terminate() { }
 
-    virtual bool LoadFromFiles(const std::vector<string>& filenames, bool useAssetPath = true) = 0;
+    virtual bool LoadFromFiles(const std::vector<string>& filenameList, bool useAssetPath = true) = 0;
 
     // GetSize()
     // SetPreprocessorDefines()

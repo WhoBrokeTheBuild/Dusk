@@ -33,12 +33,12 @@ bool OpenGLGraphicsDriver::Initialize()
 
     _glContext = SDL_GL_CreateContext(GetSDL2Window());
     if (!_glContext) {
-        DuskLogError("Failed to create OpenGL context, %s", SDL_GetError());
+        LogError(DUSK_ANCHOR, "Failed to create OpenGL context, {}", SDL_GetError());
         return false;
     }
 
     if (!gladLoadGL((GLADloadfunc) SDL_GL_GetProcAddress)) {
-        DuskLogError("Failed to initialize OpenGL context");
+        LogError(DUSK_ANCHOR, "Failed to initialize OpenGL context");
         return false;
     }
 
@@ -50,48 +50,48 @@ bool OpenGLGraphicsDriver::Initialize()
 
     SDL_GL_SetSwapInterval(0);
     
-    DuskLogVerbose("OpenGL Version: %s",  glGetString(GL_VERSION));
-    DuskLogVerbose("GLSL Version: %s",    glGetString(GL_SHADING_LANGUAGE_VERSION));
-    DuskLogVerbose("OpenGL Vendor: %s",   glGetString(GL_VENDOR));
-    DuskLogVerbose("OpenGL Renderer: %s", glGetString(GL_RENDERER));
+    LogVerbose(DUSK_ANCHOR, "OpenGL Version: {}",  glGetString(GL_VERSION));
+    LogVerbose(DUSK_ANCHOR, "GLSL Version: {}",    glGetString(GL_SHADING_LANGUAGE_VERSION));
+    LogVerbose(DUSK_ANCHOR, "OpenGL Vendor: {}",   glGetString(GL_VENDOR));
+    LogVerbose(DUSK_ANCHOR, "OpenGL Renderer: {}", glGetString(GL_RENDERER));
 
     int value = 0;
 
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &value);
-    DuskLogVerbose("Max Vertex Attributes: %d", value);
+    LogVerbose(DUSK_ANCHOR, "Max Vertex Attributes: {}", value);
 
     glGetIntegerv(GL_MAX_VERTEX_UNIFORM_COMPONENTS, &value);
-    DuskLogVerbose("Max Vertex Uniform Components: %d", value);
+    LogVerbose(DUSK_ANCHOR, "Max Vertex Uniform Components: {}", value);
 
     glGetIntegerv(GL_MAX_VERTEX_OUTPUT_COMPONENTS, &value);
-    DuskLogVerbose("Max Vertex Output Components: %d", value);
+    LogVerbose(DUSK_ANCHOR, "Max Vertex Output Components: {}", value);
 
     glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, &value);
-    DuskLogVerbose("Max Fragment Uniform Components: %d", value);
+    LogVerbose(DUSK_ANCHOR, "Max Fragment Uniform Components: {}", value);
 
     glGetIntegerv(GL_MAX_FRAGMENT_INPUT_COMPONENTS, &value);
-    DuskLogVerbose("Max Fragment Input Components: %d", value);
+    LogVerbose(DUSK_ANCHOR, "Max Fragment Input Components: {}", value);
 
     glGetIntegerv(GL_MAX_DRAW_BUFFERS, &value);
-    DuskLogVerbose("Max Draw Buffers: %d", value);
+    LogVerbose(DUSK_ANCHOR, "Max Draw Buffers: {}", value);
 
     glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &value);
-    DuskLogVerbose("Max Fragment Texture Image Units: %d", value);
+    LogVerbose(DUSK_ANCHOR, "Max Fragment Texture Image Units: {}", value);
 
     glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &value);
-    DuskLogVerbose("Max Vertex Texture Image Units: %d", value);
+    LogVerbose(DUSK_ANCHOR, "Max Vertex Texture Image Units: {}", value);
     
     glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &value);
-    DuskLogVerbose("Max Uniform Buffer Bindings: %d", value);
+    LogVerbose(DUSK_ANCHOR, "Max Uniform Buffer Bindings: {}", value);
     
     glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &value);
-    DuskLogVerbose("Max Vertex Uniform Blocks: %d", value);
+    LogVerbose(DUSK_ANCHOR, "Max Vertex Uniform Blocks: {}", value);
     
     glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &value);
-    DuskLogVerbose("Max Fragment Uniform Blocks: %d", value);
+    LogVerbose(DUSK_ANCHOR, "Max Fragment Uniform Blocks: {}", value);
     
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &value);
-    DuskLogVerbose("Max Uniform Block Size: %d", value);
+    LogVerbose(DUSK_ANCHOR, "Max Uniform Block Size: {}", value);
 
     InitializeUpdateContext();
     InitializeRenderContext();
@@ -196,28 +196,20 @@ _OpenGLDebugMessageCallback(
     GLsizei length, const GLchar * message, const void * userData)
 {
     if (type == GL_DEBUG_TYPE_PERFORMANCE) {
-        Log(LogLevel::Performance, "[PERF](OpenGLDebugMessage) %s\n", message);
+        Log(LogLevel::Performance, "OpenGLDebugMessage", message);
     }
     else {
         switch (severity) {
         case GL_DEBUG_SEVERITY_HIGH:
         case GL_DEBUG_SEVERITY_MEDIUM:
-            Log(LogLevel::Error, "[ERRO](OpenGLDebugMessage) %s\n", message);
+            Log(LogLevel::Error, "OpenGLDebugMessage", message);
             break;
         case GL_DEBUG_SEVERITY_LOW:
-            Log(LogLevel::Warning, "[WARN](OpenGLDebugMessage) %s\n", message);
+            Log(LogLevel::Warning, "OpenGLDebugMessage", message);
             break;
-
-        #if defined(DUSK_BUILD_DEBUG)
-
-            case GL_DEBUG_SEVERITY_NOTIFICATION:
-                if (IsVerboseLoggingEnabled()) {
-                    Log(LogLevel::Verbose, "[VERB](OpenGLDebugMessage) %s\n", message);
-                }
-                break;
-                
-        #endif
-
+        case GL_DEBUG_SEVERITY_NOTIFICATION:
+            Log(LogLevel::Verbose, "OpenGLDebugMessage", message);
+            break;
         }
     }
 }

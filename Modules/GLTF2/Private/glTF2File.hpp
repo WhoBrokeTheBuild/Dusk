@@ -9,6 +9,7 @@
 #include <Dusk/TextureImporter.hpp>
 #include <Dusk/Material.hpp>
 #include <Dusk/PrimitiveData.hpp>
+#include <Dusk/Path.hpp>
 
 #include "OpenGLStub.hpp"
 
@@ -111,7 +112,7 @@ public:
 
     virtual ~glTF2File() = default;
 
-    bool LoadFromFile(const string& filename);
+    void LoadFromFile(const Path& path);
 
     const uint32_t MAGIC = 0x46546C67; // glTF
 
@@ -121,9 +122,7 @@ public:
         BIN     = 0x004E4942, // BIN
     };
 
-    string Filename;
-
-    string BaseDir;
+    Path Directory;
 
     json JSON;
 
@@ -147,21 +146,21 @@ public:
 
     bool IsValidTexture(int index, int texCoord);
 
-    bool LoadBuffers();
+    void LoadBuffers();
 
-    bool LoadBufferViews();
+    void LoadBufferViews();
 
-    bool LoadAccessors();
+    void LoadAccessors();
 
-    bool LoadImages();
+    void LoadImages();
     
-    bool LoadSamplers();
+    void LoadSamplers();
 
-    bool LoadTextures();
+    void LoadTextures();
 
-    bool LoadMaterials();
+    void LoadMaterials();
     
-    bool LoadCameras();
+    void LoadCameras();
 
     std::vector<std::unique_ptr<PrimitiveData>> LoadMesh();
 

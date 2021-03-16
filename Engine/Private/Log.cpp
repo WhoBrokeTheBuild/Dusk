@@ -4,41 +4,35 @@
 
 namespace Dusk {
 
-static bool _VerboseLoggingEnabled = false;
+static LogLevel _MinimumLogLevel = LogLevel::Info;
 
 static std::vector<FILE *> _LogFiles;
 
 DUSK_ENGINE_API
-void SetVerboseLoggingEnabled(bool enabled)
+void SetMinimumLogLevel(LogLevel level)
 {
-    _VerboseLoggingEnabled = enabled;
+    _MinimumLogLevel = level;
 }
 
 DUSK_ENGINE_API
-bool IsVerboseLoggingEnabled()
+LogLevel GetMinimumLogLevel()
 {
-    return _VerboseLoggingEnabled;
+    return _MinimumLogLevel;
 }
 
 DUSK_ENGINE_API
-bool AddLogFile(const string& filename)
+bool AddLogFile(Path path)
 {
     FILE * file = nullptr;
-    file = fopen(filename.c_str(), "wt");
+    file = fopen(path.ToCString(), "wt");
     if (file) {
         _LogFiles.push_back(file);
-        DuskLogVerbose("Adding log file '%s'", filename);
+        LogVerbose(DUSK_ANCHOR, "Adding log file '{}'", path);
         return true;
     }
 
-    DuskLogError("Failed to add log file '%s'", filename);
+    LogError(DUSK_ANCHOR, "Failed to add log file '{}'", path);
     return false;
-}
-
-DUSK_ENGINE_API
-std::vector<FILE *> GetAllLogFiles()
-{
-    return _LogFiles;
 }
 
 DUSK_ENGINE_API
@@ -50,9 +44,44 @@ void CloseAllLogFiles()
     _LogFiles.clear();
 }
 
-void Log(LogLevel level, const std::string& message)
+DUSK_ENGINE_API
+void LogMessage(LogLevel level, string_view tag, string_view message)
 {
-    
+    if (level < _MinimumLogLevel) {
+        return;
+    }
+
+    fmt::text_style ts = bg(fmt::terminal_color::black);
+
+    switch (level) {
+    case LogLevel::Verbose:
+        ts = fmt::fg(fmt::terminal_color::cyan);
+        break;
+    case LogLevel::Debug:
+        ts = fmt::fg(fmt::terminal_color::green);
+        break;
+    case LogLevel::Performance:
+        ts = fmt::fg(fmt::terminal_color::magenta);
+        break;
+    case LogLevel::Info:
+        ts = fmt::fg(fmt::terminal_color::white);
+        break;
+    case LogLevel::Warning:
+        ts = fmt::fg(fmt::terminal_color::yellow);
+        break;
+    case LogLevel::Error:
+    case LogLevel::Fatal:
+        ts = fmt::fg(fmt::terminal_color::red);
+        break;
+    default:
+        break;
+    }
+
+    fmt::print(ts, "({}) {}\n", tag, message);
+
+    for (FILE * file : _LogFiles) {
+        fmt::print(file, "({}) {}\n", tag, message);
+    }
 }
 
 } // namespace Dusk

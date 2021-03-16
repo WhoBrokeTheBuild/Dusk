@@ -43,7 +43,7 @@ bool VulkanTexture::Load(const std::unique_ptr<TextureData>& data, Options opts 
     // };
 
     // if (vkCreateImage(gfx->GetDevice(), &imageCreateInfo, nullptr, &_vkImage) != VK_SUCCESS) {
-    //     DuskLogError("Failed to create image");
+    //     LogError(DUSK_ANCHOR, "Failed to create image");
     //     return false;
     // }
 

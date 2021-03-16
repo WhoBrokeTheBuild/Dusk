@@ -3,6 +3,7 @@
 #include <Dusk/GraphicsDriver.hpp>
 #include <Dusk/Benchmark.hpp>
 #include <Dusk/Log.hpp>
+#include <Dusk/Exception.hpp>
 #include <Dusk/GLTF2/GLTF2PrimitiveData.hpp>
 
 #include <Base64.h>
@@ -13,48 +14,45 @@ namespace Dusk::GLTF2 {
 bool glTF2File::IsValidTexture(int index, int texCoord)
 {
     if (index < 0 || index > static_cast<int>(Textures.size())) {
-        DuskLogError("Invalid glTF2 Texture Index: %d", index);
+        LogError(DUSK_ANCHOR, "Invalid glTF2 Texture Index: {}", index);
         return false;
     }
 
     if (texCoord > 0) {
-        DuskLogWarn("Multiple glTF2 TEXCOORDs not supported");
+        LogWarning(DUSK_ANCHOR, "Multiple glTF2 TEXCOORDs not supported");
         return false;
     }
 
     return true;
 }
 
-bool glTF2File::LoadFromFile(const string& filename)
+void glTF2File::LoadFromFile(const Path& path)
 {
     DuskBenchmarkStart();
 
-    Filename = filename;
-    BaseDir = GetDirname(Filename);
+    Directory = path.GetParentPath();
 
     std::ifstream file;
-    file.open(Filename, std::ios::in | std::ios::binary);
+    file.open(path, std::ios::in | std::ios::binary);
 
     if (!file.is_open()) {
-        return false;
+        throw FileNotFound(path);
     }
 
-    const auto& ext = GetExtension(Filename);
+    const string& ext = path.GetExtension();
     
     if (ext == "glb") {
         // Header
         uint32_t magic;
         file.read(reinterpret_cast<char *>(&magic), sizeof(magic));
         if (magic != MAGIC) {
-            DuskLogError("Invalid binary glTF2 file header");
-            return false;
+            throw RuntimeError("Invalid binary glTF2 file magic");
         }
 
         uint32_t version;
         file.read(reinterpret_cast<char *>(&version), sizeof(version));
         if (version != 2) {
-            DuskLogError("Invalid binary glTF2 container version, %u", version);
-            return false;
+            throw RuntimeError(fmt::format("Invalid binary glTF2 container version, {}", version));
         }
 
         uint32_t length;
@@ -69,20 +67,14 @@ bool glTF2File::LoadFromFile(const string& filename)
         file.read(reinterpret_cast<char *>(&jsonChunkType), sizeof(jsonChunkType));
 
         if (jsonChunkType != ChunkType::JSON) {
-            DuskLogError("Invalid binary glTF2 file. The first chunk must be JSON, found '%08x'", jsonChunkType);
-            return false;
+            throw RuntimeError(fmt::format("Invalid binary glTF2 file. The first chunk must be JSON, found '{:08X}'", jsonChunkType));
         }
 
         std::vector<char> jsonChunk(jsonChunkLength + 1);
         file.read(jsonChunk.data(), jsonChunkLength);
         jsonChunk.back() = '\0';
 
-        try {
-            JSON = json::parse(jsonChunk.data());
-        }
-        catch (...) {
-            return false;
-        }
+        JSON = json::parse(jsonChunk.data());
 
         // Buffer Chunk (Optional)
 
@@ -94,8 +86,7 @@ bool glTF2File::LoadFromFile(const string& filename)
             file.read(reinterpret_cast<char *>(&bufferChunkType), sizeof(bufferChunkType));
 
             if (bufferChunkType != ChunkType::BIN) {
-                DuskLogError("Invalid binary glTF2 file. The second chunk must be BIN, found '%08x'", bufferChunkType);
-                return false;
+                throw RuntimeError(fmt::format("Invalid binary glTF2 file. The second chunk must be BIN, found '{:08X}'", bufferChunkType));
             }
 
             Buffers.push_back(std::vector<uint8_t>(bufferChunkLength));
@@ -103,104 +94,71 @@ bool glTF2File::LoadFromFile(const string& filename)
         }
     }
     else {
-        try {
-            file >> JSON;
-        }
-        catch (...) {
-            return false;
-        }
+        file >> JSON;
 
-        if (!LoadBuffers()) {
-            return false;
-        }
+        LoadBuffers();
     }
 
     const auto VERSION_PATH = json::json_pointer("/asset/version");
 
     if (JSON.contains(VERSION_PATH)) {
         auto version = JSON[VERSION_PATH].get<string>();
-        DuskLogVerbose("glTF2 Version: %s", version);
+        LogVerbose(DUSK_ANCHOR, "glTF2 Version: {}", version);
     }
 
     const auto GENERATOR_PATH = json::json_pointer("/asset/generator");
 
     if (JSON.contains(GENERATOR_PATH)) {
         auto generator = JSON[GENERATOR_PATH].get<string>();
-        DuskLogVerbose("glTF2 Generator: %s", generator);
+        LogVerbose(DUSK_ANCHOR, "glTF2 Generator: {}", generator);
     }
 
-    if (!LoadBufferViews()) {
-        return false;
-    }
-
-    if (!LoadAccessors()) {
-        return false;
-    }
-
-    if (!LoadImages()) {
-        return false;
-    }
-
-    if (!LoadSamplers()) {
-        return false;
-    }
-
-    if (!LoadTextures()) {
-        return false;
-    }
-
-    if (!LoadMaterials()) {
-        return false;
-    }
-
-    if (!LoadCameras()) {
-        return false;
-    }
+    LoadBufferViews();
+    LoadAccessors();
+    LoadImages();
+    LoadSamplers();
+    LoadTextures();
+    LoadMaterials();
+    LoadCameras();
 
     DuskBenchmarkEnd();
-    return true;
 }
 
-bool glTF2File::LoadBuffers()
+void glTF2File::LoadBuffers()
 {
     const auto BUFFERS_PATH = json::json_pointer("/buffers");
 
     if (JSON.contains(BUFFERS_PATH)) {
         for (const auto& object : JSON[BUFFERS_PATH]) {
-            const auto& byteLength = object.value<size_t>("byteLength", 0);
-            const auto& uri = object.value("uri", "");
+            size_t byteLength = object.value<size_t>("byteLength", 0);
+            const string& uri = object.value("uri", "");
 
             if (uri.rfind("data:", 0) == 0) {
                 size_t pivot = uri.find(',');
                 Buffers.push_back(macaron::Base64::Decode(uri.substr(pivot + 1)));
             }
             else {
-                DuskLogVerbose("Loading glTF2 buffer from '%s'", uri);
+                const Path& path = Directory / uri;
+                LogVerbose(DUSK_ANCHOR, "Loading glTF2 buffer from '{}'", path);
 
-                string path = BaseDir + DUSK_PATH_SLASH + uri;
                 std::ifstream file(path, std::ios::in | std::ios::binary);
                 if (!file.is_open()) {
-                    DuskLogError("Failed to read glTF2 buffer from '%s'", uri);
-                    return false;
+                    throw RuntimeError("Failed to load glTF2 buffer file");
                 }
 
                 Buffers.push_back(std::vector<uint8_t>(byteLength));
                 file.read(reinterpret_cast<char *>(Buffers.back().data()), byteLength);
-
-                DuskLogLoad("glTF2 buffer '%s'", path);
             }
         }
     }
     else {
-        return false;
+        throw RuntimeError("No glTF2 buffers found");
     }
 
-    DuskLogVerbose("Loaded %d Buffer(s)", Buffers.size());
-
-    return true;
+    LogVerbose(DUSK_ANCHOR, "Loaded {} Buffer(s)", Buffers.size());
 }
 
-bool glTF2File::LoadBufferViews()
+void glTF2File::LoadBufferViews()
 {
     const auto BUFFER_VIEWS_PATH = json::json_pointer("/bufferViews");
 
@@ -215,16 +173,11 @@ bool glTF2File::LoadBufferViews()
             });
         }
     }
-    else {
-        return false;
-    }
 
-    DuskLogVerbose("Loaded %d Buffer View(s)", BufferViews.size());
-
-    return true;
+    LogVerbose(DUSK_ANCHOR, "Loaded {} Buffer View(s)", BufferViews.size());
 }
 
-bool glTF2File::LoadAccessors()
+void glTF2File::LoadAccessors()
 {
     const auto ACCESSORS_PATH = json::json_pointer("/accessors");
 
@@ -241,15 +194,13 @@ bool glTF2File::LoadAccessors()
         }
     }
     else {
-        return false;
+        throw std::runtime_error("No accessors views found in glTF2 file");
     }
 
-    DuskLogVerbose("Loaded %d Accessor(s)", Accessors.size());
-
-    return true;
+    LogVerbose(DUSK_ANCHOR, "Loaded {} Accessor(s)", Accessors.size());
 }
 
-bool glTF2File::LoadImages()
+void glTF2File::LoadImages()
 {
     const auto IMAGES_PATH = json::json_pointer("/images");
 
@@ -263,12 +214,10 @@ bool glTF2File::LoadImages()
         }
     }
 
-    DuskLogVerbose("Loaded %d Image(s)", Images.size());
-
-    return true;
+    LogVerbose(DUSK_ANCHOR, "Loaded {} Image(s)", Images.size());
 }
 
-bool glTF2File::LoadSamplers()
+void glTF2File::LoadSamplers()
 {
     const auto SAMPLERS_PATH = json::json_pointer("/samplers");
 
@@ -284,20 +233,15 @@ bool glTF2File::LoadSamplers()
         }
     }
 
-    DuskLogVerbose("Loaded %d Samplers(s)", Samplers.size());
-
-    return true;
+    LogVerbose(DUSK_ANCHOR, "Loaded {} Samplers(s)", Samplers.size());
 }
 
-bool glTF2File::LoadTextures()
+void glTF2File::LoadTextures()
 {
     const auto TEXTURES_PATH = json::json_pointer("/textures");
 
     GraphicsDriver * gfx = Dusk::GetGraphicsDriver();
-    if (!gfx) {
-        DuskLogError("Unable to load textures from a glTF2 file without a graphics driver");
-        return false;
-    }
+    DuskAssert(gfx);
 
     if (JSON.contains(TEXTURES_PATH)) {
         for (const auto& object : JSON[TEXTURES_PATH]) {
@@ -305,8 +249,7 @@ bool glTF2File::LoadTextures()
             int source = object.value("source", -1);
 
             if (source < 0 || source >= Images.size()) {
-                DuskLogError("Invalid glTF2 sourceimage: %d\n", source);
-                return false;
+                throw OutOfRange("Image.source");
             }
 
             Dusk::Texture::Options opts;
@@ -316,45 +259,47 @@ bool glTF2File::LoadTextures()
 
             const auto& image = Images[source];
             if (image.bufferView >= 0) {
-                DuskLogVerbose("Loading glTF2 texture from bufferView");
+                LogVerbose(DUSK_ANCHOR, "Loading glTF2 texture from bufferView");
 
                 const auto& bufferView = BufferViews[image.bufferView];
                 const auto& buffer = Buffers[bufferView.buffer];
 
                 if (bufferView.byteStride > 0) {
-                    DuskLogError("Unsupported glTF2 bufferView, byteStride != 0");
-                    return false;
+                    throw std::runtime_error("Unsupported bufferView.byteStride != 0");
                 }
 
                 const uint8_t * ptr = buffer.data() + bufferView.byteOffset;
 
-                auto texture = LoadTextureFromMemory(ptr, bufferView.byteLength, opts);
+                auto texture = LoadTextureFromMemory(ptr, bufferView.byteLength, image.mimeType, opts);
                 if (!texture) {
-                    return false;
+                    // TODO: Improve
+                    throw std::runtime_error("Failed to load texture");
                 }
 
                 Textures.push_back(texture);
             }
             else if (image.uri.rfind("data:", 0) == 0) {
-                DuskLogVerbose("Loading glTF2 texture from base64 encoded uri");
+                LogVerbose(DUSK_ANCHOR, "Loading glTF2 texture from base64 encoded uri");
                 
                 size_t pivot = image.uri.find(',');
                 const auto& data = macaron::Base64::Decode(image.uri.substr(pivot + 1));
 
-                auto texture = LoadTextureFromMemory(data.data(), data.size(), opts);
+                auto texture = LoadTextureFromMemory(data.data(), data.size(), image.mimeType, opts);
                 if (!texture) {
-                    return false;
+                    // TODO: Improve
+                    throw std::runtime_error("Failed to load texture");
                 }
 
                 Textures.push_back(texture);
             }
             else {
-                string path = BaseDir + DUSK_PATH_SLASH + image.uri;
-                DuskLogVerbose("Loading glTF2 texture from file: '%s'", path);
+                Path path = Directory / image.uri;
+                LogVerbose(DUSK_ANCHOR, "Loading glTF2 texture from file: '{}'", path);
                 
-                auto texture = LoadTextureFromFile(path, false, opts);
+                auto texture = LoadTextureFromFile(path, false, image.mimeType, opts);
                 if (!texture) {
-                    return false;
+                    // TODO: Improve
+                    throw std::runtime_error("Failed to load texture");
                 }
 
                 Textures.push_back(texture);
@@ -362,20 +307,15 @@ bool glTF2File::LoadTextures()
         }
     }
 
-    DuskLogVerbose("Loaded %d Texture(s)", Textures.size());
-
-    return true;
+    LogVerbose(DUSK_ANCHOR, "Loaded {} Texture(s)", Textures.size());
 }
 
-bool glTF2File::LoadMaterials()
+void glTF2File::LoadMaterials()
 {
     const auto MATERIALS_PATH = json::json_pointer("/materials");
 
     GraphicsDriver * gfx = Dusk::GetGraphicsDriver();
-    if (!gfx) {
-        DuskLogError("Unable to load textures from a glTF2 file without a graphics driver");
-        return false;
-    }
+    assert(gfx);
 
     if (JSON.contains(MATERIALS_PATH)) {
         for (const auto& object : JSON[MATERIALS_PATH]) {
@@ -396,7 +336,7 @@ bool glTF2File::LoadMaterials()
                     material->SetNormalScale(value.value("scale", material->GetNormalScale()));
                 }
                 else {
-                    DuskLogWarn("Malformed glTF2 normalTexture");
+                    LogWarning(DUSK_ANCHOR, "Malformed glTF2 normalTexture");
                 }
             }
 
@@ -415,7 +355,7 @@ bool glTF2File::LoadMaterials()
                     }
                 }
                 else {
-                    DuskLogWarn("Malformed glTF2 emissiveTexture");
+                    LogWarning(DUSK_ANCHOR, "Malformed glTF2 emissiveTexture");
                 }
             }
 
@@ -438,7 +378,7 @@ bool glTF2File::LoadMaterials()
                     material->SetOcclusionStrength(value.value("strength", material->GetOcclusionStrength()));
                 }
                 else {
-                    DuskLogWarn("Malformed glTF2 occlusionTexture");
+                    LogWarning(DUSK_ANCHOR, "Malformed glTF2 occlusionTexture");
                 }
             }
 
@@ -463,7 +403,7 @@ bool glTF2File::LoadMaterials()
                             }
                         }
                         else {
-                            DuskLogWarn("Malformed glTF2 baseColorTexture");
+                            LogWarning(DUSK_ANCHOR, "Malformed glTF2 baseColorTexture");
                         }
                     }
 
@@ -483,7 +423,7 @@ bool glTF2File::LoadMaterials()
                             }
                         }
                         else {
-                            DuskLogWarn("Malformed glTF2 metallicRoughnessTexture");
+                            LogWarning(DUSK_ANCHOR, "Malformed glTF2 metallicRoughnessTexture");
                         }
                     }
                 }
@@ -507,17 +447,15 @@ bool glTF2File::LoadMaterials()
 
             // [doubleSided]
             
-            DuskLogLoad("Loaded Material '%s'", object.value<string>("name", ""));
+            LogVerbose(DUSK_ANCHOR, "Loaded Material '{}'", object.value<string>("name", ""));
             Materials.push_back(material);
         }
     }
 
-    DuskLogVerbose("Loaded %d Material(s)", Materials.size());
-
-    return true;
+    LogVerbose(DUSK_ANCHOR, "Loaded {} Material(s)", Materials.size());
 }
 
-bool glTF2File::LoadCameras()
+void glTF2File::LoadCameras()
 {
     const auto CAMERAS_PATH = json::json_pointer("/cameras");
 
@@ -532,8 +470,7 @@ bool glTF2File::LoadCameras()
             if (camera.type == "perspective") {
                 auto it = object.find("perspective");
                 if (it == object.end()) {
-                    DuskLogError("Invalid glTF2 perspective camera");
-                    return false;
+                    throw RuntimeError("Invalid glTF2 perspective camera");
                 }
 
                 const auto& perspective = it.value();
@@ -545,8 +482,7 @@ bool glTF2File::LoadCameras()
             else if (camera.type == "orthographic") {
                 auto it = object.find("orthographic");
                 if (it == object.end()) {
-                    DuskLogError("Invalid glTF2 orthographic camera");
-                    return false;
+                    throw RuntimeError("Invalid glTF2 orthographic camera");
                 }
 
                 const auto& orthographic = it.value();
@@ -556,14 +492,12 @@ bool glTF2File::LoadCameras()
                 camera.znear = orthographic.value("znear", 0.0f);
             }
             else {
-                DuskLogWarn("Unknown glTF2 camera type: '%s'", camera.type);
+                LogWarning(DUSK_ANCHOR, "Unknown glTF2 camera type: '{}'", camera.type);
             }
         }
     }
 
-    DuskLogVerbose("Loaded %d Camera(s)", Cameras.size());
-
-    return true;
+    LogVerbose(DUSK_ANCHOR, "Loaded {} Camera(s)", Cameras.size());
 }
 
 std::vector<std::unique_ptr<PrimitiveData>> glTF2File::LoadMesh()
@@ -578,8 +512,7 @@ std::vector<std::unique_ptr<PrimitiveData>> glTF2File::LoadMesh()
             if (iter != object.end()) {
                 const auto& primitives = iter.value();
                 if (!primitives.is_array()) {
-                    DuskLogError("Invalid glTF2 mesh, missing primitives array");
-                    continue;
+                    throw RuntimeError("Invalid glTF2 mesh, missing primitives array");
                 }
 
                 for (const auto& primitive : primitives) {
@@ -596,11 +529,11 @@ std::vector<std::unique_ptr<PrimitiveData>> glTF2File::LoadMesh()
                     GLenum primitiveType = primitive.value<GLenum>("mode", GL_TRIANGLES);
 
                     if (primitiveType == GL_LINE_LOOP) {
-                        DuskLogWarn("Unsupported glTF2 primitive mode: GL_LINE_LOOP");
+                        LogWarning(DUSK_ANCHOR, "Unsupported glTF2 primitive mode: GL_LINE_LOOP");
                         continue;
                     }
                     else if (primitiveType == GL_TRIANGLE_FAN) {
-                        DuskLogWarn("Unsupported glTF2 primitive mode: GL_TRIANGLE_FAN");
+                        LogWarning(DUSK_ANCHOR, "Unsupported glTF2 primitive mode: GL_TRIANGLE_FAN");
                         continue;
                     }
 
@@ -637,13 +570,13 @@ std::vector<std::unique_ptr<PrimitiveData>> glTF2File::LoadMesh()
                     if (iter != primitive.end()) {
                         const auto& attributes = iter.value();
                         if (!attributes.is_object()) {
-                            DuskLogError("Invalid glTF2 primitive, missing attributes dictionary");
+                            LogError(DUSK_ANCHOR, "Invalid glTF2 primitive, missing attributes dictionary");
                             continue;
                         }
 
                         int positionIndex = attributes.value("POSITION", -1);
                         if (positionIndex < 0) {
-                            DuskLogError("Invalid glTF2 primitive, missing POSITION");
+                            LogError(DUSK_ANCHOR, "Invalid glTF2 primitive, missing POSITION");
                             continue;
                         }
 

@@ -26,7 +26,7 @@ bool OpenGLTexture::Load(const std::unique_ptr<TextureData>& data, Options opts 
 
     glGenTextures(1, &_glID);
     if (!_glID) {
-        DuskLogError("Failed to create GL Texture");
+        LogError(DUSK_ANCHOR, "Failed to create GL Texture");
         return false;
     }
 
@@ -44,7 +44,7 @@ bool OpenGLTexture::Load(const std::unique_ptr<TextureData>& data, Options opts 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GetGLFilterType(opts.MagFilter));
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GetGLFilterType(opts.MinFilter));
 
-    DuskLogVerbose("Bound texture to ID %d", _glID);
+    LogVerbose(DUSK_ANCHOR, "Bound texture to ID {}", _glID);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 

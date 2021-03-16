@@ -30,42 +30,6 @@ std::wstring ConvertUTF8ToWideString(string str);
 DUSK_ENGINE_API
 string ConvertWideStringToUTF8(std::wstring str);
 
-class WindowsErrorMessage
-{
-public:
-
-    WindowsErrorMessage(HRESULT hResult) {
-        FormatMessage(
-            FORMAT_MESSAGE_FROM_SYSTEM |
-            FORMAT_MESSAGE_ALLOCATE_BUFFER |
-            FORMAT_MESSAGE_IGNORE_INSERTS,
-            nullptr,
-            hResult,
-            GetUserDefaultUILanguage(),
-            (LPTSTR)&_message,
-            0,
-            nullptr
-        );
-
-    };
-
-    ~WindowsErrorMessage() {
-        if (_message) {
-            LocalFree(_message);
-            _message = nullptr;
-        }
-    }
-
-    char * GetMessage() const {
-        return _message;
-    }
-
-private:
-
-    char * _message = nullptr;
-
-};
-
 #endif // defined(DUSK_PLATFORM_WINDOWS)
 
 } // namespace Dusk

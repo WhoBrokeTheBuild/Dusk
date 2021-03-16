@@ -6,6 +6,7 @@
 #include <Dusk/Math.hpp>
 #include <Dusk/TextureData.hpp>
 #include <Dusk/String.hpp>
+#include <Dusk/Path.hpp>
 
 #include <cstdint>
 #include <cstdlib>
@@ -63,10 +64,10 @@ public:
 }; // class Texture
 
 DUSK_ENGINE_API
-std::shared_ptr<Texture> LoadTextureFromFile(const string& filename, bool useAssetPath = true, Texture::Options opts = Texture::Options());
+std::shared_ptr<Texture> LoadTextureFromFile(const Path& path, bool useAssetPath = true, string mediaType = "", Texture::Options opts = Texture::Options());
 
 DUSK_ENGINE_API
-std::shared_ptr<Texture> LoadTextureFromMemory(const uint8_t * buffer, size_t length, Texture::Options opts = Texture::Options());
+std::shared_ptr<Texture> LoadTextureFromMemory(const uint8_t * buffer, size_t length, string mediaType, Texture::Options opts = Texture::Options());
 
 inline string TextureWrapTypeToString(TextureWrapType textureWrapType)
 {

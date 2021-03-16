@@ -93,10 +93,34 @@ IF("cflags" IN_LIST DUSK_REQUIRED_DEPENDENCIES)
             ThirdParty_cflags
             URL                 "https://github.com/WhoBrokeTheBuild/cflags/archive/v2.0.1.zip"
             URL_HASH            MD5=957b2e6a481efd96c0ce72f291176cb4
-            SOURCE_DIR          ${GSL_SOURCE_DIR}
+            SOURCE_DIR          ${cflags_SOURCE_DIR}
             CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${cflags_ROOT}
             BUILD_COMMAND       ""
             UPDATE_COMMAND      ""
+        )
+    ENDIF()
+ENDIF()
+
+# fmt
+
+IF("fmt" IN_LIST DUSK_REQUIRED_DEPENDENCIES)
+    SET(fmt_ROOT       ${CMAKE_BINARY_DIR}/fmt)
+    SET(fmt_SOURCE_DIR ${CMAKE_BINARY_DIR}/fmt_src)
+
+    FIND_PACKAGE(fmt CONFIG QUIET)
+
+    IF(NOT fmt_FOUND)
+        ExternalProject_Add(
+            ThirdParty_fmt
+            URL                 "https://github.com/fmtlib/fmt/releases/download/7.1.3/fmt-7.1.3.zip"
+            URL_HASH            MD5=d7f69b6df5ee6b7057b60239268d26ef
+            SOURCE_DIR          ${fmt_SOURCE_DIR}
+            CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${fmt_ROOT}
+            BUILD_COMMAND       ""
+            UPDATE_COMMAND      ""
+            TEST_COMMAND        ""
+            INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
+            COMMAND             ${CMAKE_COMMAND} --build . --target install --config Debug
         )
     ENDIF()
 ENDIF()

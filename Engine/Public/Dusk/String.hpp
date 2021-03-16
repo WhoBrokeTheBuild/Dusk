@@ -9,8 +9,13 @@
 namespace Dusk {
 
 using std::string;
+using std::string_view;
 
-inline bool StringEqualCaseInsensitive(const string& a, const string& b) {
+// TODO: Maybe later
+// typedef std::string String;
+// typedef std::string_view StringView;
+
+inline bool StringEqualCaseInsensitive(string_view a, string_view b) {
     return std::equal(
         a.begin(), a.end(),
         b.begin(), b.end(),

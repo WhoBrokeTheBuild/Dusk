@@ -12,7 +12,7 @@ bool OpenGLBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUsa
     _size = size;
 
     if (!data && _memoryUsage == MemoryUsage::GPU) {
-        DuskLogError("Attempting to create an empty buffer with MemoryUsage GPU");
+        LogError(DUSK_ANCHOR, "Attempting to create an empty buffer with MemoryUsage GPU");
         return false;
     }
     
@@ -30,7 +30,7 @@ bool OpenGLBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUsa
     // TODO: Limit to only mappable memory usages
     _mappedBufferMemory = glMapBufferRange(_glTarget, 0, _size, flags);
     if (!_mappedBufferMemory) {
-        DuskLogError("glMapBuffer() failed");
+        LogError(DUSK_ANCHOR, "glMapBuffer() failed");
         return false;
     }
 

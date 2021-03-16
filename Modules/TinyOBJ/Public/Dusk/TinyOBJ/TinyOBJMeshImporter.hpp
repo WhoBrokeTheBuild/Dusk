@@ -17,7 +17,9 @@ public:
 
     TinyOBJMeshImporter() = default;
 
-    std::vector<std::unique_ptr<PrimitiveData>> LoadFromFile(const string& filename, bool useAssetPath = true) override;
+    std::vector<string> GetSupportedMediaTypes() override;
+
+    std::vector<std::unique_ptr<PrimitiveData>> LoadFromFile(const Path& filename, bool useAssetPath = true) override;
 
 }; // class TinyOBJMeshImporter
 

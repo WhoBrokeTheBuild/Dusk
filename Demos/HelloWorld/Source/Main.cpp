@@ -116,6 +116,7 @@ void run()
 
 int main(int argc, char** argv)
 {
+    Dusk::SetMinimumLogLevel(Dusk::LogLevel::Verbose);
     Dusk::AddLogFile("lastrun.log");
 
     Dusk::SetApplicationName("HelloWorld");
@@ -126,7 +127,7 @@ int main(int argc, char** argv)
     }
 
     // if (!Dusk::RunScriptFile("Main.py")) {
-    //     DuskLogError("Failed to load Main.py");
+    //     LogError(DUSK_ANCHOR, "Failed to load Main.py");
     //     return 1;
     // }
 

@@ -22,6 +22,7 @@ bool ModuleInit()
 
 void ModuleTerm()
 {
+    _DirectXGraphicsDriver->Terminate();
     _DirectXGraphicsDriver.reset();
 }
 

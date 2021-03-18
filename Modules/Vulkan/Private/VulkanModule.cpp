@@ -22,6 +22,7 @@ bool ModuleInit()
 
 void ModuleTerm()
 {
+    _VulkanGraphicsDriver->Terminate();
     _VulkanGraphicsDriver.reset();
 }
 

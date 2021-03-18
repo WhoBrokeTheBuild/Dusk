@@ -22,6 +22,7 @@ bool ModuleInit()
 
 void ModuleTerm()
 {
+    _OpenGLGraphicsDriver->Terminate();
     _OpenGLGraphicsDriver.reset();
 }
 

@@ -24,7 +24,7 @@ int main(int argc, char** argv)
     Dusk::SetRunning(true);
 
     while (Dusk::IsRunning()) {
-        Dusk::GraphicsDriver * gfx = Dusk::GetGraphicsDriver();
+        auto gfx = Dusk::GraphicsDriver::GetInstance();
 
         if (gfx) {
             gfx->ProcessEvents();

@@ -4,11 +4,16 @@
 
 namespace Dusk::Vulkan {
 
+static std::unique_ptr<VulkanGraphicsDriver> _VulkanGraphicsDriver;
+
 bool ModuleInit()
 {
-    SetGraphicsDriver(std::unique_ptr<GraphicsDriver>(New VulkanGraphicsDriver()));
-    if (!GetGraphicsDriver()->Initialize()) {
-        SetGraphicsDriver(nullptr);
+    try {
+        _VulkanGraphicsDriver.reset(new(__LINE__, __FILE__) VulkanGraphicsDriver());
+        _VulkanGraphicsDriver->Initialize(); // TODO: Remove
+    }
+    catch (const std::exception& e) {
+        LogError(DUSK_ANCHOR, "{}", e.what());
         return false;
     }
 
@@ -17,7 +22,7 @@ bool ModuleInit()
 
 void ModuleTerm()
 {
-    SetGraphicsDriver(nullptr);
+    _VulkanGraphicsDriver.reset();
 }
 
 Version GetVersion()

@@ -10,6 +10,7 @@
 #include <Dusk/Vulkan/VulkanMesh.hpp>
 #include <Dusk/Vulkan/VulkanPrimitive.hpp>
 #include <Dusk/Vulkan/VulkanBuffer.hpp>
+#include <Dusk/Vulkan/VulkanMaterial.hpp>
 #include <Dusk/Vulkan/VulkanRenderContext.hpp>
 
 #include <vector>
@@ -17,11 +18,13 @@
 
 namespace Dusk::Vulkan {
 
-#define DUSK_VULKAN_GRAPHICS_DRIVER(x) (dynamic_cast<Dusk::Vulkan::VulkanGraphicsDriver *>(x))
-
 class DUSK_VULKAN_API VulkanGraphicsDriver : public SDL2::SDL2GraphicsDriver
 {
 public:
+
+    static inline VulkanGraphicsDriver * GetInstance() {
+        return static_cast<VulkanGraphicsDriver *>(GraphicsDriver::GetInstance());
+    }
 
     DISALLOW_COPY_AND_ASSIGN(VulkanGraphicsDriver)
 

@@ -1,5 +1,6 @@
 #include <Dusk/Vulkan/VulkanPrimitive.hpp>
 #include <Dusk/Vulkan/VulkanGraphicsDriver.hpp>
+#include <Dusk/Vulkan/VulkanBuffer.hpp>
 #include <Dusk/Benchmark.hpp>
 
 namespace Dusk::Vulkan {
@@ -21,7 +22,7 @@ bool VulkanPrimitive::Load(const std::unique_ptr<PrimitiveData>& data)
 {
     DuskBenchmarkStart();
 
-    auto gfx = GetGraphicsDriver();
+    auto gfx = VulkanGraphicsDriver::GetInstance();
 
     bool result;
 
@@ -33,7 +34,10 @@ bool VulkanPrimitive::Load(const std::unique_ptr<PrimitiveData>& data)
     const auto& indexList = data->GetIndexList();
     const auto& vertexList = data->GetVertexList();
 
-    _vertexBuffer.reset(New VulkanBuffer());
+    // Check if the buffer has been created, if not create it
+    if (!_vertexBuffer) {
+        _vertexBuffer.reset(New VulkanBuffer());
+    }
 
     result = _vertexBuffer->Initialize(
         vertexList.size() * sizeof(Vertex),

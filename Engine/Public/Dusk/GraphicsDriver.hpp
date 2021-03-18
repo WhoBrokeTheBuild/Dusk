@@ -34,11 +34,15 @@ class DUSK_ENGINE_API GraphicsDriver : public Object
 {
 public:
 
+    static inline GraphicsDriver * GetInstance() {
+        return _Instance;
+    }
+
     DISALLOW_COPY_AND_ASSIGN(GraphicsDriver)
 
-    GraphicsDriver() = default;
+    GraphicsDriver();
 
-    virtual ~GraphicsDriver() = default;
+    virtual ~GraphicsDriver();
 
     virtual bool Initialize() = 0;
 
@@ -52,37 +56,27 @@ public:
 
     virtual bool InitializeDefaults();
 
-    virtual void SetWindowTitle(const string& title) {
-        _windowTitle = title;
-        UpdateWindowTitle(title);
-    }
+    virtual void SetWindowTitle(const string& title);
 
-    virtual string GetWindowTitle() {
+    virtual inline string GetWindowTitle() const {
         return _windowTitle;
     }
 
-    virtual void SetWindowSize(const ivec2& size) {
-        _windowSize = size;
-        UpdateWindowSize(size);
-    }
+    virtual void SetWindowSize(const ivec2& size);
 
-    virtual ivec2 GetWindowSize() {
+    virtual inline ivec2 GetWindowSize() const {
         return _windowSize;
     }
 
-    virtual void SetBackbufferCount(unsigned backbufferCount) {
-        _backbufferCount = backbufferCount;
-    }
+    virtual void SetBackbufferCount(unsigned backbufferCount);
 
-    virtual unsigned GetBackbufferCount() const {
+    virtual inline unsigned GetBackbufferCount() const {
         return _backbufferCount;
     }
 
-    virtual void SetClearColor(const vec4& color) {
-        _clearColor = color;
-    }
+    virtual void SetClearColor(const vec4& color);
 
-    virtual vec4 GetClearColor() const {
+    virtual inline vec4 GetClearColor() const {
         return _clearColor;
     }
 
@@ -134,6 +128,8 @@ public:
 
 protected:
 
+    static GraphicsDriver * _Instance;
+
     virtual void UpdateWindowTitle(const string& title) = 0;
 
     virtual void UpdateWindowSize(const ivec2& size) = 0;
@@ -169,12 +165,6 @@ protected:
     std::shared_ptr<Shader> _activeDebugShader;
 
 }; // class GraphicsDriver
-
-DUSK_ENGINE_API
-void SetGraphicsDriver(std::unique_ptr<GraphicsDriver> && driver);
-
-DUSK_ENGINE_API
-GraphicsDriver * GetGraphicsDriver();
 
 } // namespace Dusk
 

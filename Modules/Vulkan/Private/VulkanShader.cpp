@@ -12,7 +12,7 @@ namespace Dusk::Vulkan {
 DUSK_VULKAN_API
 void VulkanShader::Terminate()
 {
-    auto gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
+    auto gfx = VulkanGraphicsDriver::GetInstance();
 
     for (auto& shaderModule : _shaderModuleList) {
         vkDestroyShaderModule(gfx->GetDevice(), shaderModule, nullptr);
@@ -41,7 +41,7 @@ bool VulkanShader::LoadFromFiles(const std::vector<string>& filenameList, bool u
 DUSK_VULKAN_API
 bool VulkanShader::LoadSPV(const Path& path, bool useAssetPath)
 {
-    VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
+    auto gfx = VulkanGraphicsDriver::GetInstance();
 
     std::ifstream file;
 

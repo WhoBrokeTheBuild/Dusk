@@ -27,7 +27,7 @@ void VulkanMesh::Terminate()
 DUSK_VULKAN_API
 bool VulkanMesh::Create()
 {
-    VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
+    auto gfx = VulkanGraphicsDriver::GetInstance();
     if (!gfx->CreateDescriptorSet(&_vkDescriptorSet)) {
         return false;
     }
@@ -67,7 +67,7 @@ void VulkanMesh::Render(RenderContext * ctx)
 {
     Mesh::Render(ctx);
 
-    VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
+    auto gfx = VulkanGraphicsDriver::GetInstance();
 
     VulkanRenderContext * vkRenderContext = DUSK_VULKAN_RENDER_CONTEXT(ctx);
     VkCommandBuffer vkCommandBuffer = vkRenderContext->GetVkCommandBuffer();

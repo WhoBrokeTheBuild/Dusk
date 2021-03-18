@@ -3,26 +3,12 @@
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Object.hpp>
-#include <Dusk/Math.hpp>
-#include <Dusk/Vertex.hpp>
-#include <Dusk/String.hpp>
 #include <Dusk/Material.hpp>
+#include <Dusk/PrimitiveData.hpp>
 
 #include <memory>
 
 namespace Dusk {
-
-enum class PrimitiveTopology 
-{
-    PointList,
-    LineList,
-    LineStrip,
-    TriangleList,
-    TriangleStrip,
-
-}; // enum class PrimitiveTopology
-
-class PrimitiveData;
 
 class DUSK_ENGINE_API Primitive : public Object
 {
@@ -51,24 +37,6 @@ protected:
     std::shared_ptr<Material> _material;
 
 }; // class Primitive
-
-inline string PrimitiveTopologyToString(PrimitiveTopology primitiveTopology)
-{
-    switch (primitiveTopology) {
-    case PrimitiveTopology::PointList:
-        return "PointList";
-    case PrimitiveTopology::LineList:
-        return "LineList";
-    case PrimitiveTopology::LineStrip:
-        return "LineStrip";
-    case PrimitiveTopology::TriangleList:
-        return "TriangleList";
-    case PrimitiveTopology::TriangleStrip:
-        return "TriangleStrip";
-    }
-
-    return "Unknown";
-}
 
 } // namespace Dusk
 

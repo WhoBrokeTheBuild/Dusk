@@ -7,12 +7,13 @@ namespace Dusk::OpenGL {
 
 void OpenGLMaterial::Bind()
 {
-    auto gfx = GetGraphicsDriver();
+    auto gfx = GraphicsDriver::GetInstance();
+    assert(gfx);
 
-    OpenGLBuffer * glMaterialBuffer = DUSK_OPENGL_BUFFER(_shaderMaterialBuffer.get());
+    OpenGLBuffer * glMaterialBuffer = static_cast<OpenGLBuffer *>(_shaderMaterialBuffer.get());
     glBindBufferBase(GL_UNIFORM_BUFFER, DUSK_SHADER_MATERIAL_BINDING, glMaterialBuffer->GetGLID());
 
-    OpenGLTexture * glDefaultTexture = DUSK_OPENGL_TEXTURE(gfx->GetDefaultTexture().get());
+    OpenGLTexture * glDefaultTexture = static_cast<OpenGLTexture *>(gfx->GetDefaultTexture().get());
     GLuint defaultTextureID = (glDefaultTexture ? glDefaultTexture->GetGLID() : 0);
 
     OpenGLTexture * glTexture = nullptr;

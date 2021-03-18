@@ -17,7 +17,7 @@ bool VulkanTexture::Load(const std::unique_ptr<TextureData>& data, Options opts 
 {
     DuskBenchmarkStart();
 
-    // VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
+    // auto gfx = VulkanGraphicsDriver::GetInstance();
 
     // const auto& size = data->GetSize();
     // VkDeviceSize imageSize = size.x * size.y * data->GetComponents();

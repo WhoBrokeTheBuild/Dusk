@@ -46,13 +46,13 @@ void glTF2File::LoadFromFile(const Path& path)
         uint32_t magic;
         file.read(reinterpret_cast<char *>(&magic), sizeof(magic));
         if (magic != MAGIC) {
-            throw RuntimeError("Invalid binary glTF2 file magic");
+            throw Exception("Invalid binary glTF2 file magic");
         }
 
         uint32_t version;
         file.read(reinterpret_cast<char *>(&version), sizeof(version));
         if (version != 2) {
-            throw RuntimeError(fmt::format("Invalid binary glTF2 container version, {}", version));
+            throw Exception(fmt::format("Invalid binary glTF2 container version, {}", version));
         }
 
         uint32_t length;
@@ -67,7 +67,7 @@ void glTF2File::LoadFromFile(const Path& path)
         file.read(reinterpret_cast<char *>(&jsonChunkType), sizeof(jsonChunkType));
 
         if (jsonChunkType != ChunkType::JSON) {
-            throw RuntimeError(fmt::format("Invalid binary glTF2 file. The first chunk must be JSON, found '{:08X}'", jsonChunkType));
+            throw Exception(fmt::format("Invalid binary glTF2 file. The first chunk must be JSON, found '{:08X}'", jsonChunkType));
         }
 
         std::vector<char> jsonChunk(jsonChunkLength + 1);
@@ -86,7 +86,7 @@ void glTF2File::LoadFromFile(const Path& path)
             file.read(reinterpret_cast<char *>(&bufferChunkType), sizeof(bufferChunkType));
 
             if (bufferChunkType != ChunkType::BIN) {
-                throw RuntimeError(fmt::format("Invalid binary glTF2 file. The second chunk must be BIN, found '{:08X}'", bufferChunkType));
+                throw Exception(fmt::format("Invalid binary glTF2 file. The second chunk must be BIN, found '{:08X}'", bufferChunkType));
             }
 
             Buffers.push_back(std::vector<uint8_t>(bufferChunkLength));
@@ -143,7 +143,7 @@ void glTF2File::LoadBuffers()
 
                 std::ifstream file(path, std::ios::in | std::ios::binary);
                 if (!file.is_open()) {
-                    throw RuntimeError("Failed to load glTF2 buffer file");
+                    throw Exception("Failed to load glTF2 buffer file");
                 }
 
                 Buffers.push_back(std::vector<uint8_t>(byteLength));
@@ -152,7 +152,7 @@ void glTF2File::LoadBuffers()
         }
     }
     else {
-        throw RuntimeError("No glTF2 buffers found");
+        throw Exception("No glTF2 buffers found");
     }
 
     LogVerbose(DUSK_ANCHOR, "Loaded {} Buffer(s)", Buffers.size());
@@ -240,9 +240,6 @@ void glTF2File::LoadTextures()
 {
     const auto TEXTURES_PATH = json::json_pointer("/textures");
 
-    GraphicsDriver * gfx = Dusk::GetGraphicsDriver();
-    DuskAssert(gfx);
-
     if (JSON.contains(TEXTURES_PATH)) {
         for (const auto& object : JSON[TEXTURES_PATH]) {
             int sampler = object.value("sampler", -1);
@@ -314,7 +311,7 @@ void glTF2File::LoadMaterials()
 {
     const auto MATERIALS_PATH = json::json_pointer("/materials");
 
-    GraphicsDriver * gfx = Dusk::GetGraphicsDriver();
+    auto gfx = Dusk::GraphicsDriver::GetInstance();
     assert(gfx);
 
     if (JSON.contains(MATERIALS_PATH)) {
@@ -470,7 +467,7 @@ void glTF2File::LoadCameras()
             if (camera.type == "perspective") {
                 auto it = object.find("perspective");
                 if (it == object.end()) {
-                    throw RuntimeError("Invalid glTF2 perspective camera");
+                    throw Exception("Invalid glTF2 perspective camera");
                 }
 
                 const auto& perspective = it.value();
@@ -482,7 +479,7 @@ void glTF2File::LoadCameras()
             else if (camera.type == "orthographic") {
                 auto it = object.find("orthographic");
                 if (it == object.end()) {
-                    throw RuntimeError("Invalid glTF2 orthographic camera");
+                    throw Exception("Invalid glTF2 orthographic camera");
                 }
 
                 const auto& orthographic = it.value();
@@ -512,7 +509,7 @@ std::vector<std::unique_ptr<PrimitiveData>> glTF2File::LoadMesh()
             if (iter != object.end()) {
                 const auto& primitives = iter.value();
                 if (!primitives.is_array()) {
-                    throw RuntimeError("Invalid glTF2 mesh, missing primitives array");
+                    throw Exception("Invalid glTF2 mesh, missing primitives array");
                 }
 
                 for (const auto& primitive : primitives) {

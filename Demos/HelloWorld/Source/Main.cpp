@@ -12,6 +12,7 @@
 #include <Dusk/Camera.hpp>
 #include <Dusk/MeshImporter.hpp>
 #include <Dusk/Path.hpp>
+#include <Dusk/String.hpp>
 
 #include <Dusk/Event.hpp>
 
@@ -28,26 +29,20 @@ void run()
     Dusk::LoadModule("DuskGLTF2");
     // Dusk::LoadModule("DuskFreeType");
 
-    const char * envGraphicsDriver = getenv("DUSK_GRAPHICS_DRIVER");
+    std::string_view envGraphicsDriver = getenv("DUSK_GRAPHICS_DRIVER");
     
-    if (!envGraphicsDriver) {
-        envGraphicsDriver = "Vulkan";
-    }
-
-    if (strcmp(envGraphicsDriver, "OpenGL") == 0) {
+    if (envGraphicsDriver == "OpenGL") {
         Dusk::LoadModule("DuskOpenGL");
     }
-    else if (strcmp(envGraphicsDriver, "DirectX") == 0) {
+    else if (envGraphicsDriver == "DirectX") {
         Dusk::LoadModule("DuskDirectX");
     }
     else {
         Dusk::LoadModule("DuskVulkan");
     }
 
-    auto gfx = Dusk::GetGraphicsDriver();
-    if (!gfx) {
-        return;
-    }
+    auto gfx = Dusk::GraphicsDriver::GetInstance();
+    assert(gfx);
 
     Dusk::RenderContext * renderCtx = gfx->GetRenderContext();
     Dusk::ShaderTransform * transformData = renderCtx->GetShaderTransform();
@@ -77,7 +72,7 @@ void run()
     // auto mesh = Dusk::LoadMeshFromFile("SciFiHelmet/SciFiHelmet.gltf");
     // camera.SetPosition(glm::vec3(2.0f));
 
-    auto mesh = Dusk::LoadMeshFromFile("DamagedHelmet/DamagedHelmet.gltf");
+    auto mesh = Dusk::Mesh::LoadFromFile("DamagedHelmet/DamagedHelmet.gltf");
     camera.SetPosition(glm::vec3(1.5f));
 
     // auto mesh = Dusk::LoadMeshFromFile("BoomBox/BoomBox.gltf");
@@ -121,6 +116,8 @@ int main(int argc, char** argv)
 
     Dusk::SetApplicationName("HelloWorld");
     Dusk::SetApplicationVersion({ 1, 0, 0 });
+
+    using namespace Dusk;
 
     if (!Dusk::Initialize(argc, argv)) {
         return 1;

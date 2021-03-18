@@ -18,7 +18,7 @@ bool VulkanBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUsa
         return false;
     }
 
-    VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
+    auto gfx = VulkanGraphicsDriver::GetInstance();
 
     auto vkBufferUsage = GetVkBufferUsage(_bufferUsage);
     auto vkMemoryUsage = GetVkMemoryUsage(_memoryUsage);
@@ -151,7 +151,7 @@ bool VulkanBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUsa
 DUSK_VULKAN_API
 void VulkanBuffer::Terminate()
 {
-    VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
+    auto gfx = VulkanGraphicsDriver::GetInstance();
 
     if (_mappedBufferMemory) {
         vmaUnmapMemory(gfx->GetAllocator(), _vmaAllocation);

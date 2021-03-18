@@ -24,7 +24,7 @@ std::vector<std::unique_ptr<PrimitiveData>> TinyOBJMeshImporter::LoadFromFile(co
 {
     DuskBenchmarkStart();
 
-    auto gfx = GetGraphicsDriver();
+    auto gfx = GraphicsDriver::GetInstance();
 
     Path dir;
 

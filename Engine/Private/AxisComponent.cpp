@@ -11,7 +11,8 @@ namespace Dusk {
 DUSK_ENGINE_API
 AxisComponent::AxisComponent()
 {
-    auto gfx = GetGraphicsDriver();
+    auto gfx = GraphicsDriver::GetInstance();
+    assert(gfx);
 
     _shader = gfx->CreateShader();
     _shader->LoadFromFiles({
@@ -27,7 +28,7 @@ AxisComponent::AxisComponent()
 DUSK_ENGINE_API
 void AxisComponent::Render(RenderContext * ctx)
 {
-    // auto gfx = GetGraphicsDriver();
+    // auto gfx = GraphicsDriver::GetInstance();
     auto transformData = ctx->GetShaderTransform();
 
     transformData->Model = GetEntity()->GetWorldTransform();

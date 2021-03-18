@@ -6,7 +6,7 @@ namespace Dusk::Vulkan {
 DUSK_VULKAN_API
 bool VulkanMaterial::Create()
 {
-    VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
+    auto gfx = VulkanGraphicsDriver::GetInstance();
     if (!gfx->CreateDescriptorSet(&_vkDescriptorSet)) {
         return false;
     }

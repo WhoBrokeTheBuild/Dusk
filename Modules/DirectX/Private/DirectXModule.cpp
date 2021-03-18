@@ -4,11 +4,16 @@
 
 namespace Dusk::DirectX {
 
+static std::unique_ptr<DirectXGraphicsDriver> _DirectXGraphicsDriver;
+
 bool ModuleInit()
 {
-    SetGraphicsDriver(std::unique_ptr<GraphicsDriver>(New DirectXGraphicsDriver()));
-    if (!GetGraphicsDriver()->Initialize()) {
-        SetGraphicsDriver(nullptr);
+    try {
+        _DirectXGraphicsDriver.reset(new(__LINE__, __FILE__) DirectXGraphicsDriver());
+        _DirectXGraphicsDriver->Initialize(); // TODO: Remove
+    }
+    catch (const std::exception& e) {
+        LogError(DUSK_ANCHOR, "{}", e);
         return false;
     }
     
@@ -17,7 +22,7 @@ bool ModuleInit()
 
 void ModuleTerm()
 {
-    SetGraphicsDriver(nullptr);
+    _DirectXGraphicsDriver.reset();
 }
 
 Version GetVersion()

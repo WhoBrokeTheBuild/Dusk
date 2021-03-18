@@ -2,6 +2,7 @@
 
 #include <Dusk/Dusk.hpp>
 #include <Dusk/Log.hpp>
+#include <Dusk/Exception.hpp>
 
 namespace Dusk::SDL2 {
 
@@ -9,8 +10,7 @@ DUSK_SDL2_API
 bool SDL2GraphicsDriver::Initialize()
 {
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
-        LogError(DUSK_ANCHOR, "Failed to initialize SDL, {}", SDL_GetError());
-        return false;
+        throw Exception("Failed to initialize SDL2, {}", SDL_GetError());
     }
 
     SDL_version version;
@@ -29,18 +29,18 @@ void SDL2GraphicsDriver::Terminate()
     _inputDriver = nullptr;
     SetInputDriver(nullptr);
 
-    SDL_DestroyWindow(_sdlWindow);
-    _sdlWindow = nullptr;
+    if (_sdlWindow) {
+        SDL_DestroyWindow(_sdlWindow);
+        _sdlWindow = nullptr;
+    }
 
     SDL_Quit();
 }
 
 DUSK_SDL2_API
-bool SDL2GraphicsDriver::CreateWindow(unsigned flags)
+bool SDL2GraphicsDriver::CreateWindow(uint32_t flags)
 {
     _windowTitle = GetApplicationName() + " (" + GetApplicationVersion().ToString() + ")";
-
-    ivec2 size = GetWindowSize();
 
     if (_sdlWindow) {
         SDL_DestroyWindow(_sdlWindow);
@@ -50,20 +50,21 @@ bool SDL2GraphicsDriver::CreateWindow(unsigned flags)
     _sdlWindow = SDL_CreateWindow(_windowTitle.c_str(),
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        size.x, size.y, 
+        _windowSize.x, _windowSize.y, 
         flags | SDL_WINDOW_RESIZABLE);
 
     if (!_sdlWindow) {
-        LogError(DUSK_ANCHOR, "SDL_CreateWindow() failed, {}", SDL_GetError());
-        return false;
+        throw Exception("SDL_CreateWindow() failed, {}", SDL_GetError());
     }
 
+    // TODO: Replace with an actual icon
     Uint16 pixels[16 * 16] = { 0xFFFF };
-    SDL_Surface * surface = SDL_CreateRGBSurfaceFrom(pixels, 16, 16, 16, 16 * 2,
-                                                     0x0f00, 0x00f0, 0x000f, 0xf000);
+    SDL_Surface * surface = SDL_CreateRGBSurfaceFrom(
+        pixels, 16, 16, 16, 16 * 2, 0xF000, 0x0F00, 0x00F0, 0x000F); // RGBA
+
     SDL_SetWindowIcon(_sdlWindow, surface);
     SDL_FreeSurface(surface);
-
+    
     return true;
 }
 

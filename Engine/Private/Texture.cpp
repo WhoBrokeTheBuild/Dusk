@@ -9,8 +9,8 @@ namespace Dusk {
 DUSK_ENGINE_API
 std::shared_ptr<Texture> LoadTextureFromFile(const Path& path, bool useAssetPath /*= true*/, string mediaType /*= ""*/, Texture::Options opts /*= Texture::Options()*/)
 {
-    GraphicsDriver * gfx = GetGraphicsDriver();
-    DuskAssert(gfx);
+    auto gfx = GraphicsDriver::GetInstance();
+    assert(gfx);
 
     string ext = path.GetExtension();
     
@@ -38,8 +38,8 @@ std::shared_ptr<Texture> LoadTextureFromFile(const Path& path, bool useAssetPath
 DUSK_ENGINE_API
 std::shared_ptr<Texture> LoadTextureFromMemory(const uint8_t * buffer, size_t length, string mediaType, Texture::Options opts /*= Texture::Options()*/)
 {
-    GraphicsDriver * gfx = GetGraphicsDriver();
-    DuskAssert(gfx);
+    auto gfx = GraphicsDriver::GetInstance();
+    assert(gfx);
 
     const auto& importers = GetTextureImporterListForMediaType(mediaType);
     for (const auto& importer : importers) {

@@ -99,8 +99,11 @@ bool Run(std::function<void()> update)
 {
     using namespace std::chrono;
 
-    GraphicsDriver * gfx = GetGraphicsDriver();
+    auto gfx = GraphicsDriver::GetInstance();
+    assert(gfx);
+
     UpdateContext * updateCtx = gfx->GetUpdateContext();
+    assert(updateCtx);
 
     high_resolution_clock::time_point startTime = high_resolution_clock::now();
     high_resolution_clock::time_point previousTime = startTime;

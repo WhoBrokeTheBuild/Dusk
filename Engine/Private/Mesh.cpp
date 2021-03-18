@@ -11,7 +11,8 @@ bool Mesh::Initialize()
 {
     bool result = true;
 
-    GraphicsDriver * gfx = GetGraphicsDriver();
+    auto gfx = GraphicsDriver::GetInstance();
+    assert(gfx);
 
     _pipeline = gfx->GetDefaultPipeline();
 
@@ -38,7 +39,8 @@ void Mesh::Terminate()
 DUSK_ENGINE_API
 bool Mesh::Load(const std::vector<std::unique_ptr<PrimitiveData>>& data)
 {
-    GraphicsDriver * gfx = GetGraphicsDriver();
+    auto gfx = GraphicsDriver::GetInstance();
+    assert(gfx);
     
     for (const auto& primitiveData : data) {
         auto primitive = gfx->CreatePrimitive();
@@ -52,10 +54,20 @@ bool Mesh::Load(const std::vector<std::unique_ptr<PrimitiveData>>& data)
 }
 
 DUSK_ENGINE_API
-std::shared_ptr<Mesh> LoadMeshFromFile(const Path& path, string mediaType /*= ""*/, bool useAssetPath /*= true*/)
+void Mesh::Render(RenderContext * ctx)
+{
+    if (_shaderTransformBuffer) {
+        uint8_t * data = reinterpret_cast<uint8_t *>(ctx->GetShaderTransform());
+        _shaderTransformBuffer->WriteTo(0, sizeof(ShaderTransform), data);
+    }
+}
+
+DUSK_ENGINE_API
+std::shared_ptr<Mesh> Mesh::LoadFromFile(const Path& path, string mediaType /*= ""*/, bool useAssetPath /*= true*/)
 {
     DuskBenchmarkStart();
-    GraphicsDriver * gfx = GetGraphicsDriver();
+    auto gfx = GraphicsDriver::GetInstance();
+    assert(gfx);
 
     string ext = path.GetExtension();
     
@@ -81,15 +93,6 @@ std::shared_ptr<Mesh> LoadMeshFromFile(const Path& path, string mediaType /*= ""
 
     LogError(DUSK_ANCHOR, "Failed to load mesh '{}'", path);
     return nullptr;
-}
-
-DUSK_ENGINE_API
-void Mesh::Render(RenderContext * ctx)
-{
-    if (_shaderTransformBuffer) {
-        uint8_t * data = reinterpret_cast<uint8_t *>(ctx->GetShaderTransform());
-        _shaderTransformBuffer->WriteTo(0, sizeof(ShaderTransform), data);
-    }
 }
 
 } // namespace Dusk

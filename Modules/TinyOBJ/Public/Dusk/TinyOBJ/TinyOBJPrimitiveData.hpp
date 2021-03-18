@@ -19,7 +19,7 @@ public:
         return PrimitiveTopology::TriangleList;
     }
 
-    gsl::span<Vertex> GetVertexList() override {
+    std::span<Vertex> GetVertexList() override {
         return vertexList;
     }
 

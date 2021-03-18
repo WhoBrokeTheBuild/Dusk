@@ -40,11 +40,29 @@ public:
 
     virtual void Terminate() = 0;
 
-    virtual bool ReadFrom(size_t offset, size_t length, uint8_t * data);
+    inline size_t GetSize() const {
+        return _size;
+    }
 
-    virtual bool WriteTo(size_t offset, size_t length, uint8_t * data);
+    inline BufferUsage GetBufferUsage() const {
+        return _bufferUsage;
+    }
+
+    inline MemoryUsage GetMemoryUsage() const {
+        return _memoryUsage;
+    }
+
+    virtual bool IsMapped() const {
+        return (_mappedBufferMemory != nullptr);
+    }
+
+    virtual void ReadFrom(size_t offset, size_t length, uint8_t * data);
+
+    virtual void WriteTo(size_t offset, size_t length, uint8_t * data);
 
 protected:
+
+    size_t _size;
 
     BufferUsage _bufferUsage;
 

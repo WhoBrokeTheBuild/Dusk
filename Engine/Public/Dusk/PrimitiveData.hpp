@@ -3,11 +3,23 @@
 
 #include <Dusk/Config.hpp>
 #include <Dusk/Object.hpp>
-#include <Dusk/Primitive.hpp>
+#include <Dusk/Vertex.hpp>
+#include <Dusk/Material.hpp>
 
-#include <gsl/gsl>
+#include <span>
+#include <memory>
 
 namespace Dusk {
+
+enum class PrimitiveTopology 
+{
+    PointList,
+    LineList,
+    LineStrip,
+    TriangleList,
+    TriangleStrip,
+
+}; // enum class PrimitiveTopology
 
 class DUSK_ENGINE_API PrimitiveData : public Object
 {
@@ -21,11 +33,11 @@ public:
 
     virtual PrimitiveTopology GetTopology() const = 0;
 
-    virtual gsl::span<uint32_t> GetIndexList() {
-        return gsl::span<uint32_t>();
+    virtual std::span<uint32_t> GetIndexList() {
+        return std::span<uint32_t>();
     }
     
-    virtual gsl::span<Vertex> GetVertexList() = 0;
+    virtual std::span<Vertex> GetVertexList() = 0;
 
     virtual std::shared_ptr<Material> GetMaterial() {
         return nullptr;
@@ -34,6 +46,24 @@ public:
     virtual void CalculateTangents();
 
 }; // class PrimitiveData
+
+inline string PrimitiveTopologyToString(PrimitiveTopology primitiveTopology)
+{
+    switch (primitiveTopology) {
+    case PrimitiveTopology::PointList:
+        return "PointList";
+    case PrimitiveTopology::LineList:
+        return "LineList";
+    case PrimitiveTopology::LineStrip:
+        return "LineStrip";
+    case PrimitiveTopology::TriangleList:
+        return "TriangleList";
+    case PrimitiveTopology::TriangleStrip:
+        return "TriangleStrip";
+    }
+
+    return "Unknown";
+}
 
 } // namespace Dusk
 

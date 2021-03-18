@@ -20,6 +20,8 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(Mesh)
 
+    static std::shared_ptr<Mesh> LoadFromFile(const Path& filename, string mediaType = "", bool useAssetPath = true);
+
     Mesh() = default;
 
     virtual ~Mesh() = default;
@@ -45,9 +47,6 @@ protected:
     std::shared_ptr<Buffer> _shaderTransformBuffer;
 
 }; // class Mesh
-
-DUSK_ENGINE_API
-std::shared_ptr<Mesh> LoadMeshFromFile(const Path& filename, string mediaType = "", bool useAssetPath = true);
 
 } // namespace Dusk
 

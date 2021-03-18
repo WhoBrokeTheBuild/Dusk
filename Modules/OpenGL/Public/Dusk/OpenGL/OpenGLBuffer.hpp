@@ -6,8 +6,6 @@
 
 namespace Dusk::OpenGL {
 
-#define DUSK_OPENGL_BUFFER(x) (dynamic_cast<Dusk::OpenGL::OpenGLBuffer *>(x))
-
 class DUSK_OPENGL_API OpenGLBuffer : public Buffer
 {
 public:
@@ -34,9 +32,7 @@ private:
 
     GLuint _glID = 0;
 
-    GLenum _glTarget;
-
-    size_t _size;
+    GLenum _glTarget = GL_INVALID_ENUM;
 
 }; // class OpenGLBuffer
 

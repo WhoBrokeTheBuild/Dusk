@@ -3,12 +3,9 @@
 
 #include <Dusk/Vulkan/VulkanConfig.hpp>
 
-#include <Dusk/Log.hpp>
 #include <Dusk/Primitive.hpp>
-#include <Dusk/PrimitiveData.hpp>
 #include <Dusk/Vulkan/VulkanBuffer.hpp>
 
-#include <vector>
 #include <optional>
 
 namespace Dusk::Vulkan {

@@ -1,27 +1,25 @@
 #include <Dusk/OpenGL/OpenGLBuffer.hpp>
-
-#include <Dusk/Log.hpp>
+#include <Dusk/Exception.hpp>
 
 namespace Dusk::OpenGL {
 
 DUSK_OPENGL_API
 bool OpenGLBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUsage, MemoryUsage memoryUsage)
 {
+    _size = size;
     _bufferUsage = bufferUsage;
     _memoryUsage = memoryUsage;
-    _size = size;
 
-    if (!data && _memoryUsage == MemoryUsage::GPU) {
-        LogError(DUSK_ANCHOR, "Attempting to create an empty buffer with MemoryUsage GPU");
-        return false;
+    if (!data && memoryUsage == MemoryUsage::GPU) {
+        throw InvalidArgument("data, memoryUsage", "Attempting to create a buffer with no data and MemoryUsage::GPU");
     }
     
-    _glTarget = GetGLBufferUsage(_bufferUsage);
+    _glTarget = GetGLBufferUsage(bufferUsage);
     if (_glTarget == GL_INVALID_ENUM) {
-        return false;
+        throw InvalidArgument("bufferUsage", "Unable to map BufferUsage::{} to OpenGL Target", BufferUsageToString(bufferUsage));
     }
 
-    GLbitfield flags = GetGLMemoryUsage(_memoryUsage);
+    GLbitfield flags = GetGLMemoryUsage(memoryUsage);
 
     glGenBuffers(1, &_glID);
     glBindBuffer(_glTarget, _glID);
@@ -30,12 +28,10 @@ bool OpenGLBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUsa
     // TODO: Limit to only mappable memory usages
     _mappedBufferMemory = glMapBufferRange(_glTarget, 0, _size, flags);
     if (!_mappedBufferMemory) {
-        LogError(DUSK_ANCHOR, "glMapBuffer() failed");
-        return false;
+        throw Exception("glMapBufferRange() failed");
     }
 
     glBindBuffer(_glTarget, 0);
-
     return true;
 }
 
@@ -46,11 +42,11 @@ void OpenGLBuffer::Terminate()
         glBindBuffer(_glTarget, _glID);
         glUnmapBuffer(_glTarget);
         glBindBuffer(_glTarget, 0);
-        
-        _mappedBufferMemory = nullptr;
     }
 
-    glDeleteBuffers(1, &_glID);
+    if (_glID > 0) {
+        glDeleteBuffers(1, &_glID);
+    }
 }
 
 DUSK_OPENGL_API

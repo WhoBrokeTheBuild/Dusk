@@ -16,7 +16,7 @@ public:
 
     void Terminate() override;
 
-    virtual bool CreateWindow(unsigned flags);
+    virtual bool CreateWindow(uint32_t flags);
 
     void ProcessEvents() override;
 

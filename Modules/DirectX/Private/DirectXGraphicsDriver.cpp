@@ -10,7 +10,8 @@ namespace Dusk {
 
 LRESULT CALLBACK WndProc(HWND hwnd, unsigned msg, WPARAM wParam, LPARAM lParam)
 {
-    DirectXGraphicsDriver * gfx = DUSK_DIRECTX_GRAPHICS_DRIVER(GetGraphicsDriver());
+    auto gfx = DirectXGraphicsDriver::GetInstance();
+    assert(gfx);
 
     return gfx->ProcessMessage(hwnd, msg, wParam, lParam);
 }
@@ -89,10 +90,10 @@ ivec2 DirectXGraphicsDriver::GetWindowSize()
 
 void DirectXGraphicsDriver::ProcessEvents()
 {
-    MSG Msg;
-    if (GetMessage(&Msg, NULL, 0, 0)) {
-        TranslateMessage(&Msg);
-        DispatchMessage(&Msg);
+    MSG msg;
+    if (GetMessage(&msg, NULL, 0, 0)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
     }
 }
 

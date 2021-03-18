@@ -144,7 +144,7 @@ static struct PyMethodDef PyDusk_methods[] = {
     { "LogFatal",                   PyDusk_LogFatal,                    METH_VARARGS,   "Dusk::LogFatal()" },
     { "LoadModule",                 PyDusk_LoadModule,                  METH_VARARGS,   "Dusk::LoadModule(name, [minVersion]), minVersion must be a tuple of (Major, Minor, Patch)" },
     { "FreeModule",                 PyDusk_FreeModule,                  METH_VARARGS,   "Dusk::FreeModule(name)" },
-    { "GetGraphicsDriver",          PyDusk_GetGraphicsDriver,           METH_NOARGS,    "Dusk::GetGraphicsDriver()" },
+    // { "GetGraphicsDriver",          PyDusk_GetGraphicsDriver,           METH_NOARGS,    "Dusk::GetGraphicsDriver()" },
     { nullptr, nullptr, 0, nullptr },
 };
 

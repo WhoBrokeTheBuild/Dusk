@@ -32,13 +32,10 @@ bool VulkanPipeline::Create()
 {
     VkResult vkResult;
 
-    VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
+    auto gfx = VulkanGraphicsDriver::GetInstance();
 
-    VulkanShader * vkShader = DUSK_VULKAN_SHADER(_shader.get());
-    if (!vkShader) {
-        LogError(DUSK_ANCHOR, "Trying to bind a Vulkan VulkanPipeline with no shader");
-        return false;
-    }
+    VulkanShader * vkShader = static_cast<VulkanShader *>(_shader.get());
+    assert(vkShader);
 
     const auto& stageList = vkShader->GetStageList();
 
@@ -279,7 +276,7 @@ bool VulkanPipeline::Create()
 DUSK_VULKAN_API
 void VulkanPipeline::Destroy()
 {
-    VulkanGraphicsDriver * gfx = DUSK_VULKAN_GRAPHICS_DRIVER(GetGraphicsDriver());
+    auto gfx = VulkanGraphicsDriver::GetInstance();
  
     if (_vkPipeline) {
         vkDestroyPipeline(gfx->GetDevice(), _vkPipeline, nullptr);

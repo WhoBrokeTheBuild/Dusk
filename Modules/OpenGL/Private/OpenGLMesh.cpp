@@ -13,14 +13,14 @@ void OpenGLMesh::Render(RenderContext * ctx)
 {
     Mesh::Render(ctx);
 
-    OpenGLPipeline * glPipeline = DUSK_OPENGL_PIPELINE(_pipeline.get());
+    OpenGLPipeline * glPipeline = static_cast<OpenGLPipeline *>(_pipeline.get());
     glPipeline->Bind();
 
-    OpenGLBuffer * glTransformBuffer = DUSK_OPENGL_BUFFER(_shaderTransformBuffer.get());
+    OpenGLBuffer * glTransformBuffer = static_cast<OpenGLBuffer *>(_shaderTransformBuffer.get());
     glBindBufferBase(GL_UNIFORM_BUFFER, DUSK_SHADER_TRANSFORM_BINDING, glTransformBuffer->GetGLID());
 
     for (const auto& primitive : _primitiveList) {
-        OpenGLPrimitive * glPrimitive = DUSK_OPENGL_PRIMITIVE(primitive.get());
+        OpenGLPrimitive * glPrimitive = static_cast<OpenGLPrimitive *>(primitive.get());
         glPrimitive->Render();
     }
 }

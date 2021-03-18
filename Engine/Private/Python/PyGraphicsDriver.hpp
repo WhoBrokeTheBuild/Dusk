@@ -24,7 +24,7 @@ PyObject * PyGraphicsDriver_EnableDebugShader(PyObject * self, PyObject * args);
 
 PyObject * PyGraphicsDriver_DisableDebugShader(PyObject * self, PyObject * args);
 
-PyObject * PyDusk_GetGraphicsDriver(PyObject * self, PyObject * args);
+// PyObject * PyDusk_GetGraphicsDriver(PyObject * self, PyObject * args);
 
 bool PyInit_GraphicsDriver(PyObject * mod);
 

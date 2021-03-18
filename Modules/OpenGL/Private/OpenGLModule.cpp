@@ -4,11 +4,16 @@
 
 namespace Dusk::OpenGL {
 
+static std::unique_ptr<OpenGLGraphicsDriver> _OpenGLGraphicsDriver;
+
 bool ModuleInit()
 {
-    SetGraphicsDriver(std::unique_ptr<GraphicsDriver>(New OpenGLGraphicsDriver()));
-    if (!GetGraphicsDriver()->Initialize()) {
-        SetGraphicsDriver(nullptr);
+    try {
+        _OpenGLGraphicsDriver.reset(new(__LINE__, __FILE__) OpenGLGraphicsDriver());
+        _OpenGLGraphicsDriver->Initialize(); // TODO: Remove
+    }
+    catch (const std::exception& e) {
+        LogError(DUSK_ANCHOR, "{}", e.what());
         return false;
     }
 
@@ -17,7 +22,7 @@ bool ModuleInit()
 
 void ModuleTerm()
 {
-    SetGraphicsDriver(nullptr);
+    _OpenGLGraphicsDriver.reset();
 }
 
 Version GetVersion()

@@ -14,8 +14,6 @@
 
 namespace Dusk::OpenGL {
 
-#define DUSK_OPENGL_GRAPHICS_DRIVER(x) (dynamic_cast<Dusk::OpenGL::OpenGLGraphicsDriver *>(x))
-
 class DUSK_OPENGL_API OpenGLGraphicsDriver : public SDL2::SDL2GraphicsDriver
 {
 public:
@@ -50,7 +48,7 @@ private:
 
     void BindUniformBufferObjects();
 
-    void InitDebugMessageCallback();
+    void RegisterDebugMessageCallback();
 
     SDL_GLContext _glContext = nullptr;
 

@@ -30,11 +30,11 @@ public:
         return topology;
     }
 
-    gsl::span<uint32_t> GetIndexList() override {
+    std::span<uint32_t> GetIndexList() override {
         return indexList;
     }
 
-    gsl::span<Vertex> GetVertexList() override {
+    std::span<Vertex> GetVertexList() override {
         return vertexList;
     }
 

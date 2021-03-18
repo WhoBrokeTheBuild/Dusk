@@ -11,13 +11,18 @@ namespace Dusk::OpenGL {
 DUSK_OPENGL_API
 bool OpenGLPipeline::Bind()
 {
-    auto gfx = GetGraphicsDriver();
+    auto gfx = GraphicsDriver::GetInstance();
+    assert(gfx);
+
     glm::ivec2 windowSize = gfx->GetWindowSize();
 
-    Shader * debugShader = gfx->GetActiveDebugShader();
+    OpenGLShader * shader = static_cast<OpenGLShader *>(_shader.get());
+    OpenGLShader * debugShader = static_cast<OpenGLShader *>(gfx->GetActiveDebugShader());
 
-    OpenGLShader * shader = DUSK_OPENGL_SHADER(debugShader ? debugShader : _shader.get());
-    if (shader) {
+    if (debugShader) {
+        debugShader->Bind();
+    }
+    else if (shader) {
         shader->Bind();
     }
 

@@ -40,32 +40,32 @@ namespace Dusk {
 //         return Mode::Lines;
 //     }
 
-//     gsl::span<const unsigned> GetIndices() const override {
-//         return gsl::span(Indices, 6);
+//     std::span<const unsigned> GetIndices() const override {
+//         return std::span(Indices, 6);
 //     }
 
-//     gsl::span<const float> GetVertices() const override {
-//         return gsl::span(Vertices, 24);
+//     std::span<const float> GetVertices() const override {
+//         return std::span(Vertices, 24);
 //     }
 
-//     gsl::span<const float> GetNormals() const override {
-//         return gsl::span<float>();
+//     std::span<const float> GetNormals() const override {
+//         return std::span<float>();
 //     }
 
-//     gsl::span<const float> GetUVs() const override {
-//         return gsl::span<float>();
+//     std::span<const float> GetUVs() const override {
+//         return std::span<float>();
 //     }
 
-//     gsl::span<const float> GetColors() const override {
-//         return gsl::span(Colors, 24);
+//     std::span<const float> GetColors() const override {
+//         return std::span(Colors, 24);
 //     }
 
-//     gsl::span<const float> GetTangents() const override {
-//         return gsl::span<float>();
+//     std::span<const float> GetTangents() const override {
+//         return std::span<float>();
 //     }
 
-//     gsl::span<const float> GetBitangents() const override {
-//         return gsl::span<float>();
+//     std::span<const float> GetBitangents() const override {
+//         return std::span<float>();
 //     }
 
 // }; // class PrimitiveData

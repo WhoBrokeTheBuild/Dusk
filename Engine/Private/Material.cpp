@@ -5,7 +5,8 @@ namespace Dusk {
 
 void Material::Initialize()
 {
-    auto gfx = GetGraphicsDriver();
+    auto gfx = GraphicsDriver::GetInstance();
+    assert(gfx);
 
     _shaderMaterialBuffer = gfx->CreateBuffer();
     bool result = _shaderMaterialBuffer->Initialize(

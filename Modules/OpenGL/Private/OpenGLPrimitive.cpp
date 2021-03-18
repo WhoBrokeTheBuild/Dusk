@@ -32,7 +32,7 @@ bool OpenGLPrimitive::Load(const std::unique_ptr<PrimitiveData>& data)
 {
     DuskBenchmarkStart();
 
-    auto gfx = GetGraphicsDriver();
+    auto gfx = GraphicsDriver::GetInstance();
 
     _material = data->GetMaterial();
     if (!_material) {

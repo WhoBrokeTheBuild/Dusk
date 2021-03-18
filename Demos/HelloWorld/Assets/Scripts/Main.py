@@ -1,7 +1,7 @@
 import Dusk
 
 
-# gfx = Dusk.GetGraphicsDriver()
+# gfx = Dusk.GraphicsDriver.Instance()
 # if gfx == None:
 #     quit()
 

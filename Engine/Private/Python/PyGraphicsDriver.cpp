@@ -169,15 +169,15 @@ PyObject * PyGraphicsDriver_DisableDebugShader(PyObject * self, PyObject * args)
     Py_RETURN_NONE;
 }
 
-PyObject * PyDusk_GetGraphicsDriver(PyObject * self, PyObject * args)
-{
-    auto gfx = GetGraphicsDriver();
-    if (!gfx) {
-        Py_RETURN_NONE;
-    }
+// PyObject * PyDusk_GetGraphicsDriver(PyObject * self, PyObject * args)
+// {
+//     auto gfx = GetGraphicsDriver();
+//     if (!gfx) {
+//         Py_RETURN_NONE;
+//     }
 
-    return New_PyGraphicsDriver(gfx);
-}
+//     return New_PyGraphicsDriver(gfx);
+// }
 
 bool PyInit_GraphicsDriver(PyObject * mod) 
 {

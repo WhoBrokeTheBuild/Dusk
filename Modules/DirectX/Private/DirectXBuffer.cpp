@@ -18,7 +18,8 @@ bool DirectXBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUs
         return false;
     }
 
-    DirectXGraphicsDriver * gfx = DUSK_DIRECTX_GRAPHICS_DRIVER(GetGraphicsDriver());
+    auto gfx = DirectXGraphicsDriver::GetInstance();
+    assert(gfx);
 
     auto resourceState = GetDXResourceState(_bufferUsage);
     auto heapType = GetDXHeapType(_memoryUsage);

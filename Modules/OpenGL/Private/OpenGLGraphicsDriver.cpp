@@ -44,7 +44,7 @@ bool OpenGLGraphicsDriver::Initialize()
 
     #if defined(DUSK_BUILD_DEBUG)
 
-        InitDebugMessageCallback();
+        RegisterDebugMessageCallback();
 
     #endif
 
@@ -131,7 +131,7 @@ void OpenGLGraphicsDriver::Render()
     uint8_t * data = reinterpret_cast<uint8_t *>(_renderContext->GetShaderGlobals());
     _shaderGlobalsBuffer->WriteTo(0, sizeof(ShaderGlobals), data);
 
-    OpenGLBuffer * glGlobalsBuffer = DUSK_OPENGL_BUFFER(_shaderGlobalsBuffer.get());
+    OpenGLBuffer * glGlobalsBuffer = static_cast<OpenGLBuffer *>(_shaderGlobalsBuffer.get());
     glBindBufferBase(GL_UNIFORM_BUFFER, DUSK_SHADER_GLOBALS_BINDING, glGlobalsBuffer->GetGLID());
 
     Scene * scene = GetCurrentScene();
@@ -215,7 +215,7 @@ _OpenGLDebugMessageCallback(
 }
 
 DUSK_OPENGL_API
-void OpenGLGraphicsDriver::InitDebugMessageCallback()
+void OpenGLGraphicsDriver::RegisterDebugMessageCallback()
 {
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(_OpenGLDebugMessageCallback, nullptr);

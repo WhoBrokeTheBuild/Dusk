@@ -6,7 +6,7 @@
 #include <Dusk/Math.hpp>
 #include <Dusk/String.hpp>
 
-#include <gsl/gsl>
+#include <span>
 
 namespace Dusk {
 

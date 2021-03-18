@@ -3,7 +3,20 @@
 
 namespace Dusk {
 
-static std::unique_ptr<GraphicsDriver> _GraphicsDriver(nullptr);
+GraphicsDriver * GraphicsDriver::_Instance = nullptr;
+
+DUSK_ENGINE_API
+GraphicsDriver::GraphicsDriver()
+{
+    _Instance = this;
+}
+
+DUSK_ENGINE_API
+GraphicsDriver::~GraphicsDriver()
+{
+
+    _Instance = nullptr;
+}
 
 DUSK_ENGINE_API
 void GraphicsDriver::InitializeUpdateContext()
@@ -52,8 +65,6 @@ bool GraphicsDriver::InitializeConstantBuffers()
 
     return result;
 }
-
-
 
 DUSK_ENGINE_API
 bool GraphicsDriver::InitializeDefaults()
@@ -150,6 +161,28 @@ bool GraphicsDriver::InitializeDefaults()
     return true;
 }
 
+void GraphicsDriver::SetWindowTitle(const string& title)
+{
+    _windowTitle = title;
+    UpdateWindowTitle(title);
+}
+
+void GraphicsDriver::SetWindowSize(const ivec2& size)
+{
+    _windowSize = size;
+    UpdateWindowSize(size);
+}
+
+void GraphicsDriver::SetBackbufferCount(unsigned backbufferCount)
+{
+    _backbufferCount = backbufferCount;
+}
+
+void GraphicsDriver::SetClearColor(const vec4& color)
+{
+    _clearColor = color;
+}
+
 DUSK_ENGINE_API
 void GraphicsDriver::Render()
 {
@@ -229,21 +262,6 @@ PyObject * WindowResizedEventData::GetPyObject() const
     PyDict_SetItemString(dict, "Size", size);
 
     return dict;
-}
-
-DUSK_ENGINE_API 
-void SetGraphicsDriver(std::unique_ptr<GraphicsDriver> && driver)
-{
-    if (_GraphicsDriver) {
-        _GraphicsDriver->Terminate();
-    }
-    _GraphicsDriver = std::move(driver);
-}
-
-DUSK_ENGINE_API 
-GraphicsDriver * GetGraphicsDriver()
-{
-    return _GraphicsDriver.get();
 }
 
 } // namespace Dusk

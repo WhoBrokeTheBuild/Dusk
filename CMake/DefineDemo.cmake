@@ -96,7 +96,7 @@ MACRO(DEFINE_DEMO _target)
         ${_shaders_out}
         ${_assets}
     )
-
+    
     SET_SOURCE_GROUPS(${CMAKE_CURRENT_SOURCE_DIR} "${_sources}")
     SET_SOURCE_GROUPS(${CMAKE_CURRENT_BINARY_DIR} "${_sources_out}")
     SET_SOURCE_GROUPS(${CMAKE_CURRENT_SOURCE_DIR} "${_shaders_in}")
@@ -106,7 +106,7 @@ MACRO(DEFINE_DEMO _target)
     TARGET_LINK_LIBRARIES(
         ${_target}
         PRIVATE
-            DuskEngine
+            DuskCore
     )
 
     TARGET_INCLUDE_DIRECTORIES(
@@ -116,37 +116,11 @@ MACRO(DEFINE_DEMO _target)
             ${CMAKE_CURRENT_BINARY_DIR}/Source
     )
 
-    STRING(LENGTH "${CMAKE_SOURCE_DIR}/" _source_path_length)
-
     TARGET_COMPILE_DEFINITIONS(
         ${_target}
         PUBLIC
             # Disable VS "not secure" warnings
             $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
-        PRIVATE
-            DUSK_SOURCE_PATH_LENGTH=${_source_path_length}
-    )
-
-    TARGET_COMPILE_OPTIONS(
-        ${_target}
-        PRIVATE
-            # Configure VS to use C++20, since it ignores CXX_STANDARD
-            $<$<CXX_COMPILER_ID:MSVC>: /std:c++latest>
-
-            # Force windows to use UTF-8
-            $<$<CXX_COMPILER_ID:MSVC>: /utf-8>
-
-            # Disable unknown pragmas warning, C++ exceptions
-            $<$<CXX_COMPILER_ID:GNU>:   -Wall -Wno-unknown-pragmas>
-            $<$<CXX_COMPILER_ID:Clang>: -Wall -Wno-unknown-pragmas>
-            $<$<CXX_COMPILER_ID:MSVC>:  /MP /wd4068>
-    )
-
-    TARGET_LINK_OPTIONS(
-        ${_target}
-        PUBLIC
-            # Fix windows bug in looking for python38.lib
-            $<$<CXX_COMPILER_ID:MSVC>:/NODEFAULTLIB:python38.lib>
     )
 
     SET_TARGET_PROPERTIES(
@@ -168,120 +142,27 @@ MACRO(DEFINE_DEMO _target)
         PROPERTIES
             FOLDER "${_folder}"
     )
-
-    IF(MSVC)
-        SET_TARGET_PROPERTIES(
-            ${_target}
-            PROPERTIES 
-                VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                VS_DEBUGGER_ENVIRONMENT "PATH=${DUSK_RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${DUSK_RUNTIME_SEARCH_PATH_DEBUG};>$<$<CONFIG:Release>:${DUSK_RUNTIME_SEARCH_PATH_RELEASE};>$ENV{PATH}\nDUSK_ASSET_PATH=${DUSK_ASSET_PATH}"
-        )
-
-        ADD_CUSTOM_TARGET(
-            run-${_target}
-            COMMAND ${CMAKE_COMMAND} -E env "PATH=${DUSK_RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${DUSK_RUNTIME_SEARCH_PATH_DEBUG};>$<$<CONFIG:Release>:${DUSK_RUNTIME_SEARCH_PATH_RELEASE};>$ENV{PATH}" "DUSK_ASSET_PATH=${DUSK_ASSET_PATH}" $<TARGET_FILE:${_target}>
-            DEPENDS ${_target}
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        )
-
-        SET_TARGET_PROPERTIES(
-            run-${_target}
-            PROPERTIES 
-                FOLDER "Automation"
-        )
-
-        # Append debug target to .vscode/launch.json if .vscode/ exists
-        IF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/.vscode)
-            SET(_launch_json ${CMAKE_SOURCE_DIR}/.vscode/launch.json)
-            SET(_graphics_drivers "")
-
-            IF("OpenGL" IN_LIST DUSK_REQUIRED_MODULES)
-                LIST(APPEND _graphics_drivers "OpenGL")
-            ENDIF()
-
-            IF("Vulkan" IN_LIST DUSK_REQUIRED_MODULES)
-                LIST(APPEND _graphics_drivers "Vulkan")
-            ENDIF()
-
-            IF("DirectX" IN_LIST DUSK_REQUIRED_MODULES)
-                LIST(APPEND _graphics_drivers "DirectX")
-            ENDIF()
-
-            FOREACH(_driver ${_graphics_drivers})
-                ADD_CUSTOM_COMMAND(
-                    TARGET ${_target} POST_BUILD
-                    BYPRODUCTS ${_launch_json}
-                    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Scripts/add-vscode-launch-target.py ${_launch_json} "${_target} (${_driver}, $<CONFIG>)" $<TARGET_FILE:${_target}> ${CMAKE_CURRENT_BINARY_DIR} "PATH=${DUSK_RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${DUSK_RUNTIME_SEARCH_PATH_DEBUG};>$<$<CONFIG:Release>:${DUSK_RUNTIME_SEARCH_PATH_RELEASE};>$ENV{PATH}" "DUSK_ASSET_PATH=${DUSK_ASSET_PATH}" "DUSK_GRAPHICS_DRIVER=${_driver}"
-                )
-            ENDFOREACH()
-        ENDIF()
-    ELSE()
-        STRING(JOIN ":" LD_LIBRARY_PATH ${DUSK_RUNTIME_SEARCH_PATH})
-        STRING(JOIN ":" DUSK_ASSET_PATH ${DUSK_ASSET_PATH})
-        
-        ADD_CUSTOM_TARGET(
-            run-${_target}
-            COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${DUSK_ASSET_PATH}" $<TARGET_FILE:${_target}>
-            DEPENDS ${_target}
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        )
-
-        SET_TARGET_PROPERTIES(
-            run-${_target}
-            PROPERTIES 
-                FOLDER "Automation"
-        )
-
-        IF(gdb_COMMAND)
-            ADD_CUSTOM_TARGET(
-                gdb-${_target}
-                COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${DUSK_ASSET_PATH}" gdb --args $<TARGET_FILE:${_target}>
-                DEPENDS ${_target}
-                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-            )
-
-            SET_TARGET_PROPERTIES(
-                gdb-${_target}
-                PROPERTIES 
-                    FOLDER "Automation"
-            )
-        ENDIF()
-
-        IF(valgrind_COMMAND)
-            ADD_CUSTOM_TARGET(
-                valgrind-${_target}
-                COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${DUSK_ASSET_PATH}" valgrind $<TARGET_FILE:${_target}>
-                DEPENDS ${_target}
-                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-            )
-
-            SET_TARGET_PROPERTIES(
-                valgrind-${_target}
-                PROPERTIES 
-                    FOLDER "Automation"
-            )
-        ENDIF()
-
-        IF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/.vscode)
-            SET(_launch_json ${CMAKE_SOURCE_DIR}/.vscode/launch.json)
-            SET(_graphics_drivers "")
-
-            IF("OpenGL" IN_LIST DUSK_REQUIRED_MODULES)
-                LIST(APPEND _graphics_drivers "OpenGL")
-            ENDIF()
-
-            IF("Vulkan" IN_LIST DUSK_REQUIRED_MODULES)
-                LIST(APPEND _graphics_drivers "Vulkan")
-            ENDIF()
-
-            FOREACH(_driver ${_graphics_drivers})
-                ADD_CUSTOM_COMMAND(
-                    TARGET ${_target} 
-                    BYPRODUCTS ${_launch_json}
-                    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Scripts/add-vscode-launch-target.py ${_launch_json} "${_target} \\(${_driver}\\)" $<TARGET_FILE:${_target}> ${CMAKE_CURRENT_BINARY_DIR} "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" "DUSK_ASSET_PATH=${DUSK_ASSET_PATH}" "DUSK_GRAPHICS_DRIVER=${_driver}"
-                )
-            ENDFOREACH()
-        ENDIF()
-    ENDIF()
     
+    STRING(REPLACE " " "\\ " DUSK_MODULE_PATH "${DUSK_MODULE_PATH}")
+    STRING(REPLACE " " "\\ " DUSK_ASSET_PATH "${DUSK_ASSET_PATH}")
+
+    # TODO: Improve
+    SET(_ext "")
+    IF(WIN32)
+        SET(_ext ".exe")
+    ENDIF()
+
+    FILE(RELATIVE_PATH _executable ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${_target}${_ext})
+    FILE(TO_NATIVE_PATH ${_executable} _executable)
+
+    EXECUTE_PROCESS(
+        COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_SOURCE_DIR}/Scripts/generate-launch-targets.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/${_target}.duskproj
+            ${CMAKE_BINARY_DIR}
+            ${_executable}
+            "${DUSK_ASSET_PATH}"
+            "${DUSK_MODULE_PATH}"
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
 ENDMACRO()

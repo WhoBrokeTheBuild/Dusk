@@ -166,6 +166,7 @@ IF(BUILD_THIRDPARTY)
     SET(SDL2_ROOT           ${_thirdparty_binary_dir}/SDL2)
     SET(OpenAL_ROOT         ${_thirdparty_binary_dir}/OpenAL)
     SET(freetype_ROOT       ${_thirdparty_binary_dir}/freetype)
+    SET(fmt_ROOT            ${_thirdparty_binary_dir}/fmt)
 
     # Set CMAKE_PREFIX_PATH for find-based packages
     LIST(APPEND CMAKE_PREFIX_PATH
@@ -183,6 +184,7 @@ IF(BUILD_THIRDPARTY)
 
     EXECUTE_PROCESS(
         COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" 
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
             -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
             -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
             -DDUSK_REQUIRED_DEPENDENCIES=${_tmp_required_dependencies}
@@ -282,22 +284,24 @@ IF(TARGET SDL2::SDL2)
     GET_TARGET_PROPERTY(_location SDL2::SDL2 IMPORTED_LOCATION)
     GET_FILENAME_COMPONENT(SDL2_RUNTIME_DIR ${_location} DIRECTORY)
     
-    GET_TARGET_PROPERTY(_location SDL2::SDL2 IMPORTED_LOCATION_DEBUG)
-    GET_FILENAME_COMPONENT(SDL2_RUNTIME_DIR_DEBUG ${_location} DIRECTORY)
-    
-    GET_TARGET_PROPERTY(_location SDL2::SDL2 IMPORTED_LOCATION_RELEASE)
-    GET_FILENAME_COMPONENT(SDL2_RUNTIME_DIR_RELEASE ${_location} DIRECTORY)
+    IF (SDL2_RUNTIME_DIR STREQUAL "")
+        STRING(TOUPPER ${CMAKE_BUILD_TYPE} _type)
+        GET_TARGET_PROPERTY(_location SDL2::SDL2 IMPORTED_LOCATION_${_type})
+        GET_FILENAME_COMPONENT(SDL2_RUNTIME_DIR ${_location} DIRECTORY)
+    ENDIF()
+
+    MESSAGE(STATUS ${SDL2_RUNTIME_DIR} "IMPORTED_LOCATION_${CMAKE_BUILD_TYPE}")
 ENDIF()
 
 IF(TARGET OpenAL::OpenAL)
     GET_TARGET_PROPERTY(_location OpenAL::OpenAL IMPORTED_LOCATION)
     GET_FILENAME_COMPONENT(OpenAL_RUNTIME_DIR ${_location} DIRECTORY)
-
-    GET_TARGET_PROPERTY(_location OpenAL::OpenAL IMPORTED_LOCATION_DEBUG)
-    GET_FILENAME_COMPONENT(OpenAL_RUNTIME_DIR_DEBUG ${_location} DIRECTORY)
-
-    GET_TARGET_PROPERTY(_location OpenAL::OpenAL IMPORTED_LOCATION_RELEASE)
-    GET_FILENAME_COMPONENT(OpenAL_RUNTIME_DIR_RELEASE ${_location} DIRECTORY)
+    
+    IF (OpenAL_RUNTIME_DIR STREQUAL "")
+        STRING(TOUPPER ${CMAKE_BUILD_TYPE} _type)
+        GET_TARGET_PROPERTY(_location OpenAL::OpenAL IMPORTED_LOCATION_${_type})
+        GET_FILENAME_COMPONENT(OpenAL_RUNTIME_DIR ${_location} DIRECTORY)
+    ENDIF()
 ENDIF()
 
 ###
@@ -305,21 +309,11 @@ ENDIF()
 ###
 
 # Allow custom targets in Visual Studio to find .dll files
-SET(DUSK_RUNTIME_SEARCH_PATH
+SET(DUSK_MODULE_PATH
     ${SDL2_RUNTIME_DIR}
     ${OpenAL_RUNTIME_DIR}
     ${Python3_RUNTIME_LIBRARY_DIRS}
     ${GTEST_RUNTIME_DIR}
-)
-
-SET(DUSK_RUNTIME_SEARCH_PATH_DEBUG
-    ${SDL2_RUNTIME_DIR_DEBUG}
-    ${OpenAL_RUNTIME_DIR_DEBUG}
-)
-
-SET(DUSK_RUNTIME_SEARCH_PATH_RELEASE
-    ${SDL2_RUNTIME_DIR_RELEASE}
-    ${OpenAL_RUNTIME_DIR_RELEASE}
 )
 
 SET(DUSK_MODULE_TARGETS "")
@@ -340,9 +334,6 @@ ADD_SUBDIRECTORY(Modules)
 ###
 ### Demos
 ###
-
-# Allow custom targets to find .dlls
-SET(CMAKE_MSVCIDE_RUN_PATH ${DUSK_RUNTIME_SEARCH_PATH})
 
 IF(BUILD_DEMOS)
     ADD_SUBDIRECTORY(Demos)
@@ -428,12 +419,24 @@ IF(docker_COMMAND)
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     )
 
+    SET_TARGET_PROPERTIES(
+        build-docker-images
+        PROPERTIES 
+            FOLDER "Automation"
+    )
+
     ADD_CUSTOM_TARGET(
         push-docker-images
         COMMAND ${docker_COMMAND} push whobrokethebuild/dusk:builder-minimal
         COMMAND ${docker_COMMAND} push whobrokethebuild/dusk:builder
         DEPENDS build-docker-images
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+
+    SET_TARGET_PROPERTIES(
+        push-docker-images
+        PROPERTIES 
+            FOLDER "Automation"
     )
 ENDIF()
 
@@ -448,5 +451,11 @@ IF(circleci_COMMAND)
         test-circleci
         COMMAND ${circleci_COMMAND} local execute --job "Clang, Release, System"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+
+    SET_TARGET_PROPERTIES(
+        test-circleci
+        PROPERTIES 
+            FOLDER "Automation"
     )
 ENDIF()

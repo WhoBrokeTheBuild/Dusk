@@ -7,6 +7,8 @@
 #include <Dusk/Vulkan/VulkanShader.hpp>
 #include <Dusk/Vulkan/VulkanMesh.hpp>
 
+#include <array>
+
 namespace Dusk::Vulkan {
 
 DUSK_VULKAN_API

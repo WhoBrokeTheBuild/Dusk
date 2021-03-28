@@ -67,15 +67,15 @@ private:
 }; // struct IncludeHandler
 
 DUSK_DIRECTX_API
-bool DirectXShader::LoadFromFiles(const std::vector<string>& filenames)
+bool DirectXShader::LoadFromFiles(const std::vector<string>& filenameList, bool useAssetPath /*= true*/)
 {
     DuskBenchmarkStart();
 
-    for (const auto& filename : filenames) {
-        string_view ext = GetExtension(filename);
+    for (const auto& filename : filenameList) {
+        Path ext = GetExtension(filename);
 
         if (ext == "cso") {
-            if (LoadCSO(filename)) {
+            if (LoadCSO(Path(filename), useAssetPath)) {
                 break;
             }
             else {
@@ -84,7 +84,7 @@ bool DirectXShader::LoadFromFiles(const std::vector<string>& filenames)
             }
         }
         else if (ext == "hlsl") {
-            if (LoadHLSL(filename)) {
+            if (LoadHLSL(Path(filename), useAssetPath)) {
                 break;
             }
             else {
@@ -93,7 +93,7 @@ bool DirectXShader::LoadFromFiles(const std::vector<string>& filenames)
             }
         }
         else {
-            if (LoadCSO(filename + ".cso") || LoadHLSL(filename + ".hlsl")) {
+            if (LoadCSO(Path(filename) + ".cso", useAssetPath) || LoadHLSL(filename + ".hlsl", useAssetPath)) {
                 break;
             }
             else {
@@ -108,9 +108,9 @@ bool DirectXShader::LoadFromFiles(const std::vector<string>& filenames)
 }
 
 DUSK_DIRECTX_API
-bool DirectXShader::LoadCSO(const Path& path, bool useAssetPath)
+bool DirectXShader::LoadCSO(const Path& path, ShaderStage stage, const string& entrypoint, bool useAssetPath)
 {
-    LogVerbose(DUSK_ANCHOR, "Looking for Compiled Shader Object '{}'", filename);
+    LogVerbose(DUSK_ANCHOR, "Looking for Compiled Shader Object '{}'", path);
 
     auto stage = GetShaderStageFromFilename(path);
     if (!stage) {
@@ -147,38 +147,17 @@ bool DirectXShader::LoadCSO(const Path& path, bool useAssetPath)
     auto begin = std::istreambuf_iterator<char>(file);
     auto end = std::istreambuf_iterator<char>();
 
-    switch (stage.value()) {
-    case ShaderStage::Vertex:
-        _vertex.reserve(size);
-        _vertex.assign(begin, end);
-        break;
-    case ShaderStage::Fragment:
-        _pixel.reserve(size);
-        _pixel.assign(begin, end);
-        break;
-    case ShaderStage::TessControl:
-        _domain.reserve(size);
-        _domain.assign(begin, end);
-        break;
-    case ShaderStage::TessEvaluation:
-        _hull.reserve(size);
-        _hull.assign(begin, end);
-        break;
-    case ShaderStage::Geometry:
-        _geometry.reserve(size);
-        _geometry.assign(begin, end);
-        break;
-    case ShaderStage::Compute:
-        _compute.reserve(size);
-        _compute.assign(begin, end);
-        break;
-    }
+    _bytecodeByStage[stage.value()] = std::vector<uint8_t>();
+    auto& v = _bytecodeByStage[stage.value()];
+
+    v.reserve(size);
+    v.assign(begin, end);
 
     return true;
 }
 
 DUSK_DIRECTX_API
-bool DirectXShader::LoadHLSL(string_view path, bool useAssetPath)
+bool DirectXShader::LoadHLSL(const Path& path, ShaderStage stage, const string& entrypoint, bool useAssetPath)
 {
     LogVerbose(DUSK_ANCHOR, "Looking for HLSL shader '{}'", path);
 
@@ -254,15 +233,35 @@ bool DirectXShader::LoadHLSL(string_view path, bool useAssetPath)
     }
 
     auto entrypoint = GetShaderEntrypoint(stage.value());
-    auto targetProfile = GetShaderTargetProfile(stage.value());
 
     if (!entrypoint) {
         LogError(DUSK_ANCHOR, "Failed to determine shader entrypoint");
         return false;
     }
 
-    if (!targetProfile) {
-        LogError(DUSK_ANCHOR, "Failed to determine shader target profile");
+    std::wstring targetProfile;
+
+    switch (stage) {
+    case ShaderStage::Vertex:
+        targetProfile = L"vs_6_0";
+        break;
+    case ShaderStage::Fragment:
+        targetProfile = L"ps_6_0";
+        break;
+    case ShaderStage::TessControl:
+        targetProfile = L"hs_6_0";
+        break;
+    case ShaderStage::TessEvaluation:
+        targetProfile = L"ds_6_0";
+        break;
+    case ShaderStage::Geometry:
+        targetProfile = L"gs_6_0";
+        break;
+    case ShaderStage::Compute:
+        targetProfile = L"cs_6_0";
+        break;
+    default:
+        LogError(DUSK_ANCHOR, "Unable to determine shader target profile");
         return false;
     }
 
@@ -271,7 +270,7 @@ bool DirectXShader::LoadHLSL(string_view path, bool useAssetPath)
         sourceBlob.Get(),
         wfilename.c_str(),
         entrypoint.value(),
-        targetProfile.value(),
+        targetProfile.c_str(),
         &args[0],
         sizeof(args) / sizeof(args[0]),
         nullptr, 0,
@@ -301,131 +300,25 @@ bool DirectXShader::LoadHLSL(string_view path, bool useAssetPath)
     uint8_t * begin = static_cast<uint8_t *>(blob->GetBufferPointer());
     uint8_t * end = begin + blob->GetBufferSize();
 
-    switch (stage.value()) {
-    case ShaderStage::Vertex:
-        _vertex.reserve(blob->GetBufferSize());
-        _vertex.assign(begin, end);
-        break;
-    case ShaderStage::Fragment:
-        _pixel.reserve(blob->GetBufferSize());
-        _pixel.assign(begin, end);
-        break;
-    case ShaderStage::TessControl:
-        _domain.reserve(blob->GetBufferSize());
-        _domain.assign(begin, end);
-        break;
-    case ShaderStage::TessEvaluation:
-        _hull.reserve(blob->GetBufferSize());
-        _hull.assign(begin, end);
-        break;
-    case ShaderStage::Geometry:
-        _geometry.reserve(blob->GetBufferSize());
-        _geometry.assign(begin, end);
-        break;
-    case ShaderStage::Compute:
-        _compute.reserve(blob->GetBufferSize());
-        _compute.assign(begin, end);
-        break;
-    }
+    _bytecodeByStage[stage.value()] = std::vector<uint8_t>();
+    auto& v = _bytecodeByStage[stage.value()];
+
+    v.reserve(blob->GetBufferSize());
+    v.assign(begin, end);
     
     return true;
 }
 
 DUSK_DIRECTX_API
-D3D12_SHADER_BYTECODE DirectXShader::GetShaderBytecode(const ShaderStage& stage)
+D3D12_SHADER_BYTECODE DirectXShader::GetShaderBytecode(ShaderStage stage)
 {
-    switch (stage) {
-    case ShaderStage::Vertex:
-        return { static_cast<void *>(_vertex.data()), _vertex.size() };
-    case ShaderStage::Fragment:
-        return { static_cast<void *>(_pixel.data()), _pixel.size() };
-    case ShaderStage::TessControl:
-        return { static_cast<void *>(_domain.data()), _domain.size() };
-    case ShaderStage::TessEvaluation:
-        return { static_cast<void *>(_hull.data()), _hull.size() };
-    case ShaderStage::Geometry:
-        return { static_cast<void *>(_geometry.data()), _geometry.size() };
-    case ShaderStage::Compute:
-        return { static_cast<void *>(_compute.data()), _compute.size() };
+    auto it = _bytecodeByStage.find(stage);
+    if (it != _bytecodeByStage.end()) {
+        const auto& v = *it;
+        return { static_cast<void *>(v.data()), v.size() };
     }
 
     return { nullptr, 0 };
-}
-
-DUSK_DIRECTX_API
-std::optional<ShaderStage> GetShaderStageFromFilename(string_view filename)
-{
-    string ext = GetExtension(filename);
-    if (ext == "cso" || ext == "hlsl") {
-        size_t pivot = filename.find_last_of('.');
-        if (pivot == string::npos) {
-            return {};
-        }
-        ext = GetExtension(filename.substr(0, pivot));
-    }
-
-    if (ext == "vert" || ext == "vertex") {
-        return ShaderStage::Vertex;
-    }
-    else if (ext == "frag" || ext == "fragment" || ext == "pixel") {
-        return ShaderStage::Fragment;
-    }
-    else if (ext == "tesc" || ext == "tesscontrol" || ext == "hull") {
-        return ShaderStage::TessControl;
-    }
-    else if (ext == "tese" || ext == "tesseval" || ext == "domain") {
-        return ShaderStage::TessEvaluation;
-    }
-    else if (ext == "geom" || ext == "geometry") {
-        return ShaderStage::Geometry;
-    }
-    else if (ext == "comp" || ext == "compute") {
-        return ShaderStage::Compute;
-    }
-
-    return {};
-}
-
-DUSK_DIRECTX_API
-std::optional<const wchar_t *> GetShaderEntrypoint(const ShaderStage& stage)
-{
-    switch (stage) {
-    case ShaderStage::Vertex:
-        return L"VSMain";
-    case ShaderStage::Fragment:
-        return L"PSMain";
-    case ShaderStage::TessControl:
-        return L"HSMain";
-    case ShaderStage::TessEvaluation:
-        return L"DSMain";
-    case ShaderStage::Geometry:
-        return L"GSMain";
-    case ShaderStage::Compute:
-        return L"CSMain";
-    }
-    
-    return {};
-}
-
-DUSK_DIRECTX_API
-std::optional<const wchar_t *> GetShaderTargetProfile(const ShaderStage& stage)
-{
-    switch (stage) {
-    case ShaderStage::Vertex:
-        return L"vs_6_0";
-    case ShaderStage::Fragment:
-        return L"ps_6_0";
-    case ShaderStage::TessControl:
-        return L"hs_6_0";
-    case ShaderStage::TessEvaluation:
-        return L"ds_6_0";
-    case ShaderStage::Geometry:
-        return L"gs_6_0";
-    case ShaderStage::Compute:
-        return L"cs_6_0";
-    }
-
-    return {};
 }
 
 } // namespace Dusk

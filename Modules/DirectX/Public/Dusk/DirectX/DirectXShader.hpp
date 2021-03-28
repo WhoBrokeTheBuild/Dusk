@@ -17,38 +17,19 @@ public:
 
     DirectXShader() = default;
 
-    bool LoadFromFiles(const std::vector<string>& filenameList) override;
+    bool LoadFromFiles(const std::vector<string>& pathList, bool useAssetPath = true) override;
     
-    D3D12_SHADER_BYTECODE GetShaderBytecode(const ShaderStage& stage);
+    D3D12_SHADER_BYTECODE GetShaderBytecode(ShaderStage stage);
 
 private:
 
-    bool LoadCSO(const Path& path, bool useAssetPath);
+    bool LoadCSO(const Path& path, ShaderStage stage, const string& entrypoint, bool useAssetPath);
 
-    bool LoadHLSL(const Path& path, bool useAssetPath);
+    bool LoadHLSL(const Path& path, ShaderStage stage, const string& entrypoint, bool useAssetPath);
 
-    std::vector<uint8_t> _vertex;
-
-    std::vector<uint8_t> _pixel;
-
-    std::vector<uint8_t> _domain;
-
-    std::vector<uint8_t> _hull;
-
-    std::vector<uint8_t> _geometry;
-
-    std::vector<uint8_t> _compute;
+    std::unordered_map<ShaderStage, std::vector<uint8_t>> _bytecodeByStage;
 
 }; // class DirectXShader
-
-DUSK_DIRECTX_API
-std::optional<ShaderStage> GetShaderStageFromFilename(string_view filename);
-
-DUSK_DIRECTX_API
-std::optional<const wchar_t *> GetShaderEntrypoint(const ShaderStage& stage);
-
-DUSK_DIRECTX_API
-std::optional<const wchar_t *> GetShaderTargetProfile(const ShaderStage& stage);
 
 } // namespace Dusk
 

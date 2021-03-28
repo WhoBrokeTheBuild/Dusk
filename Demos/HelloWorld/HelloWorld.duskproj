@@ -1,0 +1,27 @@
+{
+    "name": "HelloWorld",
+    "version": "1.0.0",
+    "modules": [
+        "DuskSTBI",
+        "DuskTinyOBJ",
+        "DuskGLTF2"
+    ],
+    "configurations": {
+        "Vulkan": {
+            "modules": [
+                "DuskVulkan"
+            ]
+        },
+        "OpenGL": {
+            "modules": [
+                "DuskOpenGL"
+            ]
+        },
+        "DirectX": {
+            "modules": [
+                "DuskDirectX"
+            ]
+        }
+    },
+    "defaultConfiguration": "Vulkan"
+}

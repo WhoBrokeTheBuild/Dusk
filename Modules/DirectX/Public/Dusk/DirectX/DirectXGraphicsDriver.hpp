@@ -18,6 +18,10 @@ class DUSK_DIRECTX_API DirectXGraphicsDriver : public GraphicsDriver
 {
 public:
 
+    static inline DirectXGraphicsDriver * GetInstance() {
+        return static_cast<DirectXGraphicsDriver *>(GraphicsDriver::GetInstance());
+    }
+
     DISALLOW_COPY_AND_ASSIGN(DirectXGraphicsDriver)
 
     DirectXGraphicsDriver() = default;
@@ -28,17 +32,11 @@ public:
 
     void Terminate() override;
 
-    void SetWindowTitle(string_view title) override;
-
-    string GetWindowTitle() override;
-
-    void SetWindowSize(const ivec2& size) override;
-
-    ivec2 GetWindowSize() override;
-
     void ProcessEvents() override;
 
     void Render() override;
+
+    std::shared_ptr<Buffer> CreateBuffer() override;
 
     std::shared_ptr<Pipeline> CreatePipeline(std::shared_ptr<Shader> shader) override;
 
@@ -50,6 +48,8 @@ public:
 
     std::shared_ptr<Primitive> CreatePrimitive() override;
 
+    std::shared_ptr<Material> CreateMaterial() override;
+
     LRESULT ProcessMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
     ID3D12Device2 * GetDevice() const {
@@ -59,6 +59,12 @@ public:
     D3D12MA::Allocator * GetAllocator() const {
         return _dmaAllocator;
     }
+
+protected:
+
+    void UpdateWindowTitle(const string& title) override;
+
+    void UpdateWindowSize(const ivec2& size) override;
 
 private:
 

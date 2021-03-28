@@ -24,22 +24,23 @@ using namespace std::chrono;
 
 void run()
 {
-    Dusk::LoadModule("DuskSTBI");
-    Dusk::LoadModule("DuskTinyOBJ");
-    Dusk::LoadModule("DuskGLTF2");
-    // Dusk::LoadModule("DuskFreeType");
+    //Dusk::LoadModule("DuskSTBI");
+    //Dusk::LoadModule("DuskTinyOBJ");
+    //Dusk::LoadModule("DuskGLTF2");
+    //// Dusk::LoadModule("DuskFreeType");
 
-    std::string_view envGraphicsDriver = getenv("DUSK_GRAPHICS_DRIVER");
-    
-    if (envGraphicsDriver == "OpenGL") {
-        Dusk::LoadModule("DuskOpenGL");
-    }
-    else if (envGraphicsDriver == "DirectX") {
-        Dusk::LoadModule("DuskDirectX");
-    }
-    else {
-        Dusk::LoadModule("DuskVulkan");
-    }
+    //const char * env = getenv("DUSK_GRAPHICS_DRIVER");
+    //std::string_view envGraphicsDriver = (env ? env : "");
+    //
+    //if (envGraphicsDriver == "OpenGL") {
+    //    Dusk::LoadModule("DuskOpenGL");
+    //}
+    //else if (envGraphicsDriver == "DirectX") {
+    //    Dusk::LoadModule("DuskDirectX");
+    //}
+    //else {
+    //    Dusk::LoadModule("DuskVulkan");
+    //}
 
     auto gfx = Dusk::GraphicsDriver::GetInstance();
     assert(gfx);
@@ -113,11 +114,6 @@ int main(int argc, char** argv)
 {
     Dusk::SetMinimumLogLevel(Dusk::LogLevel::Verbose);
     Dusk::AddLogFile("lastrun.log");
-
-    Dusk::SetApplicationName("HelloWorld");
-    Dusk::SetApplicationVersion({ 1, 0, 0 });
-
-    using namespace Dusk;
 
     if (!Dusk::Initialize(argc, argv)) {
         return 1;

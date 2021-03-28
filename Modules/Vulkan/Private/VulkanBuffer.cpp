@@ -19,6 +19,7 @@ bool VulkanBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUsa
     }
 
     auto gfx = VulkanGraphicsDriver::GetInstance();
+    assert(gfx);
 
     auto vkBufferUsage = GetVkBufferUsage(_bufferUsage);
     auto vkMemoryUsage = GetVkMemoryUsage(_memoryUsage);

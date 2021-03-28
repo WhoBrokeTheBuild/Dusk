@@ -60,25 +60,19 @@ bool DirectXBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUs
     );
 
     if (FAILED(hResult)) {
-        fmt::windows_error msg(hResult);
-        LogError(DUSK_ANCHOR, "CreateResource() failed: {}", msg);
-        return false;
+        throw fmt::windows_error(hResult, "CreateResource() failed");
     }
 
     D3D12_RANGE readRange = { 0, 0 };
 
     if (data) {
-        void * ptr;
-        hResult = _dxResource->Map(0, &readRange, &ptr);
+        hResult = _dxResource->Map(0, &readRange, &_mappedBufferMemory);
+
         if (FAILED(hResult)) {
-            fmt::windows_error msg(hResult);
-            LogError(DUSK_ANCHOR, "Map() failed: {}", msg);
-            return false;
+            throw fmt::windows_error(hResult, "Map() failed");
         }
 
-        memcpy(ptr, data, _size);
-
-        _dxResource->Unmap(0, &readRange);
+        memcpy(_mappedBufferMemory, data, _size);
     }
 
     return true;
@@ -87,66 +81,16 @@ bool DirectXBuffer::Initialize(size_t size, uint8_t * data, BufferUsage bufferUs
 DUSK_DIRECTX_API
 void DirectXBuffer::Terminate()
 {
+    if (_mappedBufferMemory) {
+        // TODO: readRange?
+        // _dxResource->Unmap(0, &readRange);
+        _mappedBufferMemory = nullptr;
+    }
+
     _dmaAllocation->Release();
     _dmaAllocation = nullptr;
 
     _dxResource.Reset();
-}
-
-DUSK_DIRECTX_API
-bool DirectXBuffer::ReadFrom(size_t offset, size_t length, uint8_t * data)
-{
-    HRESULT hResult;
-    
-    if (_memoryUsage != MemoryUsage::Download) {
-        LogError(DUSK_ANCHOR, "Unable to read data from buffer with MemoryUsage: {}",
-            MemoryUsageToString(_memoryUsage));
-        return false;
-    }
-
-    D3D12_RANGE readRange = { offset, offset + length };
-
-    void * ptr;
-    hResult = _dxResource->Map(0, &readRange, &ptr);
-    if (FAILED(hResult)) {
-        fmt::windows_error msg(hResult);
-        LogError(DUSK_ANCHOR, "Map() failed: {}", msg);
-        return false;
-    }
-
-    memcpy(data, ptr, _size);
-
-    _dxResource->Unmap(0, &readRange);
-
-    return true;
-}
-
-DUSK_DIRECTX_API
-bool DirectXBuffer::WriteTo(size_t offset, size_t length, uint8_t * data)
-{
-    HRESULT hResult;
-
-    if (_memoryUsage != MemoryUsage::UploadOnce && _memoryUsage != MemoryUsage::UploadOften) {
-        LogError(DUSK_ANCHOR, "Unable to write data to buffer with MemoryUsage: {}",
-            MemoryUsageToString(_memoryUsage));
-        return false;
-    }
-
-    D3D12_RANGE readRange = { offset, offset + length };
-
-    void * ptr;
-    hResult = _dxResource->Map(0, &readRange, &ptr);
-    if (FAILED(hResult)) {
-        fmt::windows_error msg(hResult);
-        LogError(DUSK_ANCHOR, "Map() failed: {}", msg);
-        return false;
-    }
-
-    memcpy(ptr, data, _size);
-
-    _dxResource->Unmap(0, &readRange);
-
-    return true;
 }
 
 } // namespace Dusk::DirectX

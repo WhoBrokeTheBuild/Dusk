@@ -11,6 +11,7 @@ bool VulkanMaterial::Create()
         return false;
     }
 
+    return false;
 }
 
 DUSK_VULKAN_API

@@ -2,4 +2,6 @@
 vgcore.*
 imgui.ini
 .vscode
+.vs
 *.log
+CMakeSettings.json

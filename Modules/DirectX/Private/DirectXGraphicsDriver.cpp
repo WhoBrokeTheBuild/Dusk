@@ -3,6 +3,8 @@
 #include <Dusk/Dusk.hpp>
 #include <Dusk/Log.hpp>
 
+#include <Dusk/DirectX/DirectXBuffer.hpp>
+
 // DirectX 12 Extension Library
 #include "d3dx12.h"
 
@@ -64,28 +66,17 @@ void DirectXGraphicsDriver::Terminate()
     TermWindow();
 }
 
-void DirectXGraphicsDriver::SetWindowTitle(string_view title)
+DUSK_DIRECTX_API
+void DirectXGraphicsDriver::UpdateWindowTitle(const string& title)
 {
     SetWindowText(_window, title.c_str());
 }
 
-string DirectXGraphicsDriver::GetWindowTitle()
-{
-    char buffer[256];
-    GetWindowText(_window, buffer, sizeof(buffer));
-    return string(buffer);
-}
-
-void DirectXGraphicsDriver::SetWindowSize(const ivec2& size)
+DUSK_DIRECTX_API
+void DirectXGraphicsDriver::UpdateWindowSize(const ivec2& size)
 {
     // TODO: Check if we need AdjustWindowRect
     SetWindowPos(_window, HWND_TOP, 0, 0, size.x, size.y, SWP_NOMOVE | SWP_NOREPOSITION);
-    _windowSize = size;
-}
-
-ivec2 DirectXGraphicsDriver::GetWindowSize()
-{
-    return _windowSize;
 }
 
 void DirectXGraphicsDriver::ProcessEvents()
@@ -137,6 +128,11 @@ void DirectXGraphicsDriver::Render()
     // _renderTargetIndex = _swapChain->GetCurrentBackBufferIndex();
 }
 
+std::shared_ptr<Buffer> DirectXGraphicsDriver::CreateBuffer()
+{
+    return std::shared_ptr<Shader>(New DirectXBuffer());
+}
+
 std::shared_ptr<Pipeline> DirectXGraphicsDriver::CreatePipeline(std::shared_ptr<Shader> shader)
 {
     return nullptr;
@@ -161,6 +157,11 @@ std::shared_ptr<Primitive> DirectXGraphicsDriver::CreatePrimitive()
 {
     return nullptr;
     // return std::unique_ptr<Mesh>(New DirectXPrimitive());
+}
+
+std::shared_ptr<Material> DirectXGraphicsDriver::CreateMaterial()
+{
+    return nullptr;
 }
 
 LRESULT DirectXGraphicsDriver::ProcessMessage(HWND hwnd, unsigned msg, WPARAM wParam, LPARAM lParam)
@@ -218,9 +219,7 @@ bool DirectXGraphicsDriver::InitWindow()
     };
 
     if (!RegisterClassEx(&wndClass)) {
-        fmt::windows_error msg(HRESULT_FROM_WIN32(GetLastError()));
-        LogError(DUSK_ANCHOR, "RegisterClassEx() failed: {}", msg);
-        return false;
+        throw fmt::windows_error(GetLastError(), "RegisterClassEx() failed");
     }
     
     string name = GetApplicationName();
@@ -250,9 +249,7 @@ bool DirectXGraphicsDriver::InitWindow()
     );
 
     if (!_window) {
-        fmt::windows_error msg(HRESULT_FROM_WIN32(GetLastError()));
-        LogError(DUSK_ANCHOR, "CreateWindowEx() failed: {}", msg);
-        return false;
+        throw fmt::windows_error(GetLastError(), "CreateWindowEx() failed");
     }
 
     ShowWindow(_window, SW_SHOWNORMAL);
@@ -275,9 +272,7 @@ bool DirectXGraphicsDriver::InitDevice()
 
     hResult = CreateDXGIFactory2(0, IID_PPV_ARGS(&_dxFactory));
     if (FAILED(hResult)) {
-        fmt::windows_error msg(hResult);
-        LogError(DUSK_ANCHOR, "CreateDXGIFactory2() failed: {}", msg);
-        return false;
+        throw fmt::windows_error(hResult, "CreateDXGIFactory2() failed");
     }
 
     for (unsigned i = 0; ; ++i) {
@@ -319,8 +314,7 @@ bool DirectXGraphicsDriver::InitDevice()
     // Disable Alt+Enter fullscreen command
     hResult = _dxFactory->MakeWindowAssociation(_window, DXGI_MWA_NO_ALT_ENTER);
     if (FAILED(hResult)) {
-        fmt::windows_error msg(hResult);
-        LogWarning(DUSK_ANCHOR, "MakeWindowAssociation() failed: {}", msg);
+        throw fmt::windows_error(hResult, "MakeWindowAssociation() failed");
     }
     
     D3D12_COMMAND_QUEUE_DESC commandQueueDesc = {
@@ -336,9 +330,7 @@ bool DirectXGraphicsDriver::InitDevice()
     );
 
     if (FAILED(hResult)) {
-        fmt::windows_error msg(hResult);
-        LogError(DUSK_ANCHOR, "CreateCommandQueue() failed: {}", msg);
-        return false;
+        throw fmt::windows_error(hResult, "CreateCommandQueue() failed");
     }
 
     return true;
@@ -357,9 +349,7 @@ bool DirectXGraphicsDriver::InitDebugLayer()
 
     hResult = D3D12GetDebugInterface(IID_PPV_ARGS(&_dxDebug));
     if (FAILED(hResult)) {
-        fmt::windows_error msg(hResult);
-        LogError(DUSK_ANCHOR, "D3D12GetDebugInterface() failed: {}", msg);
-        return false;
+        throw fmt::windows_error(hResult, "D3D12GetDebugInterface() failed");
     }
 
     _dxDebug->EnableDebugLayer();
@@ -430,16 +420,12 @@ bool DirectXGraphicsDriver::InitSwapChain()
     );
 
     if (FAILED(hResult)) {
-        fmt::windows_error msg(hResult);
-        LogError(DUSK_ANCHOR, "CreateSwapChainForHwnd() failed: {}", msg);
-        return false;
+        throw fmt::windows_error(hResult, "CreateSwapChainForHwnd() failed");
     }
 
     hResult = swapChain.As(&_dxSwapChain);
     if (FAILED(hResult)) {
-        fmt::windows_error msg(hResult);
-        LogError(DUSK_ANCHOR, "Failed to convert IDXGISwapChain1 to IDXGISwapChain4: {}", msg);
-        return false;
+        throw fmt::windows_error(hResult, "Failed to convert IDXGISwapChain1 to IDXGISwapChain4");
     }
 
     return true;
@@ -470,9 +456,7 @@ bool DirectXGraphicsDriver::InitDescriptorHeaps()
 
     hResult = _dxDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&_dxRenderTargetViewHeap));
     if (FAILED(hResult)) {
-        fmt::windows_error msg(hResult);
-        LogError(DUSK_ANCHOR, "CreateDescriptorHeap() failed: {}", msg);
-        return false;
+        throw fmt::windows_error(hResult, "CreateDescriptorHeap() failed");
     }
 
     _dxRenderTargetViewDescriptorSize = 
@@ -495,9 +479,7 @@ bool DirectXGraphicsDriver::InitRenderTargets()
     for (unsigned i = 0; i < BUFFER_COUNT; ++i) {
         hResult = _dxSwapChain->GetBuffer(i, IID_PPV_ARGS(&_dxRenderTargets[i]));
         if (FAILED(hResult)) {
-            fmt::windows_error msg(hResult);
-            LogError(DUSK_ANCHOR, "GetBuffer() failed: {}", msg);
-            return false;
+            throw fmt::windows_error(hResult, "GetBuffer() failed");
         }
 
         D3D12_RENDER_TARGET_VIEW_DESC renderTargetViewDesc = {
@@ -517,9 +499,7 @@ bool DirectXGraphicsDriver::InitRenderTargets()
         );
 
         if(FAILED(hResult)) {
-            fmt::windows_error msg(hResult);
-            LogError(DUSK_ANCHOR, "CreateCommandAllocator() failed: {}", msg);
-            return false;
+            throw fmt::windows_error(hResult, "CreateCommandAllocator() failed");
         }
     }
 
@@ -548,18 +528,14 @@ bool DirectXGraphicsDriver::InitSyncObjects()
 
     hResult = _dxDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&_dxFence));
     if (FAILED(hResult)) {
-        fmt::windows_error msg(hResult);
-        LogError(DUSK_ANCHOR, "CreateFence() failed: {}", msg);
-        return false;
+        throw fmt::windows_error(hResult, "CreateFence() failed");
     }
 
     ++_dxFenceValues[_renderTargetIndex];
 
     _dxFenceEvent = CreateEvent(nullptr, false, false, nullptr);
     if (_dxFenceEvent == nullptr) {
-        fmt::windows_error msg(HRESULT_FROM_WIN32(GetLastError()));
-        LogError(DUSK_ANCHOR, "CreateEvent() failed: {}", msg);
-        return false;
+        throw fmt::windows_error(GetLastError(), "CreateEvent() failed");
     }
 
     // WaitForGPU

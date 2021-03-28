@@ -69,17 +69,17 @@ MACRO(DEFINE_MODULE _target _prefix)
         ${_sources_in}
         ${_sources_out}
     )
-
+    
     SET_SOURCE_GROUPS(${CMAKE_CURRENT_SOURCE_DIR} "${_sources}")
     SET_SOURCE_GROUPS(${CMAKE_CURRENT_SOURCE_DIR} "${_sources_in}")
     SET_SOURCE_GROUPS(${CMAKE_CURRENT_BINARY_DIR} "${_sources_out}")
     SET_SOURCE_GROUPS(${CMAKE_CURRENT_SOURCE_DIR} "${_assets}")
     
-    IF(NOT _target STREQUAL "DuskEngine")
+    IF(NOT _target STREQUAL "DuskCore")
         TARGET_LINK_LIBRARIES(
             ${_target}
             PUBLIC
-                DuskEngine
+                DuskCore
         )
     ENDIF()
 
@@ -94,15 +94,11 @@ MACRO(DEFINE_MODULE _target _prefix)
             ${CMAKE_CURRENT_BINARY_DIR}/Private
     )
 
-    STRING(LENGTH "${CMAKE_SOURCE_DIR}/" SOURCE_PATH_LENGTH)
-
     TARGET_COMPILE_DEFINITIONS(
         ${_target}
         PUBLIC
             # Disable Visual Studio "not secure" warnings
             $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
-        PRIVATE
-            DUSK_SOURCE_PATH_LENGTH=${SOURCE_PATH_LENGTH}
     )
 
     TARGET_COMPILE_OPTIONS(
@@ -111,13 +107,19 @@ MACRO(DEFINE_MODULE _target _prefix)
             # Configure VS to use C++20, since it ignores CXX_STANDARD
             $<$<CXX_COMPILER_ID:MSVC>: /std:c++latest>
 
+            # Configure exception handling model
+            $<$<CXX_COMPILER_ID:MSVC>: /EHs>
+
+            # Build with multiple processors
+            $<$<CXX_COMPILER_ID:MSVC>: /MP>
+
             # Force windows to use UTF-8
             $<$<CXX_COMPILER_ID:MSVC>: /utf-8>
 
-            # Disable unknown pragmas warning, C++ exceptions
+            # Enable most warnings, disable unknown pragmas warning
             $<$<CXX_COMPILER_ID:GNU>:   -Wall -Wno-unknown-pragmas>
             $<$<CXX_COMPILER_ID:Clang>: -Wall -Wno-unknown-pragmas>
-            $<$<CXX_COMPILER_ID:MSVC>:  /MP /wd4068>
+            $<$<CXX_COMPILER_ID:MSVC>:  /wd4068>
     )
 
     TARGET_LINK_OPTIONS(
@@ -157,18 +159,15 @@ MACRO(DEFINE_MODULE _target _prefix)
             FOLDER "${folder}"
     )
 
-    IF(MSVC)
-        LIST(APPEND DUSK_RUNTIME_SEARCH_PATH "${CMAKE_CURRENT_BINARY_DIR}/$(Configuration)")
-    ELSE()
-        LIST(APPEND DUSK_RUNTIME_SEARCH_PATH "${CMAKE_CURRENT_BINARY_DIR}")
-    ENDIF()
-
-    SET(DUSK_RUNTIME_SEARCH_PATH ${DUSK_RUNTIME_SEARCH_PATH} PARENT_SCOPE)
+    LIST(APPEND DUSK_MODULE_PATH ${CMAKE_CURRENT_BINARY_DIR})
+    SET(DUSK_MODULE_PATH ${DUSK_MODULE_PATH} PARENT_SCOPE)
     
     LIST(APPEND DUSK_MODULE_TARGETS ${_target})
-    SET(DUSK_MODULE_TARGETS ${DUSK_MODULE_TARGETS} PARENT_SCOPE)    
-
-    # Tests
+    SET(DUSK_MODULE_TARGETS ${DUSK_MODULE_TARGETS} PARENT_SCOPE)
+    
+    ###
+    ### Testing
+    ###
 
     IF(BUILD_TESTS)
         FILE(GLOB_RECURSE
@@ -209,7 +208,7 @@ MACRO(DEFINE_MODULE _target _prefix)
                 ${_test_target}
                 PROPERTIES 
                     VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                    VS_DEBUGGER_ENVIRONMENT "PATH=%PATH%;${DUSK_RUNTIME_SEARCH_PATH};$<$<CONFIG:Debug>:${DUSK_RUNTIME_SEARCH_PATH_DEBUG}>;$<$<CONFIG:Release>:${DUSK_RUNTIME_SEARCH_PATH_RELEASE}>"
+                    VS_DEBUGGER_ENVIRONMENT "PATH=%PATH%;${DUSK_MODULE_PATH};$<$<CONFIG:Debug>:${DUSK_MODULE_PATH_DEBUG}>;$<$<CONFIG:Release>:${DUSK_MODULE_PATH_RELEASE}>"
             )
 
             GTEST_ADD_TESTS(

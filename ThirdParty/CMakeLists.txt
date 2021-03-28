@@ -106,6 +106,7 @@ ENDIF()
 IF("fmt" IN_LIST DUSK_REQUIRED_DEPENDENCIES)
     SET(fmt_ROOT       ${CMAKE_BINARY_DIR}/fmt)
     SET(fmt_SOURCE_DIR ${CMAKE_BINARY_DIR}/fmt_src)
+    SET(fmt_BINARY_DIR ${CMAKE_BINARY_DIR}/fmt_bin)
 
     FIND_PACKAGE(fmt CONFIG QUIET)
 
@@ -115,12 +116,13 @@ IF("fmt" IN_LIST DUSK_REQUIRED_DEPENDENCIES)
             URL                 "https://github.com/fmtlib/fmt/releases/download/7.1.3/fmt-7.1.3.zip"
             URL_HASH            MD5=d7f69b6df5ee6b7057b60239268d26ef
             SOURCE_DIR          ${fmt_SOURCE_DIR}
+            BINARY_DIR          ${fmt_BINARY_DIR}
             CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${fmt_ROOT}
+                                -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
             BUILD_COMMAND       ""
             UPDATE_COMMAND      ""
             TEST_COMMAND        ""
-            INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
-            COMMAND             ${CMAKE_COMMAND} --build . --target install --config Debug
+            INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install
         )
     ENDIF()
 ENDIF()
@@ -186,12 +188,12 @@ IF("SDL2" IN_LIST DUSK_REQUIRED_DEPENDENCIES)
             SOURCE_DIR          ${SDL2_SOURCE_DIR}
             BINARY_DIR          ${SDL2_BINARY_DIR}
             CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${SDL2_ROOT}
+                                -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
                                 -DBUILD_SHARED_LIBS=ON
             BUILD_COMMAND       ""
             UPDATE_COMMAND      ""
             TEST_COMMAND        ""
-            INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
-            COMMAND             ${CMAKE_COMMAND} --build . --target install --config Debug
+            INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install
             PATCH_COMMAND       ${_SDL2_PATCH_COMMAND}
         )
     ENDIF()
@@ -214,13 +216,14 @@ IF("OpenAL" IN_LIST DUSK_REQUIRED_DEPENDENCIES)
             SOURCE_DIR          ${OpenAL_SOURCE_DIR}
             BINARY_DIR          ${OpenAL_BINARY_DIR}
             CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${OpenAL_ROOT}
+                                -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
                                 -DALSOFT_UTILS=OFF
                                 -DALSOFT_EXAMPLES=OFF
                                 -DALSOFT_TESTS=OFF
             BUILD_COMMAND       ""
             UPDATE_COMMAND      ""
             TEST_COMMAND        ""
-            INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
+            INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install
         )
     ENDIF()
 ENDIF()
@@ -242,10 +245,11 @@ IF("freetype" IN_LIST DUSK_REQUIRED_DEPENDENCIES)
             SOURCE_DIR          ${freetype_SOURCE_DIR}
             BINARY_DIR          ${freetype_BINARY_DIR}
             CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${freetype_ROOT}
+                                -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
             BUILD_COMMAND       ""
             UPDATE_COMMAND      ""
             TEST_COMMAND        ""
-            INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
+            INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install
         )
     ENDIF()
 ENDIF()
@@ -397,7 +401,7 @@ IF("GTest" IN_LIST DUSK_REQUIRED_DEPENDENCIES)
             BUILD_COMMAND       ""
             UPDATE_COMMAND      ""
             TEST_COMMAND        ""
-            INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config Release
+            INSTALL_COMMAND     ${CMAKE_COMMAND} --build . --target install --config ${CMAKE_BUILD_TYPE}
         )
     ENDIF()
 ENDIF()

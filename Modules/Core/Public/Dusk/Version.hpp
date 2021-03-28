@@ -80,7 +80,7 @@ struct DUSK_CORE_API Version
             std::to_string(Patch);
     }
 
-    operator string() const
+    inline operator string() const
     {
         return ToString();
     }

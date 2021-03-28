@@ -36,6 +36,7 @@ Path::Path(const char * cstr)
     Normalize();
 }
 
+DUSK_CORE_API
 Path& Path::Append(const Path& rhs)
 {
     // If path is empty, and doesn't have a trailing separator, append one
@@ -141,6 +142,7 @@ void Path::Normalize()
     _path.erase(newEnd, end);
 }
 
+DUSK_CORE_API
 size_t Path::GetRootNameLength() const
 {
     #if defined(DUSK_PLATFORM_WINDOWS)
@@ -174,6 +176,7 @@ size_t Path::GetRootNameLength() const
     return 0;
 }
 
+DUSK_CORE_API
 Path GetCurrentPath()
 {
 #if defined(DUSK_PLATFORM_WINDOWS)

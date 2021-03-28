@@ -9,14 +9,9 @@
 
 namespace Dusk {
 
-// class PathIterator;
-
 class DUSK_CORE_API Path : public Object
 {
 public:
-
-    // typedef PathIterator Iterator;
-    // typedef PathIterator ConstIterator;
 
     static const char Separator = DUSK_PATH_SLASH;
 

@@ -61,11 +61,6 @@ MACRO(DEFINE_DEMO _target)
         Assets/Shaders/*.hlsl
     )
 
-    LIST(INSERT DUSK_ASSET_PATH 0
-        ${CMAKE_CURRENT_SOURCE_DIR}/Assets/
-        ${CMAKE_CURRENT_BINARY_DIR}/Assets/
-    )
-
     COMPILE_SHADERS("${_shader_includes}" "${_shaders_in}" _shaders_out)
 
     ###
@@ -82,6 +77,11 @@ MACRO(DEFINE_DEMO _target)
         ${_assets} 
         PROPERTIES
             HEADER_FILE_ONLY TRUE
+    )
+
+    LIST(INSERT DUSK_ASSET_PATH 0
+        ${CMAKE_CURRENT_SOURCE_DIR}/Assets/
+        ${CMAKE_CURRENT_BINARY_DIR}/Assets/
     )
 
     ###

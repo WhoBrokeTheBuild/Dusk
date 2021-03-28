@@ -51,7 +51,7 @@ bool Initialize(int argc, char ** argv)
         );
     }
 
-    if (flags->argc > 0) {
+    if (flags->argc > 1) {
         LoadConfigurationFile(flags->argv[1], (config ? config : ""));
     }
 

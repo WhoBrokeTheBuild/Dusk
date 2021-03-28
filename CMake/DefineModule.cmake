@@ -59,6 +59,13 @@ MACRO(DEFINE_MODULE _target _prefix)
             HEADER_FILE_ONLY TRUE
     )
 
+    LIST(APPEND DUSK_ASSET_PATH
+        ${CMAKE_CURRENT_SOURCE_DIR}/Assets/
+        ${CMAKE_CURRENT_BINARY_DIR}/Assets/
+    )
+    
+    SET(DUSK_ASSET_PATH ${DUSK_ASSET_PATH} PARENT_SCOPE)
+
     ###
     ### Target Configuration
     ###
@@ -104,9 +111,6 @@ MACRO(DEFINE_MODULE _target _prefix)
     TARGET_COMPILE_OPTIONS(
         ${_target}
         PUBLIC
-            # Configure VS to use C++20, since it ignores CXX_STANDARD
-            $<$<CXX_COMPILER_ID:MSVC>: /std:c++latest>
-
             # Configure exception handling model
             $<$<CXX_COMPILER_ID:MSVC>: /EHs>
 

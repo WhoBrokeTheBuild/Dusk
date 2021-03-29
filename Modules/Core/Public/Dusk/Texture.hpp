@@ -59,7 +59,7 @@ public:
 
     virtual ~Texture() = default;
 
-    virtual bool Load(const std::unique_ptr<TextureData>& data, Options opts = Options()) = 0;
+    virtual bool Load(const TextureData * data, Options opts = Options()) = 0;
 
 }; // class Texture
 

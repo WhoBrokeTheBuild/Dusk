@@ -95,10 +95,10 @@ void run()
     // Force ResetSwapChain
     gfx->SetWindowSize({ 1024, 768 });
 
-    Dusk::ScriptConsole::Initialize();
+    // Dusk::ScriptConsole::Initialize();
 
     Dusk::Run([&]() {
-        Dusk::ScriptConsole::Update();
+        // Dusk::ScriptConsole::Update();
 
         transformData->View = camera.GetView();
         transformData->Projection = camera.GetProjection();
@@ -107,7 +107,7 @@ void run()
         tmpEntity->SetOrientation(orient);
     });
 
-    Dusk::ScriptConsole::Terminate();
+    // Dusk::ScriptConsole::Terminate();
 }
 
 int main(int argc, char** argv)

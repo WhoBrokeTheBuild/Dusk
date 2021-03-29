@@ -23,7 +23,7 @@ std::shared_ptr<Texture> LoadTextureFromFile(const Path& path, bool useAssetPath
         auto textureData = importer->LoadFromFile(path, useAssetPath);
         if (textureData) {
             auto texture = gfx->CreateTexture();
-            if (texture->Load(textureData, opts)) {
+            if (texture->Load(textureData.get(), opts)) {
                 return texture;
             }
             
@@ -46,7 +46,7 @@ std::shared_ptr<Texture> LoadTextureFromMemory(const uint8_t * buffer, size_t le
         auto textureData = importer->LoadFromMemory(buffer, length);
         if (textureData) {
             auto texture = gfx->CreateTexture();
-            if (texture->Load(textureData, opts)) {
+            if (texture->Load(textureData.get(), opts)) {
                 return texture;
             }
 

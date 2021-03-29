@@ -18,37 +18,3 @@ TARGET_LINK_LIBRARIES(
         Python3::Python
         ${CMAKE_DL_LIBS}
 )
-
-###
-### Shader Processing
-###
-
-FILE(
-    GLOB_RECURSE
-    _shader_includes
-    Assets/Shaders/*.inc.glsl
-    Assets/Shaders/*.inc.hlsl
-)
-
-SET(DUSK_CORE_SHADER_INCLUDES ${_shader_includes} PARENT_SCOPE)
-
-FILE(
-    GLOB_RECURSE
-    _shaders_in
-    Assets/Shaders/*.glsl
-    Assets/Shaders/*.hlsl
-)
-
-SET_SOURCE_GROUPS(${CMAKE_CURRENT_BINARY_DIR} "${_shaders_out}")
-
-COMPILE_SHADERS("${_shader_includes}" "${_shaders_in}" _shaders_out)
-
-TARGET_SOURCES(
-    ${_target}
-    PRIVATE
-        ${_shaders_in}
-        ${_shaders_out}
-)
-
-SET_SOURCE_GROUPS(${CMAKE_CURRENT_SOURCE_DIR} "${_shaders_in}")
-SET_SOURCE_GROUPS(${CMAKE_CURRENT_BINARY_DIR} "${_shaders_out}")

@@ -6,6 +6,12 @@
         "DuskTinyOBJ",
         "DuskGLTF2"
     ],
+    "scripts": [
+        "Main.py"
+    ],
+    "logFiles": [
+        "lastrun.log"
+    ],
     "configurations": {
         "Vulkan": {
             "modules": [

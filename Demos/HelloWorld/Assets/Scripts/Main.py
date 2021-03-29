@@ -1,5 +1,6 @@
 import Dusk
 
+Dusk.LogInfo('Hello from Main.py')
 
 # gfx = Dusk.GraphicsDriver.Instance()
 # if gfx == None:

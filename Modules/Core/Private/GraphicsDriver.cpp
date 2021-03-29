@@ -75,7 +75,7 @@ bool GraphicsDriver::InitializeDefaults()
     ));
 
     _defaultTexture = CreateTexture();
-    if (!_defaultTexture->Load(textureData, Texture::Options())) {
+    if (!_defaultTexture->Load(textureData.get(), Texture::Options())) {
         LogError(DUSK_ANCHOR, "Failed to create default texture");
         return false;
     }

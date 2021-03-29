@@ -59,12 +59,34 @@ MACRO(DEFINE_MODULE _target _prefix)
             HEADER_FILE_ONLY TRUE
     )
 
-    LIST(APPEND DUSK_ASSET_PATH
-        ${CMAKE_CURRENT_SOURCE_DIR}/Assets/
-        ${CMAKE_CURRENT_BINARY_DIR}/Assets/
+    IF (NOT _assets STREQUAL "")
+        LIST(APPEND DUSK_ASSET_PATH
+            ${CMAKE_CURRENT_SOURCE_DIR}/Assets/
+            ${CMAKE_CURRENT_BINARY_DIR}/Assets/
+        )
+        
+        SET(DUSK_ASSET_PATH ${DUSK_ASSET_PATH} PARENT_SCOPE)
+    ENDIF()
+
+    ###
+    ### Shader Processing
+    ###
+
+    FILE(
+        GLOB_RECURSE
+        _shader_includes
+        Assets/Shaders/*.inc.glsl
+        Assets/Shaders/*.inc.hlsl
     )
-    
-    SET(DUSK_ASSET_PATH ${DUSK_ASSET_PATH} PARENT_SCOPE)
+
+    FILE(
+        GLOB_RECURSE
+        _shaders_in
+        Assets/Shaders/*.glsl
+        Assets/Shaders/*.hlsl
+    )
+
+    COMPILE_SHADERS("${_shader_includes}" "${_shaders_in}" _shaders_out)
 
     ###
     ### Target Configuration
@@ -75,12 +97,16 @@ MACRO(DEFINE_MODULE _target _prefix)
         ${_sources}
         ${_sources_in}
         ${_sources_out}
+        ${_shaders_in}
+        ${_shaders_out}
     )
     
     SET_SOURCE_GROUPS(${CMAKE_CURRENT_SOURCE_DIR} "${_sources}")
     SET_SOURCE_GROUPS(${CMAKE_CURRENT_SOURCE_DIR} "${_sources_in}")
     SET_SOURCE_GROUPS(${CMAKE_CURRENT_BINARY_DIR} "${_sources_out}")
     SET_SOURCE_GROUPS(${CMAKE_CURRENT_SOURCE_DIR} "${_assets}")
+    SET_SOURCE_GROUPS(${CMAKE_CURRENT_SOURCE_DIR} "${_shaders_in}")
+    SET_SOURCE_GROUPS(${CMAKE_CURRENT_BINARY_DIR} "${_shaders_out}")
     
     IF(NOT _target STREQUAL "DuskCore")
         TARGET_LINK_LIBRARIES(
@@ -111,6 +137,9 @@ MACRO(DEFINE_MODULE _target _prefix)
     TARGET_COMPILE_OPTIONS(
         ${_target}
         PUBLIC
+            # Configure VS to use C++20, since it ignores CXX_STANDARD
+            $<$<CXX_COMPILER_ID:MSVC>: /std:c++latest>
+
             # Configure exception handling model
             $<$<CXX_COMPILER_ID:MSVC>: /EHs>
 

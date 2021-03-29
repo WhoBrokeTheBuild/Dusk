@@ -51,10 +51,6 @@ bool Initialize(int argc, char ** argv)
         );
     }
 
-    if (flags->argc > 1) {
-        LoadConfigurationFile(flags->argv[1], (config ? config : ""));
-    }
-
     InitMemoryTracking();
 
     PyImport_AppendInittab("Dusk", PyInit_Dusk);
@@ -70,6 +66,10 @@ bool Initialize(int argc, char ** argv)
     PyImport_ImportModule("Dusk");
 
     RunScriptFile("Dusk/Dusk.py");
+
+    if (flags->argc > 1) {
+        LoadConfigurationFile(flags->argv[1], (config ? config : ""));
+    }
 
     LogVerbose(DUSK_ANCHOR, "Dusk Version: {}", GetVersion());
     LogVerbose(DUSK_ANCHOR, "Application Name: {}", GetApplicationName());
@@ -103,9 +103,19 @@ void LoadConfigurationFile(const Path& path, string_view configName)
     data << file;
 
     auto applyConfig = [](json& data) {
+        const auto& logFiles = data.value<std::vector<string>>("logFiles", {});
+        for (const auto& path : logFiles) {
+            AddLogFile(path);
+        }
+
         const auto& modules = data.value<std::vector<string>>("modules", {});
         for (const auto& name : modules) {
             LoadModule(name);
+        }
+
+        const auto& scripts = data.value<std::vector<string>>("scripts", {});
+        for (const auto& path : scripts) {
+            RunScriptFile(path);
         }
     };
 

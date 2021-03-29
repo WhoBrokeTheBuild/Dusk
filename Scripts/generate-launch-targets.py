@@ -64,12 +64,11 @@ if os.path.isdir('.vscode'):
                 'value': assetPath
             }
         ],
-        'externalConsole': False
+        'console': 'internalConsole'
     }
     
     if isWindows:
         default['type'] = 'cppvsdbg'
-        default['externalConsole'] = True
         default['environment'].append({
             'name': 'PATH',
             'value': '${env:PATH};' + modulePath

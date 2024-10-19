@@ -10,7 +10,7 @@
 
 namespace dusk {
 
-class DUSK_API Exception : std::runtime_error
+class DUSK_API Exception : public std::runtime_error
 {
 public:
 
@@ -18,6 +18,8 @@ public:
     Exception(StringView format, Args... args)
         : std::runtime_error(std::vformat(format, std::make_format_args(args...)))
     { }
+
+    using std::runtime_error::what;
 
 }; // class Exception
 

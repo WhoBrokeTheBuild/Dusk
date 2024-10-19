@@ -28,26 +28,26 @@ public:
         _material = material;
     }
 
-    inline vk::PrimitiveTopology GetTopology() const {
+    inline VkPrimitiveTopology GetTopology() const {
         return _topology;
     }
 
     bool Create(
         Span<PrimitiveVertex> vertexList,
-        vk::PrimitiveTopology topology = vk::PrimitiveTopology::eTriangleList,
+        VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
         bool haveTangents = true
     );
 
     bool Create(
         Span<uint32_t> indexList,
         Span<PrimitiveVertex> vertexList,
-        vk::PrimitiveTopology topology = vk::PrimitiveTopology::eTriangleList,
+        VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
         bool haveTangents = true
     );
 
     void Destroy();
 
-    void GenerateCommands(vk::CommandBuffer commandBuffer);
+    void GenerateCommands(VkCommandBuffer commandBuffer);
 
 private:
 
@@ -57,7 +57,7 @@ private:
 
     uint32_t _count;
 
-    vk::PrimitiveTopology _topology;
+    VkPrimitiveTopology _topology;
     
     Material::Pointer _material;
 

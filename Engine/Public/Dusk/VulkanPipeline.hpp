@@ -18,26 +18,26 @@ public:
 
     using Pointer = std::shared_ptr<VulkanPipeline>;
 
-    VulkanPipeline() = default;
+    VulkanPipeline();
     
     virtual ~VulkanPipeline();
 
     // TODO: Getters and Setters
 
-    inline void SetTopology(vk::PrimitiveTopology topology) {
-        _inputAssemblyStateCreateInfo.setTopology(topology);
+    inline void SetTopology(VkPrimitiveTopology topology) {
+        _inputAssemblyStateCreateInfo.topology = topology;
     }
 
-    inline void SetPolygonMode(vk::PolygonMode polygonMode) {
-        _rasterizationStateCreateInfo.setPolygonMode(polygonMode);
+    inline void SetPolygonMode(VkPolygonMode polygonMode) {
+        _rasterizationStateCreateInfo.polygonMode = polygonMode;
     }
 
-    inline void SetCullMode(vk::CullModeFlagBits cullMode) {
-        _rasterizationStateCreateInfo.setCullMode(cullMode);
+    inline void SetCullMode(VkCullModeFlagBits cullMode) {
+        _rasterizationStateCreateInfo.cullMode = cullMode;
     }
 
-    inline void SetFrontFace(vk::FrontFace frontFace) {
-        _rasterizationStateCreateInfo.setFrontFace(frontFace);
+    inline void SetFrontFace(VkFrontFace frontFace) {
+        _rasterizationStateCreateInfo.frontFace = frontFace;
     }
 
     bool Create(VulkanShader::Pointer shader);
@@ -56,7 +56,7 @@ public:
         return (_shader != nullptr);
     }
 
-    inline vk::Pipeline GetVkPipeline() {
+    inline VkPipeline GetVkPipeline() {
         return _pipeline;
     }
 
@@ -64,60 +64,19 @@ private:
 
     VulkanShader::Pointer _shader = nullptr;
 
-    vk::PipelineInputAssemblyStateCreateInfo _inputAssemblyStateCreateInfo = 
-        vk::PipelineInputAssemblyStateCreateInfo()
-            .setTopology(vk::PrimitiveTopology::eTriangleList)
-            .setPrimitiveRestartEnable(false);
+    VkPipelineInputAssemblyStateCreateInfo _inputAssemblyStateCreateInfo;
 
-    vk::PipelineRasterizationStateCreateInfo _rasterizationStateCreateInfo = 
-        vk::PipelineRasterizationStateCreateInfo()
-            .setRasterizerDiscardEnable(false)
-            .setPolygonMode(vk::PolygonMode::eFill)
-            .setLineWidth(1.0f)
-            .setCullMode(vk::CullModeFlagBits::eNone)
-            .setFrontFace(vk::FrontFace::eCounterClockwise)
-            .setDepthClampEnable(false)
-            .setDepthBiasEnable(false)
-            .setDepthBiasClamp(0.0f)
-            .setDepthBiasConstantFactor(0.0f)
-            .setDepthBiasSlopeFactor(0.0f);
+    VkPipelineRasterizationStateCreateInfo _rasterizationStateCreateInfo;
 
-    vk::PipelineMultisampleStateCreateInfo _multisampleStateCreateInfo =
-        vk::PipelineMultisampleStateCreateInfo()
-            .setRasterizationSamples(vk::SampleCountFlagBits::e1)
-            .setSampleShadingEnable(false);
+    VkPipelineMultisampleStateCreateInfo _multisampleStateCreateInfo;
 
-    vk::PipelineColorBlendAttachmentState _colorBlendAttachmentState = 
-        vk::PipelineColorBlendAttachmentState()
-            .setBlendEnable(false)
-            // .setSrcColorBlendFactor(vk::BlendFactor::eSrcColor)
-            // .setDstColorBlendFactor(vk::BlendFactor::eOneMinusSrcAlpha)
-            // .setColorBlendOp(vk::BlendOp::eAdd)
-            // .setSrcAlphaBlendFactor(vk::BlendFactor::eSrcAlpha)
-            // .setDstAlphaBlendFactor(vk::BlendFactor::eOneMinusSrcAlpha)
-            // .setAlphaBlendOp(vk::BlendOp::eAdd)
-            .setColorWriteMask(
-                vk::ColorComponentFlagBits::eR |
-                vk::ColorComponentFlagBits::eG |
-                vk::ColorComponentFlagBits::eB |
-                vk::ColorComponentFlagBits::eA
-            );
+    VkPipelineColorBlendAttachmentState _colorBlendAttachmentState;
 
-    vk::PipelineColorBlendStateCreateInfo _colorBlendStateCreateInfo =
-        vk::PipelineColorBlendStateCreateInfo()
-            .setLogicOpEnable(false)
-            .setLogicOp(vk::LogicOp::eCopy)
-            .setBlendConstants({ 0.0f, 0.0f, 0.0f, 0.0f });
+    VkPipelineColorBlendStateCreateInfo _colorBlendStateCreateInfo;
 
-    vk::PipelineDepthStencilStateCreateInfo _depthStencilStateCreateInfo =
-        vk::PipelineDepthStencilStateCreateInfo()
-            .setDepthTestEnable(true)
-            .setDepthWriteEnable(true)
-            .setDepthCompareOp(vk::CompareOp::eLess)
-            .setDepthBoundsTestEnable(false)
-            .setStencilTestEnable(false);
+    VkPipelineDepthStencilStateCreateInfo _depthStencilStateCreateInfo;
 
-    vk::Pipeline _pipeline;
+    VkPipeline _pipeline = VK_NULL_HANDLE;
 
 }; // VulkanPipeline
 

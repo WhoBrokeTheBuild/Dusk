@@ -17,7 +17,7 @@ VulkanTexture::~VulkanTexture()
 DUSK_API
 bool VulkanTexture::LoadFromFile(
     const Path& path,
-    vk::SamplerCreateInfo samplerCreateInfo /*= {}*/
+    VkSamplerCreateInfo samplerCreateInfo /*= {}*/
 ) {
     Destroy();
 
@@ -49,9 +49,10 @@ bool VulkanTexture::LoadFromFile(
         return false;
     }
 
-    _extent.setWidth(width);
-    _extent.setHeight(height);
+    _extent.width = width;
+    _extent.height = height;
     _samplerCreateInfo = samplerCreateInfo;
+    _samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
     
     size_t pixelsSize = width * height * STBI_rgb_alpha;
     createImage(pixels, pixelsSize);
@@ -66,7 +67,7 @@ DUSK_API
 bool VulkanTexture::LoadFromBuffer(
     const uint8_t * buffer,
     size_t size,
-    vk::SamplerCreateInfo samplerCreateInfo /*= {}*/
+    VkSamplerCreateInfo samplerCreateInfo /*= {}*/
 ) {
     Destroy();
 
@@ -78,8 +79,8 @@ bool VulkanTexture::LoadFromBuffer(
     }
 
     _path.clear();
-    _extent.setWidth(width);
-    _extent.setHeight(height);
+    _extent.width = width;
+    _extent.height = height;
     _samplerCreateInfo = samplerCreateInfo;
     
     size_t pixelsSize = width * height * STBI_rgb_alpha;
@@ -95,22 +96,18 @@ DUSK_API
 void VulkanTexture::Destroy()
 {
     if (_sampler) {
-        Graphics::Device.destroySampler(_sampler);
+        vkDestroySampler(Graphics::Device, _sampler, nullptr);
         _sampler = VK_NULL_HANDLE;
     }
 
     if (_imageView) {
-        Graphics::Device.destroyImageView(_imageView);
+        vkDestroyImageView(Graphics::Device, _imageView, nullptr);
         _imageView = VK_NULL_HANDLE;
     }
 
     if (_image) {
-        Graphics::Device.destroyImage(_image);
+        vmaDestroyImage(Graphics::Allocator, _image, _allocation);
         _image = VK_NULL_HANDLE;
-    }
-
-    if (_allocation) {
-        vmaFreeMemory(Graphics::Allocator, _allocation);
         _allocation = VK_NULL_HANDLE;
     }
 }
@@ -122,81 +119,114 @@ bool VulkanTexture::Reload()
 }
 
 DUSK_API
-void VulkanTexture::createImage(uint8_t * pixels, vk::DeviceSize size)
+void VulkanTexture::createImage(uint8_t * pixels, VkDeviceSize size)
 {
-    auto stagingBufferCreateInfo = vk::BufferCreateInfo()
-        .setSize(size)
-        .setUsage(vk::BufferUsageFlagBits::eTransferSrc);
+    VkResult result;
+
+    auto stagingBufferCreateInfo = VkBufferCreateInfo{
+        .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+        .size = size,
+        .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+    };
 
     auto stagingAllocationCreateInfo = VmaAllocationCreateInfo{
         .flags = VMA_ALLOCATION_CREATE_MAPPED_BIT,
         .usage = VMA_MEMORY_USAGE_CPU_TO_GPU,
     };
 
+    VkBuffer stagingBuffer;
+    VmaAllocation stagingAllocation;
     VmaAllocationInfo stagingAllocationInfo;
-    auto[stagingBuffer, stagingAllocation] = Graphics::CreateBuffer(
-        stagingBufferCreateInfo,
-        stagingAllocationCreateInfo,
+
+    result = vmaCreateBuffer(
+        Graphics::Allocator,
+        &stagingBufferCreateInfo,
+        &stagingAllocationCreateInfo,
+        &stagingBuffer,
+        &stagingAllocation,
         &stagingAllocationInfo
     );
+    CheckVkResult("vmaCreateBuffer", result);
 
     memcpy(stagingAllocationInfo.pMappedData, pixels, size);
 
-    auto imageCreateInfo = vk::ImageCreateInfo()
-        .setImageType(vk::ImageType::e2D)
-        .setFormat(vk::Format::eR8G8B8A8Srgb)
-        .setTiling(vk::ImageTiling::eOptimal)
-        .setExtent(vk::Extent3D(_extent, 1))
-        .setMipLevels(1) // TODO: Investigate
-        .setArrayLayers(1) // TODO: Investigate
-        .setUsage(vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled)
-        .setInitialLayout(vk::ImageLayout::eUndefined)
-        .setSharingMode(vk::SharingMode::eExclusive)
-        .setSamples(vk::SampleCountFlagBits::e1); // TODO: Investigate
+    auto imageCreateInfo = VkImageCreateInfo{
+        .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        .imageType = VK_IMAGE_TYPE_2D,
+        .format = VK_FORMAT_R8G8B8A8_SRGB,
+        .extent = VkExtent3D{
+            .width = _extent.width,
+            .height = _extent.height,
+            .depth = 1
+        },
+        .mipLevels = 1,
+        .arrayLayers = 1,
+        .samples = VK_SAMPLE_COUNT_1_BIT,
+        .tiling = VK_IMAGE_TILING_OPTIMAL,
+        .usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+    };
 
     auto allocationCreateInfo = VmaAllocationCreateInfo{
         .usage = VMA_MEMORY_USAGE_GPU_ONLY,
     };
 
-    std::tie(_image, _allocation) = Graphics::CreateImage(
-        imageCreateInfo,
-        allocationCreateInfo
+    result = vmaCreateImage(
+        Graphics::Allocator,
+        &imageCreateInfo,
+        &allocationCreateInfo,
+        &_image,
+        &_allocation,
+        nullptr
     );
+    CheckVkResult("vmaCreateImage", result);
 
-    auto subresourceLayers = vk::ImageSubresourceLayers()
-        .setAspectMask(vk::ImageAspectFlagBits::eColor)
-        .setMipLevel(0)
-        .setBaseArrayLayer(0)
-        .setLayerCount(1);
+    auto subresourceLayers = VkImageSubresourceLayers{
+        .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+        .mipLevel = 0,
+        .baseArrayLayer = 0,
+        .layerCount = 1,
+    };
 
-    auto region = vk::BufferImageCopy()
-        .setBufferOffset(0)
-        .setBufferRowLength(0)
-        .setBufferImageHeight(0)
-        .setImageSubresource(subresourceLayers)
-        .setImageOffset(vk::Offset3D(0, 0, 0))
-        .setImageExtent(vk::Extent3D(_extent, 1));
+    auto region = VkBufferImageCopy{
+        .bufferOffset = 0,
+        .bufferRowLength = 0,
+        .bufferImageHeight = 0,
+        .imageSubresource = subresourceLayers,
+        .imageOffset = VkOffset3D{0, 0, 0},
+        .imageExtent = VkExtent3D{
+            .width = _extent.width,
+            .height = _extent.height,
+            .depth = 1,
+        },
+    };
 
     Graphics::CopyBufferToImage(stagingBuffer, _image, region);
 
     vmaDestroyBuffer(Graphics::Allocator, stagingBuffer, stagingAllocation);
 
-    auto subresourceRange = vk::ImageSubresourceRange()
-        .setAspectMask(vk::ImageAspectFlagBits::eColor)
-        .setBaseMipLevel(0)
-        .setLevelCount(1)
-        .setBaseArrayLayer(0)
-        .setLayerCount(1);
+    auto subresourceRange = VkImageSubresourceRange{
+        .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+        .baseMipLevel = 0,
+        .levelCount = 1,
+        .baseArrayLayer = 0,
+        .layerCount = 1,
+    };
 
-    auto imageViewCreateInfo = vk::ImageViewCreateInfo()
-        .setImage(_image)
-        .setViewType(vk::ImageViewType::e2D)
-        .setFormat(vk::Format::eR8G8B8A8Srgb)
-        .setSubresourceRange(subresourceRange);
+    auto imageViewCreateInfo = VkImageViewCreateInfo{
+        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        .image = _image,
+        .viewType = VK_IMAGE_VIEW_TYPE_2D,
+        .format = VK_FORMAT_R8G8B8A8_SRGB,
+        .subresourceRange = subresourceRange,
+    };
 
-    _imageView = Graphics::Device.createImageView(imageViewCreateInfo);
+    result = vkCreateImageView(Graphics::Device, &imageViewCreateInfo, nullptr, &_imageView);
+    CheckVkResult("vkCreateImageView", result);
 
-    _sampler = Graphics::Device.createSampler(_samplerCreateInfo);
+    result = vkCreateSampler(Graphics::Device, &_samplerCreateInfo, nullptr, &_sampler);
+    CheckVkResult("vkCreateSampler", result);
 }
 
 } // namespace dusk

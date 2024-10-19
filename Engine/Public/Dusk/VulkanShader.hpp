@@ -35,15 +35,15 @@ public:
         return not _pathList.empty();
     }
 
-    inline List<vk::PipelineShaderStageCreateInfo>& GetPipelineShaderStageCreateInfoList() {
+    inline List<VkPipelineShaderStageCreateInfo>& GetPipelineShaderStageCreateInfoList() {
         return _pipelineShaderStageCreateInfoList;
     }
 
-    // inline vk::PipelineLayout& GetPipelineLayout() {
+    // inline VkPipelineLayout& GetPipelineLayout() {
     //     return _pipelineLayout;
     // }
 
-    void GenerateCommands(vk::CommandBuffer commandBuffer);
+    void GenerateCommands(VkCommandBuffer commandBuffer);
 
     void SetTexture(StringView name, VulkanTexture *);
 
@@ -55,15 +55,15 @@ private:
 
     List<SpvReflectShaderModule> _reflectShaderModuleList;
 
-    List<vk::ShaderModule> _shaderModuleList;
+    List<VkShaderModule> _shaderModuleList;
 
-    List<vk::PipelineShaderStageCreateInfo> _pipelineShaderStageCreateInfoList;
+    List<VkPipelineShaderStageCreateInfo> _pipelineShaderStageCreateInfoList;
 
-    List<vk::PushConstantRange> _pushConstantRangeList;
+    List<VkPushConstantRange> _pushConstantRangeList;
 
-    // List<vk::DescriptorSetLayout> _descriptorSetLayoutList;
+    // List<VkDescriptorSetLayout> _descriptorSetLayoutList;
 
-    // vk::PipelineLayout _pipelineLayout;
+    // VkPipelineLayout _pipelineLayout;
 
 }; // class VulkanShader
 

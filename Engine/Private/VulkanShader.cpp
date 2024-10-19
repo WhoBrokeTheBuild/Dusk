@@ -56,7 +56,7 @@ bool VulkanShader::LoadFromFiles(const List<Path>& pathList)
 DUSK_API
 void VulkanShader::Destroy()
 {
-    // Graphics::Device.destroyPipelineLayout(_pipelineLayout);
+    // vk::Device(Graphics::Device).destroyPipelineLayout(_pipelineLayout);
     // _pipelineLayout = VK_NULL_HANDLE;
     
     _pushConstantRangeList.clear();
@@ -64,12 +64,12 @@ void VulkanShader::Destroy()
     _pipelineShaderStageCreateInfoList.clear();
 
     // for (auto& descriptorSetLayout : _descriptorSetLayoutList) {
-    //     Graphics::Device.destroyDescriptorSetLayout(descriptorSetLayout);
+    //     vk::Device(Graphics::Device).destroyDescriptorSetLayout(descriptorSetLayout);
     // }
     // _descriptorSetLayoutList.clear();
 
     for (auto& shaderModule : _shaderModuleList) {
-        Graphics::Device.destroyShaderModule(shaderModule);
+        vkDestroyShaderModule(Graphics::Device, shaderModule, nullptr);
     }
     _shaderModuleList.clear();
 
@@ -88,6 +88,8 @@ bool VulkanShader::Reload()
 DUSK_API
 bool VulkanShader::loadSPV(const Path& path)
 {
+    VkResult result;
+
     File file(path, File::Mode::Read);
     if (not file) {
         return false;
@@ -104,35 +106,46 @@ bool VulkanShader::loadSPV(const Path& path)
     _reflectShaderModuleList.push_back({});
     auto& reflectShaderModule = _reflectShaderModuleList.back();
 
-    auto result = spvReflectCreateShaderModule(sizeInBytes, data->data(), &reflectShaderModule);
-    if (result != SPV_REFLECT_RESULT_SUCCESS) {
+    auto spvResult = spvReflectCreateShaderModule(sizeInBytes, data->data(), &reflectShaderModule);
+    if (spvResult != SPV_REFLECT_RESULT_SUCCESS) {
         Log(DUSK_ANCHOR, "spvReflectCreateShaderModule failed");
         return false;
     }
 
-    auto shaderModuleCreateInfo = vk::ShaderModuleCreateInfo()
-        .setCodeSize(sizeInBytes)
-        .setPCode(data->data());
+    auto shaderModuleCreateInfo = VkShaderModuleCreateInfo{
+        .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+        .codeSize = sizeInBytes,
+        .pCode = data->data(),
+    };
 
-    _shaderModuleList.push_back(Graphics::Device.createShaderModule(shaderModuleCreateInfo));
-    auto shaderModule = _shaderModuleList.back();
+    VkShaderModule shaderModule;
+    result = vkCreateShaderModule(
+        Graphics::Device,
+        &shaderModuleCreateInfo,
+        nullptr,
+        &shaderModule
+    );
+    CheckVkResult("vkCreateShaderModule", result);
 
     _pipelineShaderStageCreateInfoList.push_back(
-        vk::PipelineShaderStageCreateInfo()
-            .setStage(vk::ShaderStageFlagBits(reflectShaderModule.shader_stage))
-            .setModule(shaderModule)
-            .setPName(reflectShaderModule.entry_point_name)
-            .setPSpecializationInfo(VK_NULL_HANDLE)
+        VkPipelineShaderStageCreateInfo{
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+            .stage = VkShaderStageFlagBits(reflectShaderModule.shader_stage),
+            .module = shaderModule,
+            .pName = reflectShaderModule.entry_point_name,
+            .pSpecializationInfo = VK_NULL_HANDLE,
+        }
     );
 
     for (uint32_t i = 0; i < reflectShaderModule.push_constant_block_count; ++i) {
         const auto& pushConstantBlock = reflectShaderModule.push_constant_blocks[i];
 
         _pushConstantRangeList.push_back(
-            vk::PushConstantRange()
-                .setOffset(pushConstantBlock.offset)
-                .setSize(pushConstantBlock.size)
-                .setStageFlags(vk::ShaderStageFlags(reflectShaderModule.shader_stage))
+            VkPushConstantRange{
+                .stageFlags = VkShaderStageFlags(reflectShaderModule.shader_stage),
+                .offset = pushConstantBlock.offset,
+                .size = pushConstantBlock.size,
+            }
         );
 
         // std::println("Push Constant Range: {} {} {}",
@@ -151,6 +164,8 @@ bool VulkanShader::loadSPV(const Path& path)
     //     auto& output = reflectShaderModule.output_variables[i];
     //     std::println("  Output {} Location {} ", output->name, output->location);
     // }
+
+    _shaderModuleList.push_back(shaderModule);
 
     Log(DUSK_ANCHOR, "Loaded {}", path.string());
 

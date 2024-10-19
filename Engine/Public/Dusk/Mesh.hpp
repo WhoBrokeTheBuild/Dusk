@@ -30,7 +30,7 @@ public:
         _primitiveList.push_back(std::move(primitive));
     }
     
-    inline void GenerateCommands(vk::CommandBuffer commandBuffer) {
+    inline void GenerateCommands(VkCommandBuffer commandBuffer) {
         for (const auto& primitive : _primitiveList) {
             primitive->GenerateCommands(commandBuffer);
         }

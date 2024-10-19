@@ -22,11 +22,11 @@ public:
     
     virtual ~VulkanTexture();
 
-    bool LoadFromFile(const Path& path, vk::SamplerCreateInfo samplerCreateInfo = {});
+    bool LoadFromFile(const Path& path, VkSamplerCreateInfo samplerCreateInfo = {});
 
-    bool LoadFromBuffer(const uint8_t * buffer,size_t size, vk::SamplerCreateInfo samplerCreateInfo = {});
+    bool LoadFromBuffer(const uint8_t * buffer, size_t size, VkSamplerCreateInfo samplerCreateInfo = {});
 
-    inline bool LoadFromBuffer(Span<const uint8_t> buffer, vk::SamplerCreateInfo samplerCreateInfo = {}) {
+    inline bool LoadFromBuffer(Span<const uint8_t> buffer, VkSamplerCreateInfo samplerCreateInfo = {}) {
         return LoadFromBuffer(buffer.data(), buffer.size(), samplerCreateInfo);
     }
 
@@ -44,17 +44,17 @@ private:
 
     Path _path;
 
-    vk::Extent2D _extent;
+    VkExtent2D _extent;
 
-    vk::SamplerCreateInfo _samplerCreateInfo;
+    VkSamplerCreateInfo _samplerCreateInfo;
 
-    vk::Image _image = VK_NULL_HANDLE;
+    VkImage _image = VK_NULL_HANDLE;
 
     VmaAllocation _allocation = VK_NULL_HANDLE;
 
-    vk::ImageView _imageView = VK_NULL_HANDLE;
+    VkImageView _imageView = VK_NULL_HANDLE;
 
-    vk::Sampler _sampler = VK_NULL_HANDLE;
+    VkSampler _sampler = VK_NULL_HANDLE;
 
 }; // class VulkanTexture
 

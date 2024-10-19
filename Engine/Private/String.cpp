@@ -1,5 +1,6 @@
 #include <Dusk/String.hpp>
 #include <Dusk/Array.hpp>
+#include <Dusk/Enumerate.hpp>
 
 #include <format>
 
@@ -25,7 +26,7 @@ List<String> StringSplit(StringView str, StringView delim)
 DUSK_API
 String StringJoin(List<StringView> strList, StringView delim)
 {
-    size_t totalSize = delim.size() * strList.size();
+    size_t totalSize = delim.size() * (strList.size() - 1);
     for (const auto& str : strList) {
         totalSize += str.size();
     }
@@ -33,9 +34,11 @@ String StringJoin(List<StringView> strList, StringView delim)
     String result;
     result.reserve(totalSize);
 
-    for (const auto& str : strList) {
+    for (const auto& [index, str] : Enumerate(strList)) {
         result += str;
-        result += delim;
+        if (index < (strList.size() - 1)) {
+            result += delim;
+        }
     }
 
     return result;

@@ -2,14 +2,16 @@
 #define DUSK_GRAPHICS_HPP
 
 #include <Dusk/Macros.hpp>
+#include <Dusk/Exception.hpp>
+#include <Dusk/ShaderGlobals.hpp>
 #include <Dusk/String.hpp>
 #include <Dusk/Tuple.hpp>
+#include <Dusk/VulkanBuffer.hpp>
+#include <Dusk/VulkanUtil.hpp>
 
 #include <Dusk/ThirdParty/vulkan.hpp>
 #include <Dusk/ThirdParty/SDL.hpp>
 
-#include <Dusk/ShaderGlobals.hpp>
-#include <Dusk/VulkanBuffer.hpp>
 
 #include <functional>
 
@@ -18,22 +20,22 @@ namespace dusk {
 namespace Graphics {
 
     DUSK_API
-    extern vk::Instance Instance;
+    extern VkInstance Instance;
 
     DUSK_API
-    extern vk::Device Device;
+    extern VkDevice Device;
 
     DUSK_API
-    extern vk::PhysicalDeviceProperties PhysicalDeviceProperties;
+    extern VkPhysicalDeviceProperties PhysicalDeviceProperties;
 
     DUSK_API
-    extern vk::PhysicalDeviceFeatures PhysicalDeviceFeatures;
+    extern VkPhysicalDeviceFeatures PhysicalDeviceFeatures;
 
     DUSK_API
     extern VmaAllocator Allocator;
 
     DUSK_API
-    extern vk::RenderPass RenderPass;
+    extern VkRenderPass RenderPass;
 
     DUSK_API
     extern ShaderGlobals Globals;
@@ -42,13 +44,13 @@ namespace Graphics {
     extern VulkanBuffer::Pointer GlobalsBuffer;
 
     DUSK_API
-    extern vk::DescriptorPool DescriptorPool;
+    extern VkDescriptorPool DescriptorPool;
 
     DUSK_API
-    extern vk::DescriptorSetLayout DescriptorSetLayout;
+    extern VkDescriptorSetLayout DescriptorSetLayout;
 
     DUSK_API
-    extern vk::PipelineLayout PipelineLayout;
+    extern VkPipelineLayout PipelineLayout;
 
     DUSK_API
     void Init();
@@ -60,7 +62,7 @@ namespace Graphics {
     void Render();
 
     DUSK_API
-    void SetRenderCallback(std::function<void(vk::CommandBuffer)> renderCallback);
+    void SetRenderCallback(std::function<void(VkCommandBuffer)> renderCallback);
 
     DUSK_API
     void HandleEvent(SDL_Event * event);
@@ -70,27 +72,13 @@ namespace Graphics {
     // void SetWindowSize(unsigned width, unsigned height);
 
     DUSK_API
-    vk::Extent2D GetWindowSize();
+    VkExtent2D GetWindowSize();
 
     DUSK_API
-    Tuple<vk::Buffer, VmaAllocation> CreateBuffer(
-        vk::BufferCreateInfo& bufferCreateInfo,
-        VmaAllocationCreateInfo& allocationCreateInfo,
-        VmaAllocationInfo * allocationInfo = nullptr
-    );
+    void CopyBuffer(VkBuffer source, VkBuffer destination, VkBufferCopy region);
 
     DUSK_API
-    Tuple<vk::Image, VmaAllocation> CreateImage(
-        vk::ImageCreateInfo& imageCreateInfo,
-        VmaAllocationCreateInfo& allocationCreateInfo,
-        VmaAllocationInfo * allocationInfo = nullptr
-    );
-
-    DUSK_API
-    void CopyBuffer(vk::Buffer source, vk::Buffer destination, vk::BufferCopy region);
-
-    DUSK_API
-    void CopyBufferToImage(vk::Buffer source, vk::Image destination, vk::BufferImageCopy region);
+    void CopyBufferToImage(VkBuffer source, VkImage destination, VkBufferImageCopy region);
 
 } // namespace Graphics
 

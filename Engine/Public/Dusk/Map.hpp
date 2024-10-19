@@ -5,8 +5,8 @@
 
 namespace dusk {
 
-template <typename K, typename T, typename Hash = std::hash<T>>
-using Map = std::unordered_map<K, T>;
+template <typename K, typename T, typename Hash = std::hash<K>>
+using Map = std::unordered_map<K, T, Hash>;
 
 } // namespace dusk
 

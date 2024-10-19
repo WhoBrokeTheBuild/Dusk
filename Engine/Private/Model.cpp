@@ -10,45 +10,66 @@ namespace dusk {
 DUSK_API
 void Model::Create(List<Mesh::Pointer>&& meshList)
 {
+    VkResult result;
+    
     _meshList = std::move(meshList);
 
     _shaderTransformBuffer.reset(new VulkanBuffer());
     _shaderTransformBuffer->Create(
-        vk::BufferUsageFlagBits::eUniformBuffer,
+        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
         VMA_MEMORY_USAGE_CPU_TO_GPU,
         sizeof(ShaderTransform)
     );
 
-    auto descriptorSetAllocateInfo = vk::DescriptorSetAllocateInfo()
-        .setDescriptorPool(Graphics::DescriptorPool)
-        .setDescriptorSetCount(1)
-        .setSetLayouts({ Graphics::DescriptorSetLayout });
-
-    auto descriptorSetList = Graphics::Device.allocateDescriptorSets(descriptorSetAllocateInfo);
-    _descriptorSet = descriptorSetList.front();
-
-    auto _globalsBufferInfo = vk::DescriptorBufferInfo()
-        .setBuffer(Graphics::GlobalsBuffer->GetVkBuffer())
-        .setRange(VK_WHOLE_SIZE);
-
-    auto transformBufferInfo = vk::DescriptorBufferInfo()
-        .setBuffer(_shaderTransformBuffer->GetVkBuffer())
-        .setRange(VK_WHOLE_SIZE);
-
-    Array<vk::WriteDescriptorSet, 2> writeDescriptorSetList = {
-        vk::WriteDescriptorSet()
-            .setDstSet(_descriptorSet)
-            .setDstBinding(ShaderGlobals::Binding)
-            .setBufferInfo({ _globalsBufferInfo })
-            .setDescriptorType(vk::DescriptorType::eUniformBuffer),
-        vk::WriteDescriptorSet()
-            .setDstSet(_descriptorSet)
-            .setDstBinding(ShaderTransform::Binding)
-            .setBufferInfo({ transformBufferInfo })
-            .setDescriptorType(vk::DescriptorType::eUniformBuffer),
+    auto descriptorSetAllocateInfo = VkDescriptorSetAllocateInfo{
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+        .descriptorPool = Graphics::DescriptorPool,
+        .descriptorSetCount = 1,
+        .pSetLayouts = &Graphics::DescriptorSetLayout,
     };
 
-    Graphics::Device.updateDescriptorSets(writeDescriptorSetList, {});
+    result = vkAllocateDescriptorSets(
+        Graphics::Device,
+        &descriptorSetAllocateInfo,
+        &_descriptorSet
+    );
+    CheckVkResult("vkAllocateDescriptorSets", result);
+
+    auto globalsBufferInfo = VkDescriptorBufferInfo{
+        .buffer = Graphics::GlobalsBuffer->GetVkBuffer(),
+        .range = VK_WHOLE_SIZE,
+    };
+
+    auto transformBufferInfo = VkDescriptorBufferInfo{
+        .buffer = _shaderTransformBuffer->GetVkBuffer(),
+        .range = VK_WHOLE_SIZE,
+    };
+
+    Array<VkWriteDescriptorSet, 2> writeDescriptorSetList = {
+        VkWriteDescriptorSet{
+            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .dstSet = _descriptorSet,
+            .dstBinding = ShaderGlobals::Binding,
+            .descriptorCount = 1,
+            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .pBufferInfo = &globalsBufferInfo,
+        },
+        VkWriteDescriptorSet{
+            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .dstSet = _descriptorSet,
+            .dstBinding = ShaderTransform::Binding,
+            .descriptorCount = 1,
+            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .pBufferInfo = &transformBufferInfo,
+        },
+    };
+
+    vkUpdateDescriptorSets(
+        Graphics::Device,
+        writeDescriptorSetList.size(),
+        writeDescriptorSetList.data(),
+        0, nullptr
+    );
 }
 
 DUSK_API
@@ -117,13 +138,14 @@ void Model::Update(mat4 view, mat4 proj)
 }
 
 DUSK_API
-void Model::GenerateCommands(vk::CommandBuffer commandBuffer)
+void Model::GenerateCommands(VkCommandBuffer commandBuffer)
 {
-    commandBuffer.bindDescriptorSets(
-        vk::PipelineBindPoint::eGraphics,
+    vkCmdBindDescriptorSets(
+        commandBuffer,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
         Graphics::PipelineLayout,
-        0, { _descriptorSet },
-        {}
+        0, 1, &_descriptorSet,
+        0, nullptr
     );
 
     for (auto& mesh : _meshList) {

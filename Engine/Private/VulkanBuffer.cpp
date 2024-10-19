@@ -1,5 +1,4 @@
 #include <Dusk/VulkanBuffer.hpp>
-#include <Dusk/Exception.hpp>
 #include <Dusk/Graphics.hpp>
 
 namespace dusk {
@@ -11,8 +10,10 @@ VulkanBuffer::~VulkanBuffer()
 }
 
 DUSK_API
-void VulkanBuffer::Create(vk::BufferUsageFlagBits bufferUsage, VmaMemoryUsage memoryUsage, vk::DeviceSize size, void * data /* = nullptr */)
+void VulkanBuffer::Create(VkBufferUsageFlagBits bufferUsage, VmaMemoryUsage memoryUsage, VkDeviceSize size, void * data /* = nullptr */)
 {
+    VkResult result;
+
     Destroy();
 
     _size = size;
@@ -24,51 +25,69 @@ void VulkanBuffer::Create(vk::BufferUsageFlagBits bufferUsage, VmaMemoryUsage me
             throw Exception("Attempting to create a GPU only buffer with no data");
         }
 
-        auto stagingBufferCreateInfo = vk::BufferCreateInfo()
-            .setSize(_size)
-            .setUsage(vk::BufferUsageFlagBits::eTransferSrc)
-            .setSharingMode(vk::SharingMode::eExclusive);
+        auto stagingBufferCreateInfo = VkBufferCreateInfo{
+            .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .size = _size,
+            .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+            .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+        };
 
         auto stagingAllocationCreateInfo = VmaAllocationCreateInfo{
             .flags = VMA_ALLOCATION_CREATE_MAPPED_BIT,
             .usage = VMA_MEMORY_USAGE_CPU_ONLY,
         };
 
+        VkBuffer stagingBuffer;
+        VmaAllocation stagingAllocation;
         VmaAllocationInfo stagingAllocationInfo;
-        auto[stagingBuffer, stagingAllocation] = Graphics::CreateBuffer(
-            stagingBufferCreateInfo,
-            stagingAllocationCreateInfo,
+    
+        result = vmaCreateBuffer(
+            Graphics::Allocator,
+            &stagingBufferCreateInfo,
+            &stagingAllocationCreateInfo,
+            &stagingBuffer,
+            &stagingAllocation,
             &stagingAllocationInfo
         );
+        CheckVkResult("vmaCreateBuffer", result);
 
         memcpy(stagingAllocationInfo.pMappedData, data, _size);
 
-        auto bufferCreateInfo = vk::BufferCreateInfo()
-            .setSize(_size)
-            .setUsage(vk::BufferUsageFlagBits::eTransferDst | _bufferUsage)
-            .setSharingMode(vk::SharingMode::eExclusive);
+        auto bufferCreateInfo = VkBufferCreateInfo{
+            .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .size = _size,
+            .usage = VkBufferUsageFlags(VK_BUFFER_USAGE_TRANSFER_DST_BIT | _bufferUsage),
+            .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+        };
 
         auto allocationCreateInfo = VmaAllocationCreateInfo{
             .usage = _memoryUsage,
         };
 
-        std::tie(_buffer, _allocation) = Graphics::CreateBuffer(
-            bufferCreateInfo,
-            allocationCreateInfo
+        result = vmaCreateBuffer(
+            Graphics::Allocator,
+            &bufferCreateInfo,
+            &allocationCreateInfo,
+            &_buffer,
+            &_allocation,
+            nullptr
         );
+        CheckVkResult("vmaCreateBuffer", result);
 
-        auto region = vk::BufferCopy()
-            .setSize(size);
+        auto region = VkBufferCopy{
+            .size = size,
+        };
 
         Graphics::CopyBuffer(stagingBuffer, _buffer, region);
 
-        Graphics::Device.destroyBuffer(stagingBuffer);
-        vmaFreeMemory(Graphics::Allocator, stagingAllocation);
+        vmaDestroyBuffer(Graphics::Allocator, stagingBuffer, stagingAllocation);
     }
     else {
-        auto bufferCreateInfo = vk::BufferCreateInfo()
-            .setSize(_size)
-            .setUsage(_bufferUsage);
+        auto bufferCreateInfo = VkBufferCreateInfo{
+            .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .size = _size,
+            .usage = _bufferUsage,
+        };
 
         auto allocationCreateInfo = VmaAllocationCreateInfo{
             .usage = _memoryUsage,
@@ -79,12 +98,16 @@ void VulkanBuffer::Create(vk::BufferUsageFlagBits bufferUsage, VmaMemoryUsage me
         }
 
         VmaAllocationInfo allocationInfo;
-        std::tie(_buffer, _allocation) = Graphics::CreateBuffer(
-            bufferCreateInfo,
-            allocationCreateInfo,
+        result = vmaCreateBuffer(
+            Graphics::Allocator,
+            &bufferCreateInfo,
+            &allocationCreateInfo,
+            &_buffer,
+            &_allocation,
             &allocationInfo
         );
-
+        CheckVkResult("vmaCreateBuffer", result);
+        
         _mappedMemory = reinterpret_cast<uint8_t *>(allocationInfo.pMappedData);
 
         if (data) {
@@ -99,26 +122,29 @@ void VulkanBuffer::Destroy()
 {
     UnMap();
 
-    vmaDestroyBuffer(Graphics::Allocator, _buffer, _allocation);
-    _buffer = VK_NULL_HANDLE;
-    _allocation = VK_NULL_HANDLE;
+    if (_buffer) {
+        vmaDestroyBuffer(Graphics::Allocator, _buffer, _allocation);
+        _buffer = VK_NULL_HANDLE;
+        _allocation = VK_NULL_HANDLE;
+    }
 
     _size = 0;
-    _bufferUsage = vk::BufferUsageFlagBits(0);
+    _bufferUsage = VkBufferUsageFlagBits(0);
     _memoryUsage = VMA_MEMORY_USAGE_UNKNOWN;
 }
 
 DUSK_API
 void VulkanBuffer::Map()
 {
+    VkResult result;
+
     if (IsMapped()) {
         return;
     }
 
     void * pointer = nullptr;
-    auto result = vmaMapMemory(Graphics::Allocator, _allocation, &pointer);
-    
-    vk::detail::resultCheck(vk::Result(result), "vmaMapMemory");
+    result = vmaMapMemory(Graphics::Allocator, _allocation, &pointer);
+    CheckVkResult("vmaMapMemory", result);
 
     _mappedMemory = reinterpret_cast<uint8_t *>(pointer);
 }

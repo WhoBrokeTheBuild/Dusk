@@ -61,7 +61,7 @@ public:
 
     template <typename T>
     inline bool ReadInto(Span<T> buffer) {
-        return ReadInto(buffer.data(), buffer.size() * sizeof(T));
+        return ReadInto(buffer.data(), buffer.size_bytes());
     }
 
     template <typename T = uint8_t>
@@ -92,7 +92,7 @@ public:
     static Optional<List<T>> ReadFile(const Path& path) {
         File file(path);
         if (not file) {
-            return {};
+            return nullopt;
         }
 
         return file.ReadAll<T>();

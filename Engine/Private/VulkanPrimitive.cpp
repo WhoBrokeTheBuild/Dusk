@@ -9,7 +9,7 @@ VulkanPrimitive::~VulkanPrimitive()
 
 bool VulkanPrimitive::Create(
     Span<PrimitiveVertex> vertexList,
-    vk::PrimitiveTopology topology /*= vk::PrimitiveTopology::eTriangleList*/,
+    VkPrimitiveTopology topology /*= VkPrimitiveTopology::eTriangleList*/,
     bool haveTangents /*= true*/
 ) {
     Destroy();
@@ -24,7 +24,7 @@ bool VulkanPrimitive::Create(
     _indexed = false;
 
     _vertexBuffer.Create(
-        vk::BufferUsageFlagBits::eVertexBuffer,
+        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
         VMA_MEMORY_USAGE_GPU_ONLY,
         vertexList.size_bytes(),
         vertexList.data()
@@ -36,7 +36,7 @@ bool VulkanPrimitive::Create(
 bool VulkanPrimitive::Create(
     Span<uint32_t> indexList,
     Span<PrimitiveVertex> vertexList,
-    vk::PrimitiveTopology topology /*= vk::PrimitiveTopology::eTriangleList*/,
+    VkPrimitiveTopology topology /*= VkPrimitiveTopology::eTriangleList*/,
     bool haveTangents /*= true*/
 ) {
     Destroy();
@@ -53,7 +53,7 @@ bool VulkanPrimitive::Create(
         _count = indexList.size();
 
         _indexBuffer.Create(
-            vk::BufferUsageFlagBits::eIndexBuffer,
+            VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
             VMA_MEMORY_USAGE_GPU_ONLY,
             indexList.size_bytes(),
             indexList.data()
@@ -61,7 +61,7 @@ bool VulkanPrimitive::Create(
     }
 
     _vertexBuffer.Create(
-        vk::BufferUsageFlagBits::eVertexBuffer,
+        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
         VMA_MEMORY_USAGE_GPU_ONLY,
         vertexList.size_bytes(),
         vertexList.data()
@@ -74,27 +74,28 @@ void VulkanPrimitive::Destroy()
 {
     _indexed = false;
     _count = 0;
-    _topology = vk::PrimitiveTopology(0);
 
     _indexBuffer.Destroy();
     _vertexBuffer.Destroy();
 }
 
-void VulkanPrimitive::GenerateCommands(vk::CommandBuffer commandBuffer)
+void VulkanPrimitive::GenerateCommands(VkCommandBuffer commandBuffer)
 {
     if (_indexed) {
-        commandBuffer.bindIndexBuffer(_indexBuffer.GetVkBuffer(), 0, vk::IndexType::eUint32);
+        vkCmdBindIndexBuffer(commandBuffer, _indexBuffer.GetVkBuffer(), 0, VK_INDEX_TYPE_UINT32);
     }
  
     // TODO: Enable
     // commandBuffer.setPrimitiveTopology(_topology);
-    commandBuffer.bindVertexBuffers(0, { _vertexBuffer.GetVkBuffer() }, { 0 });
+    VkBuffer vertexBuffer = _vertexBuffer.GetVkBuffer();
+    VkDeviceSize vertexOffset = 0;
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, &vertexOffset);
 
     if (_indexed) {
-        commandBuffer.drawIndexed(_count, 1, 0, 0, 0);
+        vkCmdDrawIndexed(commandBuffer, _count, 1, 0, 0, 0);
     }
     else {
-        commandBuffer.draw(_count, 1, 0, 0);
+        vkCmdDraw(commandBuffer, _count, 1, 0, 0);
     }
 }
 
@@ -102,7 +103,7 @@ void VulkanPrimitive::calculateTangents(Span<uint32_t> indexList, Span<Primitive
 {
     // Computing tangents for other topologies can cause issues with averaging and such
     // best to just let the modeling software generate those tangents
-    if (_topology != vk::PrimitiveTopology::eTriangleList) {
+    if (_topology != VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST) {
         return;
     }
 

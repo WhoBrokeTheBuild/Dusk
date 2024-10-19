@@ -12,57 +12,57 @@
 namespace dusk {
 namespace glTF {
 
-Optional<vk::SamplerAddressMode> mapTextureWrapToVulkan(GLenum textureWrap)
+Optional<VkSamplerAddressMode> mapTextureWrapToVulkan(GLenum textureWrap)
 {
     switch (textureWrap) {
     case GL_REPEAT:
-        return vk::SamplerAddressMode::eRepeat;
+        return VK_SAMPLER_ADDRESS_MODE_REPEAT;
     case GL_MIRRORED_REPEAT:
-        return vk::SamplerAddressMode::eMirroredRepeat;
+        return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
     case GL_CLAMP_TO_EDGE:
-        return vk::SamplerAddressMode::eClampToEdge;
+        return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     case GL_CLAMP_TO_BORDER:
-        return vk::SamplerAddressMode::eClampToBorder;
+        return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
     }
 
     return nullopt;
 }
 
-Tuple<Optional<vk::Filter>, Optional<vk::SamplerMipmapMode>> mapTextureFilterToVulkan(GLenum textureFilter)
+Tuple<Optional<VkFilter>, Optional<VkSamplerMipmapMode>> mapTextureFilterToVulkan(GLenum textureFilter)
 {
     switch (textureFilter) {
     case GL_NEAREST:
-        return { vk::Filter::eNearest, nullopt };
+        return { VK_FILTER_NEAREST, nullopt };
     case GL_NEAREST_MIPMAP_NEAREST:
-        return { vk::Filter::eNearest, vk::SamplerMipmapMode::eNearest };
+        return { VK_FILTER_NEAREST, VK_SAMPLER_MIPMAP_MODE_NEAREST };
     case GL_NEAREST_MIPMAP_LINEAR:
-        return { vk::Filter::eNearest, vk::SamplerMipmapMode::eLinear };
+        return { VK_FILTER_NEAREST, VK_SAMPLER_MIPMAP_MODE_LINEAR };
     case GL_LINEAR:
-        return { vk::Filter::eLinear, nullopt };
+        return { VK_FILTER_LINEAR, nullopt };
     case GL_LINEAR_MIPMAP_NEAREST:
-        return { vk::Filter::eLinear, vk::SamplerMipmapMode::eNearest };
+        return { VK_FILTER_LINEAR, VK_SAMPLER_MIPMAP_MODE_NEAREST };
     case GL_LINEAR_MIPMAP_LINEAR:
-        return { vk::Filter::eLinear, vk::SamplerMipmapMode::eLinear };
+        return { VK_FILTER_LINEAR, VK_SAMPLER_MIPMAP_MODE_LINEAR };
     }
 
     return { nullopt, nullopt };
 }
 
-Optional<vk::PrimitiveTopology> mapTopologyToVulkan(GLenum topology)
+Optional<VkPrimitiveTopology> mapTopologyToVulkan(GLenum topology)
 {
     switch (topology) {
     case GL_POINTS:
-        return vk::PrimitiveTopology::ePointList;
+        return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
     case GL_LINES:
-        return vk::PrimitiveTopology::eLineList;
+        return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
     case GL_LINE_LOOP:
-        return vk::PrimitiveTopology::eLineStrip;
+        return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
     case GL_TRIANGLES:
-        return vk::PrimitiveTopology::eTriangleList;
+        return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     case GL_TRIANGLE_STRIP:
-        return vk::PrimitiveTopology::eTriangleStrip;
+        return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
     case GL_TRIANGLE_FAN:
-        return vk::PrimitiveTopology::eTriangleFan;
+        return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN;
     }
 
     return nullopt;
@@ -272,36 +272,44 @@ bool Loader::LoadFromFile(const Path& path)
                 return false;
             }
 
-            vk::SamplerCreateInfo samplerCreateInfo;
+            VkSamplerCreateInfo samplerCreateInfo = {
+                .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+                .magFilter = VK_FILTER_NEAREST,
+                .minFilter = VK_FILTER_NEAREST,
+                .mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST,
+                .addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+                .addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+            };
+
             if (sampler >= 0 and sampler < SamplerList.size()) {
                 const auto& samplerData = SamplerList[sampler];
 
                 auto addressModeU = mapTextureWrapToVulkan(samplerData.wrapS);
                 if (addressModeU) {
-                    samplerCreateInfo.setAddressModeU(addressModeU.value());
+                    samplerCreateInfo.addressModeU = addressModeU.value();
                 }
 
                 auto addressModeV = mapTextureWrapToVulkan(samplerData.wrapT);
                 if (addressModeU) {
-                    samplerCreateInfo.setAddressModeV(addressModeV.value());
+                    samplerCreateInfo.addressModeV = addressModeV.value();
                 }
                 
                 auto[magFilter, magMipmapMode] = mapTextureFilterToVulkan(samplerData.magFilter);
                 if (magFilter) {
-                    samplerCreateInfo.setMagFilter(magFilter.value());
+                    samplerCreateInfo.magFilter = magFilter.value();
                 }
 
                 auto[minFilter, minMipmapMode] = mapTextureFilterToVulkan(samplerData.minFilter);
                 if (minFilter) {
-                    samplerCreateInfo.setMinFilter(minFilter.value());
+                    samplerCreateInfo.minFilter = minFilter.value();
                 }
 
                 // TODO: Improve
                 if (magMipmapMode) {
-                    samplerCreateInfo.setMipmapMode(magMipmapMode.value());
+                    samplerCreateInfo.mipmapMode = magMipmapMode.value();
                 }
                 else if (minMipmapMode) {
-                    samplerCreateInfo.setMipmapMode(minMipmapMode.value());
+                    samplerCreateInfo.mipmapMode = minMipmapMode.value();
                 }
             }
 

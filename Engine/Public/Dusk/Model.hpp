@@ -34,7 +34,7 @@ public:
     // TODO: Move and Replace
     void Update(mat4 view, mat4 proj);
 
-    void GenerateCommands(vk::CommandBuffer commandBuffer);
+    void GenerateCommands(VkCommandBuffer commandBuffer);
 
 private:
 
@@ -44,7 +44,7 @@ private:
 
     VulkanBuffer::Pointer _shaderTransformBuffer;
 
-    vk::DescriptorSet _descriptorSet = VK_NULL_HANDLE;
+    VkDescriptorSet _descriptorSet = VK_NULL_HANDLE;
 
 }; // class Model
 

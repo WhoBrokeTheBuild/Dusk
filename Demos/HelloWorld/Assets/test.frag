@@ -157,5 +157,5 @@ void main()
 
     // o_Color = vec4(color, albedo.a);
 
-    o_Color = vec4(v_TBN[2].xyz, 1.0);
+    o_Color = vec4(v_Color.xyz, 1.0);
 }

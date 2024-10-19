@@ -22,17 +22,17 @@ public:
 
     virtual ~VulkanBuffer();
 
-    void Create(vk::BufferUsageFlagBits bufferUsage, VmaMemoryUsage memoryUsage, Span<uint8_t> data);
+    void Create(VkBufferUsageFlagBits bufferUsage, VmaMemoryUsage memoryUsage, Span<uint8_t> data);
 
-    void Create(vk::BufferUsageFlagBits bufferUsage, VmaMemoryUsage memoryUsage, vk::DeviceSize size, void * data = nullptr);
+    void Create(VkBufferUsageFlagBits bufferUsage, VmaMemoryUsage memoryUsage, VkDeviceSize size, void * data = nullptr);
 
     void Destroy();
 
-    inline vk::DeviceSize GetSize() const {
+    inline VkDeviceSize GetSize() const {
         return _size;
     }
 
-    inline vk::BufferUsageFlagBits GetBufferUsage() const {
+    inline VkBufferUsageFlagBits GetBufferUsage() const {
         return _bufferUsage;
     }
 
@@ -40,7 +40,7 @@ public:
         return _memoryUsage;
     }
 
-    inline vk::Buffer GetVkBuffer() const {
+    inline VkBuffer GetVkBuffer() const {
         return _buffer;
     }
 
@@ -66,13 +66,13 @@ public:
 
 private:
 
-    vk::DeviceSize _size;
+    VkDeviceSize _size;
 
-    vk::BufferUsageFlagBits _bufferUsage;
+    VkBufferUsageFlagBits _bufferUsage;
 
     VmaMemoryUsage _memoryUsage;
 
-    vk::Buffer _buffer = VK_NULL_HANDLE;
+    VkBuffer _buffer = VK_NULL_HANDLE;
 
     VmaAllocation _allocation = VK_NULL_HANDLE;
 

@@ -10,7 +10,6 @@ file(GLOB_RECURSE
     "Assets/*.glsl"
     "Assets/*.vert"
     "Assets/*.frag"
-    # TODO:
 )
 
 include(DuskCompileShaderList)

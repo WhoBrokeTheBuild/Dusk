@@ -1,6 +1,6 @@
 #version 450 core
 
-// #include <Dusk/Globals.inc.glsl>
+#include <Dusk/Globals.inc.glsl>
 #include <Dusk/Transform.inc.glsl>
 #include <Dusk/VertexAttributes.inc.glsl>
 #include <Dusk/TBN.inc.glsl>
@@ -15,7 +15,7 @@ void main()
     vec4 position = u_Model * a_Position;
     v_Position = position.xyz / position.w;
 
-    v_Color = a_Normal; // a_Color;
+    v_Color = a_Color;
     v_TexCoord = a_TexCoord;
 
     v_TBN = CalculateTBN(u_Model, a_Normal, a_Tangent);

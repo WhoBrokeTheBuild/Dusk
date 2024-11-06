@@ -20,6 +20,10 @@ layout(binding=0, std140) uniform DuskGlobals
 
     // A ratio of DeltaTime / ExpectedDeltaTime
     float u_FrameSpeedRatio;
+
+    vec3 u_CameraPosition;
+    vec3 u_CameraDirection;
+    vec3 u_LightPosition;
 };
 
 #endif // DUSK_GLOBALS_INC_GLSL

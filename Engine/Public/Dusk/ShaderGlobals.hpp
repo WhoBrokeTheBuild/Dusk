@@ -30,10 +30,14 @@ public:
     // A ratio of DeltaTime / (1 / FPS)
     alignas(4) float FrameSpeedRatio;
 
+    alignas(16) vec3 CameraPosition;
+    alignas(16) vec3 CameraDirection;
+    alignas(16) vec3 LightPosition;
+
 }; // struct ShaderGlobals
 
 static_assert(
-    sizeof(ShaderGlobals) == 32,
+    sizeof(ShaderGlobals) == 80,
     "Layout of ShaderGlobals does not conform to std140"
 );
 

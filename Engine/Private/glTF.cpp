@@ -387,10 +387,12 @@ bool Loader::LoadFromFile(const Path& path)
                     }
 
                     if (index >= 0) {
-                        material->SetTexture(Material::NormalMapName, TextureList[index]);
+                        // material->SetTexture(Material::NormalMapName, TextureList[index]);
+                        material->SetNormalMap(TextureList[index]);
                     }
 
-                    material->SetFloatParameter(Material::NormalScaleName, value.value("scale", 1.0f));
+                    // material->SetFloatParameter(Material::NormalScaleName, value.value("scale", 1.0f));
+                    material->SetNormalScale(value.value("scale", material->GetNormalScale()));
                 }
             }
  
@@ -412,17 +414,20 @@ bool Loader::LoadFromFile(const Path& path)
                     }
 
                     if (index >= 0) {
-                        material->SetTexture(Material::EmissiveMapName, TextureList[index]);
+                        // material->SetTexture(Material::EmissiveMapName, TextureList[index]);
+                        material->SetEmissiveMap(TextureList[index]);
 
                         // TODO: Improve
-                        material->SetVec3Parameter(Material::EmissiveFactorName, vec3(1.0f));
+                        // material->SetVec3Parameter(Material::EmissiveFactorName, vec3(1.0f));
+                        material->SetEmissiveFactor(vec3(1.0f));
                     }
                 }
             }
 
             it = object.find("emissiveFactor");
             if (it != object.end()) {
-                material->SetVec3Parameter(Material::EmissiveFactorName, JSON::ToVec3(*it, vec3(0.0f)));
+                material->SetEmissiveFactor(JSON::ToVec3(*it, material->GetEmissiveFactor()));
+                // material->SetVec3Parameter(Material::EmissiveFactorName, JSON::ToVec3(*it, vec3(0.0f)));
             }
  
             it = object.find("occlusionTexture");
@@ -443,10 +448,12 @@ bool Loader::LoadFromFile(const Path& path)
                     }
 
                     if (index >= 0) {
-                        material->SetTexture(Material::OcclusionMapName, TextureList[index]);
+                        material->SetOcclusionMap(TextureList[index]);
+                        // material->SetTexture(Material::OcclusionMapName, TextureList[index]);
                     }
 
-                    material->SetFloatParameter(Material::OcclusionStrengthName, value.value("strength", 1.0f));
+                    material->SetOcclusionStrength(value.value("strength", material->GetOcclusionStrength()));
+                    // material->SetFloatParameter(Material::OcclusionStrengthName, value.value("strength", 1.0f));
                 }
             }
  
@@ -456,7 +463,8 @@ bool Loader::LoadFromFile(const Path& path)
                 if (group.is_object()) {
                     it = group.find("baseColorFactor");
                     if (it != group.end()) {
-                        material->SetVec3Parameter(Material::BaseColorFactorName, JSON::ToVec3(*it, vec3(1.0f)));
+                        material->SetBaseColorFactor(JSON::ToVec4(*it, material->GetBaseColorFactor()));
+                        // material->SetVec3Parameter(Material::BaseColorFactorName, JSON::ToVec3(*it, vec3(1.0f)));
                     }
 
                     it = group.find("baseColorTexture");
@@ -477,12 +485,15 @@ bool Loader::LoadFromFile(const Path& path)
                         }
 
                         if (index >= 0) {
-                            material->SetTexture(Material::BaseColorMapName, TextureList[index]);
+                            material->SetBaseColorMap(TextureList[index]);
+                            // material->SetTexture(Material::BaseColorMapName, TextureList[index]);
                         }
                     }
 
-                    material->SetFloatParameter(Material::MetallicFactorName, group.value("metallicFactor", 1.0f));
-                    material->SetFloatParameter(Material::RoughnessFactorName, group.value("roughnessFactor", 1.0f));
+                    material->SetMetallicFactor(group.value("metallicFactor", material->GetMetallicFactor()));
+                    material->SetRoughnessFactor(group.value("roughnessFactor", material->GetRoughnessFactor()));
+                    // material->SetFloatParameter(Material::MetallicFactorName, group.value("metallicFactor", 1.0f));
+                    // material->SetFloatParameter(Material::RoughnessFactorName, group.value("roughnessFactor", 1.0f));
 
                     it = group.find("metallicRoughnessTexture");
                     if (it != group.end()) {
@@ -502,7 +513,8 @@ bool Loader::LoadFromFile(const Path& path)
                         }
 
                         if (index >= 0) {
-                            material->SetTexture(Material::MetallicRoughnessMapName, TextureList[index]);
+                            material->SetMetallicRoughnessMap(TextureList[index]);
+                            // material->SetTexture(Material::MetallicRoughnessMapName, TextureList[index]);
                         }
                     }
                 }

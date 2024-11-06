@@ -7,6 +7,7 @@
 #include <Dusk/PrimitiveVertex.hpp>
 #include <Dusk/VulkanBuffer.hpp>
 #include <Dusk/Material.hpp>
+#include <Dusk/BoundingBox.hpp>
 
 #include <Dusk/ThirdParty/vulkan.hpp>
 
@@ -20,7 +21,7 @@ public:
 
     using Pointer = std::unique_ptr<VulkanPrimitive>;
 
-    VulkanPrimitive() = default;
+    VulkanPrimitive();
 
     virtual ~VulkanPrimitive();
 
@@ -30,6 +31,10 @@ public:
 
     inline VkPrimitiveTopology GetTopology() const {
         return _topology;
+    }
+
+    inline BoundingBox GetBounds() const {
+        return _bounds;
     }
 
     bool Create(
@@ -47,9 +52,13 @@ public:
 
     void Destroy();
 
+    void UpdateDescriptorSet(VulkanBuffer * transformBuffer);
+
     void GenerateCommands(VkCommandBuffer commandBuffer);
 
 private:
+
+    void calculateBounds(Span<PrimitiveVertex> vertexList);
 
     void calculateTangents(Span<uint32_t> indexList, Span<PrimitiveVertex> vertexList);
 
@@ -64,6 +73,10 @@ private:
     VulkanBuffer _indexBuffer;
 
     VulkanBuffer _vertexBuffer;
+
+    VkDescriptorSet _descriptorSet;
+
+    BoundingBox _bounds;
 
 }; // class VulkanPrimitive
 

@@ -7,6 +7,8 @@
 #include <Dusk/Optional.hpp>
 #include <Dusk/String.hpp>
 #include <Dusk/VulkanTexture.hpp>
+#include <Dusk/VulkanBuffer.hpp>
+#include <Dusk/ShaderMaterial.hpp>
 
 #include <print>
 
@@ -20,43 +22,133 @@ public:
 
     using Pointer = std::shared_ptr<Material>;
 
-    static constexpr StringView BaseColorMapName         = "_BaseColorMap";
-    static constexpr StringView NormalMapName            = "_NormalMap";
-    static constexpr StringView MetallicRoughnessMapName = "_MetallicRoughnessMap";
-    static constexpr StringView EmissiveMapName          = "_EmissiveMap";
-    static constexpr StringView OcclusionMapName         = "_OcclusionMap";
+    Material();
 
-    static constexpr StringView BaseColorFactorName      = "_BaseColorFactor";
-    static constexpr StringView EmissiveFactorName       = "_EmissiveFactor";
-    static constexpr StringView MetallicFactorName       = "_MetallicFactor";
-    static constexpr StringView RoughnessFactorName      = "_RoughnessFactor";
-    static constexpr StringView OcclusionStrengthName    = "_OcclusionStrength";
-    static constexpr StringView NormalScaleName          = "_NormalScale";
+    virtual ~Material() = default;
 
-
-    bool SetTexture(StringView name, VulkanTexture::Pointer texture) {
-        // TODO: check name unique
-        std::println("Setting {} = Texture", name);
-        _textureMap[name] = texture;
-        return true;
+    inline VulkanBuffer * GetBuffer() {
+        return _shaderMaterialBuffer.get();
     }
 
-    bool SetFloatParameter(StringView name, float value) {
-        // TODO: check name unique
-        std::println("Setting {} = {}", name, value);
-        _floatMap[name] = value;
-        return true;
+    inline void SetBaseColorFactor(vec4 value) {
+        _shaderMaterial.BaseColorFactor = value;
+        updateShaderMaterialBuffer();
     }
 
-    bool SetVec3Parameter(StringView name, vec3 value) {
-        // TODO: check name unique
-        std::println("Setting {} = {}", name, glm::to_string(value));
-        _vec3Map[name] = value;
-        return true;
+    inline vec4 GetBaseColorFactor() {
+        return _shaderMaterial.BaseColorFactor;
     }
 
-    VulkanTexture * GetTexture(StringView name);
+    inline void SetEmissiveFactor(vec3 value) {
+        _shaderMaterial.EmissiveFactor = value;
+        updateShaderMaterialBuffer();
+    }
 
+    inline vec3 GetEmissiveFactor() {
+        return _shaderMaterial.EmissiveFactor;
+    }
+
+    inline void SetMetallicFactor(float value) {
+        _shaderMaterial.MetallicFactor = value;
+        updateShaderMaterialBuffer();
+    }
+
+    inline float GetMetallicFactor() {
+        return _shaderMaterial.MetallicFactor;
+    }
+
+    inline void SetRoughnessFactor(float value) {
+        _shaderMaterial.RoughnessFactor = value;
+        updateShaderMaterialBuffer();
+    }
+
+    inline float GetRoughnessFactor() {
+        return _shaderMaterial.RoughnessFactor;
+    }
+
+    inline void SetOcclusionStrength(float value) {
+        _shaderMaterial.OcclusionStrength = value;
+        updateShaderMaterialBuffer();
+    }
+
+    inline float GetOcclusionStrength() {
+        return _shaderMaterial.OcclusionStrength;
+    }
+
+    inline void SetNormalScale(float value) {
+        _shaderMaterial.NormalScale = value;
+        updateShaderMaterialBuffer();
+    }
+
+    inline float GetNormalScale() {
+        return _shaderMaterial.NormalScale;
+    }
+
+    inline void SetBaseColorMap(VulkanTexture::Pointer texture) {
+        _baseColorMap = texture;
+    }
+
+    VulkanTexture * GetBaseColorMap() const;
+
+    inline void SetNormalMap(VulkanTexture::Pointer texture) {
+        _normalMap = texture;
+    }
+
+    VulkanTexture * GetNormalMap() const;
+
+    inline void SetMetallicRoughnessMap(VulkanTexture::Pointer texture) {
+        _metallicRoughnessMap = texture;
+    }
+
+    VulkanTexture * GetMetallicRoughnessMap() const;
+
+    inline void SetEmissiveMap(VulkanTexture::Pointer texture) {
+        _emissiveMap = texture;
+    }
+
+    VulkanTexture * GetEmissiveMap() const;
+
+    inline void SetOcclusionMap(VulkanTexture::Pointer texture) {
+        _occlusionMap = texture;
+    }
+
+    VulkanTexture * GetOcclusionMap() const;
+
+    // static constexpr StringView BaseColorMapName         = "_BaseColorMap";
+    // static constexpr StringView NormalMapName            = "_NormalMap";
+    // static constexpr StringView MetallicRoughnessMapName = "_MetallicRoughnessMap";
+    // static constexpr StringView EmissiveMapName          = "_EmissiveMap";
+    // static constexpr StringView OcclusionMapName         = "_OcclusionMap";
+
+    // static constexpr StringView BaseColorFactorName      = "_BaseColorFactor";
+    // static constexpr StringView EmissiveFactorName       = "_EmissiveFactor";
+    // static constexpr StringView MetallicFactorName       = "_MetallicFactor";
+    // static constexpr StringView RoughnessFactorName      = "_RoughnessFactor";
+    // static constexpr StringView OcclusionStrengthName    = "_OcclusionStrength";
+    // static constexpr StringView NormalScaleName          = "_NormalScale";
+
+    // bool SetTexture(StringView name, VulkanTexture::Pointer texture) {
+    //     // TODO: check name unique
+    //     std::println("Setting {} = Texture", name);
+    //     _textureMap[name] = texture;
+    //     return true;
+    // }
+
+    // VulkanTexture * GetTexture(StringView name);
+
+    // bool SetFloatParameter(StringView name, float value) {
+    //     // TODO: check name unique
+    //     std::println("Setting {} = {}", name, value);
+    //     _floatMap[name] = value;
+    //     return true;
+    // }
+
+    // bool SetVec3Parameter(StringView name, vec3 value) {
+    //     // TODO: check name unique
+    //     std::println("Setting {} = {}", name, glm::to_string(value));
+    //     _vec3Map[name] = value;
+    //     return true;
+    // }
 
     // float GetFloatParameter(StringView name);
     // int GetIntParameter(StringView name);
@@ -75,14 +167,27 @@ public:
 
 private:
 
-    Map<StringView, VulkanTexture::Pointer> _textureMap;
+    inline void updateShaderMaterialBuffer() {
+        _shaderMaterialBuffer->WriteTo(0, sizeof(ShaderMaterial), &_shaderMaterial);
+    }
 
-    Map<StringView, float> _floatMap;
-    Map<StringView, int> _intMap;
-    Map<StringView, uint> _uintMap;
-    Map<StringView, vec2> _vec2Map;
-    Map<StringView, vec3> _vec3Map;
-    Map<StringView, vec4> _vec4Map;
+    VulkanBuffer::Pointer _shaderMaterialBuffer;
+
+    ShaderMaterial _shaderMaterial;
+    VulkanTexture::Pointer _baseColorMap;
+    VulkanTexture::Pointer _normalMap;
+    VulkanTexture::Pointer _metallicRoughnessMap;
+    VulkanTexture::Pointer _emissiveMap;
+    VulkanTexture::Pointer _occlusionMap;
+
+    // Map<StringView, VulkanTexture::Pointer> _textureMap;
+
+    // Map<StringView, float> _floatMap;
+    // Map<StringView, int> _intMap;
+    // Map<StringView, uint> _uintMap;
+    // Map<StringView, vec2> _vec2Map;
+    // Map<StringView, vec3> _vec3Map;
+    // Map<StringView, vec4> _vec4Map;
 
 }; // class Material
 

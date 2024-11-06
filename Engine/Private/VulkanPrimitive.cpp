@@ -1,6 +1,16 @@
 #include <Dusk/VulkanPrimitive.hpp>
+#include <Dusk/Graphics.hpp>
+#include <Dusk/ShaderTransform.hpp>
+#include <Dusk/ShaderMaterial.hpp>
+#include <Dusk/Array.hpp>
+#include <Dusk/Log.hpp>
 
 namespace dusk {
+
+VulkanPrimitive::VulkanPrimitive()
+{
+    _material = Graphics::DefaultMaterial;
+}
 
 VulkanPrimitive::~VulkanPrimitive()
 {
@@ -17,7 +27,10 @@ bool VulkanPrimitive::Create(
     _count = vertexList.size();
     _topology = topology;
 
+    calculateBounds(vertexList);
+
     if (not haveTangents) {
+        Log(DUSK_ANCHOR, "Calculating Tangents");
         calculateTangents({}, vertexList);
     }
 
@@ -39,12 +52,17 @@ bool VulkanPrimitive::Create(
     VkPrimitiveTopology topology /*= VkPrimitiveTopology::eTriangleList*/,
     bool haveTangents /*= true*/
 ) {
+    VkResult result;
+
     Destroy();
 
     _count = vertexList.size();
     _topology = topology;
 
+    calculateBounds(vertexList);
+
     if (not haveTangents) {
+        Log(DUSK_ANCHOR, "Calculating Tangents");
         calculateTangents(indexList, vertexList);
     }
 
@@ -67,6 +85,20 @@ bool VulkanPrimitive::Create(
         vertexList.data()
     );
 
+    auto descriptorSetAllocateInfo = VkDescriptorSetAllocateInfo{
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+        .descriptorPool = Graphics::DescriptorPool,
+        .descriptorSetCount = 1,
+        .pSetLayouts = &Graphics::DescriptorSetLayout,
+    };
+
+    result = vkAllocateDescriptorSets(
+        Graphics::Device,
+        &descriptorSetAllocateInfo,
+        &_descriptorSet
+    );
+    CheckVkResult("vkAllocateDescriptorSets", result);
+
     return true;
 }
 
@@ -77,10 +109,148 @@ void VulkanPrimitive::Destroy()
 
     _indexBuffer.Destroy();
     _vertexBuffer.Destroy();
+
+    // TODO: Free _descriptorSet?
+    _descriptorSet = VK_NULL_HANDLE;
+}
+
+void VulkanPrimitive::UpdateDescriptorSet(VulkanBuffer * transformBuffer)
+{
+    auto globalsBufferInfo = VkDescriptorBufferInfo{
+        .buffer = Graphics::GlobalsBuffer->GetVkBuffer(),
+        .range = VK_WHOLE_SIZE,
+    };
+
+    auto transformBufferInfo = VkDescriptorBufferInfo{
+        .buffer = transformBuffer->GetVkBuffer(),
+        .range = VK_WHOLE_SIZE,
+    };
+
+    auto materialBufferInfo = VkDescriptorBufferInfo{
+        .buffer = _material->GetBuffer()->GetVkBuffer(),
+        .range = VK_WHOLE_SIZE,
+    };
+
+    auto baseColorMap = _material->GetBaseColorMap();
+    auto baseColorMapImageInfo = VkDescriptorImageInfo{
+        .sampler = baseColorMap->GetSampler(),
+        .imageView = baseColorMap->GetImageView(),
+        .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+    };
+
+    auto normalMap = _material->GetNormalMap();
+    auto normalMapImageInfo = VkDescriptorImageInfo{
+        .sampler = normalMap->GetSampler(),
+        .imageView = normalMap->GetImageView(),
+        .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+    };
+
+    auto metallicRoughnessMap = _material->GetMetallicRoughnessMap();
+    auto metallicRoughnessMapImageInfo = VkDescriptorImageInfo{
+        .sampler = metallicRoughnessMap->GetSampler(),
+        .imageView = metallicRoughnessMap->GetImageView(),
+        .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+    };
+
+    auto emissiveMap = _material->GetEmissiveMap();
+    auto emissiveMapImageInfo = VkDescriptorImageInfo{
+        .sampler = emissiveMap->GetSampler(),
+        .imageView = emissiveMap->GetImageView(),
+        .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+    };
+
+    auto occlusionMap = _material->GetOcclusionMap();
+    auto occlusionMapImageInfo = VkDescriptorImageInfo{
+        .sampler = occlusionMap->GetSampler(),
+        .imageView = occlusionMap->GetImageView(),
+        .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+    };
+
+    Array<VkWriteDescriptorSet, 8> writeDescriptorSetList = {
+        VkWriteDescriptorSet{
+            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .dstSet = _descriptorSet,
+            .dstBinding = ShaderGlobals::Binding,
+            .descriptorCount = 1,
+            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .pBufferInfo = &globalsBufferInfo,
+        },
+        VkWriteDescriptorSet{
+            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .dstSet = _descriptorSet,
+            .dstBinding = ShaderTransform::Binding,
+            .descriptorCount = 1,
+            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .pBufferInfo = &transformBufferInfo,
+        },
+        VkWriteDescriptorSet{
+            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .dstSet = _descriptorSet,
+            .dstBinding = ShaderMaterial::Binding,
+            .descriptorCount = 1,
+            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .pBufferInfo = &materialBufferInfo,
+        },
+        VkWriteDescriptorSet{
+            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .dstSet = _descriptorSet,
+            .dstBinding = ShaderMaterial::BaseColorMapBinding,
+            .descriptorCount = 1,
+            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .pImageInfo = &baseColorMapImageInfo,
+        },
+        VkWriteDescriptorSet{
+            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .dstSet = _descriptorSet,
+            .dstBinding = ShaderMaterial::NormalMapBinding,
+            .descriptorCount = 1,
+            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .pImageInfo = &normalMapImageInfo,
+        },
+        VkWriteDescriptorSet{
+            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .dstSet = _descriptorSet,
+            .dstBinding = ShaderMaterial::MetallicRoughnessMapBinding,
+            .descriptorCount = 1,
+            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .pImageInfo = &metallicRoughnessMapImageInfo,
+        },
+        VkWriteDescriptorSet{
+            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .dstSet = _descriptorSet,
+            .dstBinding = ShaderMaterial::EmissiveMapBinding,
+            .descriptorCount = 1,
+            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .pImageInfo = &emissiveMapImageInfo,
+        },
+        VkWriteDescriptorSet{
+            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .dstSet = _descriptorSet,
+            .dstBinding = ShaderMaterial::OcclusionMapBinding,
+            .descriptorCount = 1,
+            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .pImageInfo = &occlusionMapImageInfo,
+        },
+    };
+
+    vkUpdateDescriptorSets(
+        Graphics::Device,
+        writeDescriptorSetList.size(),
+        writeDescriptorSetList.data(),
+        0, nullptr
+    );
 }
 
 void VulkanPrimitive::GenerateCommands(VkCommandBuffer commandBuffer)
 {
+    vkCmdBindDescriptorSets(
+        commandBuffer,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        Graphics::PipelineLayout,
+        0, 1, &_descriptorSet,
+        0, nullptr
+    );
+
     if (_indexed) {
         vkCmdBindIndexBuffer(commandBuffer, _indexBuffer.GetVkBuffer(), 0, VK_INDEX_TYPE_UINT32);
     }
@@ -97,6 +267,16 @@ void VulkanPrimitive::GenerateCommands(VkCommandBuffer commandBuffer)
     else {
         vkCmdDraw(commandBuffer, _count, 1, 0, 0);
     }
+}
+
+void VulkanPrimitive::calculateBounds(Span<PrimitiveVertex> vertexList)
+{
+    for (const auto& vertex : vertexList) {
+        _bounds.Extend(vertex.Position);
+    }
+
+    Log(DUSK_ANCHOR, "Lower: {}", glm::to_string(_bounds.Lower));
+    Log(DUSK_ANCHOR, "Upper: {}", glm::to_string(_bounds.Upper));
 }
 
 void VulkanPrimitive::calculateTangents(Span<uint32_t> indexList, Span<PrimitiveVertex> vertexList)

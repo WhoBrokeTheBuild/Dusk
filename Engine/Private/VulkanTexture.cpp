@@ -52,7 +52,6 @@ bool VulkanTexture::LoadFromFile(
     _extent.width = width;
     _extent.height = height;
     _samplerCreateInfo = samplerCreateInfo;
-    _samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
     
     size_t pixelsSize = width * height * STBI_rgb_alpha;
     createImage(pixels, pixelsSize);
@@ -93,6 +92,27 @@ bool VulkanTexture::LoadFromBuffer(
 }
 
 DUSK_API
+bool VulkanTexture::LoadFromPixels(
+    const uint8_t * pixels,
+    size_t width,
+    size_t height,
+    size_t components,
+    VkSamplerCreateInfo samplerCreateInfo /*= {}*/
+) {
+    // TODO:
+    assert(components == 4);
+
+    _path.clear();
+    _extent.width = width;
+    _extent.height = height;
+    _samplerCreateInfo = samplerCreateInfo;
+
+    createImage(pixels, width * height * components);
+
+    return true;
+}
+
+DUSK_API
 void VulkanTexture::Destroy()
 {
     if (_sampler) {
@@ -119,7 +139,7 @@ bool VulkanTexture::Reload()
 }
 
 DUSK_API
-void VulkanTexture::createImage(uint8_t * pixels, VkDeviceSize size)
+void VulkanTexture::createImage(const uint8_t * pixels, VkDeviceSize size)
 {
     VkResult result;
 
@@ -202,7 +222,12 @@ void VulkanTexture::createImage(uint8_t * pixels, VkDeviceSize size)
         },
     };
 
-    Graphics::CopyBufferToImage(stagingBuffer, _image, region);
+    Graphics::CopyBufferToImage(
+        stagingBuffer,
+        _image,
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        region
+    );
 
     vmaDestroyBuffer(Graphics::Allocator, stagingBuffer, stagingAllocation);
 
@@ -224,6 +249,8 @@ void VulkanTexture::createImage(uint8_t * pixels, VkDeviceSize size)
 
     result = vkCreateImageView(Graphics::Device, &imageViewCreateInfo, nullptr, &_imageView);
     CheckVkResult("vkCreateImageView", result);
+
+    _samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 
     result = vkCreateSampler(Graphics::Device, &_samplerCreateInfo, nullptr, &_sampler);
     CheckVkResult("vkCreateSampler", result);

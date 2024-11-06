@@ -12,6 +12,8 @@ StringView VkResultToString(VkResult result);
 
 StringView VkObjectTypeToString(VkObjectType objectType);
 
+StringView VkSampleCountFlagBitsToString(VkSampleCountFlagBits sampleCount);
+
 StringView VkFormatToString(VkFormat format);
 
 StringView VkColorSpaceToString(VkColorSpaceKHR colorSpace);

@@ -63,6 +63,8 @@ VkQueue _graphicsQueue;
 
 VkQueue _presentQueue;
 
+VkSampleCountFlagBits MSAASampleCount;
+
 DUSK_API
 VkDevice Device = VK_NULL_HANDLE;
 
@@ -90,6 +92,16 @@ List<VkImage> _swapchainImageList;
 List<VkImageView> _swapchainImageViewList;
 
 List<VkFramebuffer> _framebufferList;
+
+// Color Buffer
+
+VkFormat _colorImageFormat = VK_FORMAT_UNDEFINED;
+
+VmaAllocation _colorImageAllocation = VK_NULL_HANDLE;
+
+VkImage _colorImage = VK_NULL_HANDLE;
+
+VkImageView _colorImageView = VK_NULL_HANDLE;
 
 // Depth Buffer
 
@@ -142,6 +154,10 @@ List<VkSemaphore> _imageAvailableSemaphoreList;
 List<VkSemaphore> _renderingFinishedSemaphoreList;
 
 List<VkFence> _inFlightFenceList;
+
+Material::Pointer DefaultMaterial;
+VulkanTexture::Pointer WhiteTexture;
+VulkanTexture::Pointer BlackTexture;
 
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL _VulkanDebugMessageCallback(
@@ -461,6 +477,35 @@ void initDevice()
 
     vkGetDeviceQueue(Device, _graphicsQueueFamilyIndex, 0, &_graphicsQueue);
     vkGetDeviceQueue(Device, _presentQueueFamilyIndex, 0, &_presentQueue);
+
+    VkSampleCountFlags counts = (
+          PhysicalDeviceProperties.limits.framebufferColorSampleCounts
+        & PhysicalDeviceProperties.limits.framebufferDepthSampleCounts
+    );
+    
+    if (counts & VK_SAMPLE_COUNT_64_BIT) {
+        MSAASampleCount = VK_SAMPLE_COUNT_64_BIT;
+    }
+    else if (counts & VK_SAMPLE_COUNT_32_BIT) {
+        MSAASampleCount = VK_SAMPLE_COUNT_32_BIT;
+    }
+    else if (counts & VK_SAMPLE_COUNT_16_BIT) {
+        MSAASampleCount = VK_SAMPLE_COUNT_16_BIT;
+    }
+    else if (counts & VK_SAMPLE_COUNT_8_BIT) {
+        MSAASampleCount = VK_SAMPLE_COUNT_8_BIT;
+    }
+    else if (counts & VK_SAMPLE_COUNT_4_BIT) {
+        MSAASampleCount = VK_SAMPLE_COUNT_4_BIT;
+    }
+    else if (counts & VK_SAMPLE_COUNT_2_BIT) {
+        MSAASampleCount = VK_SAMPLE_COUNT_2_BIT;
+    }
+    else {
+        MSAASampleCount = VK_SAMPLE_COUNT_1_BIT;
+    }
+
+    Log(DUSK_ANCHOR, "MSAA: {}", VkSampleCountFlagBitsToString(MSAASampleCount));
 }
 
 void initAllocator()
@@ -525,6 +570,73 @@ void initAllocator()
     }
 }
 
+void initColorBuffer()
+{
+    VkResult result;
+
+    _colorImageFormat = _swapchainImageFormat;
+
+    vkDestroyImageView(Device, _colorImageView, nullptr);
+    vmaDestroyImage(Allocator, _colorImage, _colorImageAllocation);
+
+    _colorImageView = VK_NULL_HANDLE;
+    _colorImage = VK_NULL_HANDLE;
+    _colorImageAllocation = VK_NULL_HANDLE;
+
+    auto imageCreateInfo = VkImageCreateInfo{
+        .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        .imageType = VK_IMAGE_TYPE_2D,
+        .format = _colorImageFormat,
+        .extent = VkExtent3D{
+            .width = _swapchainExtent.width,
+            .height = _swapchainExtent.height,
+            .depth = 1
+        },
+        .mipLevels = 1,
+        .arrayLayers = 1,
+        .samples = MSAASampleCount,
+        .tiling = VK_IMAGE_TILING_OPTIMAL,
+        .usage = (
+              VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT
+            | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+        ),
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+    };
+
+    auto allocationCreateInfo = VmaAllocationCreateInfo{
+        .usage = VMA_MEMORY_USAGE_GPU_ONLY,
+        .requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+    };
+
+    result = vmaCreateImage(
+        Allocator,
+        &imageCreateInfo,
+        &allocationCreateInfo,
+        &_colorImage,
+        &_colorImageAllocation,
+        nullptr
+    );
+    CheckVkResult("vmaCreateImage", result);
+
+    auto imageViewCreateInfo = VkImageViewCreateInfo{
+        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        .image = _colorImage,
+        .viewType = VK_IMAGE_VIEW_TYPE_2D,
+        .format = _colorImageFormat,
+        .subresourceRange = VkImageSubresourceRange{
+            .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+            .baseMipLevel = 0,
+            .levelCount = 1,
+            .baseArrayLayer = 0,
+            .layerCount = 1,
+        },
+    };
+
+    result = vkCreateImageView(Device, &imageViewCreateInfo, nullptr, &_colorImageView);
+    CheckVkResult("vkCreateImageView", result);
+}
+
 void initDepthBuffer()
 {
     VkResult result;
@@ -577,7 +689,8 @@ void initDepthBuffer()
         },
         .mipLevels = 1,
         .arrayLayers = 1,
-        .samples = VK_SAMPLE_COUNT_1_BIT,
+        // .samples = VK_SAMPLE_COUNT_1_BIT,
+        .samples = MSAASampleCount,
         .tiling = VK_IMAGE_TILING_OPTIMAL,
         .usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
         .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
@@ -623,24 +736,37 @@ void initRenderPass()
 
     auto colorAttachmentDescription = VkAttachmentDescription{
         .format = _swapchainImageFormat,
-        .samples = VK_SAMPLE_COUNT_1_BIT,
+        // .samples = VK_SAMPLE_COUNT_1_BIT,
+        .samples = MSAASampleCount,
         .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
         .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
         .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
         .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
         .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-        .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+        .finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
     };
 
     auto depthAttachmentDescription = VkAttachmentDescription{
         .format = _depthImageFormat,
-        .samples = VK_SAMPLE_COUNT_1_BIT,
+        // .samples = VK_SAMPLE_COUNT_1_BIT,
+        .samples = MSAASampleCount,
         .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
         .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
         .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
         .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
         .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
         .finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+    };
+
+    auto resolveAttachmentDescription = VkAttachmentDescription{
+        .format = _swapchainImageFormat,
+        .samples = VK_SAMPLE_COUNT_1_BIT,
+        .loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+        .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+        .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+        .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+        .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
     };
 
     auto colorAttachmentReference = VkAttachmentReference{
@@ -653,10 +779,16 @@ void initRenderPass()
         .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
     };
 
+    auto resolveAttachmentReference = VkAttachmentReference{
+        .attachment = 2,
+        .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    };
+
     auto subpassDescription = VkSubpassDescription{
         .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
         .colorAttachmentCount = 1,
         .pColorAttachments = &colorAttachmentReference,
+        .pResolveAttachments = &resolveAttachmentReference,
         .pDepthStencilAttachment = &depthAttachmentReference,
     };
 
@@ -700,9 +832,10 @@ void initRenderPass()
         //     .setDstAccessMask(VkAccessFlagBits::eDepthStencilAttachmentWrite),
     };
 
-    Array<VkAttachmentDescription, 2> attachmentList = {
+    Array<VkAttachmentDescription, 3> attachmentList = {
         colorAttachmentDescription,
         depthAttachmentDescription,
+        resolveAttachmentDescription,
     };
 
     vkDestroyRenderPass(Device, RenderPass, nullptr);
@@ -749,7 +882,7 @@ void initDescriptorSetLayout()
 {
     VkResult result;
 
-    Array<VkDescriptorSetLayoutBinding, 2> _descriptorSetLayoutBindingList = {
+    Array<VkDescriptorSetLayoutBinding, 8> _descriptorSetLayoutBindingList = {
         VkDescriptorSetLayoutBinding{
             .binding = ShaderGlobals::Binding,
             .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -760,7 +893,43 @@ void initDescriptorSetLayout()
             .binding = ShaderTransform::Binding,
             .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
             .descriptorCount = 1,
-            .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+            .stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+        },
+        VkDescriptorSetLayoutBinding{
+            .binding = ShaderMaterial::Binding,
+            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+        },
+        VkDescriptorSetLayoutBinding{
+            .binding = ShaderMaterial::BaseColorMapBinding,
+            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+        },
+        VkDescriptorSetLayoutBinding{
+            .binding = ShaderMaterial::NormalMapBinding,
+            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+        },
+        VkDescriptorSetLayoutBinding{
+            .binding = ShaderMaterial::MetallicRoughnessMapBinding,
+            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+        },
+        VkDescriptorSetLayoutBinding{
+            .binding = ShaderMaterial::EmissiveMapBinding,
+            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+        },
+        VkDescriptorSetLayoutBinding{
+            .binding = ShaderMaterial::OcclusionMapBinding,
+            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
         },
     };
 
@@ -815,9 +984,10 @@ void initFramebuffers()
     _framebufferList.resize(_swapchainImageViewList.size());
 
     for (auto&& [index, imageView] : Enumerate(_swapchainImageViewList)) {
-        Array<VkImageView, 2> attachmentList = {
-            imageView,
+        Array<VkImageView, 3> attachmentList = {
+            _colorImageView,
             _depthImageView,
+            imageView,
         };
 
         auto framebufferCreateInfo = VkFramebufferCreateInfo{
@@ -1217,6 +1387,7 @@ void initSwapchain()
         CheckVkResult("vkCreateImageView", result);
     }
 
+    initColorBuffer();
     initDepthBuffer();
     initRenderPass();
     initFramebuffers();
@@ -1246,6 +1417,21 @@ void Init()
 
     initSwapchain();
     initSwapchain(); // Test swap chain recreation
+
+    DefaultMaterial.reset(new Material());
+
+    auto samplerCreateInfo = VkSamplerCreateInfo{
+        .addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+        .addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+    };
+
+    uint8_t white[] = { 255, 255, 255, 255 };
+    WhiteTexture.reset(new VulkanTexture());
+    WhiteTexture->LoadFromPixels(white, 1, 1, 4, samplerCreateInfo);
+
+    uint8_t black[] = { 0, 0, 0, 255 };
+    BlackTexture.reset(new VulkanTexture());
+    BlackTexture->LoadFromPixels(black, 1, 1, 4, samplerCreateInfo);
 }
 
 DUSK_API
@@ -1255,6 +1441,10 @@ void Term()
 
     result = vkDeviceWaitIdle(Device);
     CheckVkResult("vkDeviceWaitIdle", result);
+
+    DefaultMaterial.reset();
+    WhiteTexture.reset();
+    BlackTexture.reset();
 
     // Sync Objects
 
@@ -1305,6 +1495,15 @@ void Term()
     vmaDestroyImage(Allocator, _depthImage, _depthImageAllocation);
     _depthImage = VK_NULL_HANDLE;
     _depthImageAllocation = VK_NULL_HANDLE;
+
+    // Color Buffer
+
+    vkDestroyImageView(Device, _colorImageView, nullptr);
+    _colorImageView = VK_NULL_HANDLE;
+
+    vmaDestroyImage(Allocator, _colorImage, _colorImageAllocation);
+    _colorImage = VK_NULL_HANDLE;
+    _colorImageAllocation = VK_NULL_HANDLE;
 
     // Swapchain
 
@@ -1484,8 +1683,11 @@ VkExtent2D GetWindowSize()
 }
 
 DUSK_API
-void CopyBuffer(VkBuffer source, VkBuffer destination, VkBufferCopy region)
-{
+void CopyBuffer(
+    VkBuffer source,
+    VkBuffer destination,
+    VkBufferCopy region
+) {
     VkResult result;
 
     auto commandBufferAllocateInfo = VkCommandBufferAllocateInfo{
@@ -1528,8 +1730,12 @@ void CopyBuffer(VkBuffer source, VkBuffer destination, VkBufferCopy region)
 }
 
 DUSK_API
-void CopyBufferToImage(VkBuffer source, VkImage destination, VkBufferImageCopy region)
-{
+void CopyBufferToImage(
+    VkBuffer source,
+    VkImage destination,
+    VkImageLayout layout,
+    VkBufferImageCopy region
+) {
     VkResult result;
 
     auto commandBufferAllocateInfo = VkCommandBufferAllocateInfo{
@@ -1556,12 +1762,24 @@ void CopyBufferToImage(VkBuffer source, VkImage destination, VkBufferImageCopy r
         .layerCount = region.imageSubresource.layerCount,
     };
 
-    auto imageMemoryBarrier = VkImageMemoryBarrier{
+    auto transferImageMemoryBarrier = VkImageMemoryBarrier{
         .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
         .srcAccessMask = 0,
         .dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
         .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
         .newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .image = destination,
+        .subresourceRange = subresourceRange,
+    };
+
+    auto convertMemoryBarrier = VkImageMemoryBarrier{
+        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+        .srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
+        .dstAccessMask = 0,
+        .oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        .newLayout = layout,
         .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
         .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
         .image = destination,
@@ -1577,7 +1795,7 @@ void CopyBufferToImage(VkBuffer source, VkImage destination, VkBufferImageCopy r
         VkDependencyFlags(0),
         0, nullptr,
         0, nullptr,
-        1, &imageMemoryBarrier
+        1, &transferImageMemoryBarrier
     );
 
     vkCmdCopyBufferToImage(commandBuffer,
@@ -1585,6 +1803,15 @@ void CopyBufferToImage(VkBuffer source, VkImage destination, VkBufferImageCopy r
         destination,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         1, &region
+    );
+
+    vkCmdPipelineBarrier(commandBuffer,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+        VkDependencyFlags(0),
+        0, nullptr,
+        0, nullptr,
+        1, &convertMemoryBarrier
     );
 
     result = vkEndCommandBuffer(commandBuffer);

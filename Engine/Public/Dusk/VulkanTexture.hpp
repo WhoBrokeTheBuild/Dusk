@@ -30,6 +30,8 @@ public:
         return LoadFromBuffer(buffer.data(), buffer.size(), samplerCreateInfo);
     }
 
+    bool LoadFromPixels(const uint8_t * pixels, size_t width, size_t height, size_t components, VkSamplerCreateInfo samplerCreateInfo = {});
+
     void Destroy();
 
     bool Reload();
@@ -38,9 +40,17 @@ public:
         return not _path.empty();
     }
 
+    inline VkImageView GetImageView() const {
+        return _imageView;
+    }
+
+    inline VkSampler GetSampler() const {
+        return _sampler;
+    }
+
 private:
 
-    void createImage(uint8_t * pixels, size_t size);
+    void createImage(const uint8_t * pixels, size_t size);
 
     Path _path;
 

@@ -12,9 +12,15 @@ public:
 
     static constexpr uint32_t Binding = 2;
 
+    static constexpr uint32_t BaseColorMapBinding = 3;
+    static constexpr uint32_t NormalMapBinding = 4;
+    static constexpr uint32_t MetallicRoughnessMapBinding = 5;
+    static constexpr uint32_t EmissiveMapBinding = 6;
+    static constexpr uint32_t OcclusionMapBinding = 7;
+
     alignas(4) vec4 BaseColorFactor;
 
-    alignas(4) vec4 EmissiveFactor;
+    alignas(4) vec3 EmissiveFactor;
 
     alignas(4) float MetallicFactor;
 
@@ -27,7 +33,7 @@ public:
 }; // struct ShaderMaterial
 
 static_assert(
-    sizeof(ShaderMaterial) == 48,
+    sizeof(ShaderMaterial) == 44,
     "Layout of ShaderMaterial does not conform to std140"
 );
 

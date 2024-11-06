@@ -34,7 +34,19 @@ public:
     // TODO: Move and Replace
     void Update(mat4 view, mat4 proj);
 
-    void GenerateCommands(VkCommandBuffer commandBuffer);
+    inline BoundingBox GetBounds() const {
+        BoundingBox bounds;
+        for (const auto& mesh : _meshList) {
+            bounds.Extend(mesh->GetBounds());
+        }
+        return bounds;
+    }
+
+    inline void GenerateCommands(VkCommandBuffer commandBuffer) {
+        for (auto& mesh : _meshList) {
+            mesh->GenerateCommands(commandBuffer);
+        }
+    }
 
 private:
 
@@ -42,9 +54,7 @@ private:
 
     List<Mesh::Pointer> _meshList;
 
-    VulkanBuffer::Pointer _shaderTransformBuffer;
-
-    VkDescriptorSet _descriptorSet = VK_NULL_HANDLE;
+    VulkanBuffer _transformBuffer;
 
 }; // class Model
 

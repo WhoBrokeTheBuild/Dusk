@@ -24,11 +24,13 @@ int main(int argc, char * argv[])
 
             auto model = dusk::Model();
 
+            glm::quat rotation(glm::vec3(0.0f));
+
             // From https://vulkan-tutorial.com/
-            // loaded = model.LoadFromFile("viking_room.glb");
+            loaded = model.LoadFromFile("viking_room.glb");
 
             // Configure with -DGLTF_SAMPLE_ASSETS_PATH=path/to/glTF-Sample-Assets/
-            loaded = model.LoadFromFile("Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb");
+            // loaded = model.LoadFromFile("Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb"); rotation = glm::quat(glm::vec3(dusk::ToRadians(90.0f), 0.0f, 0.0f));
             // loaded = model.LoadFromFile("Models/BoxVertexColors/glTF-Binary/BoxVertexColors.glb");
             // loaded = model.LoadFromFile("Models/BoxVertexColors/glTF-Embedded/BoxVertexColors.gltf");
             // loaded = model.LoadFromFile("Models/BoomBox/glTF/BoomBox.gltf");
@@ -43,8 +45,15 @@ int main(int argc, char * argv[])
             // pipeline->SetCullMode(VkCullModeFlagBits::eBack);
             pipeline->Create(shader);
 
+            auto bounds = model.GetBounds();
+            glm::vec3 camera(bounds.Upper * 1.5f);
+            glm::vec3 center(bounds.GetCenter());
             // glm::vec3 light = glm::vec3(1.0f);
             float angle = 0.0f;
+
+            dusk::Graphics::Globals.CameraPosition = camera;
+            dusk::Graphics::Globals.CameraDirection = glm::normalize(-camera);
+            dusk::Graphics::Globals.LightPosition = camera;
 
             dusk::Graphics::SetRenderCallback(
                 [&](VkCommandBuffer commandBuffer) {
@@ -55,22 +64,23 @@ int main(int argc, char * argv[])
                     float aspect = float(windowSize.width) / float(windowSize.height);
 
                     glm::mat4 view = glm::lookAt(
-                        glm::vec3(1.5f),
-                        glm::vec3(0.0f, 0.0f, 0.0f),
+                        camera,
+                        center,
                         glm::vec3(0.0f, 1.0f, 0.0f)
                     );
 
-                    glm::mat4 projection = glm::perspective(glm::radians(60.0f), aspect, 0.01f, 10.0f);
+                    glm::mat4 projection = glm::perspective(glm::radians(60.0f), aspect, 0.001f, 1000.0f);
                     // projection[1][1] *= -1;
 
                     model.Transform.Position = { 0, 0, 0 };
-                    model.Transform.Orientation = glm::quat(glm::vec3(0.0f, angle, 0.0f));
+                    model.Transform.Orientation = glm::quat(glm::vec3(0.0f, angle, 0.0f)) * rotation;
+                    // model.Transform.Orientation = glm::quat(glm::vec3(angle)) * rotation;
                     model.Transform.Scale = { 1, 1, 1 };
                     model.Update(view, projection);
 
                     model.GenerateCommands(commandBuffer);
 
-                    angle += 0.005f;
+                    angle -= 0.002f;
                 }
             );
 

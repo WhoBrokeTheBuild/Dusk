@@ -8,6 +8,8 @@
 #include <Dusk/Tuple.hpp>
 #include <Dusk/VulkanBuffer.hpp>
 #include <Dusk/VulkanUtil.hpp>
+#include <Dusk/VulkanTexture.hpp>
+#include <Dusk/Material.hpp>
 
 #include <Dusk/ThirdParty/vulkan.hpp>
 #include <Dusk/ThirdParty/SDL.hpp>
@@ -32,6 +34,9 @@ namespace Graphics {
     extern VkPhysicalDeviceFeatures PhysicalDeviceFeatures;
 
     DUSK_API
+    extern VkSampleCountFlagBits MSAASampleCount;
+
+    DUSK_API
     extern VmaAllocator Allocator;
 
     DUSK_API
@@ -51,6 +56,15 @@ namespace Graphics {
 
     DUSK_API
     extern VkPipelineLayout PipelineLayout;
+
+    DUSK_API
+    extern Material::Pointer DefaultMaterial;
+
+    DUSK_API
+    extern VulkanTexture::Pointer WhiteTexture;
+
+    DUSK_API
+    extern VulkanTexture::Pointer BlackTexture;
 
     DUSK_API
     void Init();
@@ -75,10 +89,19 @@ namespace Graphics {
     VkExtent2D GetWindowSize();
 
     DUSK_API
-    void CopyBuffer(VkBuffer source, VkBuffer destination, VkBufferCopy region);
+    void CopyBuffer(
+        VkBuffer source,
+        VkBuffer destination,
+        VkBufferCopy region
+    );
 
     DUSK_API
-    void CopyBufferToImage(VkBuffer source, VkImage destination, VkBufferImageCopy region);
+    void CopyBufferToImage(
+        VkBuffer source,
+        VkImage destination,
+        VkImageLayout layout,
+        VkBufferImageCopy region
+    );
 
 } // namespace Graphics
 

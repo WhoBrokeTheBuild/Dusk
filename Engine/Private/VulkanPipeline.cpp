@@ -30,7 +30,7 @@ VulkanPipeline::VulkanPipeline()
 
     _multisampleStateCreateInfo = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
-        .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
+        .rasterizationSamples = Graphics::MSAASampleCount,
         .sampleShadingEnable = false,
     };
 

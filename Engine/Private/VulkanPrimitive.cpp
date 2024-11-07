@@ -19,7 +19,7 @@ VulkanPrimitive::~VulkanPrimitive()
 
 bool VulkanPrimitive::Create(
     Span<PrimitiveVertex> vertexList,
-    VkPrimitiveTopology topology /*= VkPrimitiveTopology::eTriangleList*/,
+    VkPrimitiveTopology topology /*= VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST*/,
     bool haveTangents /*= true*/
 ) {
     Destroy();
@@ -42,6 +42,8 @@ bool VulkanPrimitive::Create(
         vertexList.size_bytes(),
         vertexList.data()
     );
+
+    createDescriptorSet();
     
     return true;
 }
@@ -49,11 +51,9 @@ bool VulkanPrimitive::Create(
 bool VulkanPrimitive::Create(
     Span<uint32_t> indexList,
     Span<PrimitiveVertex> vertexList,
-    VkPrimitiveTopology topology /*= VkPrimitiveTopology::eTriangleList*/,
+    VkPrimitiveTopology topology /*= VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST*/,
     bool haveTangents /*= true*/
 ) {
-    VkResult result;
-
     Destroy();
 
     _count = vertexList.size();
@@ -85,19 +85,7 @@ bool VulkanPrimitive::Create(
         vertexList.data()
     );
 
-    auto descriptorSetAllocateInfo = VkDescriptorSetAllocateInfo{
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-        .descriptorPool = Graphics::DescriptorPool,
-        .descriptorSetCount = 1,
-        .pSetLayouts = &Graphics::DescriptorSetLayout,
-    };
-
-    result = vkAllocateDescriptorSets(
-        Graphics::Device,
-        &descriptorSetAllocateInfo,
-        &_descriptorSet
-    );
-    CheckVkResult("vkAllocateDescriptorSets", result);
+    createDescriptorSet();
 
     return true;
 }
@@ -256,7 +244,9 @@ void VulkanPrimitive::GenerateCommands(VkCommandBuffer commandBuffer)
     }
  
     // TODO: Enable
-    // commandBuffer.setPrimitiveTopology(_topology);
+    // vkCmdSetPrimitiveTopology(commandBuffer, _topology);
+
+
     VkBuffer vertexBuffer = _vertexBuffer.GetVkBuffer();
     VkDeviceSize vertexOffset = 0;
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, &vertexOffset);
@@ -267,6 +257,25 @@ void VulkanPrimitive::GenerateCommands(VkCommandBuffer commandBuffer)
     else {
         vkCmdDraw(commandBuffer, _count, 1, 0, 0);
     }
+}
+
+void VulkanPrimitive::createDescriptorSet()
+{
+    VkResult result;
+
+    auto descriptorSetAllocateInfo = VkDescriptorSetAllocateInfo{
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+        .descriptorPool = Graphics::DescriptorPool,
+        .descriptorSetCount = 1,
+        .pSetLayouts = &Graphics::DescriptorSetLayout,
+    };
+
+    result = vkAllocateDescriptorSets(
+        Graphics::Device,
+        &descriptorSetAllocateInfo,
+        &_descriptorSet
+    );
+    CheckVkResult("vkAllocateDescriptorSets", result);
 }
 
 void VulkanPrimitive::calculateBounds(Span<PrimitiveVertex> vertexList)
@@ -281,6 +290,8 @@ void VulkanPrimitive::calculateBounds(Span<PrimitiveVertex> vertexList)
 
 void VulkanPrimitive::calculateTangents(Span<uint32_t> indexList, Span<PrimitiveVertex> vertexList)
 {
+    // Assumes Counter(?) Clockwise
+
     // Computing tangents for other topologies can cause issues with averaging and such
     // best to just let the modeling software generate those tangents
     if (_topology != VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST) {

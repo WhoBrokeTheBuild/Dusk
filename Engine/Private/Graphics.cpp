@@ -464,8 +464,14 @@ void initDevice()
         requiredDeviceExtensionList.push_back(VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME);
     #endif
 
+    // auto extendedDynamicStateFeatures = VkPhysicalDeviceExtendedDynamicStateFeaturesEXT{
+    //     .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_FEATURES_EXT,
+    //     .extendedDynamicState = true,
+    // };
+
     auto deviceCreateInfo = VkDeviceCreateInfo{
         .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+        // .pNext = &extendedDynamicStateFeatures,
         .queueCreateInfoCount = uint32_t(queueCreateInfoList.size()),
         .pQueueCreateInfos = queueCreateInfoList.data(),
         .enabledExtensionCount = uint32_t(requiredDeviceExtensionList.size()),

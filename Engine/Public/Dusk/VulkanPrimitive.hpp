@@ -58,6 +58,8 @@ public:
 
 private:
 
+    void createDescriptorSet();
+
     void calculateBounds(Span<PrimitiveVertex> vertexList);
 
     void calculateTangents(Span<uint32_t> indexList, Span<PrimitiveVertex> vertexList);

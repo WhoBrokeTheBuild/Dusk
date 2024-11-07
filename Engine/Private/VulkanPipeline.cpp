@@ -147,7 +147,7 @@ bool VulkanPipeline::Create(VulkanShader::Pointer shader)
     Array<VkDynamicState, 2> dynamicStateList = {
         VK_DYNAMIC_STATE_VIEWPORT,
         VK_DYNAMIC_STATE_SCISSOR,
-        // VkDynamicState::ePrimitiveTopology,
+        // VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY,
     };
 
     // TODO: eDepthBias, eStencilCompareMask, eStencilReference, eStencilWriteMask

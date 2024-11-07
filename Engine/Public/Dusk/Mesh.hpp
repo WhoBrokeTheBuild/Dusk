@@ -5,6 +5,7 @@
 #include <Dusk/NonCopyable.hpp>
 #include <Dusk/Span.hpp>
 #include <Dusk/VulkanPrimitive.hpp>
+#include <Dusk/Graphics.hpp>
 
 #include <Dusk/ThirdParty/vulkan.hpp>
 
@@ -38,14 +39,48 @@ public:
         _primitiveList.push_back(std::move(primitive));
     }
 
+    void AddCube(
+        vec3 center = { 0.0f, 0.0f, 0.0f },
+        vec3 size = { 1.0f, 1.0f, 1.0f },
+        Material::Pointer material = Graphics::DefaultMaterial
+    );
+
     // TODO: PrimitiveVertex::Color
 
-    void AddPlane(
+    // Add Plane
+    // center3, size2
+
+    // Add Cube
+    // center3, size3
+
+    // Add UV Sphere
+
+    // Add Ico Sphere
+
+    // Add Pill
+
+
+    // Add Wire Cube
+    // Add Wire Plane
+    // Add Wire Arrow
+
+    // Add Coordinate Axis
+
+    void AddWireCube(
         vec3 center = { 0.0f, 0.0f, 0.0f },
-        vec3 normal = { 0.0f, 1.0f, 0.0f }, // TODO: = UP
-        vec2 size = { 1.0f, 1.0f },
-        uvec2 subdivisions = { 1, 1 }
+        vec3 size = { 1.0f, 1.0f, 1.0f },
+        vec4 color = { 0.0f, 0.0f, 0.0f, 1.0f },
+        Material::Pointer material = Graphics::DefaultMaterial
     );
+
+
+
+    // void AddPlane(
+    //     vec3 center = { 0.0f, 0.0f, 0.0f },
+    //     vec3 normal = { 0.0f, 1.0f, 0.0f }, // TODO: = UP
+    //     vec2 size = { 1.0f, 1.0f },
+    //     uvec2 subdivisions = { 1, 1 }
+    // );
 
     // void AddCube(vec3 topLeftFront, vec3 bottomRightBack);
 

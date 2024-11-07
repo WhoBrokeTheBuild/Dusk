@@ -24,7 +24,7 @@ public:
 
     // TODO: Getters and Setters
 
-    inline void SetTopology(VkPrimitiveTopology topology) {
+    inline void SetPrimitiveTopology(VkPrimitiveTopology topology) {
         _inputAssemblyStateCreateInfo.topology = topology;
     }
 

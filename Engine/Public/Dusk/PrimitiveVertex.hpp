@@ -28,7 +28,7 @@ struct DUSK_API PrimitiveVertex
     
     alignas(4) vec4 Tangent;
 
-    alignas(4) vec4 Color;
+    alignas(4) vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
 
     alignas(4) vec2 TexCoord;
     

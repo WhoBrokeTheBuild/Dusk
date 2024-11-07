@@ -36,17 +36,34 @@ int main(int argc, char * argv[])
             // loaded = model.LoadFromFile("Models/BoomBox/glTF/BoomBox.gltf");
             // loaded = model.LoadFromFile("Models/BoomBox/glTF-Binary/BoomBox.glb");
 
+            auto bounds = model.GetBounds();
+            
+            auto boxModel = dusk::Model();
+            dusk::Mesh::Pointer boxMesh(new dusk::Mesh());
+            boxMesh->AddWireCube(
+                bounds.GetCenter(),
+                bounds.GetSize(),
+                dusk::Color::Black
+            );
+            dusk::List<dusk::Mesh::Pointer> boxMeshList;
+            boxMeshList.push_back(std::move(boxMesh));
+            boxModel.Create(std::move(boxMeshList));
+
             if (!loaded) {
                 return 1;
             }
 
             dusk::VulkanPipeline::Pointer pipeline(new dusk::VulkanPipeline());
-            // pipeline->SetFrontFace(VkFrontFace::eCounterClockwise);
-            // pipeline->SetCullMode(VkCullModeFlagBits::eBack);
+            pipeline->SetFrontFace(VK_FRONT_FACE_COUNTER_CLOCKWISE);
+            pipeline->SetCullMode(VK_CULL_MODE_BACK_BIT);
             pipeline->Create(shader);
 
-            auto bounds = model.GetBounds();
-            glm::vec3 camera(bounds.Upper * 1.5f);
+            dusk::VulkanPipeline::Pointer debugPipeline(new dusk::VulkanPipeline());
+            debugPipeline->SetCullMode(VK_CULL_MODE_NONE);
+            debugPipeline->SetPrimitiveTopology(VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
+            debugPipeline->Create(shader);
+
+            glm::vec3 camera(bounds.Upper * 2.0f);
             glm::vec3 center(bounds.GetCenter());
             // glm::vec3 light = glm::vec3(1.0f);
             float angle = 0.0f;
@@ -79,6 +96,12 @@ int main(int argc, char * argv[])
                     model.Update(view, projection);
 
                     model.GenerateCommands(commandBuffer);
+
+                    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, debugPipeline->GetVkPipeline());
+
+                    boxModel.Transform = model.Transform;
+                    boxModel.Update(view, projection);
+                    boxModel.GenerateCommands(commandBuffer);
 
                     angle -= 0.002f;
                 }

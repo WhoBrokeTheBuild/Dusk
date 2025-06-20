@@ -26,7 +26,8 @@ constexpr uint64_t MAX_TIMEOUT = UINT64_MAX;
 
 // Window
 
-SDL_Window * _window = nullptr;
+DUSK_API
+SDL_Window * Window = nullptr;
 
 VkExtent2D _windowSize = { 1024, 768 };
 
@@ -159,6 +160,8 @@ Material::Pointer DefaultMaterial;
 VulkanTexture::Pointer WhiteTexture;
 VulkanTexture::Pointer BlackTexture;
 
+VulkanShader::Pointer DebugShader;
+VulkanPipeline::Pointer DebugPipeline;
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL _VulkanDebugMessageCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT severity,
@@ -212,7 +215,7 @@ void initWindow()
         SDL_VERSIONNUM_MICRO(sdlVersion)
     );
 
-    _window = SDL_CreateWindow(
+    Window = SDL_CreateWindow(
         "Dusk - HelloWorld",
         _windowSize.width,
         _windowSize.height,
@@ -315,7 +318,7 @@ void initInstance()
 
 void initSurface()
 {
-    if (!SDL_Vulkan_CreateSurface(_window, Instance, nullptr, &_surface)) {
+    if (!SDL_Vulkan_CreateSurface(Window, Instance, nullptr, &_surface)) {
         throw Exception("SDL_Vulkan_CreateSurface failed, {}", SDL_GetError());
     }
 }
@@ -1409,21 +1412,8 @@ void SetRenderCallback(std::function<void(VkCommandBuffer)> renderCallback)
     fillCommandBuffers();
 }
 
-DUSK_API
-void Init()
+void initDefaultMaterial()
 {
-    initWindow();
-    initInstance();
-    initSurface();
-    initDevice();
-    initAllocator();
-    initDescriptorPool();
-    initDescriptorSetLayout();
-    initPipelineLayout();
-
-    initSwapchain();
-    initSwapchain(); // Test swap chain recreation
-
     DefaultMaterial.reset(new Material());
 
     auto samplerCreateInfo = VkSamplerCreateInfo{
@@ -1440,6 +1430,36 @@ void Init()
     BlackTexture->LoadFromPixels(black, 1, 1, 4, samplerCreateInfo);
 }
 
+void initDebugPipeline()
+{
+    DebugShader.reset(new VulkanShader());
+    DebugShader->LoadFromFiles({ "Dusk/Debug.vert.spv", "Dusk/Debug.frag.spv" });
+
+    DebugPipeline.reset(new VulkanPipeline());
+    DebugPipeline->SetPrimitiveTopology(VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
+    DebugPipeline->SetCullMode(VK_CULL_MODE_NONE);
+    DebugPipeline->Create(DebugShader);
+}
+
+DUSK_API
+void Init()
+{
+    initWindow();
+    initInstance();
+    initSurface();
+    initDevice();
+    initAllocator();
+    initDescriptorPool();
+    initDescriptorSetLayout();
+    initPipelineLayout();
+
+    initSwapchain();
+    initSwapchain(); // Test swap chain recreation
+
+    initDefaultMaterial();
+    initDebugPipeline();
+}
+
 DUSK_API
 void Term()
 {
@@ -1447,6 +1467,9 @@ void Term()
 
     result = vkDeviceWaitIdle(Device);
     CheckVkResult("vkDeviceWaitIdle", result);
+
+    DebugShader.reset();
+    DebugPipeline.reset();
 
     DefaultMaterial.reset();
     WhiteTexture.reset();
@@ -1566,9 +1589,9 @@ void Term()
 
     // Window
 
-    if (_window) {
-        SDL_DestroyWindow(_window);
-        _window = nullptr;
+    if (Window) {
+        SDL_DestroyWindow(Window);
+        Window = nullptr;
     }
 
     SDL_Quit();

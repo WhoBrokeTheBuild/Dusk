@@ -1,5 +1,6 @@
 
 #include <Dusk/Dusk.hpp>
+#include <Dusk/Log.hpp>
 
 int main(int argc, char * argv[])
 {
@@ -12,10 +13,23 @@ int main(int argc, char * argv[])
         {
             bool loaded = true;
 
+            // dusk::VulkanTexture::Pointer texture(new dusk::VulkanTexture());
+            // texture->LoadFromFile("viking_room.png");
+            
+            // dusk::JSON::Object asset;
+            // texture->Serialize(asset);
+            // dusk::Log(DUSK_ANCHOR, "{}", asset.dump(4));
+
+            // texture->Destroy();
+            // texture->Deserialize(asset);
+
+
             dusk::VulkanShader::Pointer shader(new dusk::VulkanShader());
             loaded = shader->LoadFromFiles({
                 "test.vert.spv",
                 "test.frag.spv",
+                // "Dusk/Debug.vert.spv",
+                // "Dusk/Debug.frag.spv",
             });
 
             if (!loaded) {
@@ -24,7 +38,8 @@ int main(int argc, char * argv[])
 
             auto model = dusk::Model();
 
-            glm::quat rotation(glm::vec3(0.0f));
+            bool rotating = true;
+            glm::quat initialOrientation(glm::vec3(0.0f));
 
             // From https://vulkan-tutorial.com/
             loaded = model.LoadFromFile("viking_room.glb");
@@ -38,16 +53,15 @@ int main(int argc, char * argv[])
 
             auto bounds = model.GetBounds();
             
-            auto boxModel = dusk::Model();
-            dusk::Mesh::Pointer boxMesh(new dusk::Mesh());
-            boxMesh->AddWireCube(
-                bounds.GetCenter(),
-                bounds.GetSize(),
-                dusk::Color::Black
+            auto axisModel = dusk::Model();
+            dusk::Mesh::Pointer axisMesh(new dusk::Mesh());
+            axisMesh->AddWireAxis(
+                { 0.0f, 0.0f, 0.0f },
+                std::abs(std::max({ bounds.GetSize().x, bounds.GetSize().y, bounds.GetSize().z })) * 0.1f
             );
-            dusk::List<dusk::Mesh::Pointer> boxMeshList;
-            boxMeshList.push_back(std::move(boxMesh));
-            boxModel.Create(std::move(boxMeshList));
+            dusk::List<dusk::Mesh::Pointer> axisMeshList;
+            axisMeshList.push_back(std::move(axisMesh));
+            axisModel.Create(std::move(axisMeshList));
 
             if (!loaded) {
                 return 1;
@@ -66,16 +80,40 @@ int main(int argc, char * argv[])
             glm::vec3 camera(bounds.Upper * 2.0f);
             glm::vec3 center(bounds.GetCenter());
             // glm::vec3 light = glm::vec3(1.0f);
-            float angle = 0.0f;
+            glm::quat orientation = initialOrientation;
 
             dusk::Graphics::Globals.CameraPosition = camera;
             dusk::Graphics::Globals.CameraDirection = glm::normalize(-camera);
             dusk::Graphics::Globals.LightPosition = camera;
 
+            bool mouseHeld = false;
+            dusk::Input::SetMouseCallback(
+                [&](SDL_Event * event) {
+                    if (mouseHeld) {
+                        if (event->type == SDL_EVENT_MOUSE_BUTTON_UP && event->button.button == SDL_BUTTON_LEFT) {
+                            mouseHeld = false;
+                            SDL_SetWindowRelativeMouseMode(dusk::Graphics::Window, false);
+                        }
+                        else if (event->type == SDL_EVENT_MOUSE_MOTION) {
+                            orientation *= glm::quat(glm::vec3(
+                                event->motion.yrel * -0.01f,
+                                event->motion.xrel * 0.01f,
+                                0.0f
+                            ));
+                        }
+                    }
+                    else if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN && event->button.button == SDL_BUTTON_LEFT) {
+                        mouseHeld = true;
+                        rotating = false;
+                        SDL_SetWindowRelativeMouseMode(dusk::Graphics::Window, true);
+                    }
+                }
+            );
+
             dusk::Graphics::SetRenderCallback(
                 [&](VkCommandBuffer commandBuffer) {
 
-                    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetVkPipeline());
+                    pipeline->GenerateCommands(commandBuffer);
 
                     auto windowSize = dusk::Graphics::GetWindowSize();
                     float aspect = float(windowSize.width) / float(windowSize.height);
@@ -89,21 +127,23 @@ int main(int argc, char * argv[])
                     glm::mat4 projection = glm::perspective(glm::radians(60.0f), aspect, 0.001f, 1000.0f);
                     // projection[1][1] *= -1;
 
+                    if (rotating) {
+                        orientation *= glm::quat(glm::vec3(0.0f, 0.002f, 0.0f));
+                    }
+
                     model.Transform.Position = { 0, 0, 0 };
-                    model.Transform.Orientation = glm::quat(glm::vec3(0.0f, angle, 0.0f)) * rotation;
-                    // model.Transform.Orientation = glm::quat(glm::vec3(angle)) * rotation;
+                    model.Transform.Orientation = orientation;
                     model.Transform.Scale = { 1, 1, 1 };
                     model.Update(view, projection);
 
                     model.GenerateCommands(commandBuffer);
 
-                    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, debugPipeline->GetVkPipeline());
-
-                    boxModel.Transform = model.Transform;
-                    boxModel.Update(view, projection);
-                    boxModel.GenerateCommands(commandBuffer);
-
-                    angle -= 0.002f;
+                    dusk::Graphics::DebugPipeline->GenerateCommands(commandBuffer);
+                    
+                    axisModel.Transform.Position = glm::vec4(bounds.Upper, 1.0f);
+                    axisModel.Transform.Orientation = model.Transform.Orientation;
+                    axisModel.Update(view, projection);
+                    axisModel.GenerateCommands(commandBuffer);
                 }
             );
 

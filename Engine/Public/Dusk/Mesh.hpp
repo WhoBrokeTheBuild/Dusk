@@ -62,7 +62,6 @@ public:
 
     // Add Wire Cube
     // Add Wire Plane
-    // Add Wire Arrow
 
     // Add Coordinate Axis
 
@@ -70,6 +69,12 @@ public:
         vec3 center = { 0.0f, 0.0f, 0.0f },
         vec3 size = { 1.0f, 1.0f, 1.0f },
         vec4 color = { 0.0f, 0.0f, 0.0f, 1.0f },
+        Material::Pointer material = Graphics::DefaultMaterial
+    );
+
+    void AddWireAxis(
+        vec3 center = { 0.0f, 0.0f, 0.0f },
+        float size = 1.0f,
         Material::Pointer material = Graphics::DefaultMaterial
     );
 

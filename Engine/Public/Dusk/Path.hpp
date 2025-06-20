@@ -22,6 +22,9 @@ void ParseAssetPathList(StringView assetPath);
 DUSK_API
 List<Path> GetAssetPathList();
 
+DUSK_API
+Path FindShortestAssetPath(Path fullPath);
+
 } // namespace dusk
 
 #endif // DUSK_PATH_HPP

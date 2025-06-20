@@ -37,6 +37,7 @@ bool VulkanShader::LoadFromFiles(const List<Path>& pathList)
         else {
             for (const auto& assetPath : assetPathList) {
                 auto fullPath = assetPath / path;
+                Log(DUSK_ANCHOR, "Checking {}", fullPath.string());
                 if (loadSPV(fullPath)) {
                     _pathList.push_back(fullPath);
                     break;

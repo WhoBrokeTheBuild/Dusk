@@ -52,6 +52,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
 
+if(DUSK_TEST)
+    include(CTest)
+endif()
+
 ###
 ### Third Party Dependencies
 ###
@@ -59,6 +63,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
 find_package(Vulkan COMPONENTS glslc REQUIRED)
 
 include(FetchContent)
+set(_fetch_content_list "")
 
 # TODO: Update once this is included in the next version
 # https://github.com/g-truc/glm/commit/a2844eede81f92b7dfb327f831c0bc0dbb273078
@@ -67,25 +72,21 @@ FetchContent_Declare(
     URL "https://github.com/g-truc/glm/archive/refs/heads/master.zip"
     FIND_PACKAGE_ARGS 1.0.1
 )
-
-FetchContent_Declare(
-    googletest
-    URL "https://github.com/google/googletest/archive/refs/tags/v1.15.2.zip"
-    FIND_PACKAGE_ARGS 1.15.2
-)
+list(APPEND _fetch_content_list glm)
 
 FetchContent_Declare(
     nlohmann_json
-    URL "https://github.com/nlohmann/json/archive/refs/tags/v3.11.3.zip"
-    FIND_PACKAGE_ARGS 3.11.3
+    URL "https://github.com/nlohmann/json/archive/refs/tags/v3.12.0.zip"
+    FIND_PACKAGE_ARGS 3.12.0
 )
+list(APPEND _fetch_content_list nlohmann_json)
 
-# TODO: Update once SDL3 is stable
 FetchContent_Declare(
     SDL3
-    URL "https://github.com/libsdl-org/SDL/archive/refs/heads/main.zip"
-    FIND_PACKAGE_ARGS 3
+    URL "https://github.com/libsdl-org/SDL/archive/refs/tags/release-3.2.16.zip"
+    FIND_PACKAGE_ARGS 3.2.16
 )
+list(APPEND _fetch_content_list SDL3)
 
 set(SPIRV_REFLECT_EXECUTABLE OFF CACHE INTERNAL "")
 set(SPIRV_REFLECT_STATIC_LIB ON  CACHE INTERNAL "")
@@ -94,13 +95,19 @@ FetchContent_Declare(
     spirv-reflect
     URL "https://github.com/KhronosGroup/SPIRV-Reflect/archive/refs/tags/vulkan-sdk-1.3.290.0.zip"
 )
-
-FetchContent_MakeAvailable(glm nlohmann_json SDL3 spirv-reflect)
+list(APPEND _fetch_content_list spirv-reflect)
 
 if(DUSK_TEST)
-    include(CTest)
-    FetchContent_MakeAvailable(googletest)
+    FetchContent_Declare(
+        googletest
+        URL "https://github.com/google/googletest/archive/refs/tags/v1.17.0.zip"
+        FIND_PACKAGE_ARGS 1.17.0
+    )
+
+    list(APPEND _fetch_content_list googletest)
 endif()
+
+FetchContent_MakeAvailable(${_fetch_content_list})
 
 ###
 ### Globals

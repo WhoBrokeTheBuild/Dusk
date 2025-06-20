@@ -138,7 +138,31 @@ void Mesh::AddWireCube(
         PrimitiveVertex{ .Position = bottomBackRight, .Color = color, },
     };
 
-    // Fill vertex list
+    VulkanPrimitive::Pointer primitive(new VulkanPrimitive());
+    primitive->Create(
+        vertexList,
+        VK_PRIMITIVE_TOPOLOGY_LINE_LIST
+    );
+    primitive->SetMaterial(material); // TODO:
+    AddPrimitive(std::move(primitive));
+}
+
+void Mesh::AddWireAxis(
+    vec3 center /*= { 0.0f, 0.0f, 0.0f }*/,
+    float size /*= 1.0f*/,
+    Material::Pointer material /*= Graphics::DefaultMaterial*/
+) {
+
+    PrimitiveVertex vertexList[] = {
+        PrimitiveVertex{ .Position = vec4(center, 1.0f), .Color = Color::Red, },
+        PrimitiveVertex{ .Position = vec4(center + vec3(size, 0.0f, 0.0f), 1.0f), .Color = Color::Red, },
+
+        PrimitiveVertex{ .Position = vec4(center, 1.0f), .Color = Color::Green, },
+        PrimitiveVertex{ .Position = vec4(center + vec3(0.0f, size, 0.0f), 1.0f), .Color = Color::Green, },
+
+        PrimitiveVertex{ .Position = vec4(center, 1.0f), .Color = Color::Blue, },
+        PrimitiveVertex{ .Position = vec4(center + vec3(0.0f, 0.0f, size), 1.0f), .Color = Color::Blue, },
+    };
 
     VulkanPrimitive::Pointer primitive(new VulkanPrimitive());
     primitive->Create(
@@ -148,6 +172,7 @@ void Mesh::AddWireCube(
     primitive->SetMaterial(material); // TODO:
     AddPrimitive(std::move(primitive));
 }
+
 
 // void Mesh::AddPlane(
 //         vec3 center /*= { 0.0f, 0.0f, 0.0f } */,

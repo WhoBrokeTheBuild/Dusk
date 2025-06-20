@@ -60,6 +60,10 @@ public:
         return _pipeline;
     }
 
+    inline void GenerateCommands(VkCommandBuffer commandBuffer) {
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
+    }
+
 private:
 
     VulkanShader::Pointer _shader = nullptr;

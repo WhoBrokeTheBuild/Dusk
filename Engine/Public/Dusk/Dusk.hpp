@@ -8,6 +8,7 @@
 #include <Dusk/Enumerate.hpp>
 #include <Dusk/Exception.hpp>
 #include <Dusk/Graphics.hpp>
+#include <Dusk/Input.hpp>
 #include <Dusk/List.hpp>
 #include <Dusk/Map.hpp>
 #include <Dusk/Math.hpp>

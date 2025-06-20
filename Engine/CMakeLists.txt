@@ -32,9 +32,24 @@ endif()
 ### Asset Processing
 ###
 
+file(GLOB_RECURSE
+    _shader_input_list
+    "Assets/*.glsl"
+    "Assets/*.vert"
+    "Assets/*.frag"
+)
+
+include(DuskCompileShaderList)
+
 list(APPEND DUSK_ASSET_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Assets")
 list(APPEND DUSK_ASSET_PATH "${CMAKE_CURRENT_BINARY_DIR}/Assets")
 set(DUSK_ASSET_PATH "${DUSK_ASSET_PATH}" PARENT_SCOPE)
+
+dusk_compile_shader_list(
+    "${DUSK_ASSET_PATH}"
+    "${_shader_input_list}"
+    _shader_output_list
+)
 
 ###
 ### Target Configuration
@@ -43,6 +58,7 @@ set(DUSK_ASSET_PATH "${DUSK_ASSET_PATH}" PARENT_SCOPE)
 add_library(
     ${_target} SHARED
     ${_source_list}
+    ${_shader_output_list}
 )
 
 target_link_libraries(

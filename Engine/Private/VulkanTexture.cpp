@@ -1,7 +1,6 @@
 #include <Dusk/VulkanTexture.hpp>
 #include <Dusk/Graphics.hpp>
-
-#include <print>
+#include <Dusk/Log.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -12,6 +11,41 @@ DUSK_API
 VulkanTexture::~VulkanTexture()
 {
     Destroy();
+}
+
+bool VulkanTexture::Serialize(JSON::Object& data) const
+{
+    if (not CanReload()) {
+        return false;
+    }
+
+    data["path"] = FindShortestAssetPath(_path);
+    data["magFilter"] = _samplerCreateInfo.magFilter;
+    data["minFilter"] = _samplerCreateInfo.minFilter;
+    data["mipmapMode"] = _samplerCreateInfo.mipmapMode;
+    data["addressModeU"] = _samplerCreateInfo.addressModeU;
+    data["addressModeV"] = _samplerCreateInfo.addressModeV;
+
+    return true;
+}
+
+bool VulkanTexture::Deserialize(const JSON::Object& data)
+{
+    if (! data.contains("path")) {
+        return false;
+    }
+
+    auto path = data["path"].get<std::string>();
+    auto samplerCreateInfo = VkSamplerCreateInfo{
+        .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+        .magFilter = data.value<VkFilter>("magFilter", VK_FILTER_NEAREST),
+        .minFilter = data.value<VkFilter>("minFilter", VK_FILTER_NEAREST),
+        .mipmapMode = data.value<VkSamplerMipmapMode>("mipmapMode", VK_SAMPLER_MIPMAP_MODE_NEAREST),
+        .addressModeU = data.value<VkSamplerAddressMode>("addressModeU", VK_SAMPLER_ADDRESS_MODE_REPEAT),
+        .addressModeV = data.value<VkSamplerAddressMode>("addressModeV", VK_SAMPLER_ADDRESS_MODE_REPEAT),
+    };
+
+    return LoadFromFile(data["path"], samplerCreateInfo);
 }
 
 DUSK_API
@@ -26,6 +60,8 @@ bool VulkanTexture::LoadFromFile(
     int channelsInFile;
     uint8_t * pixels = nullptr;
 
+    Log(DUSK_ANCHOR, "Loading {}", path.string());
+
     auto assetPathList = GetAssetPathList();
 
     if (path.is_absolute()) {
@@ -37,7 +73,8 @@ bool VulkanTexture::LoadFromFile(
     else {
         for (const auto& assetPath : assetPathList) {
             auto fullPath = assetPath / path;
-            pixels = stbi_load(path.c_str(), &width, &height, &channelsInFile, STBI_rgb_alpha);
+            Log(DUSK_ANCHOR, "Checking {}", fullPath.string());
+            pixels = stbi_load(fullPath.c_str(), &width, &height, &channelsInFile, STBI_rgb_alpha);
             if (pixels) {
                 _path = fullPath;
                 break;
@@ -49,6 +86,8 @@ bool VulkanTexture::LoadFromFile(
         return false;
     }
 
+    Log(DUSK_ANCHOR, "Loaded {}", path.string());
+
     _extent.width = width;
     _extent.height = height;
     _samplerCreateInfo = samplerCreateInfo;
@@ -58,7 +97,7 @@ bool VulkanTexture::LoadFromFile(
 
     stbi_image_free(pixels);
 
-    // TODO: setLoaded
+    SetLoaded(true);
     return true;
 }
 
@@ -87,7 +126,7 @@ bool VulkanTexture::LoadFromBuffer(
 
     stbi_image_free(pixels);
 
-    // TODO: setLoaded
+    SetLoaded(true);
     return true;
 }
 
@@ -109,6 +148,7 @@ bool VulkanTexture::LoadFromPixels(
 
     createImage(pixels, width * height * components);
 
+    SetLoaded(true);
     return true;
 }
 
@@ -130,6 +170,8 @@ void VulkanTexture::Destroy()
         _image = VK_NULL_HANDLE;
         _allocation = VK_NULL_HANDLE;
     }
+
+    SetLoaded(false);
 }
 
 DUSK_API

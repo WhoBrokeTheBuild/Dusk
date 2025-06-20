@@ -9,17 +9,21 @@
 #include <Dusk/VulkanBuffer.hpp>
 #include <Dusk/VulkanUtil.hpp>
 #include <Dusk/VulkanTexture.hpp>
+#include <Dusk/VulkanShader.hpp>
+#include <Dusk/VulkanPipeline.hpp>
 #include <Dusk/Material.hpp>
 
 #include <Dusk/ThirdParty/vulkan.hpp>
 #include <Dusk/ThirdParty/SDL.hpp>
-
 
 #include <functional>
 
 namespace dusk {
     
 namespace Graphics {
+
+    DUSK_API
+    extern SDL_Window * Window;
 
     DUSK_API
     extern VkInstance Instance;
@@ -65,6 +69,12 @@ namespace Graphics {
 
     DUSK_API
     extern VulkanTexture::Pointer BlackTexture;
+
+    DUSK_API
+    extern VulkanShader::Pointer DebugShader;
+
+    DUSK_API
+    extern VulkanPipeline::Pointer DebugPipeline;
 
     DUSK_API
     void Init();

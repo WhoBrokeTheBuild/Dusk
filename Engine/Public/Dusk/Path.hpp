@@ -13,9 +13,9 @@ namespace dusk {
 using Path = std::filesystem::path;
 
 #if defined(DUSK_PLATFORM_WINDOWS)
-    static constexpr std::string PathListSeparator = ";";
+    constexpr StringView PathListSeparator = ";";
 #else
-    static constexpr std::string PathListSeparator = ":";
+    constexpr StringView PathListSeparator = ":";
 #endif
 
 inline Path GetCurrentPath() {

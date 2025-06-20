@@ -99,7 +99,7 @@ bool Loader::LoadFromFile(const Path& path)
         uint32_t jsonChunkLength = file.ReadOne<uint32_t>().value();
         uint32_t jsonChunkType = file.ReadOne<uint32_t>().value();
         if (jsonChunkType != CHUNK_JSON) {
-            char * c = reinterpret_cast<char *>(jsonChunkType);
+            char * c = reinterpret_cast<char *>(&jsonChunkType);
             Log(DUSK_ANCHOR, "Invalid glTF file, the first chunk must be JSON, found '{}{}{}{}'", c[0], c[1], c[2], c[3]);
             return false;
         }
@@ -119,7 +119,7 @@ bool Loader::LoadFromFile(const Path& path)
             uint32_t binChunkLength = file.ReadOne<uint32_t>().value();
             uint32_t binChunkType = file.ReadOne<uint32_t>().value();
             if (binChunkType != CHUNK_BIN) {
-                char * c = reinterpret_cast<char *>(binChunkType);
+                char * c = reinterpret_cast<char *>(&binChunkType);
                 Log(DUSK_ANCHOR, "Invalid glTF file, the second chunk must be BIN, found '{}{}{}{}'", c[0], c[1], c[2], c[3]);
                 return false;
             }

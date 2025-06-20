@@ -14,7 +14,7 @@ List<String> StringSplit(StringView str, StringView delim)
     auto next = str.find(delim);
     while (next != StringView::npos) {
         strList.emplace_back(str.substr(0, next));
-        str = str.substr(next + 1);
+        str = str.substr(next + delim.size());
         next = str.find(delim);
     }
 

@@ -35,9 +35,7 @@ target_link_libraries(
         DuskEngine
 )
 
-if(NOT WIN32)
-    string(REPLACE ";" ":" _asset_path "${DUSK_ASSET_PATH}")
-endif()
+string(REPLACE ";" "::" _asset_path "${DUSK_ASSET_PATH}")
 
 target_compile_definitions(
     HelloWorld

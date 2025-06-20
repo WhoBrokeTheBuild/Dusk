@@ -7,7 +7,8 @@ List<Path> _assetPathList;
 DUSK_API
 void ParseAssetPathList(StringView assetPath)
 {
-    for (auto& str : StringSplit(assetPath, PathListSeparator)) {
+    // Using :: as a separator avoids the issues caused by ";" or paths that contain colons such as C:/Path/
+    for (auto& str : StringSplit(assetPath, "::")) {
         _assetPathList.emplace_back(str);
     }
 }

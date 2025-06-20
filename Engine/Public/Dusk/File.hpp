@@ -56,7 +56,7 @@ public:
 
     inline bool ReadInto(void * buffer, size_t size) {
         _file.read(reinterpret_cast<char *>(buffer), size);
-        return not _file.eof();
+        return _file.good();
     }
 
     template <typename T>

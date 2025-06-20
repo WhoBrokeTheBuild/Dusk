@@ -62,6 +62,8 @@ endif()
 
 find_package(Vulkan COMPONENTS glslc REQUIRED)
 
+find_package(VMA REQUIRED)
+
 include(FetchContent)
 set(_fetch_content_list "")
 

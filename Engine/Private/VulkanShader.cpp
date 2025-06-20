@@ -47,6 +47,7 @@ bool VulkanShader::LoadFromFiles(const List<Path>& pathList)
     }
 
     if (pathList.size() != _pathList.size()) {
+        Log(DUSK_ANCHOR, "Failed to load shader");
         return false;
     }
 

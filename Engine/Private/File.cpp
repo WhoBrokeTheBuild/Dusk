@@ -5,7 +5,7 @@ namespace dusk {
 DUSK_API
 bool File::Open(const Path& path, Mode mode /*= Mode::Default*/)
 {
-    _file.open(path, std::ios::openmode(mode));
+    _file.open(path, std::ios::openmode(mode) | std::ios::binary);
     if (not _file) {
         return false;
     }

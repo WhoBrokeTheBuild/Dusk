@@ -86,7 +86,7 @@ void VulkanBuffer::Create(VkBufferUsageFlagBits bufferUsage, VmaMemoryUsage memo
         auto bufferCreateInfo = VkBufferCreateInfo{
             .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
             .size = _size,
-            .usage = _bufferUsage,
+            .usage = static_cast<VkBufferUsageFlags>(_bufferUsage),
         };
 
         auto allocationCreateInfo = VmaAllocationCreateInfo{

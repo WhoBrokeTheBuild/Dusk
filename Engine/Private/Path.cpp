@@ -7,7 +7,7 @@ List<Path> _assetPathList;
 DUSK_API
 void ParseAssetPathList(StringView assetPath)
 {
-    for (auto& str : StringSplit(assetPath, ":")) {
+    for (auto& str : StringSplit(assetPath, PathListSeparator)) {
         _assetPathList.emplace_back(str);
     }
 }

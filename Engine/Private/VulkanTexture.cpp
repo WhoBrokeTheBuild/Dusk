@@ -65,7 +65,7 @@ bool VulkanTexture::LoadFromFile(
     auto assetPathList = GetAssetPathList();
 
     if (path.is_absolute()) {
-        pixels = stbi_load(path.c_str(), &width, &height, &channelsInFile, STBI_rgb_alpha);
+        pixels = stbi_load(path.string().c_str(), &width, &height, &channelsInFile, STBI_rgb_alpha);
         if (pixels) {
             _path = path;
         }
@@ -74,7 +74,7 @@ bool VulkanTexture::LoadFromFile(
         for (const auto& assetPath : assetPathList) {
             auto fullPath = assetPath / path;
             Log(DUSK_ANCHOR, "Checking {}", fullPath.string());
-            pixels = stbi_load(fullPath.c_str(), &width, &height, &channelsInFile, STBI_rgb_alpha);
+            pixels = stbi_load(fullPath.string().c_str(), &width, &height, &channelsInFile, STBI_rgb_alpha);
             if (pixels) {
                 _path = fullPath;
                 break;
